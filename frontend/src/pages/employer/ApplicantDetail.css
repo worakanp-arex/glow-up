@@ -1,0 +1,201 @@
+.applicant-detail-page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.applicant-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.applicant-detail-back:hover {
+  color: var(--color-primary-600);
+}
+
+.applicant-detail-banner {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.applicant-detail-banner-top {
+  height: 48px;
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-600));
+}
+
+.applicant-detail-banner-body {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.applicant-detail-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  margin-top: -32px;
+  border: 3px solid var(--color-surface);
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.15rem;
+}
+
+.applicant-detail-banner-text {
+  flex: 1;
+  min-width: 160px;
+}
+
+.applicant-detail-banner-text h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.3rem;
+  color: var(--color-text);
+}
+
+.applicant-detail-job {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.applicant-detail-info {
+  padding: 1.1rem 1.4rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
+}
+
+.applicant-detail-info p {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.applicant-detail-info p:last-child {
+  margin-bottom: 0;
+}
+
+.applicant-detail-match-note {
+  color: var(--color-text-faint) !important;
+  font-size: 0.8rem !important;
+}
+
+.applicant-detail-attachments-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+  color: var(--color-text) !important;
+}
+
+.applicant-detail-attachments ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.applicant-detail-attachments a {
+  font-size: 0.85rem;
+  color: var(--color-primary-600);
+  font-weight: 500;
+}
+
+.applicant-detail-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.applicant-detail-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.applicant-detail-form select,
+.applicant-detail-form textarea {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.applicant-detail-form select:focus,
+.applicant-detail-form textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+.applicant-detail-form textarea {
+  resize: vertical;
+}
+
+.applicant-detail-submit {
+  justify-content: center;
+}
+
+.applicant-detail-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.applicant-detail-error {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 480px) {
+  .applicant-detail-banner-body {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

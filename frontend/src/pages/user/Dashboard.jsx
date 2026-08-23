@@ -1,0 +1,78 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { BookOpen, HeartHandshake, Search, User, Users } from "lucide-react";
+import { useAuth } from "../../context/AuthContext.jsx";
+import DailyCheckin from "../../components/user/DailyCheckin.jsx";
+import StreakWidget from "../../components/user/StreakWidget.jsx";
+import ApplicationStatusCard from "../../components/user/ApplicationStatusCard.jsx";
+import CourseProgressWidget from "../../components/user/CourseProgressWidget.jsx";
+import CounsellingStatusWidget from "../../components/user/CounsellingStatusWidget.jsx";
+import CommunityPreviewWidget from "../../components/user/CommunityPreviewWidget.jsx";
+import StatusBadge from "../../components/common/StatusBadge.jsx";
+import NewsSection from "../../components/common/NewsSection.jsx";
+import * as emotionService from "../../services/emotionService.js";
+import "./Dashboard.css";
+
+const QUICK_LINKS = [
+  { to: "/jobs", label: "ค้นหางาน", icon: Search },
+  { to: "/community", label: "ชุมชนฟื้นฟู", icon: Users },
+  { to: "/courses", label: "ศูนย์การเรียนรู้", icon: BookOpen },
+  { to: "/counselling", label: "การให้คำปรึกษา", icon: HeartHandshake },
+  { to: "/profile", label: "โปรไฟล์ของฉัน", icon: User },
+];
+
+function Dashboard() {
+  const { user } = useAuth();
+  const [streak, setStreak] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    emotionService
+      .getMyStreak()
+      .then(setStreak)
+      .catch(() => setStreak(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <div className="dashboard-page">
+      <div className="dashboard-greeting">
+        <h1>สวัสดี, {user.name}</h1>
+        <StatusBadge status={user.verifiedStatus} />
+      </div>
+
+      {!loading && (
+        <DailyCheckin loggedToday={streak?.loggedToday} onLogged={setStreak} />
+      )}
+
+      <div className="dashboard-section">
+        <h2>ภาพรวมของฉัน</h2>
+        <div className="dashboard-grid">
+          {streak && <StreakWidget streak={streak} />}
+          <ApplicationStatusCard />
+          <CourseProgressWidget />
+          <CounsellingStatusWidget />
+          <CommunityPreviewWidget />
+        </div>
+      </div>
+
+      <div className="dashboard-quicklinks">
+        <h2>ทางลัด</h2>
+        <div className="dashboard-links">
+          {QUICK_LINKS.map(({ to, label, icon: Icon }) => (
+            <Link key={to} to={to}>
+              <Icon size={16} />
+              <span>{label}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="dashboard-news">
+        <NewsSection />
+      </div>
+    </div>
+  );
+}
+
+export default Dashboard;

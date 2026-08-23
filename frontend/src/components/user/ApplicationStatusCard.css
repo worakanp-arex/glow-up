@@ -1,0 +1,66 @@
+.app-status-card {
+  display: flex;
+  gap: 1.1rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-status-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.app-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  color: var(--color-primary-600);
+  flex-shrink: 0;
+}
+
+.app-status-body {
+  min-width: 0;
+}
+
+.app-status-body h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.app-status-loading,
+.app-status-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.app-status-count {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.app-status-count strong {
+  color: var(--color-primary-600);
+  font-size: 1rem;
+}
+
+.app-status-latest {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}

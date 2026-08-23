@@ -1,0 +1,87 @@
+.emotion-calendar-card {
+  padding: 1.75rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.emotion-calendar-header {
+  margin-bottom: 1.25rem;
+}
+
+.emotion-calendar-header h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+
+.emotion-calendar-header p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.emotion-calendar {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.emotion-calendar-weekdays {
+  display: grid;
+  grid-template-rows: repeat(7, 15px);
+  gap: 4px;
+  font-size: 0.65rem;
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+}
+
+.emotion-calendar-weekdays span {
+  display: flex;
+  align-items: center;
+}
+
+.emotion-calendar-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 15px);
+  grid-auto-flow: column;
+  grid-auto-columns: 15px;
+  gap: 4px;
+}
+
+.emotion-calendar-cell {
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  background-color: var(--color-ink-100);
+}
+
+.emotion-calendar-cell-blank {
+  background-color: transparent;
+}
+
+.emotion-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.emotion-calendar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.emotion-calendar-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}

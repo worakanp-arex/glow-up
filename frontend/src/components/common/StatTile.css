@@ -1,0 +1,45 @@
+.stat-tile {
+  position: relative;
+  padding: 1rem 1.25rem 1rem 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-tile::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 3px;
+  border-radius: 2px;
+  background-color: var(--color-border-strong);
+}
+
+/* accent bar colors come from the accessibility-validated status palette; keep as literal hex */
+.stat-tile-warning::before {
+  background-color: #fab219;
+}
+
+.stat-tile-good::before {
+  background-color: #0ca30c;
+}
+
+.stat-tile-critical::before {
+  background-color: #d03b3b;
+}
+
+.stat-tile-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.stat-tile-value {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+}

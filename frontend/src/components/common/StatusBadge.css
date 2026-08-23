@@ -1,0 +1,37 @@
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge-pending {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.status-badge-verified,
+.status-badge-open,
+.status-badge-passed {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.status-badge-rejected,
+.status-badge-closed {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.status-badge-expired,
+.status-badge-cancelled {
+  background-color: var(--color-ink-200);
+  color: var(--color-ink-600);
+}
+
+.status-badge-interview {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+}

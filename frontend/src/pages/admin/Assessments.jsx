@@ -1,0 +1,44 @@
+import { useEffect, useState } from "react";
+import { ShieldAlert, ShieldCheck } from "lucide-react";
+import StatTile from "../../components/common/StatTile.jsx";
+import * as riskService from "../../services/riskService.js";
+import "./Assessments.css";
+
+function Assessments() {
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    riskService
+      .getRiskSummary()
+      .then(setSummary)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <div className="assessments-page">กำลังโหลด...</div>;
+  }
+
+  return (
+    <div className="assessments-page">
+      <h1>
+        <ShieldAlert size={22} />
+        <span>ภาพรวมผลประเมินความเสี่ยง</span>
+      </h1>
+      <p className="assessments-note">
+        <ShieldCheck size={16} />
+        <span>
+          แสดงเฉพาะสรุปจำนวนผู้ใช้ตามระดับความเสี่ยงล่าสุด ไม่แสดงบันทึกอารมณ์หรือรายละเอียดรายบุคคล
+          เพื่อความเป็นส่วนตัวของผู้ใช้
+        </span>
+      </p>
+      <div className="assessments-stat-grid">
+        <StatTile label="ความเสี่ยงต่ำ" value={summary.byLevel.low} tone="good" />
+        <StatTile label="ความเสี่ยงปานกลาง" value={summary.byLevel.medium} tone="warning" />
+        <StatTile label="ความเสี่ยงสูง" value={summary.byLevel.high} tone="critical" />
+      </div>
+    </div>
+  );
+}
+
+export default Assessments;

@@ -1,0 +1,139 @@
+.jobs-moderation-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.jobs-moderation-page h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.4rem;
+  font-size: 1.5rem;
+  color: var(--color-text);
+}
+
+.jobs-moderation-subtitle {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.jobs-moderation-empty {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.jobs-moderation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.jobs-moderation-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jobs-moderation-list li:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.jobs-moderation-info {
+  min-width: 220px;
+}
+
+.jobs-moderation-title {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  font-size: 1.02rem;
+  color: var(--color-text);
+}
+
+.jobs-moderation-employer {
+  margin: 0 0 0.6rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.jobs-moderation-badges {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.jobs-moderation-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.jobs-moderation-actions button {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.jobs-moderation-approve {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.jobs-moderation-approve:hover {
+  background-color: var(--color-success-bg);
+}
+
+.jobs-moderation-reject {
+  color: var(--color-danger);
+  border-color: var(--color-danger-border);
+}
+
+.jobs-moderation-reject:hover {
+  background-color: var(--color-danger-bg);
+}
+
+.jobs-moderation-delete {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  padding: 0.5rem;
+}
+
+.jobs-moderation-delete:hover {
+  background-color: var(--color-danger-bg);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+@media (max-width: 560px) {
+  .jobs-moderation-list li {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .jobs-moderation-actions {
+    justify-content: flex-start;
+  }
+}

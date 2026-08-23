@@ -1,0 +1,194 @@
+.daily-checkin {
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 2.25rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-800));
+  color: #ffffff;
+  box-shadow: var(--shadow-md);
+}
+
+.daily-checkin::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.16), transparent 45%);
+  pointer-events: none;
+}
+
+.daily-checkin-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 0.6rem;
+}
+
+.daily-checkin-header {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.daily-checkin-header h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.35rem;
+}
+
+.daily-checkin-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 46ch;
+}
+
+.daily-checkin-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.daily-checkin-happiness-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.daily-checkin-happiness-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.daily-checkin-happiness-btn:hover {
+  transform: translateY(-2px);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.daily-checkin-happiness-btn.active {
+  background-color: var(--happiness-color);
+  border-color: var(--happiness-color);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.daily-checkin-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.daily-checkin-range {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  flex: 1 1 220px;
+  white-space: nowrap;
+}
+
+.daily-checkin-range > span:first-child {
+  flex-shrink: 0;
+}
+
+.daily-checkin-range input[type="range"] {
+  flex: 1;
+  accent-color: #ffffff;
+}
+
+.daily-checkin-range-value {
+  min-width: 2.5rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.daily-checkin-form button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background-color: #ffffff;
+  color: var(--color-primary-700);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.daily-checkin-form button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.daily-checkin-form button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.daily-checkin-done {
+  background: linear-gradient(135deg, var(--color-success), #0f8a4d);
+}
+
+.daily-checkin-complete {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.daily-checkin-complete-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.daily-checkin-complete h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.15rem;
+}
+
+.daily-checkin-complete p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 560px) {
+  .daily-checkin {
+    padding: 1.5rem;
+  }
+
+  .daily-checkin-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .daily-checkin-form button[type="submit"] {
+    justify-content: center;
+  }
+}

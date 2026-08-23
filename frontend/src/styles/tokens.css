@@ -1,0 +1,175 @@
+:root {
+  /* Typography */
+  --font-sans: "Prompt", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Primary (brand) scale, derived from #3289D1 */
+  --color-primary-50: #eaf3fa;
+  --color-primary-100: #d5e7f6;
+  --color-primary-200: #accfec;
+  --color-primary-300: #7ab2e1;
+  --color-primary-400: #509bd7;
+  --color-primary-500: #3289d1;
+  --color-primary-600: #2975b3;
+  --color-primary-700: #215f92;
+  --color-primary-800: #194970;
+  --color-primary-900: #11314b;
+
+  /* Neutral (ink) scale */
+  --color-ink-50: #f8fafc;
+  --color-ink-100: #f1f5f9;
+  --color-ink-200: #e2e8f0;
+  --color-ink-300: #cbd5e1;
+  --color-ink-400: #94a3b8;
+  --color-ink-500: #64748b;
+  --color-ink-600: #475569;
+  --color-ink-700: #334155;
+  --color-ink-800: #1e293b;
+  --color-ink-900: #0f172a;
+
+  /* Semantic surfaces & text */
+  --color-page-bg: #f4f7fb;
+  --color-surface: #ffffff;
+  --color-surface-hover: var(--color-ink-100);
+  --color-border: var(--color-ink-200);
+  --color-border-strong: var(--color-ink-300);
+  --color-text: var(--color-ink-800);
+  --color-text-secondary: var(--color-ink-600);
+  --color-text-muted: var(--color-ink-500);
+  --color-text-faint: var(--color-ink-400);
+
+  /* Status */
+  --color-success: #166534;
+  --color-success-bg: #dcfce7;
+  --color-warning: #92400e;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #b91c1c;
+  --color-danger-bg: #fee2e2;
+  --color-danger-border: #fecaca;
+  --color-info: var(--color-primary-700);
+  --color-info-bg: var(--color-primary-50);
+
+  /* Happiness scale (1=worst..7=best), diverging red -> neutral gray -> green */
+  --happiness-1: #b91c1c;
+  --happiness-2: #d9622f;
+  --happiness-3: #e8a97e;
+  --happiness-4: #cbd5e1;
+  --happiness-5: #a8d5b6;
+  --happiness-6: #4fae6d;
+  --happiness-7: #166534;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+/*
+ * Dark theme overrides. Redefining the raw --color-ink-* and --color-primary-*
+ * steps here is enough to flip every semantic token (--color-text,
+ * --color-border, --color-info-bg, etc.) that's built on top of them —
+ * custom properties resolve per-element, so nothing else needs to change.
+ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-primary-50: #16324a;
+  --color-primary-100: #1c3f5c;
+  --color-primary-600: #57a2e0;
+  --color-primary-700: #7ab2e1;
+
+  --color-ink-50: #16202f;
+  --color-ink-100: #1e2a3d;
+  --color-ink-200: #2a3648;
+  --color-ink-300: #3a4a63;
+  --color-ink-400: #64748b;
+  --color-ink-500: #94a3b8;
+  --color-ink-600: #cbd5e1;
+  --color-ink-700: #e2e8f0;
+  --color-ink-800: #f1f5f9;
+  --color-ink-900: #f8fafc;
+
+  --color-page-bg: #0b1220;
+  --color-surface: #141b2d;
+
+  --color-success: #4ade80;
+  --color-success-bg: #12321f;
+  --color-warning: #fbbf24;
+  --color-warning-bg: #3a2a0a;
+  --color-danger: #f87171;
+  --color-danger-bg: #3a1414;
+  --color-danger-border: #5c2626;
+
+  --happiness-1: #f87171;
+  --happiness-2: #e0876a;
+  --happiness-3: #c9a68f;
+  --happiness-4: #3a4a63;
+  --happiness-5: #7fb28e;
+  --happiness-6: #5cc17f;
+  --happiness-7: #4ade80;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+
+    --color-primary-50: #16324a;
+    --color-primary-100: #1c3f5c;
+    --color-primary-600: #57a2e0;
+    --color-primary-700: #7ab2e1;
+
+    --color-ink-50: #16202f;
+    --color-ink-100: #1e2a3d;
+    --color-ink-200: #2a3648;
+    --color-ink-300: #3a4a63;
+    --color-ink-400: #64748b;
+    --color-ink-500: #94a3b8;
+    --color-ink-600: #cbd5e1;
+    --color-ink-700: #e2e8f0;
+    --color-ink-800: #f1f5f9;
+    --color-ink-900: #f8fafc;
+
+    --color-page-bg: #0b1220;
+    --color-surface: #141b2d;
+
+    --color-success: #4ade80;
+    --color-success-bg: #12321f;
+    --color-warning: #fbbf24;
+    --color-warning-bg: #3a2a0a;
+    --color-danger: #f87171;
+    --color-danger-bg: #3a1414;
+    --color-danger-border: #5c2626;
+
+    --happiness-1: #f87171;
+    --happiness-2: #e0876a;
+    --happiness-3: #c9a68f;
+    --happiness-4: #3a4a63;
+    --happiness-5: #7fb28e;
+    --happiness-6: #5cc17f;
+    --happiness-7: #4ade80;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
+}

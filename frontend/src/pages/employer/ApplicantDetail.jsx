@@ -1,0 +1,177 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Briefcase, Mail, Paperclip, Phone, Sparkles } from "lucide-react";
+import StatusBadge from "../../components/common/StatusBadge.jsx";
+import * as applicationService from "../../services/applicationService.js";
+import "./ApplicantDetail.css";
+
+const STATUS_OPTIONS = ["pending", "interview", "passed", "rejected"];
+const STATUS_LABELS = {
+  pending: "รอดำเนินการ",
+  interview: "นัดสัมภาษณ์",
+  passed: "ผ่านการคัดเลือก",
+  rejected: "ปฏิเสธ",
+};
+
+function initials(name) {
+  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
+}
+
+function ApplicantDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [application, setApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState("pending");
+  const [employerFeedback, setEmployerFeedback] = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    applicationService.getApplication(id).then((data) => {
+      setApplication(data);
+      setStatus(data.status);
+      setEmployerFeedback(data.employerFeedback || "");
+      setRejectionReason(data.rejectionReason || "");
+      setLoading(false);
+    });
+  }, [id]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setSaving(true);
+    try {
+      const updated = await applicationService.updateApplicationStatus(id, {
+        status,
+        employerFeedback,
+        rejectionReason,
+      });
+      setApplication(updated);
+    } catch (err) {
+      setError(err.response?.data?.message || "บันทึกไม่สำเร็จ");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return <div className="applicant-detail-page">กำลังโหลด...</div>;
+  }
+  if (!application) {
+    return <div className="applicant-detail-page">ไม่พบใบสมัครนี้</div>;
+  }
+
+  return (
+    <div className="applicant-detail-page">
+      <button type="button" className="applicant-detail-back" onClick={() => navigate(-1)}>
+        <ArrowLeft size={16} />
+        <span>กลับ</span>
+      </button>
+
+      <div className="applicant-detail-banner">
+        <div className="applicant-detail-banner-top" />
+        <div className="applicant-detail-banner-body">
+          <span className="applicant-detail-avatar">{initials(application.user.name)}</span>
+          <div className="applicant-detail-banner-text">
+            <h1>{application.user.name}</h1>
+            <p className="applicant-detail-job">
+              <Briefcase size={14} />
+              สมัครตำแหน่ง: {application.job.title}
+            </p>
+          </div>
+          <StatusBadge status={application.status} />
+        </div>
+      </div>
+
+      <div className="applicant-detail-info">
+        <p>
+          <Mail size={14} />
+          {application.user.email}
+        </p>
+        {application.user.phone && (
+          <p>
+            <Phone size={14} />
+            {application.user.phone}
+          </p>
+        )}
+        <p>
+          สถานะยืนยันตัวตน: <StatusBadge status={application.user.verifiedStatus} />
+        </p>
+        <p className="applicant-detail-match-note">
+          <Sparkles size={13} />
+          คะแนนจับคู่ AI: จะเปิดใช้งานในเฟสถัดไป
+        </p>
+      </div>
+
+      {application.attachments?.length > 0 && (
+        <div className="applicant-detail-info applicant-detail-attachments">
+          <p className="applicant-detail-attachments-title">
+            <Paperclip size={16} />
+            <span>เอกสารที่แนบมาด้วย</span>
+          </p>
+          <ul>
+            {application.attachments.map((file, i) => (
+              <li key={i}>
+                <a href={file.url} target="_blank" rel="noreferrer">
+                  {file.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {application.status === "cancelled" ? (
+        <div className="applicant-detail-info">
+          <p>
+            สถานะใบสมัคร: <StatusBadge status={application.status} />
+          </p>
+          <p className="applicant-detail-match-note">ผู้สมัครยกเลิกใบสมัครนี้แล้ว ไม่สามารถเปลี่ยนสถานะได้</p>
+        </div>
+      ) : (
+        <form className="applicant-detail-form" onSubmit={handleSubmit}>
+          {error && <p className="applicant-detail-error">{error}</p>}
+
+          <label>
+            สถานะใบสมัคร
+            <select value={status} onChange={(e) => setStatus(e.target.value)}>
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {STATUS_LABELS[option]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            ข้อเสนอแนะถึงผู้สมัคร
+            <textarea
+              value={employerFeedback}
+              onChange={(e) => setEmployerFeedback(e.target.value)}
+              rows={3}
+            />
+          </label>
+
+          {status === "rejected" && (
+            <label>
+              เหตุผลที่ปฏิเสธ
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                rows={2}
+              />
+            </label>
+          )}
+
+          <button type="submit" className="btn btn-primary applicant-detail-submit" disabled={saving}>
+            {saving ? "กำลังบันทึก..." : "บันทึก"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+export default ApplicantDetail;

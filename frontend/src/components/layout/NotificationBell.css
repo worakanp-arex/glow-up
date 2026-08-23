@@ -1,0 +1,116 @@
+.notification-bell {
+  position: relative;
+}
+
+.notification-bell-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-full);
+}
+
+.notification-bell-button:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.notification-bell-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-danger);
+  color: #ffffff;
+  font-size: 0.65rem;
+  line-height: 16px;
+  text-align: center;
+}
+
+.notification-bell-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  width: 300px;
+  max-height: 360px;
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 30;
+}
+
+.notification-bell-empty {
+  margin: 0;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.notification-bell-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notification-bell-panel li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-ink-100);
+  cursor: default;
+  transition: background-color 0.15s ease;
+}
+
+.notification-bell-panel li:last-child {
+  border-bottom: none;
+}
+
+.notification-bell-panel li.unread {
+  background-color: var(--color-primary-50);
+}
+
+.notification-bell-panel li.clickable {
+  cursor: pointer;
+}
+
+.notification-bell-panel li.clickable:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.notification-bell-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-600);
+  flex-shrink: 0;
+}
+
+.notification-bell-body {
+  min-width: 0;
+}
+
+.notification-bell-body p {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.notification-bell-body span {
+  font-size: 0.7rem;
+  color: var(--color-text-faint);
+}
