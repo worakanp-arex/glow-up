@@ -1,5 +1,5 @@
 .my-applications-page {
-  max-width: 760px;
+  max-width: var(--content-width);
   margin: 0 auto;
   padding: 2rem 1.5rem;
 }

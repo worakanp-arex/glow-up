@@ -23,6 +23,11 @@ function MyPosts() {
     setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, ...updated } : p)));
   }
 
+  async function handleToggleSave(postId) {
+    const { savedByMe } = await postService.toggleSavePost(postId);
+    setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, savedByMe } : p)));
+  }
+
   async function handleUpdated(postId, payload) {
     const updated = await postService.updatePost(postId, payload);
     setPosts((prev) => prev.map((p) => (p._id === postId ? updated : p)));
@@ -56,6 +61,7 @@ function MyPosts() {
             post={post}
             currentUserId={user._id}
             onLike={handleLike}
+            onToggleSave={handleToggleSave}
             onUpdated={handleUpdated}
             onDeleted={handleDeleted}
           />

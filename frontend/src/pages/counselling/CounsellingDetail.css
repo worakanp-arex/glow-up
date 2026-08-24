@@ -1,0 +1,383 @@
+.counselling-detail-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.counselling-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.counselling-detail-back:hover {
+  color: var(--color-primary-600);
+}
+
+.counselling-detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.counselling-detail-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  color: var(--color-primary-600);
+  flex-shrink: 0;
+}
+
+.counselling-detail-header-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.counselling-detail-header-body h1 {
+  margin: 0 0 0.3rem;
+  font-size: 1.35rem;
+  color: var(--color-text);
+}
+
+.counselling-detail-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.counselling-status-badge {
+  flex-shrink: 0;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.counselling-status-pending {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.counselling-status-active {
+  background-color: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.counselling-status-scheduled {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.counselling-status-closed {
+  background-color: var(--color-ink-200);
+  color: var(--color-ink-600);
+}
+
+.counselling-status-cancelled {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.counselling-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .counselling-detail-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.counselling-detail-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.counselling-detail-card {
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.counselling-detail-card h2 {
+  margin: 0 0 0.9rem;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+
+.counselling-detail-message {
+  margin: 0 0 1rem;
+  color: var(--color-text);
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.counselling-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.counselling-detail-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-ink-50);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.counselling-detail-scheduled {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.counselling-detail-empty-note {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.counselling-schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.counselling-schedule-form label,
+.counselling-schedule-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.counselling-schedule-form input {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.counselling-schedule-form input:focus {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+.counselling-schedule-form .btn {
+  align-self: flex-start;
+}
+
+/* ---------- message thread ---------- */
+
+.counselling-thread {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.counselling-thread-item {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.counselling-thread-avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-500);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.counselling-thread-item.counsellor .counselling-thread-avatar {
+  background-color: var(--color-primary-700);
+}
+
+.counselling-thread-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.counselling-thread-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.9rem;
+  background-color: var(--color-ink-50);
+  border-radius: var(--radius-md);
+}
+
+.counselling-thread-author {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0 0 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.counselling-thread-time {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--color-text-faint);
+}
+
+.counselling-thread-content {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  white-space: pre-line;
+}
+
+.counselling-reply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.counselling-reply-form textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.counselling-reply-form textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+.counselling-reply-form .btn {
+  align-self: flex-end;
+}
+
+/* ---------- sidebar ---------- */
+
+.counselling-detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.counselling-person {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.counselling-person-avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-500);
+  color: #ffffff;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.counselling-person-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.counselling-person-name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.92rem;
+}
+
+.counselling-person-meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.counselling-profile-link {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.counselling-claim-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.counselling-status-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.counselling-status-actions .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.counselling-cancel-btn {
+  color: var(--color-danger);
+  border-color: var(--color-danger-border);
+}
+
+.counselling-cancel-btn:hover {
+  background-color: var(--color-danger-bg);
+}

@@ -23,6 +23,13 @@ const LINKS_BY_ROLE = {
     { to: "/employer/jobs", label: "ประกาศงานของฉัน" },
     { to: "/about", label: "เกี่ยวกับเรา" },
   ],
+  counsellor: [
+    { to: "/counsellor", label: "คำขอรับคำปรึกษา", end: true },
+    { to: "/community", label: "ชุมชนฟื้นฟู" },
+    { to: "/counsellor/courses", label: "จัดการคอร์สเรียน" },
+    { to: "/counsellor/analytics", label: "ภาพรวมผู้ใช้งาน" },
+    { to: "/about", label: "เกี่ยวกับเรา" },
+  ],
   admin: [
     { to: "/admin", label: "หน้าหลัก", end: true },
     { to: "/admin/users", label: "จัดการผู้ใช้งาน" },

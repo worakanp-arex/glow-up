@@ -8,6 +8,14 @@ export function getMyPosts() {
   return api.get("/posts/mine").then((res) => res.data);
 }
 
+export function getSavedPosts() {
+  return api.get("/posts/saved").then((res) => res.data);
+}
+
+export function toggleSavePost(postId) {
+  return api.put(`/posts/${postId}/save`).then((res) => res.data);
+}
+
 export function getPost(id) {
   return api.get(`/posts/${id}`).then((res) => res.data);
 }

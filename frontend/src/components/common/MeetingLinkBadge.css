@@ -1,0 +1,17 @@
+.meeting-link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  background-color: color-mix(in srgb, var(--meeting-color) 12%, transparent);
+  color: var(--meeting-color);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.meeting-link-badge:hover {
+  transform: translateY(-1px);
+}

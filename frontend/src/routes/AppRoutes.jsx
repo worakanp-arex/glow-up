@@ -16,10 +16,16 @@ import CravingTracker from "../pages/user/CravingTracker.jsx";
 import Streak from "../pages/user/Streak.jsx";
 import Community from "../pages/user/Community.jsx";
 import MyPosts from "../pages/user/MyPosts.jsx";
+import SavedPosts from "../pages/user/SavedPosts.jsx";
 import PostDetail from "../pages/user/PostDetail.jsx";
 import Courses from "../pages/user/Courses.jsx";
 import CourseDetail from "../pages/user/CourseDetail.jsx";
 import Counselling from "../pages/user/Counselling.jsx";
+import CounsellingDetail from "../pages/counselling/CounsellingDetail.jsx";
+import CounsellorQueue from "../pages/counsellor/Queue.jsx";
+import PatientProfile from "../pages/counsellor/PatientProfile.jsx";
+import CourseManagement from "../pages/counsellor/CourseManagement.jsx";
+import Analytics from "../pages/counsellor/Analytics.jsx";
 import EmployerDashboard from "../pages/employer/Dashboard.jsx";
 import PostJob from "../pages/employer/PostJob.jsx";
 import MyJobs from "../pages/employer/MyJobs.jsx";
@@ -57,10 +63,23 @@ function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="profile" element={<Profile />} />
           <Route path="community" element={<Community />} />
-          <Route path="community/mine" element={<MyPosts />} />
+          <Route path="community/saved" element={<SavedPosts />} />
           <Route path="community/:id" element={<PostDetail />} />
           <Route path="courses" element={<Courses />} />
           <Route path="courses/:id" element={<CourseDetail />} />
+        </Route>
+
+        <Route element={<ProtectedRoute roles={["user", "counsellor", "admin"]} />}>
+          <Route path="counselling/:id" element={<CounsellingDetail />} />
+        </Route>
+
+        <Route element={<ProtectedRoute roles={["counsellor", "admin"]} />}>
+          <Route path="counsellor" element={<CounsellorQueue />} />
+          <Route path="counsellor/requests/:id" element={<CounsellingDetail />} />
+          <Route path="counsellor/patients/:userId" element={<PatientProfile />} />
+          <Route path="community/mine" element={<MyPosts />} />
+          <Route path="counsellor/courses" element={<CourseManagement />} />
+          <Route path="counsellor/analytics" element={<Analytics />} />
         </Route>
 
         <Route element={<ProtectedRoute roles={["employer"]} />}>

@@ -14,7 +14,8 @@
 
 .status-badge-verified,
 .status-badge-open,
-.status-badge-passed {
+.status-badge-passed,
+.status-badge-completed {
   background-color: var(--color-success-bg);
   color: var(--color-success);
 }
@@ -31,7 +32,8 @@
   color: var(--color-ink-600);
 }
 
-.status-badge-interview {
+.status-badge-interview,
+.status-badge-learning {
   background-color: var(--color-primary-100);
   color: var(--color-primary-700);
 }

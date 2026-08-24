@@ -1,5 +1,5 @@
 .community-page {
-  max-width: 1080px;
+  max-width: var(--content-width);
   margin: 0 auto;
   padding: 2.5rem 1.5rem;
 }
@@ -83,7 +83,7 @@
 
 .community-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 420px;
   gap: 1.5rem;
   align-items: start;
 }
@@ -113,6 +113,22 @@
 .community-sidebar {
   position: sticky;
   top: 1.5rem;
+}
+
+.community-detail-sidebar {
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+
+.community-detail-empty {
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .community-composer {
@@ -172,6 +188,14 @@
   outline: none;
   border-color: var(--color-primary-400);
   box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+.community-composer-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
 }
 
 .community-composer button {

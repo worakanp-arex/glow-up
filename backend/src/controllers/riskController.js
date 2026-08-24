@@ -10,7 +10,7 @@ export async function getMyRisk(req, res) {
     user: req.user.id,
     riskScore: result.riskScore,
     level: result.level,
-    triggerFactors: result.isPlaceholder ? "ยังไม่เปิดใช้งานการวิเคราะห์ด้วย AI (placeholder)" : result.triggerFactors,
+    triggerFactors: result.triggerFactors,
   });
 
   res.status(201).json(assessment);

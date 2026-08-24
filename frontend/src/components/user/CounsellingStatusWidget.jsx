@@ -2,16 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { HeartHandshake, MessageCircle, Phone, Video } from "lucide-react";
 import * as counsellingService from "../../services/counsellingService.js";
+import { COUNSELLING_STATUS_LABELS, COUNSELLING_STATUS_CLASS } from "../../constants/counsellingStatus.js";
 import "./CounsellingStatusWidget.css";
 
-const SESSION_TYPE_LABELS = { chat: "แชท", hotline: "สายด่วน", video: "วิดีโอคอล" };
 const SESSION_TYPE_ICONS = { chat: MessageCircle, hotline: Phone, video: Video };
-const STATUS_LABELS = { pending: "รอดำเนินการ", active: "กำลังดำเนินการ", closed: "ปิดแล้ว" };
-const STATUS_CLASS = {
-  pending: "counselling-widget-status-pending",
-  active: "counselling-widget-status-active",
-  closed: "counselling-widget-status-closed",
-};
 
 function CounsellingStatusWidget() {
   const [sessions, setSessions] = useState([]);
@@ -41,11 +35,9 @@ function CounsellingStatusWidget() {
           <p className="counselling-widget-empty">ยังไม่มีคำขอรับคำปรึกษา — ส่งคำขอได้ทุกเมื่อ</p>
         ) : (
           <>
-            <p className="counselling-widget-message">
-              {SESSION_TYPE_LABELS[latest.sessionType]}: {latest.message}
-            </p>
-            <span className={`counselling-widget-status ${STATUS_CLASS[latest.status] || ""}`}>
-              {STATUS_LABELS[latest.status] || latest.status}
+            <p className="counselling-widget-message">{latest.topic}</p>
+            <span className={`counselling-widget-status ${COUNSELLING_STATUS_CLASS[latest.status] || ""}`}>
+              {COUNSELLING_STATUS_LABELS[latest.status] || latest.status}
             </span>
           </>
         )}

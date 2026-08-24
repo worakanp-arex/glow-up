@@ -1,5 +1,5 @@
 .dashboard-page {
-  max-width: 1080px;
+  max-width: var(--content-width);
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
   display: flex;

@@ -10,6 +10,7 @@ import {
   listMySkills,
   updateUserSkill,
   removeUserSkill,
+  createUserByAdmin,
   listUsers,
   verifyUser,
   updateUser,
@@ -53,6 +54,7 @@ router.put("/me/skills/:id", verifyToken, requireRole("user"), asyncHandler(upda
 router.delete("/me/skills/:id", verifyToken, requireRole("user"), asyncHandler(removeUserSkill));
 
 router.get("/", verifyToken, requireRole("admin"), asyncHandler(listUsers));
+router.post("/", verifyToken, requireRole("admin"), asyncHandler(createUserByAdmin));
 router.put("/:id/verify", verifyToken, requireRole("admin"), asyncHandler(verifyUser));
 router.put("/:id", verifyToken, requireRole("admin"), asyncHandler(updateUser));
 router.delete("/:id", verifyToken, requireRole("admin"), asyncHandler(deleteUser));

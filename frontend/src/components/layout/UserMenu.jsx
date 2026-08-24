@@ -8,14 +8,21 @@ const DASHBOARD_BY_ROLE = {
   user: "/dashboard",
   employer: "/employer/dashboard",
   admin: "/admin",
+  counsellor: "/counsellor",
 };
 
-const ROLE_LABELS = { user: "ผู้หางาน", employer: "นายจ้าง", admin: "ผู้ดูแลระบบ" };
+const ROLE_LABELS = {
+  user: "ผู้หางาน",
+  employer: "นายจ้าง",
+  admin: "ผู้ดูแลระบบ",
+  counsellor: "บุคลากรทางการแพทย์",
+};
 
 const ROLE_LINKS = {
   user: [{ to: "/my-applications", label: "ใบสมัครของฉัน", icon: ClipboardList }],
   employer: [],
   admin: [],
+  counsellor: [],
 };
 
 function initials(name) {

@@ -4,7 +4,10 @@ import { Send } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as postService from "../../services/postService.js";
 import PostCard from "../../components/community/PostCard.jsx";
+import PostDetailPanel from "../../components/community/PostDetailPanel.jsx";
 import "./Community.css";
+
+const STAFF_ROLES = ["counsellor", "admin"];
 
 function initials(name) {
   return name?.trim()?.charAt(0)?.toUpperCase() || "?";
@@ -12,17 +15,23 @@ function initials(name) {
 
 function Community() {
   const { user } = useAuth();
+  const isStaff = STAFF_ROLES.includes(user.role);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState(null);
   const textareaRef = useRef(null);
 
   useEffect(() => {
     postService
       .getPosts()
-      .then(setPosts)
+      .then((data) => {
+        setPosts(data);
+        setSelectedPostId((prev) => prev ?? data[0]?._id ?? null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -40,10 +49,11 @@ function Community() {
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean);
-      const post = await postService.createPost({ content, tags });
+      const post = await postService.createPost({ content, tags, commentsEnabled });
       setPosts((prev) => [post, ...prev]);
       setContent("");
       setTagsInput("");
+      setCommentsEnabled(true);
     } finally {
       setSubmitting(false);
     }
@@ -52,6 +62,11 @@ function Community() {
   async function handleLike(postId) {
     const updated = await postService.likePost(postId);
     setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, ...updated } : p)));
+  }
+
+  async function handleToggleSave(postId) {
+    const { savedByMe } = await postService.toggleSavePost(postId);
+    setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, savedByMe } : p)));
   }
 
   async function handleUpdated(postId, payload) {
@@ -64,6 +79,18 @@ function Community() {
     setPosts((prev) => prev.filter((p) => p._id !== postId));
   }
 
+  function handlePanelChange(postId, patch) {
+    setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, ...patch } : p)));
+  }
+
+  function handlePanelDeleted(postId) {
+    setPosts((prev) => {
+      const remaining = prev.filter((p) => p._id !== postId);
+      setSelectedPostId(remaining[0]?._id ?? null);
+      return remaining;
+    });
+  }
+
   if (loading) {
     return <div className="community-page">กำลังโหลด...</div>;
   }
@@ -72,42 +99,59 @@ function Community() {
     <div className="community-page">
       <div className="community-header">
         <div>
-          <h1>ชุมชนเพื่อนช่วยเพื่อน (Peer Support)</h1>
+          <h1>ชุมชนฟื้นฟู</h1>
           <p className="community-subtitle">
-            พื้นที่ปลอดภัย ปราศจากตราบาป ร่วมแบ่งปันหมุดหมายฟื้นฟู ประสบการณ์การทำงาน และกำลังใจรายวัน
+            สาระความรู้และคำแนะนำจากบุคลากรทางการแพทย์ เพื่อสนับสนุนเส้นทางการฟื้นฟูของคุณ
           </p>
         </div>
-        {user.role === "user" && (
+        {isStaff && (
           <button type="button" onClick={focusComposer}>
             <Send size={16} />
-            <span>โพสต์แบ่งปันเรื่องราว</span>
+            <span>เขียนโพสต์ให้ความรู้</span>
           </button>
         )}
       </div>
 
-      {user.role === "user" && (
-        <div className="community-tabs">
-          <span className="active">ทั้งหมด</span>
+      <div className="community-tabs">
+        <span className="active">ทั้งหมด</span>
+        {isStaff ? (
           <Link to="/community/mine">โพสต์ของฉัน</Link>
-        </div>
-      )}
+        ) : (
+          <Link to="/community/saved">โพสต์ที่บันทึกไว้</Link>
+        )}
+      </div>
 
       <div className="community-layout">
         <ul className="community-list">
-          {posts.map((post) => (
-            <PostCard
-              key={post._id}
-              post={post}
-              currentUserId={user._id}
-              onLike={handleLike}
-              onUpdated={handleUpdated}
-              onDeleted={handleDeleted}
-            />
-          ))}
+          {posts.map((post) =>
+            isStaff ? (
+              <PostCard
+                key={post._id}
+                post={post}
+                currentUserId={user._id}
+                onLike={handleLike}
+                onToggleSave={handleToggleSave}
+                onUpdated={handleUpdated}
+                onDeleted={handleDeleted}
+              />
+            ) : (
+              <PostCard
+                key={post._id}
+                post={post}
+                currentUserId={user._id}
+                onLike={handleLike}
+                onToggleSave={handleToggleSave}
+                onUpdated={handleUpdated}
+                onDeleted={handleDeleted}
+                onSelect={setSelectedPostId}
+                selected={post._id === selectedPostId}
+              />
+            )
+          )}
           {posts.length === 0 && <p className="community-empty">ยังไม่มีโพสต์ในชุมชน</p>}
         </ul>
 
-        {user.role === "user" && (
+        {isStaff ? (
           <aside className="community-sidebar">
             <form className="community-composer" onSubmit={handleSubmit}>
               <div className="community-composer-header">
@@ -118,7 +162,7 @@ function Community() {
               </div>
               <textarea
                 ref={textareaRef}
-                placeholder="แบ่งปันเรื่องราว ความสำเร็จ หรือให้กำลังใจเพื่อน..."
+                placeholder="แบ่งปันความรู้ คำแนะนำ หรือกำลังใจสำหรับผู้ผ่านการบำบัด..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={4}
@@ -126,14 +170,34 @@ function Community() {
               />
               <input
                 type="text"
-                placeholder="แท็ก คั่นด้วยจุลภาค เช่น กำลังใจ, หางาน"
+                placeholder="แท็ก คั่นด้วยจุลภาค เช่น ความรู้, กำลังใจ"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
               />
+              <label className="community-composer-toggle">
+                <input
+                  type="checkbox"
+                  checked={commentsEnabled}
+                  onChange={(e) => setCommentsEnabled(e.target.checked)}
+                />
+                <span>เปิดให้แสดงความคิดเห็น</span>
+              </label>
               <button type="submit" disabled={submitting}>
                 {submitting ? "กำลังโพสต์..." : "โพสต์"}
               </button>
             </form>
+          </aside>
+        ) : (
+          <aside className="community-sidebar community-detail-sidebar">
+            {selectedPostId ? (
+              <PostDetailPanel
+                postId={selectedPostId}
+                onChange={(patch) => handlePanelChange(selectedPostId, patch)}
+                onDeleted={() => handlePanelDeleted(selectedPostId)}
+              />
+            ) : (
+              <p className="community-detail-empty">เลือกโพสต์เพื่อดูรายละเอียด</p>
+            )}
           </aside>
         )}
       </div>

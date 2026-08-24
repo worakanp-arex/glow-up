@@ -3,6 +3,8 @@ import User from "../models/User.js";
 import { computeStreakStats } from "../services/streakService.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
 
+const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 export async function createEmotionLog(req, res) {
   const { happinessLevel, cravingLevel, context, note } = req.body;
 
@@ -11,13 +13,28 @@ export async function createEmotionLog(req, res) {
   }
 
   const now = new Date();
-  const dateKey = toBangkokDateKey(now);
+  const todayKey = toBangkokDateKey(now);
 
-  // One entry per calendar day: re-submitting today updates today's entry
-  // instead of creating a duplicate (keeps the calendar/analysis unambiguous).
+  // Optional `dateKey` lets a user backfill a past day they missed — never
+  // allow logging into the future, and validate the format before trusting it.
+  let dateKey = todayKey;
+  let date = now;
+  if (req.body.dateKey !== undefined) {
+    if (!DATE_KEY_PATTERN.test(req.body.dateKey)) {
+      return res.status(400).json({ message: "รูปแบบวันที่ไม่ถูกต้อง" });
+    }
+    if (req.body.dateKey > todayKey) {
+      return res.status(400).json({ message: "ไม่สามารถบันทึกล่วงหน้าในอนาคตได้" });
+    }
+    dateKey = req.body.dateKey;
+    date = new Date(`${dateKey}T12:00:00+07:00`);
+  }
+
+  // One entry per calendar day: re-submitting the same day updates that
+  // entry instead of creating a duplicate (keeps the calendar/analysis unambiguous).
   const log = await EmotionLog.findOneAndUpdate(
     { user: req.user.id, dateKey },
-    { happinessLevel, cravingLevel, context, note, date: now, dateKey },
+    { happinessLevel, cravingLevel, context, note, date, dateKey },
     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
   );
 

@@ -1,22 +1,35 @@
-import { useEffect, useState } from "react";
-import { Activity, Briefcase, Globe, MoreHorizontal, Send, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Activity, ChevronDown, Send } from "lucide-react";
 import * as emotionService from "../../services/emotionService.js";
 import * as riskService from "../../services/riskService.js";
 import { HAPPINESS_LEVELS, happinessByLevel } from "../../constants/happiness.js";
+import { CONTEXT_OPTIONS } from "../../constants/emotionContext.js";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
+import BackfillEmotionModal from "../../components/user/BackfillEmotionModal.jsx";
+import { groupByMonth, monthGroupLabel } from "../../utils/calendarGrid.js";
 import "./CravingTracker.css";
 
-const CONTEXT_OPTIONS = [
-  { value: "work", label: "การทำงาน", icon: Briefcase },
-  { value: "family", label: "ครอบครัว", icon: Users },
-  { value: "environment", label: "สิ่งแวดล้อม", icon: Globe },
-  { value: "other", label: "อื่นๆ", icon: MoreHorizontal },
-];
+const MONTH_INITIAL_LIMIT = 5;
+const MONTH_LOAD_MORE_STEP = 10;
+const MISSING_DAYS_WINDOW = 7;
 
 const RISK_LABELS = { low: "ต่ำ", medium: "ปานกลาง", high: "สูง" };
 const RISK_CLASS = { low: "craving-tracker-risk-low", medium: "craving-tracker-risk-medium", high: "craving-tracker-risk-high" };
 
 const INITIAL_FORM = { happinessLevel: null, cravingLevel: 5, context: "work", note: "" };
+
+function pad(n) {
+  return String(n).padStart(2, "0");
+}
+
+function toLocalDateKey(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function formatThaiShortDate(dateKey) {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  return new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short" }).format(new Date(y, m - 1, d));
+}
 
 function CravingTracker() {
   const [logs, setLogs] = useState([]);
@@ -26,13 +39,27 @@ function CravingTracker() {
   const [submitting, setSubmitting] = useState(false);
   const [risk, setRisk] = useState(null);
   const [assessing, setAssessing] = useState(false);
+  const [monthVisibleCounts, setMonthVisibleCounts] = useState({});
+  const [backfillDateKey, setBackfillDateKey] = useState(null);
+  const [missingDays, setMissingDays] = useState([]);
+  const [missingDaysPromptOpen, setMissingDaysPromptOpen] = useState(false);
 
-  useEffect(() => {
-    Promise.all([emotionService.getMyEmotionLogs(), emotionService.getMyStreak()])
-      .then(([logsData, streakData]) => {
+  const historyGroups = useMemo(() => groupByMonth(logs, "date"), [logs]);
+
+  function refresh() {
+    return Promise.all([emotionService.getMyEmotionLogs(), emotionService.getMyStreak()]).then(
+      ([logsData, streakData]) => {
         setLogs(logsData);
         setStreak(streakData);
-        if (streakData.loggedToday && logsData.length > 0) {
+        return logsData;
+      }
+    );
+  }
+
+  useEffect(() => {
+    refresh()
+      .then((logsData) => {
+        if (logsData.length > 0 && logsData[0].dateKey === toLocalDateKey(new Date())) {
           const today = logsData[0];
           setForm({
             happinessLevel: today.happinessLevel || null,
@@ -43,6 +70,7 @@ function CravingTracker() {
         }
       })
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleChange(e) {
@@ -55,16 +83,24 @@ function CravingTracker() {
     if (!form.happinessLevel) return;
     setSubmitting(true);
     try {
-      const log = await emotionService.logEmotion({
-        ...form,
-        cravingLevel: Number(form.cravingLevel),
-      });
-      setLogs((prev) => [log, ...prev.filter((item) => item._id !== log._id)]);
-      const stats = await emotionService.getMyStreak();
-      setStreak(stats);
+      await emotionService.logEmotion({ ...form, cravingLevel: Number(form.cravingLevel) });
+      await refresh();
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function findMissingDays() {
+    const loggedKeys = new Set(logs.map((l) => l.dateKey));
+    const missing = [];
+    const today = new Date();
+    for (let i = 0; i < MISSING_DAYS_WINDOW; i += 1) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = toLocalDateKey(d);
+      if (!loggedKeys.has(key)) missing.push(key);
+    }
+    return missing;
   }
 
   async function handleAssessRisk() {
@@ -75,6 +111,42 @@ function CravingTracker() {
     } finally {
       setAssessing(false);
     }
+  }
+
+  function handleAssessRiskClick() {
+    const missing = findMissingDays();
+    if (missing.length > 0) {
+      setMissingDays(missing);
+      setMissingDaysPromptOpen(true);
+    } else {
+      handleAssessRisk();
+    }
+  }
+
+  function handleSkipAndAssess() {
+    setMissingDaysPromptOpen(false);
+    handleAssessRisk();
+  }
+
+  function handleMissingDayChipClick(dateKey) {
+    setMissingDaysPromptOpen(false);
+    setBackfillDateKey(dateKey);
+  }
+
+  async function handleBackfillSaved() {
+    await refresh();
+    setBackfillDateKey(null);
+  }
+
+  function getMonthVisibleCount(key) {
+    return monthVisibleCounts[key] ?? MONTH_INITIAL_LIMIT;
+  }
+
+  function showMoreForMonth(key, total) {
+    setMonthVisibleCounts((prev) => ({
+      ...prev,
+      [key]: Math.min((prev[key] ?? MONTH_INITIAL_LIMIT) + MONTH_LOAD_MORE_STEP, total),
+    }));
   }
 
   return (
@@ -95,8 +167,11 @@ function CravingTracker() {
               <p>กำลังโหลด...</p>
             </div>
           ) : (
-            <EmotionCalendar history={streak?.history || []} />
+            <EmotionCalendar logs={logs} onSelectEmptyDay={setBackfillDateKey} />
           )}
+          <p className="craving-tracker-backfill-hint">
+            แตะวันที่ว่างในปฏิทิน (เส้นประ) เพื่อบันทึกความรู้สึกย้อนหลังในวันที่คุณไม่ได้เข้ามา
+          </p>
 
           <h2 className="craving-tracker-list-heading">ประวัติการบันทึก</h2>
           {loading ? (
@@ -104,34 +179,53 @@ function CravingTracker() {
           ) : logs.length === 0 ? (
             <p className="craving-tracker-empty">ยังไม่มีบันทึก</p>
           ) : (
-            <ul className="craving-tracker-list">
-              {logs.map((log) => {
-                const context = CONTEXT_OPTIONS.find((c) => c.value === log.context);
-                const happiness = log.happinessLevel ? happinessByLevel(log.happinessLevel) : null;
-                const HappinessIcon = happiness?.icon;
-                return (
-                  <li key={log._id}>
-                    <div
-                      className="craving-tracker-list-icon"
-                      style={happiness ? { backgroundColor: happiness.color, color: "#fff" } : undefined}
+            historyGroups.map((group) => {
+              const visibleCount = getMonthVisibleCount(group.key);
+              const visibleItems = group.items.slice(0, visibleCount);
+              return (
+                <div key={group.key} className="craving-tracker-month-group">
+                  <h3 className="craving-tracker-month-heading">{monthGroupLabel(group.year, group.month)}</h3>
+                  <ul className="craving-tracker-list">
+                    {visibleItems.map((log) => {
+                      const context = CONTEXT_OPTIONS.find((c) => c.value === log.context);
+                      const happiness = log.happinessLevel ? happinessByLevel(log.happinessLevel) : null;
+                      const HappinessIcon = happiness?.icon;
+                      return (
+                        <li key={log._id}>
+                          <div
+                            className="craving-tracker-list-icon"
+                            style={happiness ? { backgroundColor: happiness.color, color: "#fff" } : undefined}
+                          >
+                            {HappinessIcon ? <HappinessIcon size={18} /> : <Activity size={18} />}
+                          </div>
+                          <div className="craving-tracker-list-body">
+                            <p className="craving-tracker-mood">{happiness?.label || "ยังไม่ระบุระดับความสุข"}</p>
+                            <p className="craving-tracker-meta">
+                              {new Date(log.date).toLocaleDateString("th-TH")}
+                              {context && ` · ${context.label}`}
+                            </p>
+                            {log.note && <p className="craving-tracker-note">{log.note}</p>}
+                          </div>
+                          {log.cravingLevel != null && (
+                            <span className="craving-tracker-badge">อยาก {log.cravingLevel}/10</span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {visibleCount < group.items.length && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary craving-tracker-load-more"
+                      onClick={() => showMoreForMonth(group.key, group.items.length)}
                     >
-                      {HappinessIcon ? <HappinessIcon size={18} /> : <Activity size={18} />}
-                    </div>
-                    <div className="craving-tracker-list-body">
-                      <p className="craving-tracker-mood">{happiness?.label || "ยังไม่ระบุระดับความสุข"}</p>
-                      <p className="craving-tracker-meta">
-                        {new Date(log.date).toLocaleDateString("th-TH")}
-                        {context && ` · ${context.label}`}
-                      </p>
-                      {log.note && <p className="craving-tracker-note">{log.note}</p>}
-                    </div>
-                    {log.cravingLevel != null && (
-                      <span className="craving-tracker-badge">อยาก {log.cravingLevel}/10</span>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+                      <ChevronDown size={15} />
+                      <span>ดูเพิ่มเติม ({group.items.length - visibleCount} รายการที่เหลือในเดือนนี้)</span>
+                    </button>
+                  )}
+                </div>
+              );
+            })
           )}
         </section>
 
@@ -221,7 +315,7 @@ function CravingTracker() {
             <button
               type="button"
               className="btn btn-secondary craving-tracker-assess-button"
-              onClick={handleAssessRisk}
+              onClick={handleAssessRiskClick}
               disabled={assessing}
             >
               {assessing ? "กำลังประเมิน..." : "ประเมินความเสี่ยงตอนนี้"}
@@ -229,6 +323,49 @@ function CravingTracker() {
           </section>
         </aside>
       </div>
+
+      {missingDaysPromptOpen && (
+        <div className="backfill-modal-overlay" onClick={() => setMissingDaysPromptOpen(false)}>
+          <div className="backfill-modal missing-days-prompt" onClick={(e) => e.stopPropagation()}>
+            <div className="backfill-modal-header">
+              <h2>พบว่ายังไม่ได้บันทึกบางวัน</h2>
+            </div>
+            <p>
+              ในช่วง {MISSING_DAYS_WINDOW} วันที่ผ่านมา คุณยังไม่ได้บันทึกอารมณ์ {missingDays.length} วัน
+              การกรอกข้อมูลให้ครบจะช่วยให้ผลประเมินความเสี่ยงแม่นยำขึ้น ต้องการกรอกเพิ่มก่อนไหม?
+            </p>
+            <div className="missing-days-chip-list">
+              {missingDays.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className="missing-days-chip"
+                  onClick={() => handleMissingDayChipClick(key)}
+                >
+                  {formatThaiShortDate(key)}
+                </button>
+              ))}
+            </div>
+            <div className="backfill-modal-actions">
+              <button type="button" className="btn btn-primary" onClick={handleSkipAndAssess}>
+                ประเมินเลย ไม่ต้องกรอกเพิ่ม
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => setMissingDaysPromptOpen(false)}>
+                ยกเลิก
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {backfillDateKey && (
+        <BackfillEmotionModal
+          dateKey={backfillDateKey}
+          existingLog={logs.find((l) => l.dateKey === backfillDateKey) || null}
+          onClose={() => setBackfillDateKey(null)}
+          onSaved={handleBackfillSaved}
+        />
+      )}
     </div>
   );
 }

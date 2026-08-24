@@ -1,5 +1,5 @@
 .counselling-page {
-  max-width: 1000px;
+  max-width: var(--content-width);
   margin: 0 auto;
   padding: 2.5rem 1.5rem;
 }
@@ -45,6 +45,24 @@
   padding: 2rem 0;
 }
 
+.counselling-month-group {
+  margin-bottom: 1.5rem;
+}
+
+.counselling-month-heading {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.counselling-load-more {
+  width: 100%;
+  justify-content: center;
+}
+
 .counselling-list {
   list-style: none;
   margin: 0;
@@ -54,7 +72,7 @@
   gap: 0.85rem;
 }
 
-.counselling-list li {
+.counselling-list-link {
   display: flex;
   align-items: flex-start;
   gap: 0.85rem;
@@ -63,10 +81,12 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  color: inherit;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.counselling-list li:hover {
+.counselling-list-link:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -88,16 +108,16 @@
   min-width: 0;
 }
 
-.counselling-type {
+.counselling-topic {
   margin: 0 0 0.2rem;
   font-weight: 600;
   color: var(--color-text);
   font-size: 0.92rem;
 }
 
-.counselling-message {
+.counselling-meta {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
   line-height: 1.5;
 }
@@ -121,9 +141,19 @@
   color: var(--color-info);
 }
 
+.counselling-status-scheduled {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
 .counselling-status-closed {
   background-color: var(--color-ink-200);
   color: var(--color-ink-600);
+}
+
+.counselling-status-cancelled {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 
 /* ---------- Sidebar form ---------- */
@@ -158,6 +188,7 @@
   color: var(--color-text-secondary);
 }
 
+.counselling-form input[type="text"],
 .counselling-form select,
 .counselling-form textarea {
   padding: 0.6rem 0.75rem;
@@ -170,6 +201,7 @@
   resize: vertical;
 }
 
+.counselling-form input[type="text"]:focus,
 .counselling-form select:focus,
 .counselling-form textarea:focus {
   outline: none;
@@ -180,4 +212,86 @@
 .counselling-form .btn-primary {
   width: 100%;
   justify-content: center;
+}
+
+.counselling-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.counselling-field-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.counselling-type-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.counselling-type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.6rem 0.4rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.counselling-type-btn.active {
+  border-color: var(--color-primary-400);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+.counselling-mood-picker {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+
+.counselling-mood-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.counselling-mood-btn:hover {
+  transform: translateY(-1px);
+}
+
+.counselling-mood-btn.active {
+  border-color: var(--color-primary-400);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+.counselling-mood-selected-label {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.counselling-error {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: 0.85rem;
 }

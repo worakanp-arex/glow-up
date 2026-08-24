@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import DailyCheckin from "../../components/user/DailyCheckin.jsx";
 import StreakWidget from "../../components/user/StreakWidget.jsx";
 import ApplicationStatusCard from "../../components/user/ApplicationStatusCard.jsx";
-import CourseProgressWidget from "../../components/user/CourseProgressWidget.jsx";
+import MyCoursesWidget from "../../components/user/MyCoursesWidget.jsx";
 import CounsellingStatusWidget from "../../components/user/CounsellingStatusWidget.jsx";
 import CommunityPreviewWidget from "../../components/user/CommunityPreviewWidget.jsx";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
@@ -50,7 +50,7 @@ function Dashboard() {
         <div className="dashboard-grid">
           {streak && <StreakWidget streak={streak} />}
           <ApplicationStatusCard />
-          <CourseProgressWidget />
+          <MyCoursesWidget />
           <CounsellingStatusWidget />
           <CommunityPreviewWidget />
         </div>

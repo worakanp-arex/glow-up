@@ -1,11 +1,28 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarHeart, Check, Filter, Pencil, Trash2, Users as UsersIcon, X } from "lucide-react";
+import {
+  CalendarHeart,
+  Check,
+  Filter,
+  Pencil,
+  Plus,
+  Trash2,
+  UserPlus,
+  Users as UsersIcon,
+  X,
+} from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as userService from "../../services/userService.js";
 import "./Users.css";
 
-const ROLE_LABELS = { user: "ผู้หางาน", employer: "นายจ้าง", admin: "ผู้ดูแลระบบ" };
+const ROLE_LABELS = {
+  user: "ผู้หางาน",
+  employer: "นายจ้าง",
+  admin: "ผู้ดูแลระบบ",
+  counsellor: "บุคลากรทางการแพทย์",
+};
+
+const INITIAL_STAFF_FORM = { name: "", email: "", password: "", phone: "", specialization: "", hospital: "" };
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -14,6 +31,10 @@ function Users() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", phone: "", role: "user" });
+  const [showStaffForm, setShowStaffForm] = useState(false);
+  const [staffForm, setStaffForm] = useState(INITIAL_STAFF_FORM);
+  const [creatingStaff, setCreatingStaff] = useState(false);
+  const [staffError, setStaffError] = useState("");
 
   function load(params = {}) {
     setLoading(true);
@@ -56,6 +77,22 @@ function Users() {
     setEditingId(null);
   }
 
+  async function handleCreateStaff(e) {
+    e.preventDefault();
+    setStaffError("");
+    setCreatingStaff(true);
+    try {
+      const created = await userService.createUser({ ...staffForm, role: "counsellor" });
+      setUsers((prev) => [created, ...prev]);
+      setStaffForm(INITIAL_STAFF_FORM);
+      setShowStaffForm(false);
+    } catch (err) {
+      setStaffError(err.response?.data?.message || "สร้างบัญชีไม่สำเร็จ");
+    } finally {
+      setCreatingStaff(false);
+    }
+  }
+
   if (loading) {
     return <div className="users-page">กำลังโหลด...</div>;
   }
@@ -66,13 +103,16 @@ function Users() {
         <UsersIcon size={22} />
         <span>จัดการผู้ใช้งาน</span>
       </h1>
-      <p className="users-subtitle">ตรวจสอบ ยืนยันตัวตน และจัดการบัญชีผู้หางาน นายจ้าง และผู้ดูแลระบบทั้งหมด</p>
+      <p className="users-subtitle">
+        ตรวจสอบ ยืนยันตัวตน และจัดการบัญชีผู้หางาน นายจ้าง บุคลากรทางการแพทย์ และผู้ดูแลระบบทั้งหมด
+      </p>
 
       <div className="users-filters">
         <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
           <option value="">ทุกบทบาท</option>
           <option value="user">ผู้หางาน</option>
           <option value="employer">นายจ้าง</option>
+          <option value="counsellor">บุคลากรทางการแพทย์</option>
           <option value="admin">ผู้ดูแลระบบ</option>
         </select>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -85,7 +125,81 @@ function Users() {
           <Filter size={15} />
           <span>กรอง</span>
         </button>
+        <button type="button" className="btn btn-primary" onClick={() => setShowStaffForm((v) => !v)}>
+          <UserPlus size={15} />
+          <span>เพิ่มบุคลากรทางการแพทย์</span>
+        </button>
       </div>
+
+      {showStaffForm && (
+        <form className="users-staff-form" onSubmit={handleCreateStaff}>
+          <h2>
+            <Plus size={16} />
+            <span>สร้างบัญชีบุคลากรทางการแพทย์</span>
+          </h2>
+          <div className="users-staff-form-grid">
+            <label>
+              ชื่อ-นามสกุล
+              <input
+                value={staffForm.name}
+                onChange={(e) => setStaffForm((f) => ({ ...f, name: e.target.value }))}
+                required
+              />
+            </label>
+            <label>
+              อีเมล
+              <input
+                type="email"
+                value={staffForm.email}
+                onChange={(e) => setStaffForm((f) => ({ ...f, email: e.target.value }))}
+                required
+              />
+            </label>
+            <label>
+              รหัสผ่าน
+              <input
+                type="password"
+                value={staffForm.password}
+                onChange={(e) => setStaffForm((f) => ({ ...f, password: e.target.value }))}
+                required
+                minLength={8}
+              />
+            </label>
+            <label>
+              เบอร์โทร
+              <input
+                value={staffForm.phone}
+                onChange={(e) => setStaffForm((f) => ({ ...f, phone: e.target.value }))}
+              />
+            </label>
+            <label>
+              ความเชี่ยวชาญ
+              <input
+                value={staffForm.specialization}
+                onChange={(e) => setStaffForm((f) => ({ ...f, specialization: e.target.value }))}
+                placeholder="เช่น จิตแพทย์, นักจิตวิทยา"
+              />
+            </label>
+            <label>
+              สังกัด
+              <input
+                value={staffForm.hospital}
+                onChange={(e) => setStaffForm((f) => ({ ...f, hospital: e.target.value }))}
+                placeholder="เช่น โรงพยาบาลธัญญารักษ์ขอนแก่น"
+              />
+            </label>
+          </div>
+          {staffError && <p className="users-staff-form-error">{staffError}</p>}
+          <div className="users-staff-form-actions">
+            <button type="submit" className="btn btn-primary" disabled={creatingStaff}>
+              {creatingStaff ? "กำลังสร้างบัญชี..." : "สร้างบัญชี"}
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={() => setShowStaffForm(false)}>
+              ยกเลิก
+            </button>
+          </div>
+        </form>
+      )}
 
       <div className="users-table">
         <div className="users-table-head">
@@ -122,6 +236,7 @@ function Users() {
                   >
                     <option value="user">ผู้หางาน</option>
                     <option value="employer">นายจ้าง</option>
+                    <option value="counsellor">บุคลากรทางการแพทย์</option>
                     <option value="admin">ผู้ดูแลระบบ</option>
                   </select>
                   <button type="submit" title="บันทึก">

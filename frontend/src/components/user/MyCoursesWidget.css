@@ -1,4 +1,4 @@
-.course-progress-widget {
+.my-courses-widget {
   display: flex;
   gap: 1.1rem;
   padding: 1.5rem;
@@ -11,12 +11,12 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.course-progress-widget:hover {
+.my-courses-widget:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
 }
 
-.course-progress-icon {
+.my-courses-widget-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,26 +28,26 @@
   flex-shrink: 0;
 }
 
-.course-progress-body {
+.my-courses-widget-body {
   min-width: 0;
   flex: 1;
 }
 
-.course-progress-body h2 {
+.my-courses-widget-body h2 {
   margin: 0 0 0.4rem;
   font-size: 1rem;
   color: var(--color-text);
 }
 
-.course-progress-loading,
-.course-progress-empty {
+.my-courses-widget-loading,
+.my-courses-widget-empty {
   margin: 0;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
 }
 
-.course-progress-title {
-  margin: 0 0 0.6rem;
+.my-courses-widget-title {
+  margin: 0 0 0.5rem;
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--color-text);
@@ -56,22 +56,9 @@
   white-space: nowrap;
 }
 
-.course-progress-track {
-  height: 6px;
-  border-radius: var(--radius-full);
-  background-color: var(--color-ink-100);
-  overflow: hidden;
-  margin-bottom: 0.4rem;
-}
-
-.course-progress-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  background: linear-gradient(90deg, var(--color-primary-400), var(--color-primary-600));
-}
-
-.course-progress-label {
+.my-courses-widget-summary {
+  display: block;
+  margin-top: 0.5rem;
   font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-success);
+  color: var(--color-text-secondary);
 }

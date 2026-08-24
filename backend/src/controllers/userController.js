@@ -25,7 +25,7 @@ const OWN_PROFILE_FIELDS = [
   "taxId",
 ];
 
-const ADMIN_EDITABLE_FIELDS = [...OWN_PROFILE_FIELDS, "email", "role"];
+const ADMIN_EDITABLE_FIELDS = [...OWN_PROFILE_FIELDS, "email", "role", "specialization", "hospital"];
 
 function pick(source, fields) {
   const result = {};
@@ -147,6 +147,39 @@ export async function removeUserSkill(req, res) {
     return res.status(404).json({ message: "Not found" });
   }
   res.status(204).send();
+}
+
+// Staff accounts (counsellors, and any other role admin manages directly)
+// can't go through the public self-registration/OTP flow, so admin creates
+// them here instead.
+export async function createUserByAdmin(req, res) {
+  const { name, email, password, role, phone, specialization, hospital } = req.body;
+  if (!name || !email || !password || !role) {
+    return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+  }
+  if (!["user", "employer", "admin", "counsellor"].includes(role)) {
+    return res.status(400).json({ message: "Invalid role" });
+  }
+
+  const existing = await User.findOne({ email: email.toLowerCase() });
+  if (existing) {
+    return res.status(409).json({ message: "Email already registered" });
+  }
+
+  const user = await User.create({
+    name,
+    email: email.toLowerCase(),
+    password,
+    role,
+    phone,
+    specialization,
+    hospital,
+    verifiedStatus: "verified",
+  });
+
+  const obj = user.toObject();
+  delete obj.password;
+  res.status(201).json(obj);
 }
 
 export async function listUsers(req, res) {

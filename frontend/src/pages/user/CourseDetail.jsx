@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, Award, BookOpen, ExternalLink, Heart } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as courseService from "../../services/courseService.js";
+import StatusBadge from "../../components/common/StatusBadge.jsx";
 import "./CourseDetail.css";
 
 function CourseDetail() {
@@ -11,7 +12,9 @@ function CourseDetail() {
   const [course, setCourse] = useState(null);
   const [enrollment, setEnrollment] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [certUploading, setCertUploading] = useState(false);
+  const [certError, setCertError] = useState("");
+  const certInputRef = useRef(null);
 
   useEffect(() => {
     Promise.all([
@@ -25,19 +28,29 @@ function CourseDetail() {
       .finally(() => setLoading(false));
   }, [id, user.role]);
 
-  async function handleEnroll() {
-    const created = await courseService.enrollCourse(id);
-    setEnrollment(created);
+  async function handleToggleHeart() {
+    if (enrollment) {
+      await courseService.unenrollCourse(id);
+      setEnrollment(null);
+    } else {
+      const created = await courseService.enrollCourse(id);
+      setEnrollment(created);
+    }
   }
 
-  async function handleProgressChange(e) {
-    const progress = Number(e.target.value);
-    setSaving(true);
+  async function handleCertSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setCertUploading(true);
+    setCertError("");
     try {
-      const updated = await courseService.updateProgress(id, progress);
+      const updated = await courseService.uploadCourseCertificate(id, file);
       setEnrollment(updated);
+    } catch (err) {
+      setCertError(err.response?.data?.message || "อัปโหลดเกียรติบัตรไม่สำเร็จ");
     } finally {
-      setSaving(false);
+      setCertUploading(false);
+      e.target.value = "";
     }
   }
 
@@ -63,30 +76,71 @@ function CourseDetail() {
         <h1>{course.title}</h1>
         <p className="course-detail-description">{course.description}</p>
 
-        {user.role === "user" &&
-          (enrollment ? (
-            <div className="course-detail-progress">
-              <div className="course-detail-progress-header">
-                <span>ความคืบหน้าของคุณ</span>
-                <strong>{enrollment.progress}%</strong>
-              </div>
-              <div className="course-detail-progress-track">
-                <div className="course-detail-progress-fill" style={{ width: `${enrollment.progress}%` }} />
-              </div>
+        {course.tags?.length > 0 && (
+          <div className="course-detail-tags">
+            {course.tags.map((tag) => (
+              <span key={tag} className="course-detail-tag">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="course-detail-actions">
+          <a href={course.externalUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+            <ExternalLink size={16} />
+            <span>ไปที่คอร์สภายนอก</span>
+          </a>
+          {user.role === "user" && (
+            <button
+              type="button"
+              className={`course-detail-heart-btn${enrollment ? " active" : ""}`}
+              onClick={handleToggleHeart}
+            >
+              <Heart size={16} fill={enrollment ? "currentColor" : "none"} />
+              <span>{enrollment ? "บันทึกไว้แล้ว" : "บันทึกคอร์สนี้"}</span>
+            </button>
+          )}
+        </div>
+
+        {user.role === "user" && enrollment && (
+          <>
+            <div className="course-detail-status-row">
+              <span>สถานะของคุณ</span>
+              <StatusBadge status={enrollment.certificateUrl ? "completed" : "learning"} />
+            </div>
+
+            <div className="course-detail-certificate">
+              <h2>
+                <Award size={16} />
+                <span>เกียรติบัตร</span>
+              </h2>
+              {enrollment.certificateUrl ? (
+                <a href={enrollment.certificateUrl} target="_blank" rel="noreferrer" className="course-detail-cert-link">
+                  ดูเกียรติบัตรที่อัปโหลดไว้
+                </a>
+              ) : (
+                <p className="course-detail-empty-note">ยังไม่ได้อัปโหลดเกียรติบัตร</p>
+              )}
+              {certError && <p className="course-detail-cert-error">{certError}</p>}
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => certInputRef.current?.click()}
+                disabled={certUploading}
+              >
+                {certUploading ? "กำลังอัปโหลด..." : enrollment.certificateUrl ? "เปลี่ยนไฟล์" : "อัปโหลดเกียรติบัตร"}
+              </button>
               <input
-                type="range"
-                min={0}
-                max={100}
-                value={enrollment.progress}
-                onChange={handleProgressChange}
-                disabled={saving}
+                ref={certInputRef}
+                type="file"
+                accept="application/pdf,image/png,image/jpeg,image/webp"
+                hidden
+                onChange={handleCertSelect}
               />
             </div>
-          ) : (
-            <button type="button" className="btn btn-primary" onClick={handleEnroll}>
-              ลงทะเบียนเรียน
-            </button>
-          ))}
+          </>
+        )}
       </div>
     </div>
   );

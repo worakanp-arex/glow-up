@@ -1,5 +1,5 @@
 .courses-page {
-  max-width: 980px;
+  max-width: var(--content-width);
   margin: 0 auto;
   padding: 2.5rem 1.5rem;
 }
@@ -22,6 +22,53 @@
 .courses-empty {
   color: var(--color-text-muted);
   font-size: 0.9rem;
+}
+
+.courses-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.courses-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 220px;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.courses-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--color-text);
+}
+
+.courses-filters select {
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.courses-filters select:focus,
+.courses-search:focus-within {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
 }
 
 .courses-grid {
@@ -85,29 +132,71 @@
   color: var(--color-text);
 }
 
-.course-card-progress {
+.course-card-tags {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
-.course-card-progress-track {
-  height: 6px;
+.course-card-tag {
+  padding: 0.15rem 0.55rem;
   border-radius: var(--radius-full);
-  background-color: var(--color-ink-100);
-  overflow: hidden;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
 }
 
-.course-card-progress-fill {
-  height: 100%;
+.course-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.course-card-external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-full);
-  background: linear-gradient(90deg, var(--color-primary-400), var(--color-primary-600));
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
-.course-card-progress-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-success);
+.course-card-external-link:hover {
+  border-color: var(--color-primary-300);
+  color: var(--color-primary-700);
+}
+
+.course-card-heart-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-left: auto;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.course-card-heart-btn:hover {
+  transform: scale(1.08);
+}
+
+.course-card-heart-btn.active {
+  color: var(--color-danger);
+  border-color: var(--color-danger-border);
+}
+
+.course-card .status-badge {
+  align-self: flex-start;
 }
 
 .course-card .btn {

@@ -1,0 +1,212 @@
+.counsellor-analytics-page {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.counsellor-analytics-page h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.4rem;
+  font-size: 1.5rem;
+  color: var(--color-text);
+}
+
+.counsellor-analytics-subtitle {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.counsellor-analytics-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1.75rem;
+}
+
+.counsellor-analytics-section {
+  margin-bottom: 1.75rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.counsellor-analytics-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 1.1rem;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.counsellor-analytics-section h2 svg {
+  color: var(--color-primary-600);
+}
+
+.counsellor-analytics-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+/* Trend chart: single-series bars using the app's primary ramp, anchored to baseline */
+
+.overview-trend-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 140px;
+}
+
+.overview-trend-bar-col {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.overview-trend-bar {
+  position: relative;
+  width: 100%;
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background-color: var(--color-primary-500);
+}
+
+.overview-trend-bar:hover {
+  background-color: var(--color-primary-600);
+}
+
+.overview-trend-bar:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--radius-sm);
+  background-color: rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.overview-trend-bar-label {
+  margin-top: 0.4rem;
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+}
+
+/* Appointments-by-day list */
+
+.counsellor-analytics-day-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.counsellor-analytics-day-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-ink-50);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.counsellor-analytics-day-list strong {
+  color: var(--color-text);
+}
+
+/* Leaderboard */
+
+.counsellor-analytics-leaderboard {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.counsellor-analytics-leaderboard li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-ink-50);
+}
+
+.counsellor-analytics-rank {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.counsellor-analytics-leaderboard-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.counsellor-analytics-leaderboard-name svg {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.counsellor-analytics-leaderboard-days {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-primary-600);
+}
+
+.counsellor-analytics-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-info-bg);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.counsellor-analytics-note svg {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--color-primary-600);
+}

@@ -1,5 +1,5 @@
 .users-page {
-  max-width: 980px;
+  max-width: var(--content-width);
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
 }
@@ -50,6 +50,69 @@
 
 .users-filters .btn {
   margin-left: auto;
+}
+
+.users-staff-form {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.users-staff-form h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1.1rem;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.users-staff-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.users-staff-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.users-staff-form input {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.users-staff-form input:focus {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+.users-staff-form-error {
+  margin: 1rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.users-staff-form-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
 }
 
 .users-table {

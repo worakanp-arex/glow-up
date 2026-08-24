@@ -10,6 +10,8 @@ const LABELS = {
   interview: "นัดสัมภาษณ์",
   passed: "ผ่านการคัดเลือก",
   cancelled: "ยกเลิกแล้ว",
+  completed: "เรียนจบแล้ว",
+  learning: "กำลังเรียน",
 };
 
 function StatusBadge({ status }) {

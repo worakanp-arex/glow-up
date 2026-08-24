@@ -31,6 +31,10 @@ export function listUsers(params) {
   return api.get("/users", { params }).then((res) => res.data);
 }
 
+export function createUser(payload) {
+  return api.post("/users", payload).then((res) => res.data);
+}
+
 export function verifyUser(id, status) {
   return api.put(`/users/${id}/verify`, { status }).then((res) => res.data);
 }

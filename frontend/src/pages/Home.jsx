@@ -20,6 +20,7 @@ const DASHBOARD_BY_ROLE = {
   user: "/dashboard",
   employer: "/employer/dashboard",
   admin: "/admin",
+  counsellor: "/counsellor",
 };
 
 const FEATURES = [

@@ -1,23 +1,36 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, MessageSquare, Pencil, Trash2 } from "lucide-react";
+import { Bookmark, Heart, Lock, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import "./PostCard.css";
 
 function initials(name) {
   return name?.trim()?.charAt(0)?.toUpperCase() || "?";
 }
 
-function PostCard({ post, currentUserId, onLike, onUpdated, onDeleted, linkToDetail = true }) {
+function PostCard({
+  post,
+  currentUserId,
+  onLike,
+  onToggleSave,
+  onUpdated,
+  onDeleted,
+  onSelect,
+  selected = false,
+  linkToDetail = true,
+}) {
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(post.content || "");
   const [tagsInput, setTagsInput] = useState((post.tags || []).join(", "));
+  const [commentsEnabled, setCommentsEnabled] = useState(post.commentsEnabled !== false);
   const [saving, setSaving] = useState(false);
 
   const isOwner = post.user?._id === currentUserId;
+  const isStaffAuthor = post.user?.role === "counsellor" || post.user?.role === "admin";
 
   function startEdit() {
     setContent(post.content || "");
     setTagsInput((post.tags || []).join(", "));
+    setCommentsEnabled(post.commentsEnabled !== false);
     setEditing(true);
   }
 
@@ -29,7 +42,7 @@ function PostCard({ post, currentUserId, onLike, onUpdated, onDeleted, linkToDet
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean);
-      await onUpdated(post._id, { content, tags });
+      await onUpdated(post._id, { content, tags, commentsEnabled });
       setEditing(false);
     } finally {
       setSaving(false);
@@ -42,25 +55,18 @@ function PostCard({ post, currentUserId, onLike, onUpdated, onDeleted, linkToDet
   }
 
   return (
-    <li className="post-card">
+    <li className={`post-card${selected ? " post-card-selected" : ""}`}>
       <div className="post-card-header">
         <span className="post-card-avatar">
           {post.user?.avatarUrl ? <img src={post.user.avatarUrl} alt="" /> : initials(post.user?.name)}
         </span>
         <div className="post-card-author-block">
-          <p className="post-card-author">{post.user?.name}</p>
+          <p className="post-card-author">
+            <span className="post-card-author-name">{post.user?.name}</span>
+            {isStaffAuthor && <span className="post-card-staff-badge">บุคลากรทางการแพทย์</span>}
+          </p>
           <p className="post-card-date">{new Date(post.createdAt).toLocaleDateString("th-TH")}</p>
         </div>
-
-        {post.tags?.length > 0 && (
-          <div className="post-card-tags">
-            {post.tags.map((tag) => (
-              <span key={tag} className="post-card-tag">
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
 
         {isOwner && !editing && (
           <div className="post-card-owner-actions">
@@ -74,6 +80,16 @@ function PostCard({ post, currentUserId, onLike, onUpdated, onDeleted, linkToDet
         )}
       </div>
 
+      {post.tags?.length > 0 && (
+        <div className="post-card-tags">
+          {post.tags.map((tag) => (
+            <span key={tag} className="post-card-tag">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
       {editing ? (
         <form className="post-card-edit-form" onSubmit={handleSave}>
           <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={3} required />
@@ -83,6 +99,14 @@ function PostCard({ post, currentUserId, onLike, onUpdated, onDeleted, linkToDet
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
           />
+          <label className="post-card-comments-toggle">
+            <input
+              type="checkbox"
+              checked={commentsEnabled}
+              onChange={(e) => setCommentsEnabled(e.target.checked)}
+            />
+            <span>เปิดให้แสดงความคิดเห็น</span>
+          </label>
           <div className="post-card-edit-actions">
             <button type="submit" className="btn btn-primary" disabled={saving}>
               {saving ? "กำลังบันทึก..." : "บันทึก"}
@@ -92,6 +116,14 @@ function PostCard({ post, currentUserId, onLike, onUpdated, onDeleted, linkToDet
             </button>
           </div>
         </form>
+      ) : onSelect ? (
+        <button
+          type="button"
+          className="post-card-content-link post-card-content-button"
+          onClick={() => onSelect(post._id)}
+        >
+          <p className="post-card-content">{post.content}</p>
+        </button>
       ) : linkToDetail ? (
         <Link to={`/community/${post._id}`} className="post-card-content-link">
           <p className="post-card-content">{post.content}</p>
@@ -109,7 +141,18 @@ function PostCard({ post, currentUserId, onLike, onUpdated, onDeleted, linkToDet
           <Heart size={16} fill={post.likedByMe ? "currentColor" : "none"} />
           <span>{post.likes} กำลังใจ</span>
         </button>
-        {linkToDetail ? (
+
+        {post.commentsEnabled === false ? (
+          <span className="post-card-comments-link post-card-comments-disabled">
+            <Lock size={14} />
+            <span>ปิดความคิดเห็น</span>
+          </span>
+        ) : onSelect ? (
+          <button type="button" className="post-card-comments-link post-card-comments-button" onClick={() => onSelect(post._id)}>
+            <MessageSquare size={16} />
+            <span>{post.commentCount ?? 0} ความคิดเห็น</span>
+          </button>
+        ) : linkToDetail ? (
           <Link to={`/community/${post._id}`} className="post-card-comments-link">
             <MessageSquare size={16} />
             <span>{post.commentCount ?? 0} ความคิดเห็น</span>
@@ -119,6 +162,17 @@ function PostCard({ post, currentUserId, onLike, onUpdated, onDeleted, linkToDet
             <MessageSquare size={16} />
             <span>{post.commentCount ?? 0} ความคิดเห็น</span>
           </span>
+        )}
+
+        {onToggleSave && (
+          <button
+            type="button"
+            className={`post-card-save-button${post.savedByMe ? " saved" : ""}`}
+            onClick={() => onToggleSave(post._id)}
+            aria-label={post.savedByMe ? "เลิกบันทึกโพสต์" : "บันทึกโพสต์"}
+          >
+            <Bookmark size={16} fill={post.savedByMe ? "currentColor" : "none"} />
+          </button>
         )}
       </div>
     </li>

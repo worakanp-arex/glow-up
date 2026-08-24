@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, GraduationCap } from "lucide-react";
+import { BookOpen, ExternalLink, GraduationCap, Heart, Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as courseService from "../../services/courseService.js";
+import StatusBadge from "../../components/common/StatusBadge.jsx";
 import "./Courses.css";
 
 function Courses() {
@@ -10,6 +11,8 @@ function Courses() {
   const [courses, setCourses] = useState([]);
   const [myCourses, setMyCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -23,9 +26,29 @@ function Courses() {
       .finally(() => setLoading(false));
   }, [user.role]);
 
-  async function handleEnroll(courseId) {
-    const enrollment = await courseService.enrollCourse(courseId);
-    setMyCourses((prev) => [...prev, enrollment]);
+  const categories = useMemo(
+    () => [...new Set(courses.map((c) => c.category).filter(Boolean))],
+    [courses]
+  );
+
+  const visibleCourses = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return courses.filter((course) => {
+      if (category && course.category !== category) return false;
+      if (!q) return true;
+      const haystack = [course.title, course.description, ...(course.tags || [])].join(" ").toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [courses, query, category]);
+
+  async function handleToggleHeart(courseId, isEnrolled) {
+    if (isEnrolled) {
+      await courseService.unenrollCourse(courseId);
+      setMyCourses((prev) => prev.filter((e) => e.course._id !== courseId));
+    } else {
+      const enrollment = await courseService.enrollCourse(courseId);
+      setMyCourses((prev) => [...prev, enrollment]);
+    }
   }
 
   if (loading) {
@@ -38,13 +61,35 @@ function Courses() {
         <GraduationCap size={22} />
         <span>คอร์สเรียน</span>
       </h1>
-      <p className="courses-subtitle">พัฒนาทักษะใหม่ๆ เพื่อเปิดโอกาสในการทำงานให้กว้างขึ้น</p>
+      <p className="courses-subtitle">คอร์สเรียนจากบุคลากรทางการแพทย์ พัฒนาทักษะใหม่ๆ เพื่อเปิดโอกาสในการทำงานให้กว้างขึ้น</p>
 
-      {courses.length === 0 ? (
-        <p className="courses-empty">ยังไม่มีคอร์สเรียนในระบบ</p>
+      <div className="courses-filters">
+        <div className="courses-search">
+          <Search size={16} />
+          <input
+            type="text"
+            placeholder="ค้นหาคอร์สเรียน หรือแท็ก..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        {categories.length > 0 && (
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="">ทุกหมวดหมู่</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {visibleCourses.length === 0 ? (
+        <p className="courses-empty">ไม่พบคอร์สเรียนที่ตรงกับเงื่อนไข</p>
       ) : (
         <div className="courses-grid">
-          {courses.map((course) => {
+          {visibleCourses.map((course) => {
             const enrollment = myCourses.find((e) => e.course._id === course._id);
             return (
               <div key={course._id} className="course-card">
@@ -54,24 +99,43 @@ function Courses() {
                   </div>
                   {course.category && <span className="course-card-category">{course.category}</span>}
                   <h2>{course.title}</h2>
+                  {course.tags?.length > 0 && (
+                    <div className="course-card-tags">
+                      {course.tags.map((tag) => (
+                        <span key={tag} className="course-card-tag">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </Link>
 
-                {user.role === "user" &&
-                  (enrollment ? (
-                    <div className="course-card-progress">
-                      <div className="course-card-progress-track">
-                        <div
-                          className="course-card-progress-fill"
-                          style={{ width: `${enrollment.progress}%` }}
-                        />
-                      </div>
-                      <span className="course-card-progress-label">{enrollment.progress}% เสร็จแล้ว</span>
-                    </div>
-                  ) : (
-                    <button type="button" className="btn btn-secondary" onClick={() => handleEnroll(course._id)}>
-                      ลงทะเบียน
+                <div className="course-card-actions">
+                  <a
+                    href={course.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="course-card-external-link"
+                  >
+                    <ExternalLink size={13} />
+                    <span>เปิดคอร์ส</span>
+                  </a>
+
+                  {user.role === "user" && (
+                    <button
+                      type="button"
+                      className={`course-card-heart-btn${enrollment ? " active" : ""}`}
+                      onClick={() => handleToggleHeart(course._id, Boolean(enrollment))}
+                      aria-label={enrollment ? "เลิกบันทึกคอร์ส" : "บันทึกคอร์สนี้"}
+                    >
+                      <Heart size={16} fill={enrollment ? "currentColor" : "none"} />
                     </button>
-                  ))}
+                  )}
+                </div>
+
+                {user.role === "user" && enrollment && (
+                  <StatusBadge status={enrollment.certificateUrl ? "completed" : "learning"} />
+                )}
               </div>
             );
           })}

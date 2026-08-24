@@ -1,0 +1,169 @@
+.booking-calendar-card {
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.booking-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.booking-calendar-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.booking-calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.booking-calendar-nav button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.booking-calendar-nav button:hover {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+  color: var(--color-primary-700);
+}
+
+.booking-calendar-month-label {
+  min-width: 120px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.booking-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 0.4rem;
+}
+
+.booking-calendar-weekdays span {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.booking-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.booking-calendar-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background-color: var(--color-ink-50);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.booking-calendar-cell:hover {
+  transform: scale(1.05);
+}
+
+.booking-calendar-cell-blank {
+  background-color: transparent;
+  cursor: default;
+  pointer-events: none;
+}
+
+.booking-calendar-cell.today {
+  border-color: var(--color-primary-300);
+}
+
+.booking-calendar-cell.has-bookings {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-800);
+  font-weight: 700;
+}
+
+.booking-calendar-cell.selected {
+  background-color: var(--color-primary-500);
+  color: #ffffff;
+}
+
+.booking-calendar-count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-600);
+  color: #ffffff;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.booking-calendar-cell.selected .booking-calendar-count {
+  background-color: #ffffff;
+  color: var(--color-primary-700);
+}
+
+.booking-calendar-card.compact {
+  max-width: 380px;
+  padding: 1rem;
+}
+
+.booking-calendar-card.compact .booking-calendar-header {
+  margin-bottom: 0.75rem;
+}
+
+.booking-calendar-card.compact .booking-calendar-weekdays,
+.booking-calendar-card.compact .booking-calendar-grid {
+  gap: 4px;
+}
+
+.booking-calendar-card.compact .booking-calendar-cell {
+  font-size: 0.68rem;
+}
+
+.booking-calendar-card.compact .booking-calendar-nav button {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 480px) {
+  .booking-calendar-grid,
+  .booking-calendar-weekdays {
+    gap: 3px;
+  }
+}

@@ -31,6 +31,7 @@ function JobSearch() {
   const [category, setCategory] = useState("");
   const [province, setProvince] = useState("");
   const [deadlineWithinDays, setDeadlineWithinDays] = useState("");
+  const [resultLimit, setResultLimit] = useState("10");
 
   useEffect(() => {
     jobCategoryService.getJobCategories().then(setCategories);
@@ -80,6 +81,7 @@ function JobSearch() {
 
   const selectedJob = jobs.find((job) => job._id === selectedJobId) || null;
   const salaryActive = Boolean(minSalary || maxSalary);
+  const visibleJobs = resultLimit === "all" ? jobs : jobs.slice(0, Number(resultLimit));
 
   return (
     <div className="job-search-page">
@@ -244,7 +246,25 @@ function JobSearch() {
       ) : (
         <div className="job-search-layout">
           <div className="job-search-list">
-            {jobs.map((job) => (
+            {jobs.length > 0 && (
+              <div className="job-search-list-header">
+                <span className="job-search-result-count">
+                  พบ {jobs.length} ตำแหน่ง
+                  {visibleJobs.length < jobs.length && ` (แสดง ${visibleJobs.length} รายการ)`}
+                </span>
+                <label className="job-search-limit-select">
+                  แสดง
+                  <select value={resultLimit} onChange={(e) => setResultLimit(e.target.value)}>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="all">ทั้งหมด</option>
+                  </select>
+                  รายการ
+                </label>
+              </div>
+            )}
+            {visibleJobs.map((job) => (
               <button
                 key={job._id}
                 type="button"

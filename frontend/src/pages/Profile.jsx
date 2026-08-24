@@ -1,14 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { Award, Camera, FileText, Mail, MapPin, Phone, Plus, Sparkles, Trash2, User, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Award, BookOpen, Camera, FileText, Mail, MapPin, Phone, Plus, Sparkles, Trash2, User, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import * as userService from "../services/userService.js";
 import * as skillService from "../services/skillService.js";
 import * as emotionService from "../services/emotionService.js";
+import * as courseService from "../services/courseService.js";
 import StatusBadge from "../components/common/StatusBadge.jsx";
 import StreakWidget from "../components/user/StreakWidget.jsx";
 import "./Profile.css";
 
-const ROLE_LABELS = { user: "ผู้หางาน", employer: "นายจ้าง", admin: "ผู้ดูแลระบบ" };
+const ROLE_LABELS = {
+  user: "ผู้หางาน",
+  employer: "นายจ้าง",
+  admin: "ผู้ดูแลระบบ",
+  counsellor: "บุคลากรทางการแพทย์",
+};
 const LEVELS = [1, 2, 3, 4, 5];
 
 function initials(name) {
@@ -50,6 +57,7 @@ function Profile() {
   const [skillsLoading, setSkillsLoading] = useState(user.role === "user");
 
   const [streak, setStreak] = useState(null);
+  const [myCourses, setMyCourses] = useState([]);
 
   useEffect(() => {
     if (user.role !== "user") return;
@@ -64,6 +72,11 @@ function Profile() {
   useEffect(() => {
     if (user.role !== "user") return;
     emotionService.getMyStreak().then(setStreak).catch(() => setStreak(null));
+  }, [user.role]);
+
+  useEffect(() => {
+    if (user.role !== "user") return;
+    courseService.getMyCourses().then(setMyCourses).catch(() => setMyCourses([]));
   }, [user.role]);
 
   function handleChange(e) {
@@ -395,6 +408,43 @@ function Profile() {
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {user.role === "user" && (
+        <div className="profile-card profile-courses-card">
+          <h2>
+            <BookOpen size={18} />
+            <span>คอร์สเรียนของฉัน</span>
+          </h2>
+          {myCourses.length === 0 ? (
+            <p className="profile-empty-note">
+              ยังไม่มีคอร์สที่บันทึกไว้ — <Link to="/courses">ไปดูคอร์สเรียน</Link>
+            </p>
+          ) : (
+            <ul className="profile-courses-list">
+              {myCourses.map((enrollment) => (
+                <li key={enrollment._id}>
+                  <Link to={`/courses/${enrollment.course._id}`} className="profile-courses-title">
+                    {enrollment.course.title}
+                  </Link>
+                  <div className="profile-courses-status-row">
+                    <StatusBadge status={enrollment.certificateUrl ? "completed" : "learning"} />
+                    {enrollment.certificateUrl && (
+                      <a
+                        href={enrollment.certificateUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="profile-courses-cert-link"
+                      >
+                        ดูเกียรติบัตร
+                      </a>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 

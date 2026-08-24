@@ -7,6 +7,7 @@ import PendingRegistration from "../models/PendingRegistration.js";
 import { publicUrl } from "../middleware/upload.js";
 import { sendOtpEmail, sendPasswordResetEmail } from "../services/emailService.js";
 import { maybeSendDailyReminder } from "../services/reminderService.js";
+import { recordLogin } from "../services/loginEventService.js";
 
 const PUBLIC_REGISTER_FIELDS = [
   "name",
@@ -164,6 +165,7 @@ export async function login(req, res) {
   const token = signToken(user);
   setTokenCookie(res, token);
   maybeSendDailyReminder(user).catch(() => {});
+  recordLogin(user).catch(() => {});
   res.json({ token, user: sanitize(user) });
 }
 
@@ -217,6 +219,7 @@ export async function googleAuth(req, res) {
   const token = signToken(user);
   setTokenCookie(res, token);
   maybeSendDailyReminder(user).catch(() => {});
+  recordLogin(user).catch(() => {});
   res.json({ token, user: sanitize(user) });
 }
 

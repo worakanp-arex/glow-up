@@ -1,0 +1,53 @@
+.patient-overview-widget {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.patient-overview-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.patient-overview-widget-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.patient-overview-widget-header h2 svg {
+  color: var(--color-primary-600);
+}
+
+.patient-overview-widget-link {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-primary-600);
+  text-decoration: none;
+}
+
+.patient-overview-widget-link:hover {
+  color: var(--color-primary-700);
+}
+
+.patient-overview-widget-loading {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.patient-overview-widget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.9rem;
+}

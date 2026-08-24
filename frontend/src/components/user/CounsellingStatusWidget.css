@@ -73,7 +73,17 @@
   color: var(--color-primary-700);
 }
 
+.counselling-widget-status-scheduled {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
 .counselling-widget-status-closed {
   background-color: var(--color-ink-200);
   color: var(--color-ink-600);
+}
+
+.counselling-widget-status-cancelled {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
 }

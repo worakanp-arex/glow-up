@@ -30,7 +30,7 @@ function CommunityPreviewWidget() {
         {loading ? (
           <p className="community-widget-loading">กำลังโหลด...</p>
         ) : !post ? (
-          <p className="community-widget-empty">ยังไม่มีโพสต์ในชุมชน — เริ่มบทสนทนาแรกได้เลย</p>
+          <p className="community-widget-empty">ยังไม่มีโพสต์ในชุมชนตอนนี้</p>
         ) : (
           <>
             <div className="community-widget-author">
