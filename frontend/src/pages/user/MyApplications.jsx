@@ -44,6 +44,8 @@ function MyApplications() {
     return <div className="my-applications-page">กำลังโหลด...</div>;
   }
 
+  const visibleApplications = applications.filter((app) => app.job);
+
   return (
     <div className="my-applications-page">
       <h1>
@@ -51,10 +53,10 @@ function MyApplications() {
         <span>ใบสมัครของฉัน</span>
       </h1>
 
-      {applications.length === 0 && <p className="my-applications-empty">คุณยังไม่ได้สมัครงานใด</p>}
+      {visibleApplications.length === 0 && <p className="my-applications-empty">คุณยังไม่ได้สมัครงานใด</p>}
 
       <ul className="my-applications-list">
-        {applications.map((app) => {
+        {visibleApplications.map((app) => {
           const employerName = app.job?.employer?.companyName || app.job?.employer?.name;
           const note = app.employerFeedback || app.rejectionReason;
 

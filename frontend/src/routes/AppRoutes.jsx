@@ -18,6 +18,7 @@ import Community from "../pages/user/Community.jsx";
 import MyPosts from "../pages/user/MyPosts.jsx";
 import SavedPosts from "../pages/user/SavedPosts.jsx";
 import PostDetail from "../pages/user/PostDetail.jsx";
+import StaffProfile from "../pages/user/StaffProfile.jsx";
 import Courses from "../pages/user/Courses.jsx";
 import CourseDetail from "../pages/user/CourseDetail.jsx";
 import Counselling from "../pages/user/Counselling.jsx";
@@ -65,6 +66,7 @@ function AppRoutes() {
           <Route path="community" element={<Community />} />
           <Route path="community/saved" element={<SavedPosts />} />
           <Route path="community/:id" element={<PostDetail />} />
+          <Route path="community/staff/:id" element={<StaffProfile />} />
           <Route path="courses" element={<Courses />} />
           <Route path="courses/:id" element={<CourseDetail />} />
         </Route>

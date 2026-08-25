@@ -4,6 +4,10 @@ export function updateMyProfile(payload) {
   return api.put("/users/me", payload).then((res) => res.data);
 }
 
+export function getPublicProfile(id) {
+  return api.get(`/users/${id}/public`).then((res) => res.data);
+}
+
 export function uploadMyAvatar(file) {
   const formData = new FormData();
   formData.append("avatar", file);

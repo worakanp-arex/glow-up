@@ -23,6 +23,8 @@ const OWN_PROFILE_FIELDS = [
   "companyName",
   "businessType",
   "taxId",
+  "specialization",
+  "hospital",
 ];
 
 const ADMIN_EDITABLE_FIELDS = [...OWN_PROFILE_FIELDS, "email", "role", "specialization", "hospital"];
@@ -42,6 +44,14 @@ export async function updateMe(req, res) {
     runValidators: true,
   });
   res.json(user);
+}
+
+export async function getPublicProfile(req, res) {
+  const target = await User.findById(req.params.id).select("name role avatarUrl specialization hospital");
+  if (!target || !["counsellor", "admin"].includes(target.role)) {
+    return res.status(404).json({ message: "ไม่พบข้อมูล" });
+  }
+  res.json(target);
 }
 
 export async function uploadMyAvatar(req, res) {

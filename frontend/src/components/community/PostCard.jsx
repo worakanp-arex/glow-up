@@ -26,6 +26,7 @@ function PostCard({
 
   const isOwner = post.user?._id === currentUserId;
   const isStaffAuthor = post.user?.role === "counsellor" || post.user?.role === "admin";
+  const isLongContent = (post.content || "").length > 180;
 
   function startEdit() {
     setContent(post.content || "");
@@ -57,12 +58,24 @@ function PostCard({
   return (
     <li className={`post-card${selected ? " post-card-selected" : ""}`}>
       <div className="post-card-header">
-        <span className="post-card-avatar">
-          {post.user?.avatarUrl ? <img src={post.user.avatarUrl} alt="" /> : initials(post.user?.name)}
-        </span>
+        {isStaffAuthor ? (
+          <Link to={`/community/staff/${post.user._id}`} className="post-card-avatar">
+            {post.user?.avatarUrl ? <img src={post.user.avatarUrl} alt="" /> : initials(post.user?.name)}
+          </Link>
+        ) : (
+          <span className="post-card-avatar">
+            {post.user?.avatarUrl ? <img src={post.user.avatarUrl} alt="" /> : initials(post.user?.name)}
+          </span>
+        )}
         <div className="post-card-author-block">
           <p className="post-card-author">
-            <span className="post-card-author-name">{post.user?.name}</span>
+            {isStaffAuthor ? (
+              <Link to={`/community/staff/${post.user._id}`} className="post-card-author-name post-card-author-link">
+                {post.user?.name}
+              </Link>
+            ) : (
+              <span className="post-card-author-name">{post.user?.name}</span>
+            )}
             {isStaffAuthor && <span className="post-card-staff-badge">บุคลากรทางการแพทย์</span>}
           </p>
           <p className="post-card-date">{new Date(post.createdAt).toLocaleDateString("th-TH")}</p>
@@ -123,10 +136,12 @@ function PostCard({
           onClick={() => onSelect(post._id)}
         >
           <p className="post-card-content">{post.content}</p>
+          {isLongContent && <span className="post-card-read-more">อ่านเพิ่มเติม →</span>}
         </button>
       ) : linkToDetail ? (
         <Link to={`/community/${post._id}`} className="post-card-content-link">
           <p className="post-card-content">{post.content}</p>
+          {isLongContent && <span className="post-card-read-more">อ่านเพิ่มเติม →</span>}
         </Link>
       ) : (
         <p className="post-card-content">{post.content}</p>

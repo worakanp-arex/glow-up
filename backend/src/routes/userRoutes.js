@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   updateMe,
+  getPublicProfile,
   uploadMyAvatar,
   uploadMyResume,
   addMyCertificate,
@@ -23,6 +24,7 @@ import { uploadAvatar, uploadResume, uploadCertificate } from "../middleware/upl
 const router = Router();
 
 router.put("/me", verifyToken, asyncHandler(updateMe));
+router.get("/:id/public", verifyToken, asyncHandler(getPublicProfile));
 
 router.post(
   "/me/avatar",

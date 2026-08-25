@@ -17,8 +17,7 @@ const STATUS_MESSAGE = {
   cancelled: (topic) => `คำขอปรึกษาเรื่อง "${topic}" ถูกยกเลิก`,
 };
 
-// `session` here is already populated (see getSession), so `user`/`counsellor`
-// are full documents rather than bare ObjectIds — compare via `._id`.
+
 function canAccessSession(session, user) {
   if (user.role === "admin") return true;
   if (user.role === "user") return session.user._id.toString() === user.id;

@@ -35,6 +35,8 @@ function Profile() {
     companyName: user.companyName || "",
     businessType: user.businessType || "",
     taxId: user.taxId || "",
+    specialization: user.specialization || "",
+    hospital: user.hospital || "",
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -478,47 +480,69 @@ function Profile() {
           )}
         </div>
 
-        <div className="profile-card">
-          {user.role === "user" ? (
-            <>
-              <h2>การศึกษาและประสบการณ์</h2>
-              <label>
-                ระดับการศึกษา
-                <input type="text" name="education" value={form.education} onChange={handleChange} />
-              </label>
-              <label>
-                ประสบการณ์ทำงาน
-                <input type="text" name="experience" value={form.experience} onChange={handleChange} />
-              </label>
-            </>
-          ) : (
-            <>
-              <h2>ข้อมูลบริษัท</h2>
-              <label>
-                ชื่อบริษัท
-                <input
-                  type="text"
-                  name="companyName"
-                  value={form.companyName}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                ประเภทธุรกิจ
-                <input type="text" name="businessType" value={form.businessType} onChange={handleChange} />
-              </label>
-              <label>
-                เลขประจำตัวผู้เสียภาษี
-                <input type="text" name="taxId" value={form.taxId} onChange={handleChange} />
-              </label>
-              <label>
-                ที่อยู่บริษัท
-                <input type="text" name="address" value={form.address} onChange={handleChange} />
-              </label>
-            </>
-          )}
-        </div>
+        {user.role === "user" ? (
+          <div className="profile-card">
+            <h2>การศึกษาและประสบการณ์</h2>
+            <label>
+              ระดับการศึกษา
+              <input type="text" name="education" value={form.education} onChange={handleChange} />
+            </label>
+            <label>
+              ประสบการณ์ทำงาน
+              <input type="text" name="experience" value={form.experience} onChange={handleChange} />
+            </label>
+          </div>
+        ) : user.role === "employer" ? (
+          <div className="profile-card">
+            <h2>ข้อมูลบริษัท</h2>
+            <label>
+              ชื่อบริษัท
+              <input
+                type="text"
+                name="companyName"
+                value={form.companyName}
+                onChange={handleChange}
+                required
+              />
+            </label>
+            <label>
+              ประเภทธุรกิจ
+              <input type="text" name="businessType" value={form.businessType} onChange={handleChange} />
+            </label>
+            <label>
+              เลขประจำตัวผู้เสียภาษี
+              <input type="text" name="taxId" value={form.taxId} onChange={handleChange} />
+            </label>
+            <label>
+              ที่อยู่บริษัท
+              <input type="text" name="address" value={form.address} onChange={handleChange} />
+            </label>
+          </div>
+        ) : user.role === "counsellor" ? (
+          <div className="profile-card">
+            <h2>ข้อมูลวิชาชีพ</h2>
+            <label>
+              ความเชี่ยวชาญ
+              <input
+                type="text"
+                name="specialization"
+                value={form.specialization}
+                onChange={handleChange}
+                placeholder="เช่น จิตแพทย์, นักจิตวิทยา"
+              />
+            </label>
+            <label>
+              สังกัดโรงพยาบาล
+              <input
+                type="text"
+                name="hospital"
+                value={form.hospital}
+                onChange={handleChange}
+                placeholder="เช่น โรงพยาบาลธัญญารักษ์ขอนแก่น"
+              />
+            </label>
+          </div>
+        ) : null}
 
         <div className="profile-form-actions">
           <button type="submit" disabled={saving}>
