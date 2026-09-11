@@ -110,3 +110,27 @@
   background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
   color: var(--color-primary-600);
 }
+
+@media (max-width: 860px) {
+  .job-categories-page {
+    padding: 2rem 1.25rem 3rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .job-categories-page {
+    padding: 1.5rem 1rem 2.5rem;
+  }
+
+  .job-categories-add-form {
+    flex-direction: column;
+  }
+
+  .job-categories-add-form .btn {
+    justify-content: center;
+  }
+
+  .job-categories-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,115 @@
+.lesson-detail-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.lesson-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.lesson-detail-back:hover {
+  color: var(--color-primary-600);
+}
+
+.lesson-detail-card {
+  padding: 2rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.lesson-detail-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  color: var(--color-primary-600);
+  margin-bottom: 1rem;
+}
+
+.lesson-detail-category {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.lesson-detail-card h1 {
+  margin: 0 0 0.85rem;
+  font-size: 1.4rem;
+  color: var(--color-text);
+}
+
+.lesson-detail-body {
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  margin: 0;
+  white-space: pre-line;
+}
+
+.lesson-detail-scenarios {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.lesson-detail-scenarios h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.lesson-detail-scenarios ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lesson-detail-scenarios a {
+  display: block;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-ink-50);
+  color: var(--color-primary-600);
+  font-weight: 500;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.lesson-detail-scenarios a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .lesson-detail-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .lesson-detail-card {
+    padding: 1.25rem;
+  }
+}

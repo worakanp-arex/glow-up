@@ -29,6 +29,8 @@ const userSchema = new mongoose.Schema(
     avatarUrl: { type: String },
     resetPasswordTokenHash: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
+    pdpaConsent: { type: Boolean, required: true },
+    pdpaConsentAt: { type: Date },
     resumeUrl: { type: String },
     certificates: [
       {

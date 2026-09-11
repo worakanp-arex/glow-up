@@ -24,6 +24,10 @@ const PUBLIC_REGISTER_FIELDS = [
   "taxId",
 ];
 
+function isTruthyConsent(value) {
+  return value === true || value === "true";
+}
+
 const COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // matches default JWT_EXPIRES_IN of "7d"
 const OTP_TTL_MS = 10 * 60 * 1000;
 const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
@@ -65,6 +69,10 @@ export async function requestRegistrationOtp(req, res) {
     return res.status(400).json({ message: "role must be 'user' or 'employer'" });
   }
 
+  if (!isTruthyConsent(req.body.pdpaConsent)) {
+    return res.status(400).json({ message: "กรุณายอมรับนโยบายความเป็นส่วนตัวก่อนสมัครสมาชิก" });
+  }
+
   const email = req.body.email.toLowerCase();
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -76,7 +84,7 @@ export async function requestRegistrationOtp(req, res) {
     return res.status(429).json({ message: "กรุณารอสักครู่ก่อนขอรหัส OTP ใหม่อีกครั้ง" });
   }
 
-  const payload = { role };
+  const payload = { role, pdpaConsent: true };
   for (const field of PUBLIC_REGISTER_FIELDS) {
     if (req.body[field] !== undefined) payload[field] = req.body[field];
   }
@@ -141,7 +149,7 @@ export async function verifyRegistrationOtp(req, res) {
     return res.status(409).json({ message: "Email already registered" });
   }
 
-  const user = await User.create(pending.payload);
+  const user = await User.create({ ...pending.payload, pdpaConsentAt: new Date() });
   await PendingRegistration.deleteOne({ _id: pending._id });
 
   const token = signToken(user);
@@ -173,7 +181,7 @@ export async function googleAuth(req, res) {
   if (!googleClient) {
     return res.status(503).json({ message: "ยังไม่ได้ตั้งค่า Google Sign-In บนเซิร์ฟเวอร์นี้" });
   }
-  const { credential, role } = req.body;
+  const { credential, role, pdpaConsent } = req.body;
   if (!credential) {
     return res.status(400).json({ message: "credential is required" });
   }
@@ -204,6 +212,9 @@ export async function googleAuth(req, res) {
       if (!user.avatarUrl && payload.picture) user.avatarUrl = payload.picture;
       await user.save();
     } else {
+      if (!isTruthyConsent(pdpaConsent)) {
+        return res.status(400).json({ message: "กรุณายอมรับนโยบายความเป็นส่วนตัวก่อนสมัครสมาชิก" });
+      }
       const chosenRole = ["user", "employer"].includes(role) ? role : "user";
       user = await User.create({
         name: payload.name || email,
@@ -212,6 +223,8 @@ export async function googleAuth(req, res) {
         role: chosenRole,
         avatarUrl: payload.picture,
         verifiedStatus: "pending",
+        pdpaConsent: true,
+        pdpaConsentAt: new Date(),
       });
     }
   }

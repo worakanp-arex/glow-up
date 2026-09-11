@@ -40,8 +40,8 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
-  const loginWithGoogle = useCallback(async (credential, role) => {
-    const data = await authService.googleAuth({ credential, role });
+  const loginWithGoogle = useCallback(async (credential, role, pdpaConsent) => {
+    const data = await authService.googleAuth({ credential, role, pdpaConsent });
     setAuthToken(data.token);
     setUser(data.user);
     setIsAuthenticated(true);

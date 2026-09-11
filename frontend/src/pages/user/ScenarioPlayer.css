@@ -1,0 +1,138 @@
+.scenario-player-page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.scenario-player-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.scenario-player-back:hover {
+  color: var(--color-primary-600);
+}
+
+.scenario-player-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 2rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.scenario-player-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  color: var(--color-primary-600);
+}
+
+.scenario-player-card h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--color-text);
+}
+
+.scenario-player-prompt {
+  margin: 0;
+  line-height: 1.75;
+  color: var(--color-text-secondary);
+}
+
+.scenario-player-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.scenario-player-option {
+  text-align: left;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.scenario-player-option:hover {
+  border-color: var(--color-primary-300);
+}
+
+.scenario-player-option.active {
+  border-color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+  font-weight: 500;
+}
+
+.scenario-player-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: var(--radius-lg);
+}
+
+.scenario-player-result.passed {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.scenario-player-result.failed {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.scenario-player-result svg {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.scenario-player-result-title {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+}
+
+.scenario-player-result-feedback {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.scenario-player-result-mission {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-primary-600);
+}
+
+@media (max-width: 520px) {
+  .scenario-player-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .scenario-player-card {
+    padding: 1.25rem;
+  }
+}

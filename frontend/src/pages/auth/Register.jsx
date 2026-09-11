@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Camera, ShieldCheck, UserPlus } from "lucide-react";
+import { Camera, ChevronDown, ShieldCheck, UserPlus } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as authService from "../../services/authService.js";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton.jsx";
@@ -22,6 +22,7 @@ const INITIAL_FORM = {
   companyName: "",
   businessType: "",
   taxId: "",
+  pdpaConsent: false,
 };
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -46,6 +47,7 @@ function Register() {
   const [otp, setOtp] = useState("");
   const [devOtp, setDevOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
+  const [consentExpanded, setConsentExpanded] = useState(false);
   const avatarInputRef = useRef(null);
 
   useEffect(() => {
@@ -72,9 +74,13 @@ function Register() {
 
   async function handleGoogleCredential(credential) {
     setError("");
+    if (!form.pdpaConsent) {
+      setError("กรุณายอมรับนโยบายความเป็นส่วนตัวก่อนสมัครสมาชิกด้วย Google");
+      return;
+    }
     setSubmitting(true);
     try {
-      const user = await loginWithGoogle(credential, form.role);
+      const user = await loginWithGoogle(credential, form.role, form.pdpaConsent);
       navigate(DASHBOARD_BY_ROLE[user.role] || "/");
     } catch (err) {
       setError(err.response?.data?.message || "เข้าสู่ระบบด้วย Google ไม่สำเร็จ");
@@ -101,6 +107,10 @@ function Register() {
 
   async function handleDetailsSubmit(e) {
     e.preventDefault();
+    if (!form.pdpaConsent) {
+      setError("กรุณายอมรับนโยบายความเป็นส่วนตัวก่อนสมัครสมาชิก");
+      return;
+    }
     await requestOtp();
   }
 
@@ -310,7 +320,35 @@ function Register() {
           </>
         )}
 
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
+        <div className="register-consent">
+          <label className="register-consent-checkbox">
+            <input
+              type="checkbox"
+              checked={form.pdpaConsent}
+              onChange={(e) => setForm((prev) => ({ ...prev, pdpaConsent: e.target.checked }))}
+              required
+            />
+            <span>
+              ฉันยอมรับ<button
+                type="button"
+                className="register-consent-toggle"
+                onClick={() => setConsentExpanded((v) => !v)}
+              >
+                นโยบายความเป็นส่วนตัวและการเก็บข้อมูล (PDPA)
+                <ChevronDown size={14} className={consentExpanded ? "open" : ""} />
+              </button>
+            </span>
+          </label>
+          {consentExpanded && (
+            <div className="register-consent-details">
+              <p>glow-up เก็บข้อมูลเท่าที่จำเป็นสำหรับการให้บริการเท่านั้น ได้แก่ ข้อมูลบัญชีผู้ใช้ (ชื่อ อีเมล เบอร์โทร) และข้อมูลที่ท่านกรอกเพิ่มเติมตามบทบาทการใช้งาน เช่น ข้อมูลการสมัครงานหรือข้อมูลบริษัท</p>
+              <p>ข้อมูลด้านสุขภาพและการฟื้นฟู (เช่น บันทึกอารมณ์ ระดับความเสี่ยง) จะถูกเก็บแยกจากข้อมูลทั่วไป เข้าถึงได้เฉพาะตัวท่านและบุคลากรที่เกี่ยวข้อง และจะไม่เปิดเผยต่อบุคคลที่สาม รวมถึงนายจ้าง โดยไม่ได้รับความยินยอมจากท่านก่อน</p>
+              <p>ท่านสามารถขอเข้าถึง แก้ไข หรือขอให้ลบข้อมูลของท่านได้ตลอดเวลาผ่านหน้าโปรไฟล์ หรือติดต่อผู้ดูแลระบบ</p>
+            </div>
+          )}
+        </div>
+
+        <button type="submit" className="btn btn-primary" disabled={submitting || !form.pdpaConsent}>
           {submitting ? "กำลังส่งรหัส OTP..." : "ขอรหัส OTP เพื่อสมัครสมาชิก"}
         </button>
 

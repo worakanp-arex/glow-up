@@ -156,3 +156,19 @@
   color: var(--color-danger);
   font-size: 0.85rem;
 }
+
+@media (max-width: 520px) {
+  .course-detail-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .course-detail-card {
+    padding: 1.25rem;
+  }
+
+  .course-detail-status-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

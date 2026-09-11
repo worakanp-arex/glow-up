@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Paperclip, Users } from "lucide-react";
+import { ArrowLeft, Paperclip, ShieldAlert, Users } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as applicationService from "../../services/applicationService.js";
 import "./Applicants.css";
@@ -13,16 +13,38 @@ function Applicants() {
   const { jobId } = useParams();
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
     applicationService
       .getJobApplicants(jobId)
       .then(setApplicants)
+      .catch((err) => {
+        if (err.response?.status === 403) {
+          setBlocked(true);
+        }
+      })
       .finally(() => setLoading(false));
   }, [jobId]);
 
   if (loading) {
     return <div className="applicants-page">กำลังโหลด...</div>;
+  }
+
+  if (blocked) {
+    return (
+      <div className="applicants-page">
+        <Link to="/employer/jobs" className="applicants-back">
+          <ArrowLeft size={16} />
+          กลับไปประกาศงานของฉัน
+        </Link>
+        <div className="applicants-verification-pending">
+          <ShieldAlert size={28} />
+          <p>บัญชีนายจ้างของคุณยังไม่ได้รับการยืนยันตัวตน</p>
+          <p>กรุณารอการตรวจสอบจากผู้ดูแลระบบก่อนจึงจะดูรายชื่อผู้สมัครงานได้</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -43,7 +65,13 @@ function Applicants() {
         {applicants.map((app) => (
           <li key={app._id}>
             <Link to={`/employer/applications/${app._id}`} className="applicants-info">
-              <span className="applicants-avatar">{initials(app.user.name)}</span>
+              <span className="applicants-avatar">
+                {app.user.avatarUrl ? (
+                  <img src={app.user.avatarUrl} alt="" />
+                ) : (
+                  initials(app.user.name)
+                )}
+              </span>
               <span className="applicants-text">
                 <span className="applicants-name">{app.user.name}</span>
                 <span className="applicants-verified">

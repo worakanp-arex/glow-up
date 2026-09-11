@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, ExternalLink, GraduationCap, Heart, Search } from "lucide-react";
+import { ArrowRight, BookOpen, ExternalLink, Heart, MessageCircleWarning, Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as courseService from "../../services/courseService.js";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
@@ -58,10 +58,21 @@ function Courses() {
   return (
     <div className="courses-page">
       <h1>
-        <GraduationCap size={22} />
+       
         <span>คอร์สเรียน</span>
       </h1>
       <p className="courses-subtitle">คอร์สเรียนจากบุคลากรทางการแพทย์ พัฒนาทักษะใหม่ๆ เพื่อเปิดโอกาสในการทำงานให้กว้างขึ้น</p>
+
+      <Link to="/learning" className="courses-learning-callout">
+        <span className="courses-learning-callout-icon">
+          <MessageCircleWarning size={20} />
+        </span>
+        <span className="courses-learning-callout-text">
+          <span className="courses-learning-callout-title">ฝึกทักษะการปฏิเสธ</span>
+          <span className="courses-learning-callout-desc">บทเรียนสั้นและสถานการณ์จำลอง ฝึกวิธีปฏิเสธในสถานการณ์เสี่ยง</span>
+        </span>
+        <ArrowRight size={18} />
+      </Link>
 
       <div className="courses-filters">
         <div className="courses-search">

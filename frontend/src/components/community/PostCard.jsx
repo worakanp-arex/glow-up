@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Bookmark, Heart, Lock, MessageSquare, Pencil, Trash2 } from "lucide-react";
+import { Bookmark, Flag, Heart, Lock, MessageSquare, Pencil, Trash2 } from "lucide-react";
+import * as postService from "../../services/postService.js";
 import "./PostCard.css";
 
 function initials(name) {
@@ -23,6 +24,7 @@ function PostCard({
   const [tagsInput, setTagsInput] = useState((post.tags || []).join(", "));
   const [commentsEnabled, setCommentsEnabled] = useState(post.commentsEnabled !== false);
   const [saving, setSaving] = useState(false);
+  const [flagged, setFlagged] = useState(Boolean(post.needsReview));
 
   const isOwner = post.user?._id === currentUserId;
   const isStaffAuthor = post.user?.role === "counsellor" || post.user?.role === "admin";
@@ -53,6 +55,12 @@ function PostCard({
   async function handleDelete() {
     if (!window.confirm("ลบโพสต์นี้?")) return;
     await onDeleted(post._id);
+  }
+
+  async function handleFlag() {
+    if (flagged || !window.confirm("รายงานเนื้อหาโพสต์นี้ให้เจ้าหน้าที่ตรวจสอบ?")) return;
+    await postService.flagPost(post._id);
+    setFlagged(true);
   }
 
   return (
@@ -187,6 +195,19 @@ function PostCard({
             aria-label={post.savedByMe ? "เลิกบันทึกโพสต์" : "บันทึกโพสต์"}
           >
             <Bookmark size={16} fill={post.savedByMe ? "currentColor" : "none"} />
+          </button>
+        )}
+
+        {!isOwner && (
+          <button
+            type="button"
+            className={`post-card-flag-button${flagged ? " flagged" : ""}`}
+            onClick={handleFlag}
+            disabled={flagged}
+            aria-label={flagged ? "รายงานแล้ว" : "รายงานเนื้อหา"}
+            title={flagged ? "รายงานแล้ว รอเจ้าหน้าที่ตรวจสอบ" : "รายงานเนื้อหา"}
+          >
+            <Flag size={15} fill={flagged ? "currentColor" : "none"} />
           </button>
         )}
       </div>

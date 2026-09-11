@@ -70,6 +70,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
 }
 
 .profile-card h2 {
@@ -466,6 +467,94 @@
 .profile-cert-add button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.profile-family-hint {
+  margin: 0 0 0.9rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.profile-family-invite-form {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.profile-family-invite-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.profile-family-invite-form button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.8rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-500);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.profile-family-invite-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.profile-family-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.profile-family-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  background-color: var(--color-ink-50);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.profile-family-status {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.profile-family-list li button {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  color: var(--color-danger);
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+@media (max-width: 520px) {
+  .profile-family-invite-form {
+    flex-direction: column;
+  }
 }
 
 /* Form row (general info / education-experience-or-company) */

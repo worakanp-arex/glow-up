@@ -78,3 +78,17 @@
   flex-shrink: 0;
   color: var(--color-primary-600);
 }
+
+@media (max-width: 520px) {
+  .staff-profile-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .staff-profile-header {
+    flex-wrap: wrap;
+  }
+
+  .staff-profile-details {
+    padding: 1rem 1.1rem;
+  }
+}

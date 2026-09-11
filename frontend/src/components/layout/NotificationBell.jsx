@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, Bell, Briefcase, Newspaper, Sparkles } from "lucide-react";
+import { Activity, AlertTriangle, Award, Bell, Briefcase, Heart, Newspaper, Sparkles } from "lucide-react";
 import * as notificationService from "../../services/notificationService.js";
 import { onNotification } from "../../services/socket.js";
 import "./NotificationBell.css";
@@ -11,6 +11,9 @@ const TYPE_ICONS = {
   reminder: Activity,
   news: Newspaper,
   system: Sparkles,
+  reward: Award,
+  milestone: Heart,
+  riskAlert: AlertTriangle,
 };
 
 function NotificationBell() {

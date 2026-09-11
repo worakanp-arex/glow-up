@@ -4,13 +4,16 @@ import { BookOpen, HeartHandshake, Search, User, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import DailyCheckin from "../../components/user/DailyCheckin.jsx";
 import StreakWidget from "../../components/user/StreakWidget.jsx";
+import WeeklyCheckInWidget from "../../components/user/WeeklyCheckInWidget.jsx";
 import ApplicationStatusCard from "../../components/user/ApplicationStatusCard.jsx";
 import MyCoursesWidget from "../../components/user/MyCoursesWidget.jsx";
 import CounsellingStatusWidget from "../../components/user/CounsellingStatusWidget.jsx";
 import CommunityPreviewWidget from "../../components/user/CommunityPreviewWidget.jsx";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import NewsSection from "../../components/common/NewsSection.jsx";
+import FamilyDashboard from "../family/FamilyDashboard.jsx";
 import * as emotionService from "../../services/emotionService.js";
+import * as familyService from "../../services/familyService.js";
 import "./Dashboard.css";
 
 const QUICK_LINKS = [
@@ -25,6 +28,7 @@ function Dashboard() {
   const { user } = useAuth();
   const [streak, setStreak] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [familyLinks, setFamilyLinks] = useState(null);
 
   useEffect(() => {
     emotionService
@@ -34,12 +38,33 @@ function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    familyService
+      .getMyFamilyLinks()
+      .then(setFamilyLinks)
+      .catch(() => setFamilyLinks([]));
+  }, []);
+
+  // A family member accepts an invite through their own regular account, so
+  // the same "user" role can view either dashboard depending on whether
+  // they're actively linked as someone's family follower. Wait for the check
+  // to resolve before rendering either dashboard, to avoid a flash of the
+  // wrong one.
+  if (familyLinks === null) {
+    return <div className="dashboard-page" />;
+  }
+  if (familyLinks.length > 0) {
+    return <FamilyDashboard links={familyLinks} />;
+  }
+
   return (
     <div className="dashboard-page">
       <div className="dashboard-greeting">
         <h1>สวัสดี, {user.name}</h1>
         <StatusBadge status={user.verifiedStatus} />
       </div>
+
+      <WeeklyCheckInWidget />
 
       {!loading && (
         <DailyCheckin loggedToday={streak?.loggedToday} onLogged={setStreak} />

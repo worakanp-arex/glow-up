@@ -37,3 +37,19 @@
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.9rem;
 }
+
+@media (max-width: 860px) {
+  .assessments-page {
+    padding: 2rem 1.25rem 3rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .assessments-page {
+    padding: 1.5rem 1rem 2.5rem;
+  }
+
+  .assessments-stat-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+}

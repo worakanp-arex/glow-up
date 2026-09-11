@@ -15,3 +15,18 @@ export function shiftDateKey(dateKey, dayOffset) {
   d.setUTCDate(d.getUTCDate() + dayOffset);
   return d.toISOString().slice(0, 10);
 }
+
+// ISO-8601 week key (e.g. "2026-W37") for the given date's Asia/Bangkok
+// calendar day — used to dedupe one weekly check-in per user per week.
+export function toIsoWeekKey(date) {
+  const [year, month, day] = toBangkokDateKey(date).split("-").map(Number);
+  const d = new Date(Date.UTC(year, month - 1, day));
+  // Shift to the Thursday of this ISO week, then the ISO year is that
+  // Thursday's year (standard ISO-8601 week-numbering rule).
+  const dayNum = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - dayNum + 3);
+  const isoYear = d.getUTCFullYear();
+  const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+  const weekNum = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+  return `${isoYear}-W${String(weekNum).padStart(2, "0")}`;
+}

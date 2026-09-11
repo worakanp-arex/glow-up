@@ -64,3 +64,20 @@
   border-color: var(--color-primary-200);
   background-color: var(--color-primary-50);
 }
+
+@media (max-width: 860px) {
+  .dashboard-page {
+    padding: 2rem 1.25rem 3rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-page {
+    padding: 1.5rem 1rem 2.5rem;
+    gap: 1.5rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle2, ExternalLink, MapPin, Paperclip, Send, Wallet } from "lucide-react";
+import { CheckCircle2, ExternalLink, MapPin, Paperclip, Send, ShieldCheck, Wallet } from "lucide-react";
 import * as applicationService from "../../services/applicationService.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import StatusBadge from "../common/StatusBadge.jsx";
@@ -86,7 +86,18 @@ function JobPreview({ job }) {
 
       <div className="job-preview-body">
         <h1 className="job-preview-title">{job.title}</h1>
-        <p className="job-preview-company">{job.employer?.companyName || job.employer?.name}</p>
+        <p className="job-preview-company">
+          <span>{job.employer?.companyName || job.employer?.name}</span>
+          {job.employer?.businessType && (
+            <span className="job-preview-business-type">{job.employer.businessType}</span>
+          )}
+          {job.employer?.verifiedStatus === "verified" && (
+            <span className="job-preview-verified-badge">
+              <ShieldCheck size={13} />
+              นายจ้างยืนยันตัวตนแล้ว
+            </span>
+          )}
+        </p>
 
         <div className="job-preview-meta">
           {job.category?.name && <span className="job-preview-category">{job.category.name}</span>}

@@ -291,3 +291,25 @@ a.post-card-comments-link:hover {
 .post-card-save-button.saved {
   color: var(--color-primary-600);
 }
+
+.post-card-flag-button {
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.post-card-flag-button:hover:not(:disabled) {
+  transform: scale(1.06);
+  color: var(--color-warning);
+}
+
+.post-card-flag-button.flagged,
+.post-card-flag-button:disabled {
+  color: var(--color-warning);
+  cursor: default;
+}

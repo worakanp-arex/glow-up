@@ -81,3 +81,23 @@
   color: var(--color-text-muted);
   font-size: 0.9rem;
 }
+
+@media (max-width: 860px) {
+  .dashboard-page {
+    padding: 2rem 1.25rem 3rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-page {
+    padding: 1.5rem 1rem 2.5rem;
+  }
+
+  .dashboard-stat-group {
+    padding: 1.1rem;
+  }
+
+  .dashboard-stat-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}

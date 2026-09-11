@@ -27,6 +27,8 @@ async function seedAdmin() {
       password,
       role: "admin",
       verifiedStatus: "verified",
+      pdpaConsent: true,
+      pdpaConsentAt: new Date(),
     });
     console.log(`Admin created: ${admin.email}`);
   }

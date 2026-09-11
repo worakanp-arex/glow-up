@@ -66,3 +66,110 @@
   height: 50px;
   width: auto;
 }
+
+.navbar-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-right: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.navbar-menu-toggle:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.navbar-mobile-backdrop {
+  display: none;
+}
+
+.navbar-mobile-panel {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .navbar {
+    padding: 0.6rem 1rem;
+  }
+
+  .navbar-menu-toggle {
+    display: flex;
+  }
+
+  .navbar-link span {
+    display: none;
+  }
+
+  .navbar-link {
+    padding: 0.5rem;
+  }
+
+  .navbar-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    border: none;
+    padding: 0;
+    background-color: rgba(15, 23, 42, 0.4);
+    cursor: default;
+  }
+
+  .navbar-mobile-panel {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 46;
+    width: min(280px, 80vw);
+    padding: 4.5rem 0.75rem 1.5rem;
+    gap: 0.25rem;
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+    overflow-y: auto;
+    animation: navbar-mobile-panel-slide-in 0.2s ease;
+  }
+
+  .navbar-mobile-link {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  .navbar-mobile-link:hover {
+    background-color: var(--color-surface-hover);
+    color: var(--color-text);
+  }
+
+  .navbar-mobile-link.active {
+    background-color: var(--color-primary-50);
+    color: var(--color-primary-700);
+  }
+}
+
+@keyframes navbar-mobile-panel-slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-mobile-panel {
+    animation: none;
+  }
+}

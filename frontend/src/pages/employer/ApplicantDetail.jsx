@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Briefcase, Mail, Paperclip, Phone, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  Award,
+  Briefcase,
+  FileText,
+  GraduationCap,
+  Mail,
+  Paperclip,
+  Phone,
+  ShieldAlert,
+  Sparkles,
+} from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as applicationService from "../../services/applicationService.js";
 import "./ApplicantDetail.css";
@@ -27,15 +38,23 @@ function ApplicantDetail() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
-    applicationService.getApplication(id).then((data) => {
-      setApplication(data);
-      setStatus(data.status);
-      setEmployerFeedback(data.employerFeedback || "");
-      setRejectionReason(data.rejectionReason || "");
-      setLoading(false);
-    });
+    applicationService
+      .getApplication(id)
+      .then((data) => {
+        setApplication(data);
+        setStatus(data.status);
+        setEmployerFeedback(data.employerFeedback || "");
+        setRejectionReason(data.rejectionReason || "");
+      })
+      .catch((err) => {
+        if (err.response?.status === 403) {
+          setBlocked(true);
+        }
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
   async function handleSubmit(e) {
@@ -59,6 +78,21 @@ function ApplicantDetail() {
   if (loading) {
     return <div className="applicant-detail-page">กำลังโหลด...</div>;
   }
+  if (blocked) {
+    return (
+      <div className="applicant-detail-page">
+        <button type="button" className="applicant-detail-back" onClick={() => navigate(-1)}>
+          <ArrowLeft size={16} />
+          <span>กลับ</span>
+        </button>
+        <div className="applicant-detail-verification-pending">
+          <ShieldAlert size={28} />
+          <p>บัญชีนายจ้างของคุณยังไม่ได้รับการยืนยันตัวตน</p>
+          <p>กรุณารอการตรวจสอบจากผู้ดูแลระบบก่อนจึงจะดูรายละเอียดผู้สมัครงานนี้ได้</p>
+        </div>
+      </div>
+    );
+  }
   if (!application) {
     return <div className="applicant-detail-page">ไม่พบใบสมัครนี้</div>;
   }
@@ -73,7 +107,13 @@ function ApplicantDetail() {
       <div className="applicant-detail-banner">
         <div className="applicant-detail-banner-top" />
         <div className="applicant-detail-banner-body">
-          <span className="applicant-detail-avatar">{initials(application.user.name)}</span>
+          <span className="applicant-detail-avatar">
+            {application.user.avatarUrl ? (
+              <img src={application.user.avatarUrl} alt="" />
+            ) : (
+              initials(application.user.name)
+            )}
+          </span>
           <div className="applicant-detail-banner-text">
             <h1>{application.user.name}</h1>
             <p className="applicant-detail-job">
@@ -104,6 +144,49 @@ function ApplicantDetail() {
           คะแนนจับคู่ AI: จะเปิดใช้งานในเฟสถัดไป
         </p>
       </div>
+
+      {(application.user.education || application.user.experience) && (
+        <div className="applicant-detail-info applicant-detail-profile">
+          {application.user.education && (
+            <p>
+              <GraduationCap size={14} />
+              <span>{application.user.education}</span>
+            </p>
+          )}
+          {application.user.experience && (
+            <p>
+              <Briefcase size={14} />
+              <span>{application.user.experience}</span>
+            </p>
+          )}
+        </div>
+      )}
+
+      {(application.user.resumeUrl || application.user.certificates?.length > 0) && (
+        <div className="applicant-detail-info applicant-detail-attachments">
+          <p className="applicant-detail-attachments-title">
+            <FileText size={16} />
+            <span>เรซูเม่และใบรับรอง</span>
+          </p>
+          <ul>
+            {application.user.resumeUrl && (
+              <li>
+                <a href={application.user.resumeUrl} target="_blank" rel="noreferrer">
+                  เรซูเม่
+                </a>
+              </li>
+            )}
+            {application.user.certificates?.map((cert, i) => (
+              <li key={i}>
+                <a href={cert.url} target="_blank" rel="noreferrer">
+                  <Award size={13} />
+                  {cert.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {application.attachments?.length > 0 && (
         <div className="applicant-detail-info applicant-detail-attachments">

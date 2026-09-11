@@ -61,6 +61,13 @@
   font-size: 1.15rem;
 }
 
+.applicant-detail-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
 .applicant-detail-banner-text {
   flex: 1;
   min-width: 160px;
@@ -126,9 +133,38 @@
 }
 
 .applicant-detail-attachments a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.85rem;
   color: var(--color-primary-600);
   font-weight: 500;
+}
+
+.applicant-detail-profile p {
+  color: var(--color-text-secondary);
+}
+
+.applicant-detail-verification-pending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.applicant-detail-verification-pending svg {
+  color: var(--color-warning);
+}
+
+.applicant-detail-verification-pending p:first-of-type {
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .applicant-detail-form {

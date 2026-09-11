@@ -15,7 +15,7 @@ const EMPLOYER_EDITABLE_FIELDS = [
   "attachmentRequests",
 ];
 
-const EMPLOYER_PUBLIC_FIELDS = "name companyName avatarUrl";
+const EMPLOYER_PUBLIC_FIELDS = "name companyName avatarUrl businessType";
 
 async function attachSkills(job) {
   const jobSkills = await JobSkill.find({ job: job._id }).populate("skill");

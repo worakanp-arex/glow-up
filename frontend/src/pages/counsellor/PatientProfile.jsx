@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Award, Building2, CalendarCheck, Flame, ShieldAlert } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Award, Building2, CalendarCheck, ClipboardList, Flame, ShieldAlert } from "lucide-react";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
 import * as counsellingService from "../../services/counsellingService.js";
+import * as weeklyCheckInService from "../../services/weeklyCheckInService.js";
 import "./PatientProfile.css";
+
+const MOOD_TREND_LABELS = { improving: "ดีขึ้น", stable: "เหมือนเดิม", worsening: "แย่ลง" };
 
 const RISK_LABELS = { low: "ต่ำ", medium: "ปานกลาง", high: "สูง" };
 const RISK_CLASS = {
@@ -27,6 +30,7 @@ function PatientProfile() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [weeklyCheckIns, setWeeklyCheckIns] = useState([]);
 
   useEffect(() => {
     counsellingService
@@ -36,11 +40,16 @@ function PatientProfile() {
       .finally(() => setLoading(false));
   }, [userId]);
 
+  useEffect(() => {
+    weeklyCheckInService.getUserWeeklyCheckIns(userId).then(setWeeklyCheckIns).catch(() => setWeeklyCheckIns([]));
+  }, [userId]);
+
   if (loading) return <div className="patient-profile-page">กำลังโหลด...</div>;
   if (error || !data) return <div className="patient-profile-page">{error || "ไม่พบข้อมูล"}</div>;
 
   const { user, rehabRecords, riskAssessments, emotionStreak, emotionLogs } = data;
   const latestRisk = riskAssessments[0];
+  const latestWeeklyCheckIn = weeklyCheckIns[0];
 
   return (
     <div className="patient-profile-page">
@@ -48,6 +57,16 @@ function PatientProfile() {
         <ArrowLeft size={16} />
         กลับไปคำขอปรึกษา
       </Link>
+
+      {latestWeeklyCheckIn?.selfHarmRiskFlag && (
+        <div className="patient-profile-risk-alert">
+          <AlertTriangle size={20} />
+          <span>
+            ผู้ใช้รายงานความเสี่ยงทำร้ายตนเองในแบบประเมินรายสัปดาห์ล่าสุด ({latestWeeklyCheckIn.isoWeekKey}) —
+            กรุณาติดต่อกลับโดยเร็ว
+          </span>
+        </div>
+      )}
 
       <div className="patient-profile-header">
         <span className="patient-profile-avatar">
@@ -123,6 +142,32 @@ function PatientProfile() {
               <p className="patient-profile-risk-history">ประเมินไปแล้วทั้งหมด {riskAssessments.length} ครั้ง</p>
             )}
           </>
+        )}
+      </section>
+
+      <section className="patient-profile-card">
+        <h2>
+          <ClipboardList size={16} />
+          <span>แบบประเมินสภาพจิตใจรายสัปดาห์</span>
+        </h2>
+        {weeklyCheckIns.length === 0 ? (
+          <p className="patient-profile-empty">ยังไม่มีการทำแบบประเมินรายสัปดาห์</p>
+        ) : (
+          <ul className="patient-profile-weekly-list">
+            {weeklyCheckIns.map((entry) => (
+              <li key={entry._id} className={entry.selfHarmRiskFlag ? "risk" : ""}>
+                <span className="patient-profile-weekly-week">{entry.isoWeekKey}</span>
+                <span>ความเครียด {entry.stressLevel}/5</span>
+                <span>{MOOD_TREND_LABELS[entry.moodTrend]}</span>
+                {entry.selfHarmRiskFlag && (
+                  <span className="patient-profile-weekly-risk-tag">
+                    <AlertTriangle size={13} />
+                    เสี่ยงทำร้ายตนเอง
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 

@@ -18,3 +18,9 @@
 .post-detail-back:hover {
   color: var(--color-primary-600);
 }
+
+@media (max-width: 520px) {
+  .post-detail-page {
+    padding: 1.5rem 1rem;
+  }
+}

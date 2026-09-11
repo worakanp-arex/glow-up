@@ -110,3 +110,13 @@
   color: var(--color-text-muted);
   text-align: center;
 }
+
+@media (max-width: 520px) {
+  .post-job-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .post-job-form {
+    padding: 1.25rem;
+  }
+}

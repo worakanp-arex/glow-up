@@ -47,3 +47,15 @@ export function deleteComment(postId, commentId) {
 export function likePost(postId) {
   return api.put(`/posts/${postId}/like`).then((res) => res.data);
 }
+
+export function flagPost(postId) {
+  return api.put(`/posts/${postId}/flag`).then((res) => res.data);
+}
+
+export function unflagPost(postId) {
+  return api.put(`/posts/${postId}/unflag`).then((res) => res.data);
+}
+
+export function getFlaggedPosts() {
+  return api.get("/posts/flagged").then((res) => res.data);
+}

@@ -87,7 +87,6 @@ function Counselling() {
   return (
     <div className="counselling-page">
       <h1>
-        <HeartHandshake size={22} />
         <span>ขอรับคำปรึกษา</span>
       </h1>
       <p className="counselling-intro">

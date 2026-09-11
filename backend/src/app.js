@@ -18,6 +18,12 @@ import courseRoutes from "./routes/courseRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import counsellingRoutes from "./routes/counsellingRoutes.js";
 import newsRoutes from "./routes/newsRoutes.js";
+import missionRoutes from "./routes/missionRoutes.js";
+import rewardRoutes from "./routes/rewardRoutes.js";
+import familyRoutes from "./routes/familyRoutes.js";
+import weeklyCheckInRoutes from "./routes/weeklyCheckInRoutes.js";
+import microLessonRoutes from "./routes/microLessonRoutes.js";
+import scenarioRoutes from "./routes/scenarioRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -47,6 +53,12 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/counselling", counsellingRoutes);
 app.use("/api/news", newsRoutes);
+app.use("/api/missions", missionRoutes);
+app.use("/api/rewards", rewardRoutes);
+app.use("/api/family", familyRoutes);
+app.use("/api/weekly-checkins", weeklyCheckInRoutes);
+app.use("/api/micro-lessons", microLessonRoutes);
+app.use("/api/scenarios", scenarioRoutes);
 
 app.use(errorHandler);
 

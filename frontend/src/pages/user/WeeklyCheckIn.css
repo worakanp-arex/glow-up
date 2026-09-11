@@ -1,0 +1,172 @@
+.weekly-checkin-page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.weekly-checkin-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+.weekly-checkin-back:hover {
+  color: var(--color-primary-600);
+}
+
+.weekly-checkin-page h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.4rem;
+  font-size: 1.4rem;
+  color: var(--color-text);
+}
+
+.weekly-checkin-subtitle {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.weekly-checkin-done {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1.25rem 1.5rem;
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+  border-radius: var(--radius-lg);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.weekly-checkin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.weekly-checkin-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.weekly-checkin-form select,
+.weekly-checkin-form textarea {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.weekly-checkin-form textarea {
+  resize: vertical;
+}
+
+.weekly-checkin-stress-picker {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.weekly-checkin-stress-btn {
+  flex: 1;
+  padding: 0.6rem 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.weekly-checkin-stress-btn.active {
+  background-color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  color: #ffffff;
+}
+
+.weekly-checkin-risk-flag {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+}
+
+.weekly-checkin-risk-note {
+  margin: -0.5rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.weekly-checkin-history {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.weekly-checkin-history h2 {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.weekly-checkin-history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.weekly-checkin-history li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-ink-50);
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+
+.weekly-checkin-history-week {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+@media (max-width: 520px) {
+  .weekly-checkin-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .weekly-checkin-form {
+    padding: 1.25rem;
+  }
+}

@@ -253,6 +253,18 @@ function Users() {
                     <p className="users-meta">
                       {user.email} · {ROLE_LABELS[user.role]}
                     </p>
+                    {user.role === "employer" && (user.companyName || user.taxId || user.businessType) && (
+                      <p className="users-verification-detail">
+                        {[user.companyName, user.businessType, user.taxId && `เลขผู้เสียภาษี: ${user.taxId}`]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    )}
+                    {user.role === "counsellor" && (user.specialization || user.hospital) && (
+                      <p className="users-verification-detail">
+                        {[user.specialization, user.hospital].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
                   </div>
                   <StatusBadge status={user.verifiedStatus} />
                   <div className="users-actions">

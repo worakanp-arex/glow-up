@@ -1,14 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Award, BookOpen, Camera, FileText, Mail, MapPin, Phone, Plus, Sparkles, Trash2, User, X } from "lucide-react";
+import {
+  Award,
+  BookOpen,
+  Camera,
+  FileText,
+  Heart,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  Sparkles,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import * as userService from "../services/userService.js";
 import * as skillService from "../services/skillService.js";
 import * as emotionService from "../services/emotionService.js";
 import * as courseService from "../services/courseService.js";
+import * as familyService from "../services/familyService.js";
 import StatusBadge from "../components/common/StatusBadge.jsx";
 import StreakWidget from "../components/user/StreakWidget.jsx";
 import "./Profile.css";
+
+const FAMILY_STATUS_LABELS = { pending: "รอการตอบรับ", active: "ติดตามอยู่", revoked: "ยกเลิกแล้ว" };
 
 const ROLE_LABELS = {
   user: "ผู้หางาน",
@@ -61,6 +78,11 @@ function Profile() {
   const [streak, setStreak] = useState(null);
   const [myCourses, setMyCourses] = useState([]);
 
+  const [familyLinks, setFamilyLinks] = useState([]);
+  const [familyEmail, setFamilyEmail] = useState("");
+  const [familyInviting, setFamilyInviting] = useState(false);
+  const [familyError, setFamilyError] = useState("");
+
   useEffect(() => {
     if (user.role !== "user") return;
     Promise.all([skillService.getSkills(), skillService.getMySkills()])
@@ -80,6 +102,34 @@ function Profile() {
     if (user.role !== "user") return;
     courseService.getMyCourses().then(setMyCourses).catch(() => setMyCourses([]));
   }, [user.role]);
+
+  useEffect(() => {
+    if (user.role !== "user") return;
+    familyService.getMyInvitedFamily().then(setFamilyLinks).catch(() => setFamilyLinks([]));
+  }, [user.role]);
+
+  async function handleInviteFamily(e) {
+    e.preventDefault();
+    const email = familyEmail.trim();
+    if (!email) return;
+    setFamilyInviting(true);
+    setFamilyError("");
+    try {
+      await familyService.inviteFamilyMember(email);
+      setFamilyEmail("");
+      const links = await familyService.getMyInvitedFamily();
+      setFamilyLinks(links);
+    } catch (err) {
+      setFamilyError(err.response?.data?.message || "ส่งคำเชิญไม่สำเร็จ");
+    } finally {
+      setFamilyInviting(false);
+    }
+  }
+
+  async function handleRevokeFamily(id) {
+    const updated = await familyService.revokeFamilyLink(id);
+    setFamilyLinks((prev) => prev.map((link) => (link._id === id ? updated : link)));
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -447,6 +497,50 @@ function Profile() {
               ))}
             </ul>
           )}
+        </div>
+      )}
+
+      {user.role === "user" && (
+        <div className="profile-card profile-family-card">
+          <h2>
+            <Heart size={18} />
+            <span>ครอบครัว/ผู้ดูแลที่ติดตามความคืบหน้า</span>
+          </h2>
+          <p className="profile-family-hint">
+            เชิญสมาชิกครอบครัว 1 คนเพื่อติดตามความคืบหน้าแบบจำกัดสิทธิ์ — เห็นแค่ระดับความสำเร็จ
+            ไม่เห็นข้อมูลสุขภาพโดยละเอียด
+          </p>
+
+          {familyError && <p className="profile-error">{familyError}</p>}
+
+          <form className="profile-family-invite-form" onSubmit={handleInviteFamily}>
+            <input
+              type="email"
+              placeholder="อีเมลของสมาชิกครอบครัว"
+              value={familyEmail}
+              onChange={(e) => setFamilyEmail(e.target.value)}
+              required
+            />
+            <button type="submit" disabled={familyInviting}>
+              <Plus size={14} />
+              <span>{familyInviting ? "กำลังส่ง..." : "เชิญ"}</span>
+            </button>
+          </form>
+
+          <ul className="profile-family-list">
+            {familyLinks.map((link) => (
+              <li key={link._id}>
+                <span>{link.inviteEmail}</span>
+                <span className="profile-family-status">{FAMILY_STATUS_LABELS[link.status]}</span>
+                {link.status !== "revoked" && (
+                  <button type="button" onClick={() => handleRevokeFamily(link._id)} aria-label="ยกเลิกการติดตาม">
+                    <X size={12} />
+                  </button>
+                )}
+              </li>
+            ))}
+            {familyLinks.length === 0 && <p className="profile-empty-note">ยังไม่มีสมาชิกครอบครัวที่เชิญ</p>}
+          </ul>
         </div>
       )}
 

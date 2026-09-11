@@ -1,3 +1,12 @@
+/*
+ * Breakpoint convention (documentation only — CSS custom properties can't be
+ * used inside @media queries, so this isn't enforced by tooling, just by
+ * convention). Use these two values in every page's @media rules:
+ *   @media (max-width: 860px) { ... }  tablet / nav collapse
+ *   @media (max-width: 520px) { ... }  small phone — tighter padding/type,
+ *                                       full-width buttons, stacked cards
+ */
+
 :root {
   /* Typography */
   --font-sans: "Prompt", system-ui, -apple-system, "Segoe UI", sans-serif;

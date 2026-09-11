@@ -1,0 +1,52 @@
+.family-accept-page {
+  max-width: 480px;
+  margin: 3rem auto;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.family-accept-page h1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+  color: var(--color-text);
+}
+
+.family-accept-page p {
+  margin: 0 0 1.25rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+.family-accept-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.family-accept-error {
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+.family-accept-success {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+@media (max-width: 520px) {
+  .family-accept-page {
+    margin: 1.5rem 1rem;
+    padding: 2rem 1.25rem;
+  }
+}

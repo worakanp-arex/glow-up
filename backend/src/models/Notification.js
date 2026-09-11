@@ -4,7 +4,20 @@ const notificationSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     message: { type: String },
-    type: { type: String, enum: ["job", "craving", "system", "reminder", "news", "counselling"] },
+    type: {
+      type: String,
+      enum: [
+        "job",
+        "craving",
+        "system",
+        "reminder",
+        "news",
+        "counselling",
+        "reward",
+        "milestone",
+        "riskAlert",
+      ],
+    },
     status: { type: String, enum: ["unread", "read"], default: "unread" },
     // where clicking the notification should take the user (optional)
     link: { type: String },

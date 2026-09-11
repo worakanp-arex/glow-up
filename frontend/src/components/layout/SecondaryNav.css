@@ -32,3 +32,9 @@
   color: #ffffff;
   border-bottom-color: #ffffff;
 }
+
+@media (max-width: 860px) {
+  .secondary-nav {
+    display: none;
+  }
+}

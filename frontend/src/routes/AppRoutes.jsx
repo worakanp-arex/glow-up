@@ -14,6 +14,11 @@ import JobDetail from "../pages/user/JobDetail.jsx";
 import MyApplications from "../pages/user/MyApplications.jsx";
 import CravingTracker from "../pages/user/CravingTracker.jsx";
 import Streak from "../pages/user/Streak.jsx";
+import WeeklyCheckIn from "../pages/user/WeeklyCheckIn.jsx";
+import MicroLessons from "../pages/user/MicroLessons.jsx";
+import LessonDetail from "../pages/user/LessonDetail.jsx";
+import ScenarioPlayer from "../pages/user/ScenarioPlayer.jsx";
+import LessonManagement from "../pages/counsellor/LessonManagement.jsx";
 import Community from "../pages/user/Community.jsx";
 import MyPosts from "../pages/user/MyPosts.jsx";
 import SavedPosts from "../pages/user/SavedPosts.jsx";
@@ -35,9 +40,11 @@ import ApplicantDetail from "../pages/employer/ApplicantDetail.jsx";
 import AdminDashboard from "../pages/admin/Dashboard.jsx";
 import AdminUsers from "../pages/admin/Users.jsx";
 import JobsModeration from "../pages/admin/JobsModeration.jsx";
+import PostsModeration from "../pages/admin/PostsModeration.jsx";
 import JobCategories from "../pages/admin/JobCategories.jsx";
 import Assessments from "../pages/admin/Assessments.jsx";
 import UserEmotionHistory from "../pages/admin/UserEmotionHistory.jsx";
+import FamilyAcceptInvite from "../pages/family/FamilyAcceptInvite.jsx";
 
 function AppRoutes() {
   return (
@@ -49,6 +56,7 @@ function AppRoutes() {
         <Route path="register" element={<Register />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="family/accept" element={<FamilyAcceptInvite />} />
 
         <Route path="jobs" element={<JobSearch />} />
         <Route path="jobs/:id" element={<JobDetail />} />
@@ -58,6 +66,10 @@ function AppRoutes() {
           <Route path="my-applications" element={<MyApplications />} />
           <Route path="craving-tracker" element={<CravingTracker />} />
           <Route path="streak" element={<Streak />} />
+          <Route path="weekly-checkin" element={<WeeklyCheckIn />} />
+          <Route path="learning" element={<MicroLessons />} />
+          <Route path="learning/:id" element={<LessonDetail />} />
+          <Route path="learning/scenarios/:id" element={<ScenarioPlayer />} />
           <Route path="counselling" element={<Counselling />} />
         </Route>
 
@@ -81,7 +93,9 @@ function AppRoutes() {
           <Route path="counsellor/patients/:userId" element={<PatientProfile />} />
           <Route path="community/mine" element={<MyPosts />} />
           <Route path="counsellor/courses" element={<CourseManagement />} />
+          <Route path="counsellor/lessons" element={<LessonManagement />} />
           <Route path="counsellor/analytics" element={<Analytics />} />
+          <Route path="admin/posts-moderation" element={<PostsModeration />} />
         </Route>
 
         <Route element={<ProtectedRoute roles={["employer"]} />}>

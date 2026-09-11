@@ -47,3 +47,11 @@ export function sendPasswordResetEmail(to, resetUrl) {
     html: `<p>คลิกลิงก์ด้านล่างเพื่อตั้งรหัสผ่านใหม่ (ลิงก์หมดอายุใน 30 นาที)</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>หากคุณไม่ได้ร้องขอ กรุณาเพิกเฉยต่ออีเมลนี้</p>`,
   });
 }
+
+export function sendFamilyInviteEmail(to, inviterName, acceptUrl) {
+  return sendMail({
+    to,
+    subject: `${inviterName} เชิญคุณติดตามความคืบหน้าบน Glow Up`,
+    html: `<p>${inviterName} เชิญคุณเข้าร่วมติดตามความคืบหน้าการฟื้นฟูแบบจำกัดสิทธิ์ (เห็นเฉพาะระดับความสำเร็จ ไม่เห็นข้อมูลสุขภาพโดยละเอียด)</p><p><a href="${acceptUrl}">${acceptUrl}</a></p><p>ลิงก์นี้จะหมดอายุใน 7 วัน หากคุณไม่รู้จักผู้เชิญ กรุณาเพิกเฉยต่ออีเมลนี้</p>`,
+  });
+}

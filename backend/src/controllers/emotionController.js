@@ -2,6 +2,7 @@ import EmotionLog from "../models/EmotionLog.js";
 import User from "../models/User.js";
 import { computeStreakStats } from "../services/streakService.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
+import { checkAndAwardMissions } from "./missionController.js";
 
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -37,6 +38,8 @@ export async function createEmotionLog(req, res) {
     { happinessLevel, cravingLevel, context, note, date, dateKey },
     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
   );
+
+  await checkAndAwardMissions(req.user.id);
 
   res.status(201).json(log);
 }

@@ -60,9 +60,33 @@
 }
 
 .job-preview-company {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
   margin: 0 0 0.85rem;
   color: var(--color-text-muted);
   font-size: 0.95rem;
+}
+
+.job-preview-business-type {
+  padding: 0.1rem 0.55rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-ink-100);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.job-preview-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 .job-preview-meta {

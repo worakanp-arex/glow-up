@@ -44,7 +44,11 @@ function Login() {
       const user = await loginWithGoogle(credential);
       navigate(DASHBOARD_BY_ROLE[user.role] || "/");
     } catch (err) {
-      setError(err.response?.data?.message || "เข้าสู่ระบบด้วย Google ไม่สำเร็จ");
+      if (err.response?.status === 400 && err.response.data?.message?.includes("นโยบายความเป็นส่วนตัว")) {
+        setError("บัญชี Google นี้ยังไม่เคยสมัครสมาชิก กรุณาไปที่หน้าสมัครสมาชิกเพื่อยอมรับนโยบายความเป็นส่วนตัวก่อน");
+      } else {
+        setError(err.response?.data?.message || "เข้าสู่ระบบด้วย Google ไม่สำเร็จ");
+      }
     } finally {
       setSubmitting(false);
     }

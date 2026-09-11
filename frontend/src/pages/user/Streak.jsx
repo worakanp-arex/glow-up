@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Award, CalendarCheck, Flame } from "lucide-react";
 import PlantGrowth, { stageLabel, streakToStage } from "../../components/user/PlantGrowth.jsx";
+import MissionBoard from "../../components/user/MissionBoard.jsx";
 import * as emotionService from "../../services/emotionService.js";
 import { WEEKDAY_LABELS, buildCalendarCells, formatThaiDate } from "../../utils/calendarGrid.js";
 import { happinessByLevel } from "../../constants/happiness.js";
@@ -107,6 +108,8 @@ function Streak() {
           </div>
         </div>
       </div>
+
+      <MissionBoard />
     </div>
   );
 }

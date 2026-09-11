@@ -1,5 +1,6 @@
 import Application from "../models/Application.js";
 import Job from "../models/Job.js";
+import User from "../models/User.js";
 import { notifyUser } from "../services/notificationService.js";
 import { publicUrl } from "../middleware/upload.js";
 
@@ -10,6 +11,23 @@ const STATUS_LABELS = {
   rejected: "ถูกปฏิเสธ",
   cancelled: "ยกเลิกแล้ว",
 };
+
+const APPLICANT_PROFILE_FIELDS =
+  "name email phone verifiedStatus education experience resumeUrl certificates avatarUrl";
+
+// Employers must be identity-verified before they can view or act on applicant
+// data; admins bypass this check.
+async function assertEmployerVerified(req, res) {
+  if (req.user.role === "admin") return true;
+  const employer = await User.findById(req.user.id).select("verifiedStatus");
+  if (!employer || employer.verifiedStatus !== "verified") {
+    res.status(403).json({
+      message: "บัญชีนายจ้างของคุณยังไม่ได้รับการยืนยันตัวตน กรุณารอการตรวจสอบจากผู้ดูแลระบบ",
+    });
+    return false;
+  }
+  return true;
+}
 
 export async function applyToJob(req, res) {
   const job = await Job.findById(req.params.jobId);
@@ -57,9 +75,10 @@ export async function jobApplicants(req, res) {
   if (req.user.role !== "admin" && job.employer.toString() !== req.user.id) {
     return res.status(403).json({ message: "Forbidden" });
   }
+  if (!(await assertEmployerVerified(req, res))) return;
 
   const applications = await Application.find({ job: job._id })
-    .populate("user", "name email phone verifiedStatus")
+    .populate("user", APPLICANT_PROFILE_FIELDS)
     .sort({ createdAt: -1 });
   res.json(applications);
 }
@@ -67,13 +86,14 @@ export async function jobApplicants(req, res) {
 export async function getApplication(req, res) {
   const application = await Application.findById(req.params.id)
     .populate("job")
-    .populate("user", "name email phone verifiedStatus");
+    .populate("user", APPLICANT_PROFILE_FIELDS);
   if (!application) {
     return res.status(404).json({ message: "Not found" });
   }
   if (req.user.role !== "admin" && application.job.employer.toString() !== req.user.id) {
     return res.status(403).json({ message: "Forbidden" });
   }
+  if (!(await assertEmployerVerified(req, res))) return;
   res.json(application);
 }
 
@@ -85,13 +105,14 @@ export async function updateApplicationStatus(req, res) {
 
   const application = await Application.findById(req.params.id)
     .populate("job")
-    .populate("user", "name email phone verifiedStatus");
+    .populate("user", APPLICANT_PROFILE_FIELDS);
   if (!application) {
     return res.status(404).json({ message: "Not found" });
   }
   if (req.user.role !== "admin" && application.job.employer.toString() !== req.user.id) {
     return res.status(403).json({ message: "Forbidden" });
   }
+  if (!(await assertEmployerVerified(req, res))) return;
   if (application.status === "cancelled") {
     return res.status(400).json({ message: "ใบสมัครนี้ถูกยกเลิกโดยผู้สมัครแล้ว" });
   }

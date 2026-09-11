@@ -194,6 +194,15 @@
   white-space: nowrap;
 }
 
+.users-verification-detail {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .users-list li > .status-badge {
   justify-self: start;
 }

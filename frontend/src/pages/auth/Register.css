@@ -202,6 +202,66 @@
   box-shadow: 0 0 0 3px var(--color-primary-50);
 }
 
+.register-consent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.register-consent-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.register-consent-checkbox input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.register-consent-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-primary-600);
+  font-weight: 500;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.register-consent-toggle svg {
+  transition: transform 0.15s ease;
+}
+
+.register-consent-toggle svg.open {
+  transform: rotate(180deg);
+}
+
+.register-consent-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-ink-50);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.register-consent-details p {
+  margin: 0;
+}
+
 .register-form .btn-primary {
   width: 100%;
   justify-content: center;

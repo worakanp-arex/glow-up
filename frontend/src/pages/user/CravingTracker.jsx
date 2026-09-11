@@ -6,6 +6,7 @@ import { HAPPINESS_LEVELS, happinessByLevel } from "../../constants/happiness.js
 import { CONTEXT_OPTIONS } from "../../constants/emotionContext.js";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
 import BackfillEmotionModal from "../../components/user/BackfillEmotionModal.jsx";
+import WeeklyCheckInWidget from "../../components/user/WeeklyCheckInWidget.jsx";
 import { groupByMonth, monthGroupLabel } from "../../utils/calendarGrid.js";
 import "./CravingTracker.css";
 
@@ -152,7 +153,6 @@ function CravingTracker() {
   return (
     <div className="craving-tracker-page">
       <h1>
-        <Activity size={22} />
         <span>บันทึกอารมณ์และความอยาก</span>
       </h1>
       <p className="craving-tracker-intro">
@@ -230,6 +230,8 @@ function CravingTracker() {
         </section>
 
         <aside className="craving-tracker-sidebar">
+          <WeeklyCheckInWidget />
+
           <form className="craving-tracker-form" onSubmit={handleSubmit}>
             <h2 className="craving-tracker-form-title">
               {streak?.loggedToday ? "แก้ไขบันทึกวันนี้" : "บันทึกวันนี้"}

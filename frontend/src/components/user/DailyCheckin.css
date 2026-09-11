@@ -119,6 +119,34 @@
   text-align: right;
 }
 
+.daily-checkin-note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.daily-checkin-note textarea {
+  resize: vertical;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+
+.daily-checkin-note textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.daily-checkin-note textarea:focus {
+  outline: none;
+  border-color: #ffffff;
+}
+
 .daily-checkin-form button[type="submit"] {
   display: inline-flex;
   align-items: center;

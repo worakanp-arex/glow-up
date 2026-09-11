@@ -185,6 +185,10 @@ export async function createUserByAdmin(req, res) {
     specialization,
     hospital,
     verifiedStatus: "verified",
+    // Admin-created staff accounts aren't a self-registration consent event —
+    // this just satisfies the schema's required field.
+    pdpaConsent: true,
+    pdpaConsentAt: new Date(),
   });
 
   const obj = user.toObject();

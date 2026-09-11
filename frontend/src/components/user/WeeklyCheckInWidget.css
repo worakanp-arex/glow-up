@@ -1,0 +1,23 @@
+.weekly-checkin-widget {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-info-bg);
+  color: var(--color-info);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.weekly-checkin-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.weekly-checkin-widget.done {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}

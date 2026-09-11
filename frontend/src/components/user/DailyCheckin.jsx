@@ -4,7 +4,7 @@ import * as emotionService from "../../services/emotionService.js";
 import { HAPPINESS_LEVELS } from "../../constants/happiness.js";
 import "./DailyCheckin.css";
 
-const INITIAL_FORM = { happinessLevel: null, cravingLevel: 5 };
+const INITIAL_FORM = { happinessLevel: null, cravingLevel: 5, note: "" };
 
 function DailyCheckin({ loggedToday, onLogged }) {
   const [form, setForm] = useState(INITIAL_FORM);
@@ -87,11 +87,23 @@ function DailyCheckin({ loggedToday, onLogged }) {
                 />
                 <span className="daily-checkin-range-value">{form.cravingLevel}/10</span>
               </label>
-              <button type="submit" disabled={submitting || !form.happinessLevel}>
-                <Send size={16} />
-                <span>{submitting ? "กำลังบันทึก..." : "บันทึกเช็คอิน"}</span>
-              </button>
             </div>
+
+            <label className="daily-checkin-note">
+              <span>บันทึกประจำวัน (ไม่บังคับ)</span>
+              <textarea
+                name="note"
+                value={form.note}
+                onChange={handleChange}
+                rows={2}
+                placeholder="วันนี้เป็นอย่างไรบ้าง..."
+              />
+            </label>
+
+            <button type="submit" className="daily-checkin-submit" disabled={submitting || !form.happinessLevel}>
+              <Send size={16} />
+              <span>{submitting ? "กำลังบันทึก..." : "บันทึกเช็คอิน"}</span>
+            </button>
           </form>
         </>
       )}

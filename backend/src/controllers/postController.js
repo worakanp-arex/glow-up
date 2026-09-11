@@ -177,6 +177,29 @@ export async function likePost(req, res) {
   res.json(serializePost(updated, req.user.id, savedIds));
 }
 
+export async function flagPostForReview(req, res) {
+  const post = await Post.findByIdAndUpdate(req.params.id, { needsReview: true }, { new: true });
+  if (!post) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  res.json({ needsReview: post.needsReview });
+}
+
+export async function clearPostFlag(req, res) {
+  const post = await Post.findByIdAndUpdate(req.params.id, { needsReview: false }, { new: true });
+  if (!post) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  res.json({ needsReview: post.needsReview });
+}
+
+export async function listFlaggedPosts(req, res) {
+  const posts = await Post.find({ needsReview: true })
+    .populate("user", USER_PUBLIC_FIELDS)
+    .sort({ createdAt: -1 });
+  res.json(posts.map((post) => serializePost(post, req.user.id)));
+}
+
 export async function toggleSavePost(req, res) {
   const post = await Post.findById(req.params.id);
   if (!post) {
