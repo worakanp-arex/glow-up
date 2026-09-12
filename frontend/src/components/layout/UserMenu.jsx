@@ -55,7 +55,7 @@ function UserMenu() {
 
   return (
     <div className="user-menu" ref={containerRef}>
-      <button type="button" className="user-menu-trigger" onClick={() => setOpen((prev) => !prev)}>
+      <button type="button" className="user-menu-trigger" aria-label="เมนูบัญชีของฉัน" aria-expanded={open} onClick={() => setOpen((prev) => !prev)}>
         <span className="user-menu-avatar">
           {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}
         </span>

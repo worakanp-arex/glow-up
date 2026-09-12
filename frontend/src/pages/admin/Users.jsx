@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -29,6 +32,8 @@ function Users() {
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
+  const pagination = usePagination(users);
+  const [loadError, setLoadError] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", phone: "", role: "user" });
   const [showStaffForm, setShowStaffForm] = useState(false);
@@ -41,6 +46,7 @@ function Users() {
     userService
       .listUsers(params)
       .then(setUsers)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }
 
@@ -49,6 +55,7 @@ function Users() {
   }, []);
 
   function applyFilters() {
+    pagination.setPage(1);
     const params = {};
     if (roleFilter) params.role = roleFilter;
     if (statusFilter) params.verifiedStatus = statusFilter;
@@ -93,8 +100,10 @@ function Users() {
     }
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="users-page">กำลังโหลด...</div>;
+    return <div className="users-page"><AsyncState /></div>;
   }
 
   return (
@@ -211,7 +220,7 @@ function Users() {
         {users.length === 0 && <p className="users-empty">ไม่พบผู้ใช้งานที่ตรงกับเงื่อนไข</p>}
 
         <ul className="users-list">
-          {users.map((user) => (
+          {pagination.items.map((user) => (
             <li key={user._id}>
               {editingId === user._id ? (
                 <form
@@ -306,6 +315,7 @@ function Users() {
           ))}
         </ul>
       </div>
+      <Pagination {...pagination} />
     </div>
   );
 }

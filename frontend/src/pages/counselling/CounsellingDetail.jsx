@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -49,6 +50,7 @@ function CounsellingDetail() {
   const { user } = useAuth();
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [error, setError] = useState("");
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
@@ -69,6 +71,7 @@ function CounsellingDetail() {
         });
       })
       .catch((err) => setError(err.response?.data?.message || "ไม่สามารถโหลดข้อมูลได้"))
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -116,7 +119,9 @@ function CounsellingDetail() {
     setSession(updated);
   }
 
-  if (loading) return <div className="counselling-detail-page">กำลังโหลด...</div>;
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
+  if (loading) return <div className="counselling-detail-page"><AsyncState /></div>;
   if (error || !session) return <div className="counselling-detail-page">{error || "ไม่พบข้อมูล"}</div>;
 
   const TypeIcon = SESSION_TYPE_ICONS[session.sessionType] || MessageCircle;

@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import StatTile from "../../components/common/StatTile.jsx";
@@ -7,16 +8,20 @@ import "./Assessments.css";
 function Assessments() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     riskService
       .getRiskSummary()
       .then(setSummary)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="assessments-page">กำลังโหลด...</div>;
+    return <div className="assessments-page"><AsyncState /></div>;
   }
 
   return (

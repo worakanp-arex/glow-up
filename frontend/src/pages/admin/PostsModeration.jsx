@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ShieldAlert, Trash2 } from "lucide-react";
@@ -7,6 +10,8 @@ import "./PostsModeration.css";
 function PostsModeration() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const pagination = usePagination(posts);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     load();
@@ -17,6 +22,7 @@ function PostsModeration() {
     postService
       .getFlaggedPosts()
       .then(setPosts)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }
 
@@ -31,8 +37,10 @@ function PostsModeration() {
     setPosts((prev) => prev.filter((p) => p._id !== post._id));
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="posts-moderation-page">กำลังโหลด...</div>;
+    return <div className="posts-moderation-page"><AsyncState /></div>;
   }
 
   return (
@@ -48,7 +56,7 @@ function PostsModeration() {
       {posts.length === 0 && <p className="posts-moderation-empty">ไม่มีโพสต์ที่รอตรวจสอบในขณะนี้</p>}
 
       <ul className="posts-moderation-list">
-        {posts.map((post) => (
+        {pagination.items.map((post) => (
           <li key={post._id}>
             <div className="posts-moderation-info">
               <p className="posts-moderation-author">
@@ -73,6 +81,7 @@ function PostsModeration() {
           </li>
         ))}
       </ul>
+      <Pagination {...pagination} />
     </div>
   );
 }

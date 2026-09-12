@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -33,6 +34,7 @@ function ApplicantDetail() {
   const navigate = useNavigate();
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [status, setStatus] = useState("pending");
   const [employerFeedback, setEmployerFeedback] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
@@ -54,6 +56,7 @@ function ApplicantDetail() {
           setBlocked(true);
         }
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -75,8 +78,10 @@ function ApplicantDetail() {
     }
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="applicant-detail-page">กำลังโหลด...</div>;
+    return <div className="applicant-detail-page"><AsyncState /></div>;
   }
   if (blocked) {
     return (

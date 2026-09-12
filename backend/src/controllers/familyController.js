@@ -58,6 +58,10 @@ export async function inviteFamilyMember(req, res) {
 
 export async function acceptFamilyInvite(req, res) {
   const email = req.body.email?.toLowerCase();
+  const recipient = await User.findById(req.user.id).select("email role");
+  if (!recipient || recipient.email.toLowerCase() !== email || recipient.role !== "user") {
+    return res.status(403).json({ message: "กรุณาเข้าสู่ระบบด้วยบัญชีผู้ใช้งานที่ได้รับคำเชิญ" });
+  }
   const { token } = req.body;
   const tokenHash = crypto.createHash("sha256").update(token || "").digest("hex");
 
@@ -72,11 +76,13 @@ export async function acceptFamilyInvite(req, res) {
     return res.status(400).json({ message: "ลิงก์คำเชิญไม่ถูกต้องหรือหมดอายุ" });
   }
 
-  invite.familyUser = req.user.id;
-  invite.status = "active";
-  await invite.save();
-
-  res.json({ _id: invite._id, status: invite.status });
+  const accepted = await FamilyLink.findOneAndUpdate(
+    { _id: invite._id, status: "pending", inviteExpiresAt: { $gt: new Date() } },
+    { $set: { familyUser: req.user.id, status: "active" } },
+    { new: true }
+  );
+  if (!accepted) return res.status(409).json({ message: "คำเชิญนี้ถูกใช้หรือยกเลิกแล้ว" });
+  res.json({ _id: accepted._id, status: accepted.status });
 }
 
 // As the recovering user: list who I've invited, so I can see status/revoke.

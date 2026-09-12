@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Briefcase, Building2, ClipboardList, Plus, Users } from "lucide-react";
@@ -21,6 +22,7 @@ function Dashboard() {
   const [jobs, setJobs] = useState([]);
   const [applicantCounts, setApplicantCounts] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     jobService
@@ -38,11 +40,14 @@ function Dashboard() {
         setApplicantCounts(Object.fromEntries(entries));
       })
       .catch(() => setJobs([]))
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="dashboard-page">กำลังโหลด...</div>;
+    return <div className="dashboard-page"><AsyncState /></div>;
   }
 
   const openJobsCount = jobs.filter((job) => job.status === "open").length;

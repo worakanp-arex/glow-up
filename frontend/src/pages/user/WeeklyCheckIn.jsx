@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, ClipboardList } from "lucide-react";
@@ -17,6 +18,7 @@ const INITIAL_FORM = { stressLevel: 3, moodTrend: "stable", selfHarmRiskFlag: fa
 function WeeklyCheckIn() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [justSubmitted, setJustSubmitted] = useState(false);
@@ -25,6 +27,7 @@ function WeeklyCheckIn() {
     weeklyCheckInService
       .getMyWeeklyCheckIns()
       .then(setHistory)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -45,8 +48,10 @@ function WeeklyCheckIn() {
     }
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="weekly-checkin-page">กำลังโหลด...</div>;
+    return <div className="weekly-checkin-page"><AsyncState /></div>;
   }
 
   return (

@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AlertTriangle, ArrowLeft, Award, Building2, CalendarCheck, ClipboardList, Flame, ShieldAlert } from "lucide-react";
@@ -29,6 +30,7 @@ function PatientProfile() {
   const { userId } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [error, setError] = useState("");
   const [weeklyCheckIns, setWeeklyCheckIns] = useState([]);
 
@@ -37,6 +39,7 @@ function PatientProfile() {
       .getPatientProfile(userId)
       .then(setData)
       .catch((err) => setError(err.response?.data?.message || "ไม่สามารถโหลดข้อมูลได้"))
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [userId]);
 
@@ -44,7 +47,9 @@ function PatientProfile() {
     weeklyCheckInService.getUserWeeklyCheckIns(userId).then(setWeeklyCheckIns).catch(() => setWeeklyCheckIns([]));
   }, [userId]);
 
-  if (loading) return <div className="patient-profile-page">กำลังโหลด...</div>;
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
+  if (loading) return <div className="patient-profile-page"><AsyncState /></div>;
   if (error || !data) return <div className="patient-profile-page">{error || "ไม่พบข้อมูล"}</div>;
 
   const { user, rehabRecords, riskAssessments, emotionStreak, emotionLogs } = data;

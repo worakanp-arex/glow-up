@@ -1,50 +1,53 @@
+import { lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "../components/layout/Layout.jsx";
+import AsyncState from "../components/common/AsyncState.jsx";
+import { Link } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-import Home from "../pages/Home.jsx";
-import About from "../pages/About.jsx";
-import Profile from "../pages/Profile.jsx";
-import Login from "../pages/auth/Login.jsx";
-import Register from "../pages/auth/Register.jsx";
-import ForgotPassword from "../pages/auth/ForgotPassword.jsx";
-import ResetPassword from "../pages/auth/ResetPassword.jsx";
-import UserDashboard from "../pages/user/Dashboard.jsx";
-import JobSearch from "../pages/user/JobSearch.jsx";
-import JobDetail from "../pages/user/JobDetail.jsx";
-import MyApplications from "../pages/user/MyApplications.jsx";
-import CravingTracker from "../pages/user/CravingTracker.jsx";
-import Streak from "../pages/user/Streak.jsx";
-import WeeklyCheckIn from "../pages/user/WeeklyCheckIn.jsx";
-import MicroLessons from "../pages/user/MicroLessons.jsx";
-import LessonDetail from "../pages/user/LessonDetail.jsx";
-import ScenarioPlayer from "../pages/user/ScenarioPlayer.jsx";
-import LessonManagement from "../pages/counsellor/LessonManagement.jsx";
-import Community from "../pages/user/Community.jsx";
-import MyPosts from "../pages/user/MyPosts.jsx";
-import SavedPosts from "../pages/user/SavedPosts.jsx";
-import PostDetail from "../pages/user/PostDetail.jsx";
-import StaffProfile from "../pages/user/StaffProfile.jsx";
-import Courses from "../pages/user/Courses.jsx";
-import CourseDetail from "../pages/user/CourseDetail.jsx";
-import Counselling from "../pages/user/Counselling.jsx";
-import CounsellingDetail from "../pages/counselling/CounsellingDetail.jsx";
-import CounsellorQueue from "../pages/counsellor/Queue.jsx";
-import PatientProfile from "../pages/counsellor/PatientProfile.jsx";
-import CourseManagement from "../pages/counsellor/CourseManagement.jsx";
-import Analytics from "../pages/counsellor/Analytics.jsx";
-import EmployerDashboard from "../pages/employer/Dashboard.jsx";
-import PostJob from "../pages/employer/PostJob.jsx";
-import MyJobs from "../pages/employer/MyJobs.jsx";
-import Applicants from "../pages/employer/Applicants.jsx";
-import ApplicantDetail from "../pages/employer/ApplicantDetail.jsx";
-import AdminDashboard from "../pages/admin/Dashboard.jsx";
-import AdminUsers from "../pages/admin/Users.jsx";
-import JobsModeration from "../pages/admin/JobsModeration.jsx";
-import PostsModeration from "../pages/admin/PostsModeration.jsx";
-import JobCategories from "../pages/admin/JobCategories.jsx";
-import Assessments from "../pages/admin/Assessments.jsx";
-import UserEmotionHistory from "../pages/admin/UserEmotionHistory.jsx";
-import FamilyAcceptInvite from "../pages/family/FamilyAcceptInvite.jsx";
+const Home = lazy(() => import("../pages/Home.jsx"));
+const About = lazy(() => import("../pages/About.jsx"));
+const Profile = lazy(() => import("../pages/Profile.jsx"));
+const Login = lazy(() => import("../pages/auth/Login.jsx"));
+const Register = lazy(() => import("../pages/auth/Register.jsx"));
+const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword.jsx"));
+const ResetPassword = lazy(() => import("../pages/auth/ResetPassword.jsx"));
+const UserDashboard = lazy(() => import("../pages/user/Dashboard.jsx"));
+const JobSearch = lazy(() => import("../pages/user/JobSearch.jsx"));
+const JobDetail = lazy(() => import("../pages/user/JobDetail.jsx"));
+const MyApplications = lazy(() => import("../pages/user/MyApplications.jsx"));
+const CravingTracker = lazy(() => import("../pages/user/CravingTracker.jsx"));
+const Streak = lazy(() => import("../pages/user/Streak.jsx"));
+const WeeklyCheckIn = lazy(() => import("../pages/user/WeeklyCheckIn.jsx"));
+const MicroLessons = lazy(() => import("../pages/user/MicroLessons.jsx"));
+const LessonDetail = lazy(() => import("../pages/user/LessonDetail.jsx"));
+const ScenarioPlayer = lazy(() => import("../pages/user/ScenarioPlayer.jsx"));
+const LessonManagement = lazy(() => import("../pages/counsellor/LessonManagement.jsx"));
+const Community = lazy(() => import("../pages/user/Community.jsx"));
+const MyPosts = lazy(() => import("../pages/user/MyPosts.jsx"));
+const SavedPosts = lazy(() => import("../pages/user/SavedPosts.jsx"));
+const PostDetail = lazy(() => import("../pages/user/PostDetail.jsx"));
+const StaffProfile = lazy(() => import("../pages/user/StaffProfile.jsx"));
+const Courses = lazy(() => import("../pages/user/Courses.jsx"));
+const CourseDetail = lazy(() => import("../pages/user/CourseDetail.jsx"));
+const Counselling = lazy(() => import("../pages/user/Counselling.jsx"));
+const CounsellingDetail = lazy(() => import("../pages/counselling/CounsellingDetail.jsx"));
+const CounsellorQueue = lazy(() => import("../pages/counsellor/Queue.jsx"));
+const PatientProfile = lazy(() => import("../pages/counsellor/PatientProfile.jsx"));
+const CourseManagement = lazy(() => import("../pages/counsellor/CourseManagement.jsx"));
+const Analytics = lazy(() => import("../pages/counsellor/Analytics.jsx"));
+const EmployerDashboard = lazy(() => import("../pages/employer/Dashboard.jsx"));
+const PostJob = lazy(() => import("../pages/employer/PostJob.jsx"));
+const MyJobs = lazy(() => import("../pages/employer/MyJobs.jsx"));
+const Applicants = lazy(() => import("../pages/employer/Applicants.jsx"));
+const ApplicantDetail = lazy(() => import("../pages/employer/ApplicantDetail.jsx"));
+const AdminDashboard = lazy(() => import("../pages/admin/Dashboard.jsx"));
+const AdminUsers = lazy(() => import("../pages/admin/Users.jsx"));
+const JobsModeration = lazy(() => import("../pages/admin/JobsModeration.jsx"));
+const PostsModeration = lazy(() => import("../pages/admin/PostsModeration.jsx"));
+const JobCategories = lazy(() => import("../pages/admin/JobCategories.jsx"));
+const Assessments = lazy(() => import("../pages/admin/Assessments.jsx"));
+const UserEmotionHistory = lazy(() => import("../pages/admin/UserEmotionHistory.jsx"));
+const FamilyAcceptInvite = lazy(() => import("../pages/family/FamilyAcceptInvite.jsx"));
 
 function AppRoutes() {
   return (
@@ -114,6 +117,7 @@ function AppRoutes() {
           <Route path="admin/job-categories" element={<JobCategories />} />
           <Route path="admin/assessments" element={<Assessments />} />
         </Route>
+        <Route path="*" element={<AsyncState empty title="ไม่พบหน้าที่คุณต้องการ" description="ลิงก์อาจเปลี่ยนไป กลับไปเริ่มต้นอีกครั้งได้เลย"><Link to="/" className="btn btn-primary">กลับหน้าหลัก</Link></AsyncState>} />
       </Route>
     </Routes>
   );

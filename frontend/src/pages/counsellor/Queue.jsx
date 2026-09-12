@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { HeartHandshake, MessageCircle, Phone, Video } from "lucide-react";
@@ -40,6 +41,7 @@ function Queue() {
   const [sessions, setSessions] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [filter, setFilter] = useState("unclaimed");
   const [selectedDate, setSelectedDate] = useState(null);
 
@@ -49,6 +51,7 @@ function Queue() {
         setSessions(sessionsData);
         setSchedule(scheduleData);
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -63,8 +66,10 @@ function Queue() {
     return list;
   }, [sessions, filter, selectedDate, user._id]);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="counsellor-queue-page">กำลังโหลด...</div>;
+    return <div className="counsellor-queue-page"><AsyncState /></div>;
   }
 
   return (

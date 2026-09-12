@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Briefcase, ClipboardList, HeartPulse, LayoutDashboard, Users } from "lucide-react";
@@ -8,16 +9,20 @@ import "./Dashboard.css";
 function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     adminService
       .getDashboard()
       .then(setStats)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="dashboard-page">กำลังโหลด...</div>;
+    return <div className="dashboard-page"><AsyncState /></div>;
   }
 
   return (

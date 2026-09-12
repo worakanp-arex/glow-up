@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { LogIn, Menu, UserPlus, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
@@ -15,6 +15,25 @@ function Navbar() {
   const { theme } = useTheme();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const panelRef = useRef(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    panelRef.current?.querySelector("button")?.focus();
+    function handleKey(event) {
+      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key !== "Tab") return;
+      const items = panelRef.current?.querySelectorAll("a, button");
+      if (!items?.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => { document.body.style.overflow = overflow; document.removeEventListener("keydown", handleKey); previous?.focus(); };
+  }, [menuOpen]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -31,12 +50,14 @@ function Navbar() {
           onClick={() => setMenuOpen((prev) => !prev)}
           aria-label={menuOpen ? "ปิดเมนู" : "เปิดเมนู"}
           aria-expanded={menuOpen}
+          aria-controls="mobile-navigation"
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
 
         <Link to="/" className="navbar-brand">
-          <img className="navbar-logo" src={theme === "dark" ? "/logoW.png" : "/logo.png"} alt="โลโก้" />
+          <img className="navbar-logo" src={theme === "dark" ? "/logoW.png" : "/logo.png"} alt="glow-up" />
+          <small>เริ่มต้นใหม่ ไปด้วยกัน</small>
         </Link>
 
         <nav className="navbar-links">
@@ -72,7 +93,8 @@ function Navbar() {
             aria-label="ปิดเมนู"
             onClick={() => setMenuOpen(false)}
           />
-          <nav className="navbar-mobile-panel">
+          <nav className="navbar-mobile-panel" id="mobile-navigation" ref={panelRef} aria-label="เมนูหลักบนมือถือ">
+            <div className="mobile-menu-heading"><strong>เมนูของคุณ</strong><button className="icon-button" onClick={() => setMenuOpen(false)} aria-label="ปิดเมนู"><X size={20} /></button></div>
             {mobileLinks.map(({ to, label, end }) => (
               <NavLink
                 key={to}

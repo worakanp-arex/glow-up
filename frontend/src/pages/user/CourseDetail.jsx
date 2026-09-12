@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Award, BookOpen, ExternalLink, Heart } from "lucide-react";
@@ -12,6 +13,7 @@ function CourseDetail() {
   const [course, setCourse] = useState(null);
   const [enrollment, setEnrollment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [certUploading, setCertUploading] = useState(false);
   const [certError, setCertError] = useState("");
   const certInputRef = useRef(null);
@@ -25,6 +27,7 @@ function CourseDetail() {
         setCourse(courseData);
         setEnrollment(myCourses.find((e) => e.course._id === id) || null);
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [id, user.role]);
 
@@ -54,8 +57,10 @@ function CourseDetail() {
     }
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="course-detail-page">กำลังโหลด...</div>;
+    return <div className="course-detail-page"><AsyncState /></div>;
   }
   if (!course) {
     return <div className="course-detail-page">ไม่พบคอร์สนี้</div>;

@@ -1,6 +1,7 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, HeartHandshake, MessageCircle, Phone, Send, Video } from "lucide-react";
+import { ChevronDown, MessageCircle, Phone, Send, Video } from "lucide-react";
 import * as counsellingService from "../../services/counsellingService.js";
 import DateTimePicker from "../../components/common/DateTimePicker.jsx";
 import { MOOD_OPTIONS, moodByValue } from "../../constants/mood.js";
@@ -36,6 +37,7 @@ function nowAsDatetimeLocal() {
 function Counselling() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -50,6 +52,7 @@ function Counselling() {
     counsellingService
       .getMySessions()
       .then(setSessions)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -84,6 +87,8 @@ function Counselling() {
     }
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   return (
     <div className="counselling-page">
       <h1>
@@ -97,7 +102,7 @@ function Counselling() {
         <section>
           <h2>คำขอที่ผ่านมา</h2>
           {loading ? (
-            <p>กำลังโหลด...</p>
+            <AsyncState />
           ) : sessions.length === 0 ? (
             <p className="counselling-empty">ยังไม่มีคำขอรับคำปรึกษา</p>
           ) : (

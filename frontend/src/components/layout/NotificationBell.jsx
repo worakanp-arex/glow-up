@@ -59,7 +59,7 @@ function NotificationBell() {
 
   return (
     <div className="notification-bell" ref={containerRef}>
-      <button type="button" className="notification-bell-button" onClick={handleOpen} aria-label="การแจ้งเตือน">
+      <button type="button" className="notification-bell-button" onClick={handleOpen} aria-label="การแจ้งเตือน" aria-expanded={open}>
         <Bell size={18} />
         {unreadCount > 0 && <span className="notification-bell-badge">{unreadCount}</span>}
       </button>
@@ -76,6 +76,8 @@ function NotificationBell() {
                   <li
                     key={notification._id}
                     className={`${notification.status === "unread" ? "unread" : ""}${notification.link ? " clickable" : ""}`}
+                    role="button" tabIndex={0}
+                    onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); handleNotificationClick(notification); } }}
                     onClick={() => handleNotificationClick(notification)}
                   >
                     <span className="notification-bell-icon">

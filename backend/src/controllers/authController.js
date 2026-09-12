@@ -12,7 +12,6 @@ import { recordLogin } from "../services/loginEventService.js";
 const PUBLIC_REGISTER_FIELDS = [
   "name",
   "email",
-  "password",
   "phone",
   "age",
   "gender",
@@ -94,6 +93,7 @@ export async function requestRegistrationOtp(req, res) {
 
   const otp = generateOtp();
   const otpHash = await bcrypt.hash(otp, 10);
+  const passwordHash = await bcrypt.hash(req.body.password, 10);
   const now = Date.now();
 
   await PendingRegistration.findOneAndUpdate(
@@ -101,6 +101,7 @@ export async function requestRegistrationOtp(req, res) {
     {
       email,
       otpHash,
+      passwordHash,
       otpExpiresAt: new Date(now + OTP_TTL_MS),
       lastSentAt: new Date(now),
       attempts: 0,
@@ -123,7 +124,7 @@ export async function verifyRegistrationOtp(req, res) {
   const email = req.body.email?.toLowerCase();
   const { otp } = req.body;
 
-  const pending = await PendingRegistration.findOne({ email });
+  const pending = await PendingRegistration.findOne({ email }).select("+passwordHash");
   if (!pending) {
     return res.status(400).json({ message: "ไม่พบคำขอสมัครสมาชิกนี้ กรุณาขอรหัส OTP ใหม่" });
   }
@@ -149,7 +150,14 @@ export async function verifyRegistrationOtp(req, res) {
     return res.status(409).json({ message: "Email already registered" });
   }
 
-  const user = await User.create({ ...pending.payload, pdpaConsentAt: new Date() });
+  // Pending requests from older versions must be restarted without reusing plaintext.
+  if (!pending.passwordHash) {
+    await PendingRegistration.deleteOne({ _id: pending._id });
+    return res.status(400).json({ message: "กรุณาขอรหัส OTP ใหม่เพื่อสมัครสมาชิกต่อ" });
+  }
+  const user = new User({ ...pending.payload, password: pending.passwordHash, pdpaConsentAt: new Date() });
+  user.$locals.passwordAlreadyHashed = true;
+  await user.save();
   await PendingRegistration.deleteOne({ _id: pending._id });
 
   const token = signToken(user);

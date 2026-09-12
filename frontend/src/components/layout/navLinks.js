@@ -11,6 +11,10 @@ export const LINKS_BY_ROLE = {
     { to: "/craving-tracker", label: "สุขภาพและระดับความเสี่ยง" },
     { to: "/community", label: "ชุมชนฟื้นฟู" },
     { to: "/courses", label: "ศูนย์การเรียนรู้" },
+    { to: "/my-applications", label: "ใบสมัครของฉัน" },
+    { to: "/weekly-checkin", label: "เช็คอินรายสัปดาห์" },
+    { to: "/learning", label: "บทเรียนและการฝึกฝน" },
+    { to: "/streak", label: "ความก้าวหน้าและรางวัล" },
     { to: "/about", label: "เกี่ยวกับเรา" },
   ],
   employer: [

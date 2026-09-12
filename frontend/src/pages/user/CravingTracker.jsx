@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Activity, ChevronDown, Send } from "lucide-react";
 import * as emotionService from "../../services/emotionService.js";
@@ -36,6 +37,7 @@ function CravingTracker() {
   const [logs, setLogs] = useState([]);
   const [streak, setStreak] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [risk, setRisk] = useState(null);
@@ -70,6 +72,7 @@ function CravingTracker() {
           });
         }
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -150,6 +153,8 @@ function CravingTracker() {
     }));
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   return (
     <div className="craving-tracker-page">
       <h1>
@@ -164,7 +169,7 @@ function CravingTracker() {
         <section>
           {loading ? (
             <div className="emotion-calendar-card">
-              <p>กำลังโหลด...</p>
+              <AsyncState />
             </div>
           ) : (
             <EmotionCalendar logs={logs} onSelectEmptyDay={setBackfillDateKey} />
@@ -175,7 +180,7 @@ function CravingTracker() {
 
           <h2 className="craving-tracker-list-heading">ประวัติการบันทึก</h2>
           {loading ? (
-            <p>กำลังโหลด...</p>
+            <AsyncState />
           ) : logs.length === 0 ? (
             <p className="craving-tracker-empty">ยังไม่มีบันทึก</p>
           ) : (

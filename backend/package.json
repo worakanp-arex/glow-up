@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "seed:admin": "node src/config/seedAdmin.js"
+    "seed:admin": "node src/config/seedAdmin.js",
+    "seed:missions": "node src/config/seedMissions.js",
+    "test": "node --import ./test/setup.js --test test/*.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

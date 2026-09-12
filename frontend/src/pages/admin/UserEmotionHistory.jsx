@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Award, CalendarCheck, ChevronDown, Flame, ShieldAlert } from "lucide-react";
@@ -16,6 +17,7 @@ function UserEmotionHistory() {
   const [streak, setStreak] = useState(null);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [error, setError] = useState("");
   const [monthVisibleCounts, setMonthVisibleCounts] = useState({});
 
@@ -39,11 +41,14 @@ function UserEmotionHistory() {
         setLogs(logsData);
       })
       .catch((err) => setError(err.response?.data?.message || "ไม่สามารถโหลดข้อมูลได้"))
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [userId]);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="user-emotion-history-page">กำลังโหลด...</div>;
+    return <div className="user-emotion-history-page"><AsyncState /></div>;
   }
   if (error || !streak) {
     return <div className="user-emotion-history-page">{error || "ไม่พบข้อมูล"}</div>;

@@ -1,5 +1,9 @@
 import api from "./api.js";
 
+export function searchJobsPage(params, signal) {
+  return api.get("/jobs", { params, signal }).then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+}
+
 export function searchJobs(params) {
   return api.get("/jobs", { params }).then((res) => res.data);
 }

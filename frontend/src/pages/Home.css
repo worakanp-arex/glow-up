@@ -531,3 +531,27 @@
   justify-content: center;
   animation: none;
 }
+
+/* A calmer public welcome, sharing the workspace's blue palette. */
+.home-page .home-hero { padding: 80px 32px; background: var(--color-page-bg); border-bottom: 1px solid var(--color-border); }
+.home-page .home-hero-blob { display: none; }
+.home-page .home-hero-inner { gap: 80px; }
+.home-page .home-hero-copy h1 { max-width: 600px; font-size: clamp(2rem, 4.2vw, 3.65rem); line-height: 1.38; letter-spacing: -.04em; }
+.home-page .home-hero-copy > p { font-size: 1rem; line-height: 1.9; }
+.home-page .home-eyebrow { border: 0; border-radius: 8px; background: var(--color-primary-50); padding: 7px 12px; }
+.home-page .home-hero-visual { padding: 24px; min-height: 400px; border-radius: 36px; background: var(--color-primary-50); border: 1px solid var(--color-primary-100); }
+.home-page .home-hero-card-main { width: 320px; padding: 24px 28px; border-radius: 24px; text-align: center; box-shadow: var(--shadow-md); animation: none; }
+.home-page .home-hero-card-icon { margin: 0 auto 8px; }
+.home-growth-art { display: flex; justify-content: center; margin: -8px 0 12px; }
+.home-page .home-hero-card-title { font-size: .94rem; }
+.home-page .home-hero-card-sub { font-size: .77rem; line-height: 1.8; }
+.home-page .home-hero-card-float { border-radius: 12px; box-shadow: var(--shadow-sm); animation: none; font-size: .72rem; }
+.home-page .home-partners { padding-block: 28px; }
+.home-page .home-features { padding-block: 64px; gap: 20px; }
+.home-page .home-feature-card { padding: 28px; box-shadow: none; }
+.home-page .home-feature-icon { background: var(--color-primary-50); border-radius: 14px; }
+.home-page .home-steps { padding-block: 64px; }
+.home-page .home-cta-banner { background: #195b91; border-radius: 24px; max-width: 1180px; margin-inline: auto; }
+.home-page .home-news-wrap { padding-block: 64px; }
+@media (max-width: 860px) { .home-page .home-hero { padding: 44px 24px; } .home-page .home-hero-inner { gap: 28px; } .home-page .home-hero-visual { min-height: 360px; margin-top: 0; } .home-page .home-hero-copy h1 { margin-inline: auto; } .home-page .home-cta-banner { margin-inline: 20px; } }
+@media (max-width: 520px) { .home-page .home-hero { padding: 36px 20px; } .home-page .home-hero-visual { padding: 24px 12px; min-height: 330px; border-radius: 24px; } .home-page .home-hero-card-main { width: 100%; max-width: 290px; } .home-page .home-features { padding: 36px 20px; grid-template-columns: 1fr; } .home-page .home-hero-actions .btn { flex: 1; } }

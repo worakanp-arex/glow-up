@@ -8,6 +8,7 @@ import ScenarioAttempt from "../models/ScenarioAttempt.js";
 import { computeStreakStats } from "../services/streakService.js";
 import { notifyUser } from "../services/notificationService.js";
 import { createCrudController } from "./crudFactory.js";
+import { insertOnce } from "../utils/insertOnce.js";
 
 const { getAll, getOne, create, update, remove } = createCrudController(Mission);
 
@@ -51,8 +52,8 @@ export async function checkAndAwardMissions(userId) {
     const progress = Math.min(currentValue, mission.targetValue);
     const justCompleted = currentValue >= mission.targetValue;
 
-    const existing = await UserMission.findOne({ user: userId, mission: mission._id });
-    if (existing?.completed) continue;
+    const identity = { user: userId, mission: mission._id };
+    await insertOnce(UserMission, identity, { progress: 0, completed: false });
 
     const changes = { progress };
     if (justCompleted) {
@@ -61,12 +62,12 @@ export async function checkAndAwardMissions(userId) {
     }
 
     const userMission = await UserMission.findOneAndUpdate(
-      { user: userId, mission: mission._id },
-      changes,
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { ...identity, completed: false },
+      { $set: changes },
+      { new: true }
     );
 
-    if (justCompleted && (!existing || !existing.completed)) {
+    if (justCompleted && userMission) {
       newlyCompletedMissions.push({ mission, userMission });
     }
   }
@@ -108,7 +109,8 @@ async function checkAndAwardRewards(userId) {
 
   for (const reward of eligibleRewards) {
     if (earnedRewardIds.has(reward._id.toString())) continue;
-    await UserReward.create({ user: userId, reward: reward._id });
+    const created = await insertOnce(UserReward, { user: userId, reward: reward._id }, { earnedAt: new Date() });
+    if (!created) continue;
     newlyEarnedRewards.push(reward);
     await notifyUser(userId, `คุณได้รับรางวัล "${reward.name}" แล้ว!`, "reward");
   }

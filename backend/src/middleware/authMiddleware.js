@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-export function verifyToken(req, res, next) {
+export async function verifyToken(req, res, next) {
   const header = req.headers.authorization;
   const headerToken = header && header.startsWith("Bearer ") ? header.slice(7) : null;
   const token = headerToken || req.cookies?.token;
@@ -10,7 +11,10 @@ export function verifyToken(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    const claims = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+    const user = await User.findById(claims.id).select("role");
+    if (!user) return res.status(401).json({ message: "กรุณาเข้าสู่ระบบอีกครั้ง" });
+    req.user = { id: claims.id, role: user.role };
     next();
   } catch {
     return res.status(401).json({ message: "Invalid or expired token" });

@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { BarChart3, CalendarClock, ShieldAlert, Trophy, Users } from "lucide-react";
 import StatTile from "../../components/common/StatTile.jsx";
@@ -45,16 +46,20 @@ function TrendChart({ data }) {
 function Analytics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     overviewService
       .getOverview()
       .then(setData)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="counsellor-analytics-page">กำลังโหลด...</div>;
+    return <div className="counsellor-analytics-page"><AsyncState /></div>;
   }
   if (!data) {
     return <div className="counsellor-analytics-page">ไม่สามารถโหลดข้อมูลภาพรวมได้</div>;

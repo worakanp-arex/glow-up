@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Award, Flame, Heart, Sparkles, Users } from "lucide-react";
 import * as familyService from "../../services/familyService.js";
@@ -11,14 +12,18 @@ function FamilyDashboard({ links }) {
   const [selectedLinkId, setSelectedLinkId] = useState(links[0]._id);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
     familyService
       .getLinkedUserSummary(selectedLinkId)
       .then(setSummary)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [selectedLinkId]);
+
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
   return (
     <div className="family-dashboard-page">
@@ -44,7 +49,7 @@ function FamilyDashboard({ links }) {
       </p>
 
       {loading || !summary ? (
-        <p className="family-dashboard-loading">กำลังโหลด...</p>
+        <div className="family-dashboard-loading"><AsyncState /></div>
       ) : (
         <>
           <div className="family-dashboard-hero">

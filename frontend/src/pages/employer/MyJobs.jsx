@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Briefcase, MapPin, Plus, Tag, Trash2, Users, Wallet } from "lucide-react";
@@ -8,6 +11,8 @@ import "./MyJobs.css";
 function MyJobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const pagination = usePagination(jobs);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     load();
@@ -18,6 +23,7 @@ function MyJobs() {
     jobService
       .getMyJobs()
       .then(setJobs)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }
 
@@ -33,8 +39,10 @@ function MyJobs() {
     setJobs((prev) => prev.filter((j) => j._id !== job._id));
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="my-jobs-page">กำลังโหลด...</div>;
+    return <div className="my-jobs-page"><AsyncState /></div>;
   }
 
   return (
@@ -53,7 +61,7 @@ function MyJobs() {
       {jobs.length === 0 && <p className="my-jobs-empty">คุณยังไม่มีประกาศงาน</p>}
 
       <ul className="my-jobs-list">
-        {jobs.map((job) => (
+        {pagination.items.map((job) => (
           <li key={job._id}>
             <div className="my-jobs-icon">
               <Briefcase size={20} />
@@ -107,6 +115,7 @@ function MyJobs() {
           </li>
         ))}
       </ul>
+      <Pagination {...pagination} />
     </div>
   );
 }

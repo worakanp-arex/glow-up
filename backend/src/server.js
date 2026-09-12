@@ -1,10 +1,10 @@
+import { validateEnvironment } from "./config/env.js";
 import http from "http";
-import dotenv from "dotenv";
 import app from "./app.js";
 import { connectDB } from "./config/db.js";
 import { initSocket } from "./services/socket.js";
 
-dotenv.config();
+validateEnvironment();
 
 const PORT = process.env.PORT || 5001;
 

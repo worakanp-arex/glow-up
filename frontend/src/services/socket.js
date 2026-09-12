@@ -2,12 +2,9 @@ import { io } from "socket.io-client";
 
 let socket = null;
 
-export function connectSocket(userId) {
+export function connectSocket() {
   if (socket) return socket;
-  socket = io("/", { path: "/socket.io" });
-  socket.on("connect", () => {
-    socket.emit("join", userId);
-  });
+  socket = io("/", { path: "/socket.io", withCredentials: true });
   return socket;
 }
 

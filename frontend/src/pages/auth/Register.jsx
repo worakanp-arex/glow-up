@@ -209,8 +209,10 @@ function Register() {
 
         {error && <p className="register-error">{error}</p>}
 
-        <GoogleSignInButton onCredential={handleGoogleCredential} />
-        <div className="auth-divider">หรือ</div>
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID && <>
+          <GoogleSignInButton onCredential={handleGoogleCredential} />
+          <div className="auth-divider">หรือ</div>
+        </>}
 
         <div className="register-avatar-picker">
           <button

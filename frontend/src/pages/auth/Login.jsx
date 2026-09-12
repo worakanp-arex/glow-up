@@ -74,8 +74,10 @@ function Login() {
 
         {error && <p className="login-error">{error}</p>}
 
-        <GoogleSignInButton onCredential={handleGoogleCredential} />
-        <div className="auth-divider">หรือ</div>
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID && <>
+          <GoogleSignInButton onCredential={handleGoogleCredential} />
+          <div className="auth-divider">หรือ</div>
+        </>}
 
         <label>
           อีเมล

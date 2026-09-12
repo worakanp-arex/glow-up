@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -10,11 +13,14 @@ function SavedPosts() {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const pagination = usePagination(posts);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     postService
       .getSavedPosts()
       .then(setPosts)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -40,8 +46,10 @@ function SavedPosts() {
     setPosts((prev) => prev.filter((p) => p._id !== postId));
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="community-page">กำลังโหลด...</div>;
+    return <div className="community-page"><AsyncState /></div>;
   }
 
   return (
@@ -57,7 +65,7 @@ function SavedPosts() {
       </div>
 
       <ul className="community-list community-list-full">
-        {posts.map((post) => (
+        {pagination.items.map((post) => (
           <PostCard
             key={post._id}
             post={post}
@@ -70,6 +78,7 @@ function SavedPosts() {
         ))}
         {posts.length === 0 && <p className="community-empty">คุณยังไม่ได้บันทึกโพสต์ไว้</p>}
       </ul>
+      <Pagination {...pagination} />
     </div>
   );
 }

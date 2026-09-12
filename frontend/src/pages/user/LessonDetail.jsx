@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BookOpen, Play } from "lucide-react";
@@ -10,6 +11,7 @@ function LessonDetail() {
   const [lesson, setLesson] = useState(null);
   const [scenarios, setScenarios] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     Promise.all([microLessonService.getLesson(id), scenarioService.getScenarios()])
@@ -17,11 +19,14 @@ function LessonDetail() {
         setLesson(lessonData);
         setScenarios(allScenarios.filter((s) => s.lesson === id));
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [id]);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="lesson-detail-page">กำลังโหลด...</div>;
+    return <div className="lesson-detail-page"><AsyncState /></div>;
   }
   if (!lesson) {
     return <div className="lesson-detail-page">ไม่พบบทเรียนนี้</div>;

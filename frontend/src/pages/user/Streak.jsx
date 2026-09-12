@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Award, CalendarCheck, Flame } from "lucide-react";
@@ -11,18 +12,22 @@ import "./Streak.css";
 function Streak() {
   const [streak, setStreak] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     emotionService
       .getMyStreak()
       .then(setStreak)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
+
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
   if (loading) {
     return (
       <div className="streak-page">
-        <p className="streak-loading">กำลังโหลด...</p>
+        <div className="streak-loading"><AsyncState /></div>
       </div>
     );
   }

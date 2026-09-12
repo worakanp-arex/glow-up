@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -46,15 +47,18 @@ function makeUploader(kind) {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, path.join(UPLOAD_ROOT, SUBFOLDERS[kind])),
     filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-      cb(null, `${unique}${ext}`);
+      const extensions = {
+        "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp",
+        "application/pdf": ".pdf", "application/msword": ".doc",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+      };
+      cb(null, `${randomUUID()}${extensions[file.mimetype] || ".bin"}`);
     },
   });
 
   return multer({
     storage,
-    limits: { fileSize: SIZE_LIMITS[kind] },
+    limits: { fileSize: SIZE_LIMITS[kind], files: 10 },
     fileFilter: (req, file, cb) => {
       if (!FILE_FILTERS[kind].includes(file.mimetype)) {
         return cb(new Error(`Invalid file type for ${kind}`));

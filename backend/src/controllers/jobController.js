@@ -1,4 +1,5 @@
 import Job from "../models/Job.js";
+import { paginationOptions, escapeRegex } from "../utils/pagination.js";
 import JobSkill from "../models/JobSkill.js";
 import Application from "../models/Application.js";
 import { notifyUser } from "../services/notificationService.js";
@@ -25,19 +26,19 @@ async function attachSkills(job) {
 }
 
 export async function listJobs(req, res) {
-  const filter = { status: "open", verifiedStatus: "verified" };
+  const filter = { status: "open", verifiedStatus: "verified", $and: [{ $or: [{ expiredAt: null }, { expiredAt: { $gt: new Date() } }] }] };
 
   if (req.query.keyword) {
-    const regex = new RegExp(req.query.keyword, "i");
+    const regex = new RegExp(escapeRegex(req.query.keyword), "i");
     filter.$or = [{ title: regex }, { description: regex }];
   }
 
   const locationConditions = [];
   if (req.query.location) {
-    locationConditions.push({ location: new RegExp(req.query.location, "i") });
+    locationConditions.push({ location: new RegExp(escapeRegex(req.query.location), "i") });
   }
   if (req.query.province) {
-    locationConditions.push({ location: new RegExp(req.query.province, "i") });
+    locationConditions.push({ location: new RegExp(escapeRegex(req.query.province), "i") });
   }
   if (locationConditions.length > 0) {
     filter.$and = (filter.$and || []).concat(locationConditions);
@@ -64,10 +65,16 @@ export async function listJobs(req, res) {
     filter._id = { $in: jobIds };
   }
 
-  const jobs = await Job.find(filter)
+  const pagination = paginationOptions(req.query);
+  const query = Job.find(filter)
     .populate("employer", EMPLOYER_PUBLIC_FIELDS)
     .populate("category")
     .sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Job.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  const jobs = await query;
   const withSkills = await Promise.all(jobs.map(attachSkills));
   res.json(withSkills);
 }

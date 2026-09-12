@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, HeartHandshake, Search, User, Users } from "lucide-react";
@@ -28,13 +29,14 @@ function Dashboard() {
   const { user } = useAuth();
   const [streak, setStreak] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [familyLinks, setFamilyLinks] = useState(null);
 
   useEffect(() => {
     emotionService
       .getMyStreak()
       .then(setStreak)
-      .catch(() => setStreak(null))
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -51,11 +53,13 @@ function Dashboard() {
   // to resolve before rendering either dashboard, to avoid a flash of the
   // wrong one.
   if (familyLinks === null) {
-    return <div className="dashboard-page" />;
+    return <AsyncState />;
   }
   if (familyLinks.length > 0) {
     return <FamilyDashboard links={familyLinks} />;
   }
+
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
   return (
     <div className="dashboard-page">

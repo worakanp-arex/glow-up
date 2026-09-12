@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Check, ClipboardCheck, Trash2, X } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
@@ -7,6 +10,8 @@ import "./JobsModeration.css";
 function JobsModeration() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const pagination = usePagination(jobs);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     load();
@@ -17,6 +22,7 @@ function JobsModeration() {
     jobService
       .getAllJobsForAdmin()
       .then(setJobs)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }
 
@@ -31,8 +37,10 @@ function JobsModeration() {
     setJobs((prev) => prev.filter((j) => j._id !== job._id));
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="jobs-moderation-page">กำลังโหลด...</div>;
+    return <div className="jobs-moderation-page"><AsyncState /></div>;
   }
 
   return (
@@ -46,7 +54,7 @@ function JobsModeration() {
       {jobs.length === 0 && <p className="jobs-moderation-empty">ยังไม่มีประกาศงานในระบบ</p>}
 
       <ul className="jobs-moderation-list">
-        {jobs.map((job) => (
+        {pagination.items.map((job) => (
           <li key={job._id}>
             <div className="jobs-moderation-info">
               <p className="jobs-moderation-title">{job.title}</p>
@@ -84,6 +92,7 @@ function JobsModeration() {
           </li>
         ))}
       </ul>
+      <Pagination {...pagination} />
     </div>
   );
 }

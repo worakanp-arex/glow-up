@@ -13,6 +13,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import Reveal from "../components/common/Reveal.jsx";
 import PartnerBadge from "../components/common/PartnerBadge.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
+import PlantGrowth from "../components/user/PlantGrowth.jsx";
 import { PARTNERS } from "../constants/partners.js";
 import "./Home.css";
 
@@ -54,7 +55,7 @@ const STEPS = [
   },
   {
     icon: Sparkles,
-    title: "รับการจับคู่งานที่เหมาะสมด้วย AI",
+    title: "ค้นหางานจากทักษะที่คุณมี",
     desc: "ระบบช่วยแนะนำงานที่ตรงกับทักษะและบริบทของคุณ เพื่อการเริ่มต้นที่ตรงจุด",
   },
   {
@@ -107,6 +108,7 @@ function Home() {
               <div className="home-hero-card-icon">
                 <HeartHandshake size={20} />
               </div>
+              <div className="home-growth-art"><PlantGrowth streak={14} size={170} /></div>
               <p className="home-hero-card-title">ทุกคนควรมีโอกาสเริ่มต้นใหม่</p>
               <p className="home-hero-card-sub">
                 จับคู่งานอย่างเป็นธรรม ดูแลความเป็นส่วนตัวของคุณเป็นอันดับแรก
@@ -118,7 +120,7 @@ function Home() {
               </div>
               <div className="home-hero-card home-hero-card-float home-hero-card-float-2">
                 <Sparkles size={16} />
-                <span>จับคู่งานด้วย AI</span>
+                <span>ค้นพบโอกาสที่เหมาะกับคุณ</span>
               </div>
             </div>
           </div>

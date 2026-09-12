@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { BookOpen, ExternalLink, Plus } from "lucide-react";
 import * as courseService from "../../services/courseService.js";
@@ -8,6 +9,7 @@ const INITIAL_FORM = { title: "", description: "", category: "", externalUrl: ""
 function CourseManagement() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -16,6 +18,7 @@ function CourseManagement() {
     courseService
       .getCourses()
       .then(setCourses)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -48,6 +51,8 @@ function CourseManagement() {
       setSubmitting(false);
     }
   }
+
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
   return (
     <div className="course-management-page">
@@ -115,7 +120,7 @@ function CourseManagement() {
 
       <h2 className="course-management-list-heading">คอร์สเรียนทั้งหมด</h2>
       {loading ? (
-        <p>กำลังโหลด...</p>
+        <AsyncState />
       ) : courses.length === 0 ? (
         <p className="course-management-empty">ยังไม่มีคอร์สเรียนในระบบ</p>
       ) : (

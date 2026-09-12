@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Paperclip, ShieldAlert, Users } from "lucide-react";
@@ -13,6 +16,8 @@ function Applicants() {
   const { jobId } = useParams();
   const [applicants, setApplicants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const pagination = usePagination(applicants);
+  const [loadError, setLoadError] = useState(null);
   const [blocked, setBlocked] = useState(false);
 
   useEffect(() => {
@@ -24,11 +29,14 @@ function Applicants() {
           setBlocked(true);
         }
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [jobId]);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="applicants-page">กำลังโหลด...</div>;
+    return <div className="applicants-page"><AsyncState /></div>;
   }
 
   if (blocked) {
@@ -62,7 +70,7 @@ function Applicants() {
       {applicants.length === 0 && <p className="applicants-empty">ยังไม่มีผู้สมัครสำหรับงานนี้</p>}
 
       <ul className="applicants-list">
-        {applicants.map((app) => (
+        {pagination.items.map((app) => (
           <li key={app._id}>
             <Link to={`/employer/applications/${app._id}`} className="applicants-info">
               <span className="applicants-avatar">
@@ -89,6 +97,7 @@ function Applicants() {
           </li>
         ))}
       </ul>
+      <Pagination {...pagination} />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Plus, Tag } from "lucide-react";
 import * as jobCategoryService from "../../services/jobCategoryService.js";
@@ -7,6 +8,7 @@ function JobCategories() {
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,6 +16,7 @@ function JobCategories() {
     jobCategoryService
       .getJobCategories()
       .then(setCategories)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,8 +36,10 @@ function JobCategories() {
     }
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="job-categories-page">กำลังโหลด...</div>;
+    return <div className="job-categories-page"><AsyncState /></div>;
   }
 
   return (

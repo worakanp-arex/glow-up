@@ -86,7 +86,7 @@ function Footer() {
 
       <div className="footer-bottom">
         <img className="footer-bottom-logo" src={logoSrc} alt="glow-up" />
-        <p>&copy; {year} glow-up — โครงการสนับสนุนการจัดหางานด้วย AI สำหรับผู้ผ่านการบำบัด</p>
+        <p>&copy; {year} glow-up — โครงการสนับสนุนโอกาสการทำงาน สำหรับผู้ผ่านการบำบัด</p>
       </div>
     </footer>
   );

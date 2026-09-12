@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Send } from "lucide-react";
@@ -18,6 +21,8 @@ function Community() {
   const isStaff = STAFF_ROLES.includes(user.role);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const pagination = usePagination(posts);
+  const [loadError, setLoadError] = useState(null);
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [commentsEnabled, setCommentsEnabled] = useState(true);
@@ -32,6 +37,7 @@ function Community() {
         setPosts(data);
         setSelectedPostId((prev) => prev ?? data[0]?._id ?? null);
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -91,8 +97,10 @@ function Community() {
     });
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="community-page">กำลังโหลด...</div>;
+    return <div className="community-page"><AsyncState /></div>;
   }
 
   return (
@@ -123,7 +131,7 @@ function Community() {
 
       <div className="community-layout">
         <ul className="community-list">
-          {posts.map((post) =>
+          {pagination.items.map((post) =>
             isStaff ? (
               <PostCard
                 key={post._id}
@@ -201,6 +209,7 @@ function Community() {
           </aside>
         )}
       </div>
+      <Pagination {...pagination} />
     </div>
   );
 }

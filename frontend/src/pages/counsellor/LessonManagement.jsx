@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { BookOpen, Play, Plus, Trash2 } from "lucide-react";
 import * as microLessonService from "../../services/microLessonService.js";
@@ -12,6 +13,7 @@ function LessonManagement() {
   const [lessons, setLessons] = useState([]);
   const [scenarios, setScenarios] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const [lessonForm, setLessonForm] = useState(INITIAL_LESSON_FORM);
   const [savingLesson, setSavingLesson] = useState(false);
@@ -27,6 +29,7 @@ function LessonManagement() {
         setLessons(lessonData);
         setScenarios(scenarioData);
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -94,6 +97,8 @@ function LessonManagement() {
     setScenarios((prev) => prev.filter((s) => s._id !== id));
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   return (
     <div className="lesson-management-page">
       <h1>
@@ -146,7 +151,7 @@ function LessonManagement() {
 
       <h2 className="lesson-management-list-heading">บทเรียนทั้งหมด</h2>
       {loading ? (
-        <p>กำลังโหลด...</p>
+        <AsyncState />
       ) : lessons.length === 0 ? (
         <p className="lesson-management-empty">ยังไม่มีบทเรียนในระบบ</p>
       ) : (
@@ -251,7 +256,7 @@ function LessonManagement() {
 
       <h2 className="lesson-management-list-heading">สถานการณ์จำลองทั้งหมด</h2>
       {loading ? (
-        <p>กำลังโหลด...</p>
+        <AsyncState />
       ) : scenarios.length === 0 ? (
         <p className="lesson-management-empty">ยังไม่มีสถานการณ์จำลองในระบบ</p>
       ) : (

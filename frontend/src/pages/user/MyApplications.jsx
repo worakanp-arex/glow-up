@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Briefcase, Building2, CalendarDays } from "lucide-react";
@@ -7,25 +10,18 @@ import "./MyApplications.css";
 
 const CANCELLABLE_STATUSES = ["pending", "interview"];
 
-// Placeholder until real AI job matching ships (see README roadmap) — deterministic
-// per application so the number doesn't jump around on every reload.
-function matchScoreFor(id) {
-  let hash = 0;
-  for (let i = 0; i < id.length; i += 1) {
-    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  }
-  return 72 + (hash % 27);
-}
-
 function MyApplications() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const pagination = usePagination(applications.filter((app) => app.job));
 
   useEffect(() => {
     applicationService
       .getMyApplications()
       .then(setApplications)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -40,8 +36,10 @@ function MyApplications() {
     }
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="my-applications-page">กำลังโหลด...</div>;
+    return <div className="my-applications-page"><AsyncState /></div>;
   }
 
   const visibleApplications = applications.filter((app) => app.job);
@@ -56,7 +54,7 @@ function MyApplications() {
       {visibleApplications.length === 0 && <p className="my-applications-empty">คุณยังไม่ได้สมัครงานใด</p>}
 
       <ul className="my-applications-list">
-        {visibleApplications.map((app) => {
+        {pagination.items.map((app) => {
           const employerName = app.job?.employer?.companyName || app.job?.employer?.name;
           const note = app.employerFeedback || app.rejectionReason;
 
@@ -81,8 +79,9 @@ function MyApplications() {
 
                 <div className="app-card-side">
                   <div className="app-card-match">
-                    <span className="app-card-match-label">คะแนนแมตช์</span>
-                    <span className="app-card-match-score">{matchScoreFor(app._id)}%</span>
+                    <span className="app-card-match-label">ทักษะตรงกับงาน</span>
+                    <span className="app-card-match-score">{app.match ? app.match.score + "%" : "ยังไม่ระบุ"}</span>
+                    {app.match && <small>{app.match.matchedSkills.length}/{app.match.totalSkills} ทักษะ · {app.match.matchedSkills.join(", ") || "ลองเพิ่มทักษะในโปรไฟล์"}</small>}
                   </div>
                   <StatusBadge status={app.status} />
                   <Link to={`/jobs/${app.job._id}`} className="app-card-detail-btn">
@@ -111,6 +110,7 @@ function MyApplications() {
           );
         })}
       </ul>
+      <Pagination {...pagination} />
     </div>
   );
 }

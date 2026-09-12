@@ -1,3 +1,4 @@
+import { applicationMatches } from "../services/jobMatchService.js";
 import Application from "../models/Application.js";
 import Job from "../models/Job.js";
 import User from "../models/User.js";
@@ -34,7 +35,7 @@ export async function applyToJob(req, res) {
   if (!job) {
     return res.status(404).json({ message: "Job not found" });
   }
-  if (job.status !== "open" || job.verifiedStatus !== "verified") {
+  if (job.status !== "open" || job.verifiedStatus !== "verified" || (job.expiredAt && job.expiredAt <= new Date())) {
     return res.status(400).json({ message: "This job is not open for applications" });
   }
 
@@ -64,7 +65,7 @@ export async function myApplications(req, res) {
   const applications = await Application.find({ user: req.user.id })
     .populate({ path: "job", populate: { path: "employer", select: "name companyName avatarUrl" } })
     .sort({ createdAt: -1 });
-  res.json(applications);
+  res.json(await applicationMatches(req.user.id, applications));
 }
 
 export async function jobApplicants(req, res) {

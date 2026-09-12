@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, MessageCircleWarning, Play } from "lucide-react";
@@ -9,6 +10,7 @@ function MicroLessons() {
   const [lessons, setLessons] = useState([]);
   const [scenarios, setScenarios] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     Promise.all([microLessonService.getLessons(), scenarioService.getScenarios()])
@@ -16,11 +18,14 @@ function MicroLessons() {
         setLessons(lessonData);
         setScenarios(scenarioData);
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="micro-lessons-page">กำลังโหลด...</div>;
+    return <div className="micro-lessons-page"><AsyncState /></div>;
   }
 
   return (

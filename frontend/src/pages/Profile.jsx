@@ -1,3 +1,4 @@
+import AsyncState from "../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -321,7 +322,7 @@ function Profile() {
               <h2>
                 <Sparkles size={18} />
                 <span>ทักษะและความสามารถ</span>
-                <span className="profile-skills-hint">(สำหรับวิเคราะห์ AI)</span>
+                <span className="profile-skills-hint">(ใช้เทียบกับทักษะที่งานต้องการ)</span>
               </h2>
 
               <form className="profile-skill-add-form" onSubmit={handleAddSkill}>
@@ -356,7 +357,7 @@ function Profile() {
               </form>
 
               {skillsLoading ? (
-                <p>กำลังโหลด...</p>
+                <AsyncState />
               ) : (
                 <div className="profile-skill-chips">
                   {mySkills.map((item) => (

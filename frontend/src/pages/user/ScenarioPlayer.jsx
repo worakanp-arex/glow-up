@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Award, CheckCircle2, Play, XCircle } from "lucide-react";
@@ -8,6 +9,7 @@ function ScenarioPlayer() {
   const { id } = useParams();
   const [scenario, setScenario] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [chosenIndex, setChosenIndex] = useState(null);
   const [result, setResult] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -16,6 +18,7 @@ function ScenarioPlayer() {
     scenarioService
       .getScenario(id)
       .then(setScenario)
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -35,8 +38,10 @@ function ScenarioPlayer() {
     setResult(null);
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="scenario-player-page">กำลังโหลด...</div>;
+    return <div className="scenario-player-page"><AsyncState /></div>;
   }
   if (!scenario) {
     return <div className="scenario-player-page">ไม่พบสถานการณ์นี้</div>;

@@ -1,3 +1,6 @@
+import Pagination from "../../components/common/Pagination.jsx";
+import { usePagination } from "../../hooks/usePagination.js";
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, ExternalLink, Heart, MessageCircleWarning, Search } from "lucide-react";
@@ -11,6 +14,7 @@ function Courses() {
   const [courses, setCourses] = useState([]);
   const [myCourses, setMyCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
 
@@ -23,6 +27,7 @@ function Courses() {
         setCourses(allCourses);
         setMyCourses(enrolled);
       })
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [user.role]);
 
@@ -41,6 +46,8 @@ function Courses() {
     });
   }, [courses, query, category]);
 
+  const pagination = usePagination(visibleCourses);
+
   async function handleToggleHeart(courseId, isEnrolled) {
     if (isEnrolled) {
       await courseService.unenrollCourse(courseId);
@@ -51,8 +58,10 @@ function Courses() {
     }
   }
 
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
   if (loading) {
-    return <div className="courses-page">กำลังโหลด...</div>;
+    return <div className="courses-page"><AsyncState /></div>;
   }
 
   return (
@@ -100,7 +109,7 @@ function Courses() {
         <p className="courses-empty">ไม่พบคอร์สเรียนที่ตรงกับเงื่อนไข</p>
       ) : (
         <div className="courses-grid">
-          {visibleCourses.map((course) => {
+          {pagination.items.map((course) => {
             const enrollment = myCourses.find((e) => e.course._id === course._id);
             return (
               <div key={course._id} className="course-card">
@@ -152,6 +161,7 @@ function Courses() {
           })}
         </div>
       )}
+      <Pagination {...pagination} />
     </div>
   );
 }

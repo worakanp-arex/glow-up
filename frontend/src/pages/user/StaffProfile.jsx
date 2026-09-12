@@ -1,3 +1,4 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Building2, Stethoscope } from "lucide-react";
@@ -12,6 +13,7 @@ function StaffProfile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -19,10 +21,13 @@ function StaffProfile() {
       .getPublicProfile(id)
       .then(setProfile)
       .catch((err) => setError(err.response?.data?.message || "ไม่สามารถโหลดข้อมูลได้"))
+      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="staff-profile-page">กำลังโหลด...</div>;
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+
+  if (loading) return <div className="staff-profile-page"><AsyncState /></div>;
   if (error || !profile) return <div className="staff-profile-page">{error || "ไม่พบข้อมูล"}</div>;
 
   return (

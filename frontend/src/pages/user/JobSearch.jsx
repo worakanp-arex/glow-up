@@ -1,3 +1,5 @@
+import AsyncState from "../../components/common/AsyncState.jsx";
+import Pagination from "../../components/common/Pagination.jsx";
 import { useEffect, useState } from "react";
 import { MapPin, Search, Wallet } from "lucide-react";
 import JobPreview from "../../components/jobs/JobPreview.jsx";
@@ -21,8 +23,11 @@ function JobSearch() {
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [selectedJobId, setSelectedJobId] = useState(null);
-  const [activeTab, setActiveTab] = useState("list");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [appliedFilters, setAppliedFilters] = useState({});
 
   const [categories, setCategories] = useState([]);
   const [openFilter, setOpenFilter] = useState(null);
@@ -34,7 +39,7 @@ function JobSearch() {
   const [resultLimit, setResultLimit] = useState("10");
 
   useEffect(() => {
-    jobCategoryService.getJobCategories().then(setCategories);
+    jobCategoryService.getJobCategories().then(setCategories).catch(() => setCategories([]));
   }, []);
 
   function buildParams() {
@@ -49,30 +54,33 @@ function JobSearch() {
     return params;
   }
 
-  function load(params) {
-    setLoading(true);
-    jobService
-      .searchJobs(params)
-      .then((data) => {
-        setJobs(data);
-        setSelectedJobId(data[0]?._id || null);
-      })
-      .finally(() => setLoading(false));
-  }
-
   useEffect(() => {
-    load({});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const controller = new AbortController();
+    setLoading(true);
+    setLoadError(null);
+    jobService
+      .searchJobsPage({ ...appliedFilters, page, limit: resultLimit }, controller.signal)
+      .then(({ items, total: count }) => {
+        if (controller.signal.aborted) return;
+        setJobs(items);
+        setTotal(count);
+        setSelectedJobId(items[0]?._id || null);
+      })
+      .catch((error) => { if (!controller.signal.aborted) setLoadError(error); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [appliedFilters, page, resultLimit]);
 
   function handleSubmit(e) {
     e.preventDefault();
-    load(buildParams());
+    setPage(1);
+    setAppliedFilters(buildParams());
   }
 
   function applyFilter() {
     setOpenFilter(null);
-    load(buildParams());
+    setPage(1);
+    setAppliedFilters(buildParams());
   }
 
   function toggleFilter(name) {
@@ -81,7 +89,9 @@ function JobSearch() {
 
   const selectedJob = jobs.find((job) => job._id === selectedJobId) || null;
   const salaryActive = Boolean(minSalary || maxSalary);
-  const visibleJobs = resultLimit === "all" ? jobs : jobs.slice(0, Number(resultLimit));
+  const visibleJobs = jobs;
+
+  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
   return (
     <div className="job-search-page">
@@ -90,13 +100,15 @@ function JobSearch() {
       <form className="job-search-form" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="พิมพ์หางานที่คุณต้องการหาได้เลย (ตำแหน่งงาน สายงาน ทักษะ)"
+          placeholder="ค้นหาตำแหน่งงานหรือรายละเอียดงาน"
+          aria-label="ค้นหาตำแหน่งงาน"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
         <input
           type="text"
           placeholder="ระบุตำบล อำเภอ"
+          aria-label="พื้นที่ทำงาน"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         />
@@ -226,39 +238,22 @@ function JobSearch() {
         </div>
       </div>
 
-      <div className="job-search-tabs">
-        <button
-          type="button"
-          className={activeTab === "list" ? "active" : ""}
-          onClick={() => setActiveTab("list")}
-        >
-          ตำแหน่งงาน
-        </button>
-        <button type="button" className={activeTab === "ai" ? "active" : ""} onClick={() => setActiveTab("ai")}>
-          AI ตำแหน่งงาน
-        </button>
-      </div>
-
-      {activeTab === "ai" ? (
-        <p className="job-search-ai-note">งานแนะนำจาก AI จะมาในเฟสถัดไป</p>
-      ) : loading ? (
-        <p>กำลังโหลด...</p>
+      {loading ? (
+        <AsyncState />
       ) : (
         <div className="job-search-layout">
           <div className="job-search-list">
             {jobs.length > 0 && (
               <div className="job-search-list-header">
                 <span className="job-search-result-count">
-                  พบ {jobs.length} ตำแหน่ง
-                  {visibleJobs.length < jobs.length && ` (แสดง ${visibleJobs.length} รายการ)`}
+                  พบ {total} ตำแหน่ง
                 </span>
                 <label className="job-search-limit-select">
                   แสดง
-                  <select value={resultLimit} onChange={(e) => setResultLimit(e.target.value)}>
+                  <select value={resultLimit} onChange={(e) => { setResultLimit(e.target.value); setPage(1); }}>
                     <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
-                    <option value="all">ทั้งหมด</option>
                   </select>
                   รายการ
                 </label>
@@ -299,6 +294,7 @@ function JobSearch() {
               </button>
             ))}
             {jobs.length === 0 && <p className="job-search-empty">ไม่พบตำแหน่งงานที่ตรงกับเงื่อนไข</p>}
+            <Pagination page={page} pageCount={Math.max(1, Math.ceil(total / Number(resultLimit)))} setPage={setPage} total={total} />
           </div>
 
           <div className="job-search-preview">

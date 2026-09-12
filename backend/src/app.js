@@ -1,4 +1,9 @@
+import "./config/env.js";
 import express from "express";
+import path from "node:path";
+import { verifyToken } from "./middleware/authMiddleware.js";
+import { authorizeDownload } from "./middleware/authorizeDownload.js";
+import { asyncHandler } from "./middleware/asyncHandler.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
@@ -32,7 +37,21 @@ app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173", crede
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
-app.use("/uploads", express.static(UPLOAD_ROOT));
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "same-origin");
+  next();
+});
+app.use("/uploads/avatars", (req, res, next) => {
+  if (!/\.(png|jpe?g|webp)$/i.test(req.path)) return res.sendStatus(404);
+  next();
+}, express.static(path.join(UPLOAD_ROOT, "avatars")));
+app.get("/uploads/:kind/:filename", verifyToken, asyncHandler(authorizeDownload), (req, res, next) => {
+  res.setHeader("Cache-Control", "private, no-store");
+  res.download(path.join(UPLOAD_ROOT, req.params.kind, req.params.filename), (err) => {
+    if (err) next(err);
+  });
+});
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
