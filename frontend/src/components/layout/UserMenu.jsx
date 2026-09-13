@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronDown, ClipboardList, LayoutDashboard, LogOut, User } from "lucide-react";
+import { Award, BookOpen, CalendarDays, ChevronDown, ClipboardList, LayoutDashboard, LogOut, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./UserMenu.css";
 
@@ -19,7 +19,12 @@ const ROLE_LABELS = {
 };
 
 const ROLE_LINKS = {
-  user: [{ to: "/my-applications", label: "ใบสมัครของฉัน", icon: ClipboardList }],
+  user: [
+    { to: "/my-applications", label: "ใบสมัครของฉัน", icon: ClipboardList },
+    { to: "/weekly-checkin", label: "เช็คอินรายสัปดาห์", icon: CalendarDays },
+    { to: "/learning", label: "บทเรียนและการฝึกฝน", icon: BookOpen },
+    { to: "/streak", label: "ความก้าวหน้าและรางวัล", icon: Award },
+  ],
   employer: [],
   admin: [],
   counsellor: [],

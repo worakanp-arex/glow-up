@@ -52,6 +52,14 @@ for (const [role, routes] of Object.entries(pages)) {
     await expect(page.locator("#main-content")).toBeVisible();
     await expect(page.locator(url === "/not-a-page" ? "#main-content .async-state h2" : "#main-content h1").first()).toBeVisible();
     await expect(page.locator("#main-content .async-state .spin")).toHaveCount(0);
+    await expect(page.locator(".workspace-sidebar")).toHaveCount(0);
+    if (testInfo.project.name === "mobile") {
+      await expect(page.locator(".secondary-nav")).toBeHidden();
+      await expect(page.getByRole("button", { name: "เปิดเมนู", exact: true })).toBeVisible();
+    } else {
+      await expect(page.locator(".secondary-nav")).toBeVisible();
+      await expect(page.locator(".navbar-menu-toggle")).toBeHidden();
+    }
     await expect(page.getByText("หน้านี้ยังเปิดไม่ได้", { exact: true })).toHaveCount(0);
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
     expect(errors).toEqual([]);
@@ -95,4 +103,33 @@ test("application cards show the supplied skill match", async ({ page }) => {
   await expect(page.locator(".app-card-match").first()).toContainText("50%");
   await expect(page.locator(".app-card-match").first()).toContainText("1/2");
   await expect(page.locator(".app-card-match").first()).toContainText("Customer service");
+});
+
+for (const width of [320, 360, 430]) test(`mobile home at ${width}px keeps primary actions in the first screen`, async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile");
+  await fixture(page, "guest");
+  await page.setViewportSize({ width, height: 780 });
+  await page.goto("/");
+  await expect(page.locator(".home-hero-actions").first()).toBeInViewport({ ratio: 1 });
+  await expect(page.locator(".home-hero-visual")).toBeInViewport({ ratio: 1 });
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: testInfo.outputPath(`home-${width}.png`), animations: "disabled" });
+});
+test("mobile drawer closes when switching to desktop", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile");
+  await fixture(page); await page.goto("/dashboard");
+  await page.getByRole("button", { name: "เปิดเมนู", exact: true }).click();
+  await expect(page.locator("#mobile-navigation")).toBeVisible();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expect(page.locator("#mobile-navigation")).toHaveCount(0);
+  await expect(page.locator(".secondary-nav")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
+});
+
+test("account menu retains the activity links", async ({ page }) => {
+  await fixture(page); await page.goto("/dashboard");
+  await page.getByRole("button", { name: "เมนูบัญชีของฉัน" }).click();
+  for (const href of ["/my-applications", "/weekly-checkin", "/learning", "/streak"]) {
+    await expect(page.locator(`.user-menu-panel a[href="${href}"]`)).toBeVisible();
+  }
 });

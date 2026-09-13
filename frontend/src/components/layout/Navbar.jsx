@@ -39,6 +39,13 @@ function Navbar() {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 861px)");
+    const closeOnDesktop = () => { if (desktop.matches) setMenuOpen(false); };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
+
   const mobileLinks = getNavLinks(user, isAuthenticated);
 
   return (

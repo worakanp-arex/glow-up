@@ -5,7 +5,8 @@ import "./SecondaryNav.css";
 
 function SecondaryNav() {
   const { user, isAuthenticated } = useAuth();
-  const links = getNavLinks(user, isAuthenticated);
+  const mobileExtras = ["/my-applications", "/weekly-checkin", "/learning", "/streak"];
+  const links = getNavLinks(user, isAuthenticated).filter(({ to }) => !mobileExtras.includes(to));
 
   return (
     <nav className="secondary-nav">
