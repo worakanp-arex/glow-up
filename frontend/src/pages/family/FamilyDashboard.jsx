@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Award, Flame, Heart, Sparkles, Users } from "lucide-react";
@@ -28,10 +29,7 @@ function FamilyDashboard({ links }) {
   return (
     <div className="family-dashboard-page">
       <div className="family-dashboard-header">
-        <h1>
-          <Heart size={22} />
-          <span>ติดตามความคืบหน้า</span>
-        </h1>
+        <PageHeader icon={Heart}>ติดตามความคืบหน้า</PageHeader>
         {links.length > 1 && (
           <select value={selectedLinkId} onChange={(e) => setSelectedLinkId(e.target.value)}>
             {links.map((link) => (

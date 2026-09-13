@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
@@ -46,10 +47,7 @@ function MyApplications() {
 
   return (
     <div className="my-applications-page">
-      <h1>
-        <Briefcase size={22} />
-        <span>ใบสมัครของฉัน</span>
-      </h1>
+      <PageHeader icon={Briefcase}>ใบสมัครของฉัน</PageHeader>
 
       {visibleApplications.length === 0 && <p className="my-applications-empty">คุณยังไม่ได้สมัครงานใด</p>}
 

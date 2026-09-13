@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { BookOpen, Play, Plus, Trash2 } from "lucide-react";
@@ -101,13 +102,9 @@ function LessonManagement() {
 
   return (
     <div className="lesson-management-page">
-      <h1>
-        <BookOpen size={22} />
-        <span>จัดการทักษะการปฏิเสธ</span>
-      </h1>
-      <p className="lesson-management-intro">
+      <PageHeader icon={BookOpen} description={<>
         เพิ่มบทเรียนสั้นและสถานการณ์จำลองเพื่อฝึกทักษะการปฏิเสธในสถานการณ์เสี่ยง
-      </p>
+      </>}>จัดการทักษะการปฏิเสธ</PageHeader>
 
       <form className="lesson-management-form" onSubmit={handleLessonSubmit}>
         <h2>

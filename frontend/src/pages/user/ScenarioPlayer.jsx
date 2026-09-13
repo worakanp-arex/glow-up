@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Award, CheckCircle2, Play, XCircle } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Award, CheckCircle2, Play, XCircle } from "lucide-react";
 import * as scenarioService from "../../services/scenarioService.js";
 import "./ScenarioPlayer.css";
 
@@ -38,27 +39,21 @@ function ScenarioPlayer() {
     setResult(null);
   }
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={Play} backTo={"/learning"} backLabel="บทเรียนทั้งหมด">{scenario?.title || "ฝึกสถานการณ์จำลอง"}</PageHeader>;
+
+  if (loadError) return <div className="scenario-player-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
   if (loading) {
-    return <div className="scenario-player-page"><AsyncState /></div>;
+    return <div className="scenario-player-page">{pageHeader}<AsyncState /></div>;
   }
   if (!scenario) {
-    return <div className="scenario-player-page">ไม่พบสถานการณ์นี้</div>;
+    return <div className="scenario-player-page">{pageHeader}ไม่พบสถานการณ์นี้</div>;
   }
 
   return (
     <div className="scenario-player-page">
-      <Link to="/learning" className="scenario-player-back">
-        <ArrowLeft size={16} />
-        บทเรียนทั้งหมด
-      </Link>
-
+      {pageHeader}
       <div className="scenario-player-card">
-        <div className="scenario-player-icon">
-          <Play size={22} />
-        </div>
-        <h1>{scenario.title}</h1>
         <p className="scenario-player-prompt">{scenario.prompt}</p>
 
         {result ? (

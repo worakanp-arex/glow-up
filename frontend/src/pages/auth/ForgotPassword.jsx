@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { KeyRound } from "lucide-react";
@@ -41,11 +42,7 @@ function ForgotPassword() {
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <h1>
-          <KeyRound size={22} />
-          <span>ลืมรหัสผ่าน</span>
-        </h1>
-        <p className="login-forgot-hint">กรอกอีเมลที่ใช้สมัครสมาชิก เราจะส่งลิงก์รีเซ็ตรหัสผ่านไปให้</p>
+        <PageHeader icon={KeyRound} backTo="/login" backLabel="หน้าเข้าสู่ระบบ" description={<>กรอกอีเมลที่ใช้สมัครสมาชิก เราจะส่งลิงก์รีเซ็ตรหัสผ่านไปให้</>}>ลืมรหัสผ่าน</PageHeader>
 
         {error && <p className="login-error">{error}</p>}
         {message && <p className="login-success">{message}</p>}

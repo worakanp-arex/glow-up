@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Award, BookOpen, ExternalLink, Heart } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Award, BookOpen, ExternalLink, Heart } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as courseService from "../../services/courseService.js";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
@@ -57,28 +58,23 @@ function CourseDetail() {
     }
   }
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={BookOpen} backTo={"/courses"} backLabel="คอร์สเรียน">{course?.title || "รายละเอียดคอร์สเรียน"}</PageHeader>;
+
+  if (loadError) return <div className="course-detail-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
   if (loading) {
-    return <div className="course-detail-page"><AsyncState /></div>;
+    return <div className="course-detail-page">{pageHeader}<AsyncState /></div>;
   }
   if (!course) {
-    return <div className="course-detail-page">ไม่พบคอร์สนี้</div>;
+    return <div className="course-detail-page">{pageHeader}ไม่พบคอร์สนี้</div>;
   }
 
   return (
     <div className="course-detail-page">
-      <Link to="/courses" className="course-detail-back">
-        <ArrowLeft size={16} />
-        คอร์สเรียนทั้งหมด
-      </Link>
-
+      {pageHeader}
       <div className="course-detail-card">
-        <div className="course-detail-icon">
-          <BookOpen size={22} />
-        </div>
         {course.category && <span className="course-detail-category">{course.category}</span>}
-        <h1>{course.title}</h1>
+
         <p className="course-detail-description">{course.description}</p>
 
         {course.tags?.length > 0 && (

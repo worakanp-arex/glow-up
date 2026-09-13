@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Briefcase } from "lucide-react";
@@ -71,10 +72,7 @@ function PostJob() {
 
   return (
     <div className="post-job-page">
-      <h1>
-        <Briefcase size={22} />
-        <span>สร้างประกาศงาน</span>
-      </h1>
+      <PageHeader icon={Briefcase} backTo="/employer/jobs" backLabel="ประกาศงานของฉัน">สร้างประกาศงาน</PageHeader>
 
       <form className="post-job-form" onSubmit={handleSubmit}>
         {error && <p className="post-job-error">{error}</p>}

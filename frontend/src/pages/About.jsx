@@ -1,3 +1,4 @@
+import PageHeader from "../components/common/PageHeader.jsx";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, HeartHandshake, ShieldCheck, Sparkles } from "lucide-react";
@@ -37,7 +38,7 @@ function About() {
       <section className="about-hero">
         <Reveal className="about-hero-inner">
           <span className="about-eyebrow">เกี่ยวกับเรา</span>
-          <h1>โอกาสใหม่ เริ่มต้นได้ ด้วยความร่วมมือของสามหน่วยงาน</h1>
+          <PageHeader icon={HeartHandshake} variant="hero">โอกาสใหม่ เริ่มต้นได้ ด้วยความร่วมมือของสามหน่วยงาน</PageHeader>
           <p>
             glow-up คือแพลตฟอร์มที่เกิดจากความร่วมมือระหว่างสถาบันทางการแพทย์ การพยาบาล และเทคโนโลยี
             เพื่อเชื่อมผู้ผ่านการบำบัดสารเสพติดเข้ากับโอกาสการทำงานจริง ด้วยการจับคู่ทักษะอย่างเป็นธรรม

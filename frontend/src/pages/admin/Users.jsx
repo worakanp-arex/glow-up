@@ -1,19 +1,10 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  CalendarHeart,
-  Check,
-  Filter,
-  Pencil,
-  Plus,
-  Trash2,
-  UserPlus,
-  Users as UsersIcon,
-  X,
-} from "lucide-react";
+import { CalendarHeart, Check, Filter, Pencil, Plus, Trash2, UserPlus, Users as UsersIcon, X } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as userService from "../../services/userService.js";
 import "./Users.css";
@@ -108,13 +99,9 @@ function Users() {
 
   return (
     <div className="users-page">
-      <h1>
-        <UsersIcon size={22} />
-        <span>จัดการผู้ใช้งาน</span>
-      </h1>
-      <p className="users-subtitle">
+      <PageHeader icon={UsersIcon} description={<>
         ตรวจสอบ ยืนยันตัวตน และจัดการบัญชีผู้หางาน นายจ้าง บุคลากรทางการแพทย์ และผู้ดูแลระบบทั้งหมด
-      </p>
+      </>}>จัดการผู้ใช้งาน</PageHeader>
 
       <div className="users-filters">
         <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>

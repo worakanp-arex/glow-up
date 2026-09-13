@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -57,10 +58,7 @@ function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="dashboard-greeting">
-        <h1>
-          <Building2 size={22} />
-          <span>สวัสดี, {user.companyName || user.name}</span>
-        </h1>
+        <PageHeader icon={Building2}>สวัสดี, {user.companyName || user.name}</PageHeader>
         <StatusBadge status={user.verifiedStatus} />
       </div>
       <p className="dashboard-subtitle">ภาพรวมประกาศงานและผู้สมัครของบริษัทคุณ</p>

@@ -1,0 +1,29 @@
+.layout .page-header { min-width: 0; margin: 0 0 20px; }
+.page-header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.page-heading { display: flex; align-items: flex-start; gap: 12px; min-width: 0; flex: 1; }
+.page-heading-copy { min-width: 0; flex: 1; }
+.page-heading-icon { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 11px; background: var(--color-primary-50); color: var(--color-primary-700); }
+.layout .page-header .page-title { display: block; margin: 2px 0 0; padding: 0; font-size: 1.5rem; font-weight: 600; line-height: 1.5; letter-spacing: -.025em; color: var(--color-text); overflow-wrap: anywhere; }
+.layout .page-header .page-description { margin: 6px 0 0; font-size: .875rem; line-height: 1.7; color: var(--color-text-secondary); }
+.layout .page-back { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 7px 10px; margin: 0 0 12px; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-surface); color: var(--color-text-secondary); font: inherit; font-size: .8125rem; text-decoration: none; cursor: pointer; }
+.layout .page-back:hover { background: var(--color-primary-50); color: var(--color-primary-700); border-color: var(--color-primary-200); }
+.page-header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.layout .page-context-title { font-size: 1.2rem; line-height: 1.5; margin: 0 0 8px; color: var(--color-text); }
+.layout :is(.dashboard-greeting, .my-jobs-header, .community-header, .family-dashboard-header) .page-header { flex: 1; margin-bottom: 0; }
+.layout .dashboard-page > .page-header { margin-bottom: 0; }
+.layout .page-header-hero .page-heading { display: block; }
+.layout .page-header-hero .page-heading-icon { margin-bottom: 12px; }
+.layout .page-header-hero .page-title { font-size: clamp(2rem, 4.2vw, 3.65rem); line-height: 1.38; }
+@media (max-width: 860px) { .layout .page-header-hero .page-heading-icon { margin-inline: auto; } }
+@media (max-width: 600px) {
+  .layout .page-header { margin-bottom: 16px; }
+  .page-heading { gap: 10px; }
+  .page-heading-icon { width: 34px; height: 34px; border-radius: 9px; }
+  .page-heading-icon svg { width: 20px; height: 20px; }
+  .layout .page-header .page-title { margin-top: 2px; font-size: 1.2rem; line-height: 1.5; }
+  .layout .page-header .page-description { font-size: .8125rem; line-height: 1.65; }
+  .layout .page-back { min-height: 44px; margin-bottom: 10px; padding: 8px 10px; }
+  .page-header-row { flex-wrap: wrap; gap: 12px; }
+  .page-header-actions { width: 100%; }
+  .layout .page-header-hero .page-title { font-size: clamp(1.5rem, 6.7vw, 1.875rem); line-height: 1.4; }
+}

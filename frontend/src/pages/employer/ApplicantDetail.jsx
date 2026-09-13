@@ -1,18 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  Award,
-  Briefcase,
-  FileText,
-  GraduationCap,
-  Mail,
-  Paperclip,
-  Phone,
-  ShieldAlert,
-  Sparkles,
-} from "lucide-react";
+import { useParams } from "react-router-dom";
+import { UserRound, Award, Briefcase, FileText, GraduationCap, Mail, Paperclip, Phone, ShieldAlert, Sparkles } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as applicationService from "../../services/applicationService.js";
 import "./ApplicantDetail.css";
@@ -31,7 +21,7 @@ function initials(name) {
 
 function ApplicantDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
+
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -54,9 +44,8 @@ function ApplicantDetail() {
       .catch((err) => {
         if (err.response?.status === 403) {
           setBlocked(true);
-        }
+        } else setLoadError(err);
       })
-      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -78,18 +67,17 @@ function ApplicantDetail() {
     }
   }
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={UserRound} backTo={application?.job?._id ? `/employer/jobs/${application.job._id}/applicants` : "/employer/jobs"} backLabel="รายชื่อผู้สมัครงาน">{"รายละเอียดผู้สมัครงาน"}</PageHeader>;
+
+  if (loadError) return <div className="applicant-detail-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
   if (loading) {
-    return <div className="applicant-detail-page"><AsyncState /></div>;
+    return <div className="applicant-detail-page">{pageHeader}<AsyncState /></div>;
   }
   if (blocked) {
     return (
       <div className="applicant-detail-page">
-        <button type="button" className="applicant-detail-back" onClick={() => navigate(-1)}>
-          <ArrowLeft size={16} />
-          <span>กลับ</span>
-        </button>
+      {pageHeader}
         <div className="applicant-detail-verification-pending">
           <ShieldAlert size={28} />
           <p>บัญชีนายจ้างของคุณยังไม่ได้รับการยืนยันตัวตน</p>
@@ -99,16 +87,12 @@ function ApplicantDetail() {
     );
   }
   if (!application) {
-    return <div className="applicant-detail-page">ไม่พบใบสมัครนี้</div>;
+    return <div className="applicant-detail-page">{pageHeader}ไม่พบใบสมัครนี้</div>;
   }
 
   return (
     <div className="applicant-detail-page">
-      <button type="button" className="applicant-detail-back" onClick={() => navigate(-1)}>
-        <ArrowLeft size={16} />
-        <span>กลับ</span>
-      </button>
-
+      {pageHeader}
       <div className="applicant-detail-banner">
         <div className="applicant-detail-banner-top" />
         <div className="applicant-detail-banner-body">
@@ -120,7 +104,7 @@ function ApplicantDetail() {
             )}
           </span>
           <div className="applicant-detail-banner-text">
-            <h1>{application.user.name}</h1>
+            <h2 className="page-context-title">{application.user.name}</h2>
             <p className="applicant-detail-job">
               <Briefcase size={14} />
               สมัครตำแหน่ง: {application.job.title}

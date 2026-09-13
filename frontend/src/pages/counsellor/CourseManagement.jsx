@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { BookOpen, ExternalLink, Plus } from "lucide-react";
@@ -56,13 +57,9 @@ function CourseManagement() {
 
   return (
     <div className="course-management-page">
-      <h1>
-        <BookOpen size={22} />
-        <span>จัดการคอร์สเรียน</span>
-      </h1>
-      <p className="course-management-intro">
+      <PageHeader icon={BookOpen} description={<>
         เพิ่มคอร์สเรียนจากแหล่งภายนอก (เช่น Chula MOOC) พร้อมคำอธิบาย แท็ก และหมวดหมู่ ให้ผู้ผ่านการบำบัดค้นหาและเรียนรู้ได้
-      </p>
+      </>}>จัดการคอร์สเรียน</PageHeader>
 
       <form className="course-management-form" onSubmit={handleSubmit}>
         <h2>

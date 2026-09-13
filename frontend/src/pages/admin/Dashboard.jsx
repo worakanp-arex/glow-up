@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -27,11 +28,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard-page">
-      <h1>
-        <LayoutDashboard size={22} />
-        <span>แผงควบคุมผู้ดูแลระบบ</span>
-      </h1>
-      <p className="dashboard-subtitle">ภาพรวมผู้ใช้งาน ประกาศงาน ใบสมัคร และความเสี่ยงในระบบทั้งหมด</p>
+      <PageHeader icon={LayoutDashboard} description={<>ภาพรวมผู้ใช้งาน ประกาศงาน ใบสมัคร และความเสี่ยงในระบบทั้งหมด</>}>แผงควบคุมผู้ดูแลระบบ</PageHeader>
 
       <div className="dashboard-links">
         <Link to="/admin/users">

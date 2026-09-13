@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Camera, ChevronDown, ShieldCheck, UserPlus } from "lucide-react";
@@ -147,13 +148,9 @@ function Register() {
         </div>
 
         <form className="register-form" onSubmit={handleVerifyOtp}>
-          <h1>
-            <ShieldCheck size={22} />
-            <span>ยืนยันอีเมล</span>
-          </h1>
-          <p className="register-otp-hint">
+          <PageHeader icon={ShieldCheck} onBack={() => setStep("details")} backLabel="ข้อมูลสมัครสมาชิก" description={<>
             กรอกรหัส 6 หลักที่ส่งไปยัง <strong>{form.email}</strong>
-          </p>
+          </>}>ยืนยันอีเมล</PageHeader>
 
           {devOtp && (
             <p className="register-otp-dev">โหมดทดสอบ (ยังไม่ได้ตั้งค่าอีเมลจริง): รหัส OTP คือ {devOtp}</p>
@@ -181,9 +178,6 @@ function Register() {
             {cooldown > 0 ? `ส่งรหัสอีกครั้งได้ใน ${cooldown} วินาที` : "ส่งรหัส OTP อีกครั้ง"}
           </button>
 
-          <button type="button" className="register-otp-back" onClick={() => setStep("details")}>
-            &larr; แก้ไขข้อมูล
-          </button>
         </form>
       </div>
     );
@@ -202,10 +196,7 @@ function Register() {
       </div>
 
       <form className="register-form" onSubmit={handleDetailsSubmit}>
-        <h1>
-          <UserPlus size={22} />
-          <span>สมัครสมาชิก</span>
-        </h1>
+        <PageHeader icon={UserPlus}>สมัครสมาชิก</PageHeader>
 
         {error && <p className="register-error">{error}</p>}
 

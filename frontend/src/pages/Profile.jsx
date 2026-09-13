@@ -1,21 +1,8 @@
+import PageHeader from "../components/common/PageHeader.jsx";
 import AsyncState from "../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Award,
-  BookOpen,
-  Camera,
-  FileText,
-  Heart,
-  Mail,
-  MapPin,
-  Phone,
-  Plus,
-  Sparkles,
-  Trash2,
-  User,
-  X,
-} from "lucide-react";
+import { Award, BookOpen, Camera, FileText, Heart, Mail, MapPin, Phone, Plus, Sparkles, Trash2, User, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import * as userService from "../services/userService.js";
 import * as skillService from "../services/skillService.js";
@@ -252,10 +239,7 @@ function Profile() {
 
   return (
     <div className="profile-page">
-      <h1>
-        <User size={22} />
-        <span>โปรไฟล์ของฉัน</span>
-      </h1>
+      <PageHeader icon={User}>โปรไฟล์ของฉัน</PageHeader>
 
       {message && <p className="profile-message">{message}</p>}
       {error && <p className="profile-error">{error}</p>}

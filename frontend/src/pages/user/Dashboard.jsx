@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, HeartHandshake, Search, User, Users } from "lucide-react";
+import { LayoutDashboard, BookOpen, HeartHandshake, Search, User, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import DailyCheckin from "../../components/user/DailyCheckin.jsx";
 import StreakWidget from "../../components/user/StreakWidget.jsx";
@@ -64,7 +65,7 @@ function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="dashboard-greeting">
-        <h1>สวัสดี, {user.name}</h1>
+        <PageHeader icon={LayoutDashboard}>สวัสดี, {user.name}</PageHeader>
         <StatusBadge status={user.verifiedStatus} />
       </div>
 

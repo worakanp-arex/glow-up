@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BookOpen, Play } from "lucide-react";
+import { BookOpen, Play } from "lucide-react";
 import * as microLessonService from "../../services/microLessonService.js";
 import * as scenarioService from "../../services/scenarioService.js";
 import "./LessonDetail.css";
@@ -23,28 +24,23 @@ function LessonDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={BookOpen} backTo={"/learning"} backLabel="บทเรียนทั้งหมด">{lesson?.title || "รายละเอียดบทเรียน"}</PageHeader>;
+
+  if (loadError) return <div className="lesson-detail-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
   if (loading) {
-    return <div className="lesson-detail-page"><AsyncState /></div>;
+    return <div className="lesson-detail-page">{pageHeader}<AsyncState /></div>;
   }
   if (!lesson) {
-    return <div className="lesson-detail-page">ไม่พบบทเรียนนี้</div>;
+    return <div className="lesson-detail-page">{pageHeader}ไม่พบบทเรียนนี้</div>;
   }
 
   return (
     <div className="lesson-detail-page">
-      <Link to="/learning" className="lesson-detail-back">
-        <ArrowLeft size={16} />
-        บทเรียนทั้งหมด
-      </Link>
-
+      {pageHeader}
       <div className="lesson-detail-card">
-        <div className="lesson-detail-icon">
-          <BookOpen size={22} />
-        </div>
         {lesson.category && <span className="lesson-detail-category">{lesson.category}</span>}
-        <h1>{lesson.title}</h1>
+
         <p className="lesson-detail-body">{lesson.body}</p>
       </div>
 

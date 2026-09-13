@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
@@ -45,11 +46,7 @@ function JobsModeration() {
 
   return (
     <div className="jobs-moderation-page">
-      <h1>
-        <ClipboardCheck size={22} />
-        <span>ตรวจสอบประกาศงาน</span>
-      </h1>
-      <p className="jobs-moderation-subtitle">ยืนยันหรือปฏิเสธประกาศงานใหม่ก่อนเผยแพร่ให้ผู้หางานเห็น</p>
+      <PageHeader icon={ClipboardCheck} description={<>ยืนยันหรือปฏิเสธประกาศงานใหม่ก่อนเผยแพร่ให้ผู้หางานเห็น</>}>ตรวจสอบประกาศงาน</PageHeader>
 
       {jobs.length === 0 && <p className="jobs-moderation-empty">ยังไม่มีประกาศงานในระบบ</p>}
 

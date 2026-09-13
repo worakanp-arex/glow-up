@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, Award, Building2, CalendarCheck, ClipboardList, Flame, ShieldAlert } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { UserRound, AlertTriangle, Award, Building2, CalendarCheck, ClipboardList, Flame, ShieldAlert } from "lucide-react";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
 import * as counsellingService from "../../services/counsellingService.js";
 import * as weeklyCheckInService from "../../services/weeklyCheckInService.js";
@@ -47,10 +48,12 @@ function PatientProfile() {
     weeklyCheckInService.getUserWeeklyCheckIns(userId).then(setWeeklyCheckIns).catch(() => setWeeklyCheckIns([]));
   }, [userId]);
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={UserRound} backTo={"/counsellor"} backLabel="คำขอรับคำปรึกษา">{"ข้อมูลผู้รับคำปรึกษา"}</PageHeader>;
 
-  if (loading) return <div className="patient-profile-page"><AsyncState /></div>;
-  if (error || !data) return <div className="patient-profile-page">{error || "ไม่พบข้อมูล"}</div>;
+  if (loadError) return <div className="patient-profile-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
+
+  if (loading) return <div className="patient-profile-page">{pageHeader}<AsyncState /></div>;
+  if (error || !data) return <div className="patient-profile-page">{pageHeader}{error || "ไม่พบข้อมูล"}</div>;
 
   const { user, rehabRecords, riskAssessments, emotionStreak, emotionLogs } = data;
   const latestRisk = riskAssessments[0];
@@ -58,11 +61,7 @@ function PatientProfile() {
 
   return (
     <div className="patient-profile-page">
-      <Link to="/counsellor" className="patient-profile-back">
-        <ArrowLeft size={16} />
-        กลับไปคำขอปรึกษา
-      </Link>
-
+      {pageHeader}
       {latestWeeklyCheckIn?.selfHarmRiskFlag && (
         <div className="patient-profile-risk-alert">
           <AlertTriangle size={20} />
@@ -78,7 +77,7 @@ function PatientProfile() {
           {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}
         </span>
         <div>
-          <h1>{user.name}</h1>
+          <h2 className="page-context-title">{user.name}</h2>
           <p className="patient-profile-meta">
             {user.email}
             {user.phone && ` · ${user.phone}`}

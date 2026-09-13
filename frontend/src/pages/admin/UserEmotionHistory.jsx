@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Award, CalendarCheck, ChevronDown, Flame, ShieldAlert } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Award, CalendarCheck, ChevronDown, Flame, ShieldAlert } from "lucide-react";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
 import { happinessByLevel } from "../../constants/happiness.js";
 import { CONTEXT_OPTIONS } from "../../constants/emotionContext.js";
@@ -45,27 +46,22 @@ function UserEmotionHistory() {
       .finally(() => setLoading(false));
   }, [userId]);
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={ShieldAlert} backTo={"/admin/users"} backLabel="จัดการผู้ใช้งาน">{"ประวัติอารมณ์และความอยาก"}</PageHeader>;
+
+  if (loadError) return <div className="user-emotion-history-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
   if (loading) {
-    return <div className="user-emotion-history-page"><AsyncState /></div>;
+    return <div className="user-emotion-history-page">{pageHeader}<AsyncState /></div>;
   }
   if (error || !streak) {
-    return <div className="user-emotion-history-page">{error || "ไม่พบข้อมูล"}</div>;
+    return <div className="user-emotion-history-page">{pageHeader}{error || "ไม่พบข้อมูล"}</div>;
   }
 
   return (
     <div className="user-emotion-history-page">
-      <Link to="/admin/users" className="user-emotion-history-back">
-        <ArrowLeft size={16} />
-        กลับไปจัดการผู้ใช้งาน
-      </Link>
-
+      {pageHeader}
       <div className="user-emotion-history-header">
-        <h1>
-          <ShieldAlert size={22} />
-          <span>ประวัติอารมณ์และความอยาก</span>
-        </h1>
+
         <p className="user-emotion-history-patient">
           {streak.user.name} · {streak.user.email}
         </p>

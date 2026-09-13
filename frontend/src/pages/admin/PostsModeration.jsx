@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
@@ -45,13 +46,9 @@ function PostsModeration() {
 
   return (
     <div className="posts-moderation-page">
-      <h1>
-        <ShieldAlert size={22} />
-        <span>ตรวจสอบโพสต์ที่ถูกรายงาน</span>
-      </h1>
-      <p className="posts-moderation-subtitle">
+      <PageHeader icon={ShieldAlert} description={<>
         โพสต์ที่ผู้ใช้กดรายงานเนื้อหา รอการตรวจสอบความถูกต้อง โดยเฉพาะข้อมูลด้านสุขภาพ
-      </p>
+      </>}>ตรวจสอบโพสต์ที่ถูกรายงาน</PageHeader>
 
       {posts.length === 0 && <p className="posts-moderation-empty">ไม่มีโพสต์ที่รอตรวจสอบในขณะนี้</p>}
 

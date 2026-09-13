@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
@@ -66,11 +67,7 @@ function Courses() {
 
   return (
     <div className="courses-page">
-      <h1>
-       
-        <span>คอร์สเรียน</span>
-      </h1>
-      <p className="courses-subtitle">คอร์สเรียนจากบุคลากรทางการแพทย์ พัฒนาทักษะใหม่ๆ เพื่อเปิดโอกาสในการทำงานให้กว้างขึ้น</p>
+      <PageHeader icon={BookOpen} description={<>คอร์สเรียนจากบุคลากรทางการแพทย์ พัฒนาทักษะใหม่ๆ เพื่อเปิดโอกาสในการทำงานให้กว้างขึ้น</>}>คอร์สเรียน</PageHeader>
 
       <Link to="/learning" className="courses-learning-callout">
         <span className="courses-learning-callout-icon">

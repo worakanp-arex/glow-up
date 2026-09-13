@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Plus, Tag } from "lucide-react";
@@ -44,13 +45,9 @@ function JobCategories() {
 
   return (
     <div className="job-categories-page">
-      <h1>
-        <Tag size={22} />
-        <span>จัดการหมวดหมู่งาน</span>
-      </h1>
-      <p className="job-categories-hint">
+      <PageHeader icon={Tag} description={<>
         หมวดหมู่ที่เพิ่มไว้ที่นี่จะปรากฏให้นายจ้างเลือกตอนสร้างประกาศงาน และใช้เป็นตัวกรองในหน้าค้นหางาน
-      </p>
+      </>}>จัดการหมวดหมู่งาน</PageHeader>
 
       {error && <p className="job-categories-error">{error}</p>}
 

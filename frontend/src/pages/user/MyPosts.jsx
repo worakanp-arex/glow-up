@@ -1,9 +1,9 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as postService from "../../services/postService.js";
 import PostCard from "../../components/community/PostCard.jsx";
@@ -54,11 +54,7 @@ function MyPosts() {
     <div className="community-page">
       <div className="community-header">
         <div>
-          <Link to="/community" className="community-back-link">
-            <ArrowLeft size={14} />
-            <span>กลับไปหน้าชุมชน</span>
-          </Link>
-          <h1>โพสต์ของฉัน</h1>
+          <PageHeader icon={FileText} backTo="/community" backLabel="หน้าชุมชน">โพสต์ของฉัน</PageHeader>
         </div>
       </div>
 

@@ -1,9 +1,10 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Paperclip, ShieldAlert, Users } from "lucide-react";
+import { Paperclip, ShieldAlert, Users } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as applicationService from "../../services/applicationService.js";
 import "./Applicants.css";
@@ -27,25 +28,23 @@ function Applicants() {
       .catch((err) => {
         if (err.response?.status === 403) {
           setBlocked(true);
-        }
+        } else setLoadError(err);
       })
-      .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [jobId]);
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={Users} backTo={"/employer/jobs"} backLabel="ประกาศงานของฉัน">{"ผู้สมัครงาน"}</PageHeader>;
+
+  if (loadError) return <div className="applicants-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
   if (loading) {
-    return <div className="applicants-page"><AsyncState /></div>;
+    return <div className="applicants-page">{pageHeader}<AsyncState /></div>;
   }
 
   if (blocked) {
     return (
       <div className="applicants-page">
-        <Link to="/employer/jobs" className="applicants-back">
-          <ArrowLeft size={16} />
-          กลับไปประกาศงานของฉัน
-        </Link>
+      {pageHeader}
         <div className="applicants-verification-pending">
           <ShieldAlert size={28} />
           <p>บัญชีนายจ้างของคุณยังไม่ได้รับการยืนยันตัวตน</p>
@@ -57,15 +56,8 @@ function Applicants() {
 
   return (
     <div className="applicants-page">
-      <Link to="/employer/jobs" className="applicants-back">
-        <ArrowLeft size={16} />
-        กลับไปประกาศงานของฉัน
-      </Link>
+      {pageHeader}
 
-      <h1>
-        <Users size={22} />
-        <span>ผู้สมัครงาน</span>
-      </h1>
 
       {applicants.length === 0 && <p className="applicants-empty">ยังไม่มีผู้สมัครสำหรับงานนี้</p>}
 

@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -74,11 +75,7 @@ function Queue() {
 
   return (
     <div className="counsellor-queue-page">
-      <h1>
-        <HeartHandshake size={22} />
-        <span>คำขอรับคำปรึกษา</span>
-      </h1>
-      <p className="counsellor-queue-intro">ดูปฏิทินนัดหมายของคุณ และจัดการคำขอรับคำปรึกษาจากผู้ผ่านการบำบัด</p>
+      <PageHeader icon={HeartHandshake} description={<>ดูปฏิทินนัดหมายของคุณ และจัดการคำขอรับคำปรึกษาจากผู้ผ่านการบำบัด</>}>คำขอรับคำปรึกษา</PageHeader>
 
       <PatientOverviewWidget />
 

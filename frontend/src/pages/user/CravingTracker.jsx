@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Activity, ChevronDown, Send } from "lucide-react";
@@ -157,13 +158,10 @@ function CravingTracker() {
 
   return (
     <div className="craving-tracker-page">
-      <h1>
-        <span>บันทึกอารมณ์และความอยาก</span>
-      </h1>
-      <p className="craving-tracker-intro">
+      <PageHeader icon={Activity} description={<>
         บันทึกความรู้สึกของคุณวันละครั้ง เพื่อติดตามแนวโน้มและรับการประเมินความเสี่ยงที่แม่นยำขึ้น
         ข้อมูลนี้จะถูกใช้เพื่อช่วยทีมดูแลเข้าใจภาพรวมของคุณได้ดีขึ้น
-      </p>
+      </>}>บันทึกอารมณ์และความอยาก</PageHeader>
 
       <div className="craving-tracker-layout">
         <section>

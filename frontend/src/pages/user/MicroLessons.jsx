@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -30,13 +31,9 @@ function MicroLessons() {
 
   return (
     <div className="micro-lessons-page">
-      <h1>
-        <MessageCircleWarning size={22} />
-        <span>ฝึกทักษะการปฏิเสธ</span>
-      </h1>
-      <p className="micro-lessons-subtitle">
+      <PageHeader icon={MessageCircleWarning} description={<>
         บทเรียนสั้นและสถานการณ์จำลอง ช่วยฝึกวิธีปฏิเสธในสถานการณ์เสี่ยงต่างๆ
-      </p>
+      </>}>ฝึกทักษะการปฏิเสธ</PageHeader>
 
       <section>
         <h2>

@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { BarChart3, CalendarClock, ShieldAlert, Trophy, Users } from "lucide-react";
@@ -67,13 +68,9 @@ function Analytics() {
 
   return (
     <div className="counsellor-analytics-page">
-      <h1>
-        <BarChart3 size={22} />
-        <span>ภาพรวมผู้ใช้งาน</span>
-      </h1>
-      <p className="counsellor-analytics-subtitle">
+      <PageHeader icon={BarChart3} description={<>
         ข้อมูลสรุปการใช้งานของผู้ผ่านการบำบัด สำหรับบุคลากรทางการแพทย์
-      </p>
+      </>}>ภาพรวมผู้ใช้งาน</PageHeader>
 
       <div className="counsellor-analytics-stat-grid">
         <StatTile label={`ใช้งานใน ${data.activeUsers.windowDays} วันล่าสุด`} value={data.activeUsers.count} tone="neutral" />

@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Building2, Stethoscope } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Building2, Stethoscope } from "lucide-react";
 import * as userService from "../../services/userService.js";
 import "./StaffProfile.css";
 
@@ -25,24 +26,22 @@ function StaffProfile() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={Stethoscope} backTo={"/community"} backLabel="หน้าชุมชน">{"ข้อมูลบุคลากร"}</PageHeader>;
 
-  if (loading) return <div className="staff-profile-page"><AsyncState /></div>;
-  if (error || !profile) return <div className="staff-profile-page">{error || "ไม่พบข้อมูล"}</div>;
+  if (loadError) return <div className="staff-profile-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
+
+  if (loading) return <div className="staff-profile-page">{pageHeader}<AsyncState /></div>;
+  if (error || !profile) return <div className="staff-profile-page">{pageHeader}{error || "ไม่พบข้อมูล"}</div>;
 
   return (
     <div className="staff-profile-page">
-      <Link to="/community" className="staff-profile-back">
-        <ArrowLeft size={16} />
-        กลับไปหน้าชุมชน
-      </Link>
-
+      {pageHeader}
       <div className="staff-profile-header">
         <span className="staff-profile-avatar">
           {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : initials(profile.name)}
         </span>
         <div>
-          <h1>{profile.name}</h1>
+          <h2 className="page-context-title">{profile.name}</h2>
           <span className="post-card-staff-badge">บุคลากรทางการแพทย์</span>
         </div>
       </div>

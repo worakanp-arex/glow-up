@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
@@ -26,10 +27,7 @@ function Assessments() {
 
   return (
     <div className="assessments-page">
-      <h1>
-        <ShieldAlert size={22} />
-        <span>ภาพรวมผลประเมินความเสี่ยง</span>
-      </h1>
+      <PageHeader icon={ShieldAlert}>ภาพรวมผลประเมินความเสี่ยง</PageHeader>
       <p className="assessments-note">
         <ShieldCheck size={16} />
         <span>

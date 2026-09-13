@@ -1,5 +1,6 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader.jsx";
+import { useNavigate, useParams } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
 import PostDetailPanel from "../../components/community/PostDetailPanel.jsx";
 import "./PostDetail.css";
 
@@ -9,10 +10,7 @@ function PostDetail() {
 
   return (
     <div className="post-detail-page">
-      <Link to="/community" className="post-detail-back">
-        <ArrowLeft size={16} />
-        กลับไปหน้าชุมชน
-      </Link>
+      <PageHeader icon={MessageSquare} backTo="/community" backLabel="หน้าชุมชน">รายละเอียดโพสต์</PageHeader>
 
       <PostDetailPanel postId={id} onDeleted={() => navigate("/community")} />
     </div>

@@ -10,7 +10,7 @@ function initials(name) {
   return name?.trim()?.charAt(0)?.toUpperCase() || "?";
 }
 
-function JobPreview({ job }) {
+function JobPreview({ job, showTitle = true }) {
   const { user, isAuthenticated } = useAuth();
   const [applying, setApplying] = useState(false);
   const [justApplied, setJustApplied] = useState(false);
@@ -85,7 +85,7 @@ function JobPreview({ job }) {
       </div>
 
       <div className="job-preview-body">
-        <h1 className="job-preview-title">{job.title}</h1>
+        {showTitle && <h2 className="job-preview-title">{job.title}</h2>}
         <p className="job-preview-company">
           <span>{job.employer?.companyName || job.employer?.name}</span>
           {job.employer?.businessType && (

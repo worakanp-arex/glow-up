@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { useEffect, useState } from "react";
@@ -95,7 +96,7 @@ function JobSearch() {
 
   return (
     <div className="job-search-page">
-      <h1>ค้นหางาน</h1>
+      <PageHeader icon={Search}>ค้นหางาน</PageHeader>
 
       <form className="job-search-form" onSubmit={handleSubmit}>
         <input

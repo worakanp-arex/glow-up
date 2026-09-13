@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Award, CalendarCheck, Flame } from "lucide-react";
+import { Award, CalendarCheck, Flame } from "lucide-react";
 import PlantGrowth, { stageLabel, streakToStage } from "../../components/user/PlantGrowth.jsx";
 import MissionBoard from "../../components/user/MissionBoard.jsx";
 import * as emotionService from "../../services/emotionService.js";
@@ -22,11 +23,14 @@ function Streak() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={Award} backTo={"/dashboard"} backLabel="หน้าหลัก">{"ความก้าวหน้าและรางวัล"}</PageHeader>;
+
+  if (loadError) return <div className="streak-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
   if (loading) {
     return (
       <div className="streak-page">
+      {pageHeader}
         <div className="streak-loading"><AsyncState /></div>
       </div>
     );
@@ -35,6 +39,7 @@ function Streak() {
   if (!streak) {
     return (
       <div className="streak-page">
+      {pageHeader}
         <p className="streak-loading">ไม่สามารถโหลดข้อมูลได้ในขณะนี้</p>
       </div>
     );
@@ -44,14 +49,10 @@ function Streak() {
 
   return (
     <div className="streak-page">
-      <Link to="/dashboard" className="streak-back">
-        <ArrowLeft size={16} />
-        กลับไปแดชบอร์ด
-      </Link>
-
+      {pageHeader}
       <div className="streak-hero">
         <PlantGrowth streak={streak.currentStreak} size={200} />
-        <h1>{stageLabel(stage)}</h1>
+        <h2 className="page-context-title">{stageLabel(stage)}</h2>
         <p>
           {streak.currentStreak > 0
             ? `เช็คอินต่อเนื่องมาแล้ว ${streak.currentStreak} วัน — เก็บสถิติไว้ให้ต้นไม้ของคุณเติบโตต่อไป`

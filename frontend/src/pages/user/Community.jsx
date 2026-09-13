@@ -1,9 +1,10 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Send } from "lucide-react";
+import { Users, Send } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as postService from "../../services/postService.js";
 import PostCard from "../../components/community/PostCard.jsx";
@@ -105,20 +106,14 @@ function Community() {
 
   return (
     <div className="community-page">
-      <div className="community-header">
-        <div>
-          <h1>ชุมชนฟื้นฟู</h1>
-          <p className="community-subtitle">
+      <PageHeader icon={Users} description={<>
             สาระความรู้และคำแนะนำจากบุคลากรทางการแพทย์ เพื่อสนับสนุนเส้นทางการฟื้นฟูของคุณ
-          </p>
-        </div>
-        {isStaff && (
-          <button type="button" onClick={focusComposer}>
+          </>} actions={isStaff && (
+          <button type="button" className="btn btn-primary" onClick={focusComposer}>
             <Send size={16} />
             <span>เขียนโพสต์ให้ความรู้</span>
           </button>
-        )}
-      </div>
+        )}>ชุมชนฟื้นฟู</PageHeader>
 
       <div className="community-tabs">
         <span className="active">ทั้งหมด</span>

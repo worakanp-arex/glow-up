@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
@@ -47,16 +48,10 @@ function MyJobs() {
 
   return (
     <div className="my-jobs-page">
-      <div className="my-jobs-header">
-        <h1>
-          <Briefcase size={22} />
-          <span>ประกาศงานของฉัน</span>
-        </h1>
-        <Link to="/employer/jobs/new" className="btn btn-primary">
+      <PageHeader icon={Briefcase} actions={<Link to="/employer/jobs/new" className="btn btn-primary">
           <Plus size={16} />
           <span>สร้างประกาศงานใหม่</span>
-        </Link>
-      </div>
+        </Link>}>ประกาศงานของฉัน</PageHeader>
 
       {jobs.length === 0 && <p className="my-jobs-empty">คุณยังไม่มีประกาศงาน</p>}
 

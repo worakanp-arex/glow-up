@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronDown, MessageCircle, Phone, Send, Video } from "lucide-react";
+import { HeartHandshake, ChevronDown, MessageCircle, Phone, Send, Video } from "lucide-react";
 import * as counsellingService from "../../services/counsellingService.js";
 import DateTimePicker from "../../components/common/DateTimePicker.jsx";
 import { MOOD_OPTIONS, moodByValue } from "../../constants/mood.js";
@@ -91,12 +92,9 @@ function Counselling() {
 
   return (
     <div className="counselling-page">
-      <h1>
-        <span>ขอรับคำปรึกษา</span>
-      </h1>
-      <p className="counselling-intro">
+      <PageHeader icon={HeartHandshake} description={<>
         ส่งคำขอรับคำปรึกษาจากบุคลากรทางการแพทย์ พร้อมเลือกวันเวลาที่สะดวก บุคลากรจะตอบกลับและยืนยันนัดหมายให้คุณ
-      </p>
+      </>}>ขอรับคำปรึกษา</PageHeader>
 
       <div className="counselling-layout">
         <section>

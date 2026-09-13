@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Heart } from "lucide-react";
@@ -33,10 +34,7 @@ function FamilyAcceptInvite() {
   if (!token || !email) {
     return (
       <div className="family-accept-page">
-        <h1>
-          <Heart size={22} />
-          <span>ลิงก์คำเชิญไม่ถูกต้อง</span>
-        </h1>
+        <PageHeader icon={Heart}>ลิงก์คำเชิญไม่ถูกต้อง</PageHeader>
         <p>ลิงก์นี้ไม่สมบูรณ์ กรุณาตรวจสอบอีเมลคำเชิญอีกครั้ง</p>
       </div>
     );
@@ -45,10 +43,7 @@ function FamilyAcceptInvite() {
   if (!isAuthenticated) {
     return (
       <div className="family-accept-page">
-        <h1>
-          <Heart size={22} />
-          <span>เข้าร่วมติดตามความคืบหน้า</span>
-        </h1>
+        <PageHeader icon={Heart}>เข้าร่วมติดตามความคืบหน้า</PageHeader>
         <p>กรุณาเข้าสู่ระบบหรือสมัครสมาชิกด้วยอีเมล {email} ก่อน แล้วกลับมาที่ลิงก์นี้อีกครั้งเพื่อยืนยันคำเชิญ</p>
         <div className="family-accept-actions">
           <Link to="/login" className="btn btn-primary">
@@ -64,10 +59,7 @@ function FamilyAcceptInvite() {
 
   return (
     <div className="family-accept-page">
-      <h1>
-        <Heart size={22} />
-        <span>เข้าร่วมติดตามความคืบหน้า</span>
-      </h1>
+      <PageHeader icon={Heart}>เข้าร่วมติดตามความคืบหน้า</PageHeader>
       {error && <p className="family-accept-error">{error}</p>}
       {done ? (
         <p className="family-accept-success">ยืนยันคำเชิญเรียบร้อยแล้ว กำลังพาไปยังแดชบอร์ด...</p>

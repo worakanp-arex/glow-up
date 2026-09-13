@@ -1,14 +1,6 @@
+import PageHeader from "../components/common/PageHeader.jsx";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  Briefcase,
-  ClipboardCheck,
-  HeartHandshake,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Briefcase, ClipboardCheck, HeartHandshake, Search, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import Reveal from "../components/common/Reveal.jsx";
 import PartnerBadge from "../components/common/PartnerBadge.jsx";
@@ -81,7 +73,7 @@ function Home() {
               <Sparkles size={14} />
               พื้นที่ปลอดภัยสำหรับการเริ่มต้นใหม่
             </span>
-            <h1>เริ่มต้นบทใหม่ของชีวิตการทำงาน ไปด้วยกัน</h1>
+            <PageHeader icon={Sparkles} variant="hero">เริ่มต้นบทใหม่ของชีวิตการทำงาน ไปด้วยกัน</PageHeader>
             <p>
               พื้นที่ที่เชื่อมผู้ผ่านการบำบัดเข้ากับโอกาสการทำงานจริง ด้วยการจับคู่ทักษะอย่างเป็นธรรม
               และดูแลความเป็นส่วนตัวของคุณเป็นอันดับแรก

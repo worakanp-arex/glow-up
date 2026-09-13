@@ -1,7 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, ClipboardList } from "lucide-react";
+
+import { CheckCircle2, ClipboardList } from "lucide-react";
 import * as weeklyCheckInService from "../../services/weeklyCheckInService.js";
 import { getIsoWeekKey } from "../../utils/isoWeek.js";
 import "./WeeklyCheckIn.css";
@@ -56,16 +57,7 @@ function WeeklyCheckIn() {
 
   return (
     <div className="weekly-checkin-page">
-      <Link to="/dashboard" className="weekly-checkin-back">
-        <ArrowLeft size={16} />
-        กลับไปแดชบอร์ด
-      </Link>
-
-      <h1>
-        <ClipboardList size={22} />
-        <span>แบบประเมินสภาพจิตใจรายสัปดาห์</span>
-      </h1>
-      <p className="weekly-checkin-subtitle">ใช้เวลาไม่ถึงนาที ช่วยให้ทีมดูแลคุณได้ทันท่วงทีหากมีความเสี่ยง</p>
+      <PageHeader icon={ClipboardList} backTo="/dashboard" backLabel="หน้าหลัก" description={<>ใช้เวลาไม่ถึงนาที ช่วยให้ทีมดูแลคุณได้ทันท่วงทีหากมีความเสี่ยง</>}>แบบประเมินสภาพจิตใจรายสัปดาห์</PageHeader>
 
       {doneThisWeek ? (
         <div className="weekly-checkin-done">

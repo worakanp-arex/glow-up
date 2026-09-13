@@ -1,18 +1,8 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  Calendar,
-  Check,
-  ClipboardList,
-  MessageCircle,
-  Phone,
-  Send,
-  User as UserIcon,
-  Video,
-  X,
-} from "lucide-react";
+import { Calendar, Check, ClipboardList, MessageCircle, Phone, Send, User as UserIcon, Video, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as counsellingService from "../../services/counsellingService.js";
 import MeetingLinkBadge from "../../components/common/MeetingLinkBadge.jsx";
@@ -119,14 +109,15 @@ function CounsellingDetail() {
     setSession(updated);
   }
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const pageHeader = <PageHeader icon={MessageCircle} backTo={isStaff ? "/counsellor" : "/counselling"} backLabel="รายการคำปรึกษา">{session?.topic || "รายละเอียดคำปรึกษา"}</PageHeader>;
 
-  if (loading) return <div className="counselling-detail-page"><AsyncState /></div>;
-  if (error || !session) return <div className="counselling-detail-page">{error || "ไม่พบข้อมูล"}</div>;
+  if (loadError) return <div className="counselling-detail-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
+
+  if (loading) return <div className="counselling-detail-page">{pageHeader}<AsyncState /></div>;
+  if (error || !session) return <div className="counselling-detail-page">{pageHeader}{error || "ไม่พบข้อมูล"}</div>;
 
   const TypeIcon = SESSION_TYPE_ICONS[session.sessionType] || MessageCircle;
   const mood = moodByValue(session.mood);
-  const backTo = isStaff ? "/counsellor" : "/counselling";
   const isAssignedCounsellor = user.role === "counsellor" && session.counsellor?._id === user._id;
   const canManage = user.role === "admin" || isAssignedCounsellor;
   const isUnclaimed = !session.counsellor;
@@ -137,17 +128,13 @@ function CounsellingDetail() {
 
   return (
     <div className="counselling-detail-page">
-      <Link to={backTo} className="counselling-detail-back">
-        <ArrowLeft size={16} />
-        กลับ
-      </Link>
-
+      {pageHeader}
       <div className="counselling-detail-header">
         <div className="counselling-detail-header-icon">
           <TypeIcon size={20} />
         </div>
         <div className="counselling-detail-header-body">
-          <h1>{session.topic}</h1>
+
           <p className="counselling-detail-meta">
             {SESSION_TYPE_LABELS[session.sessionType]} · ขอไว้เมื่อ {formatDateTime(session.createdAt)}
           </p>

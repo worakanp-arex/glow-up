@@ -2,6 +2,8 @@ import { lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "../components/layout/Layout.jsx";
 import AsyncState from "../components/common/AsyncState.jsx";
+import PageHeader from "../components/common/PageHeader.jsx";
+import { SearchX } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 const Home = lazy(() => import("../pages/Home.jsx"));
@@ -117,7 +119,7 @@ function AppRoutes() {
           <Route path="admin/job-categories" element={<JobCategories />} />
           <Route path="admin/assessments" element={<Assessments />} />
         </Route>
-        <Route path="*" element={<AsyncState empty title="ไม่พบหน้าที่คุณต้องการ" description="ลิงก์อาจเปลี่ยนไป กลับไปเริ่มต้นอีกครั้งได้เลย"><Link to="/" className="btn btn-primary">กลับหน้าหลัก</Link></AsyncState>} />
+        <Route path="*" element={<div className="not-found-page"><PageHeader icon={SearchX} backTo="/" backLabel="หน้าหลัก">ไม่พบหน้าที่คุณต้องการ</PageHeader><AsyncState empty title="404" description="ลิงก์อาจเปลี่ยนไป กลับไปเริ่มต้นอีกครั้งได้เลย"><Link to="/" className="btn btn-primary">กลับหน้าหลัก</Link></AsyncState></div>} />
       </Route>
     </Routes>
   );

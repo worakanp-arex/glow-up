@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { KeyRound } from "lucide-react";
@@ -49,13 +50,9 @@ function ResetPassword() {
         </div>
 
         <div className="login-form">
-          <h1>
-            <KeyRound size={22} />
-            <span>ลิงก์ไม่ถูกต้อง</span>
-          </h1>
-          <p className="login-forgot-hint">
+          <PageHeader icon={KeyRound} backTo="/login" backLabel="หน้าเข้าสู่ระบบ" description={<>
             ลิงก์รีเซ็ตรหัสผ่านไม่สมบูรณ์ กรุณาขอลิงก์ใหม่อีกครั้ง
-          </p>
+          </>}>ลิงก์ไม่ถูกต้อง</PageHeader>
           <Link to="/forgot-password" className="login-switch">
             ขอลิงก์รีเซ็ตรหัสผ่านใหม่
           </Link>
@@ -77,10 +74,7 @@ function ResetPassword() {
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <h1>
-          <KeyRound size={22} />
-          <span>ตั้งรหัสผ่านใหม่</span>
-        </h1>
+        <PageHeader icon={KeyRound} backTo="/login" backLabel="หน้าเข้าสู่ระบบ">ตั้งรหัสผ่านใหม่</PageHeader>
 
         {error && <p className="login-error">{error}</p>}
         {done && <p className="login-success">ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว กำลังพาไปหน้าเข้าสู่ระบบ...</p>}

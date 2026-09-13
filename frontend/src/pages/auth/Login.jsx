@@ -1,3 +1,4 @@
+import PageHeader from "../../components/common/PageHeader.jsx";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { LogIn } from "lucide-react";
@@ -67,10 +68,7 @@ function Login() {
       </div>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <h1>
-          <LogIn size={22} />
-          <span>เข้าสู่ระบบ</span>
-        </h1>
+        <PageHeader icon={LogIn}>เข้าสู่ระบบ</PageHeader>
 
         {error && <p className="login-error">{error}</p>}
 
