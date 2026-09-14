@@ -24,9 +24,10 @@ function SavedPosts() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleLike(postId) {
-    const updated = await postService.likePost(postId);
+  async function handleLike(postId, liked) {
+    const updated = await postService.likePost(postId, liked);
     setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, ...updated } : p)));
+    return updated;
   }
 
   async function handleToggleSave(postId) {

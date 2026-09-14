@@ -50,3 +50,5 @@ export function updateUser(id, payload) {
 export function deleteUser(id) {
   return api.delete(`/users/${id}`).then((res) => res.data);
 }
+
+export const getMyRecoverySummary = () => api.get("/users/me/recovery-summary").then(res => res.data);

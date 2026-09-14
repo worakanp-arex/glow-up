@@ -164,77 +164,7 @@ function CravingTracker() {
       </>}>บันทึกอารมณ์และความอยาก</PageHeader>
 
       <div className="craving-tracker-layout">
-        <section>
-          {loading ? (
-            <div className="emotion-calendar-card">
-              <AsyncState />
-            </div>
-          ) : (
-            <EmotionCalendar logs={logs} onSelectEmptyDay={setBackfillDateKey} />
-          )}
-          <p className="craving-tracker-backfill-hint">
-            แตะวันที่ว่างในปฏิทิน (เส้นประ) เพื่อบันทึกความรู้สึกย้อนหลังในวันที่คุณไม่ได้เข้ามา
-          </p>
-
-          <h2 className="craving-tracker-list-heading">ประวัติการบันทึก</h2>
-          {loading ? (
-            <AsyncState />
-          ) : logs.length === 0 ? (
-            <p className="craving-tracker-empty">ยังไม่มีบันทึก</p>
-          ) : (
-            historyGroups.map((group) => {
-              const visibleCount = getMonthVisibleCount(group.key);
-              const visibleItems = group.items.slice(0, visibleCount);
-              return (
-                <div key={group.key} className="craving-tracker-month-group">
-                  <h3 className="craving-tracker-month-heading">{monthGroupLabel(group.year, group.month)}</h3>
-                  <ul className="craving-tracker-list">
-                    {visibleItems.map((log) => {
-                      const context = CONTEXT_OPTIONS.find((c) => c.value === log.context);
-                      const happiness = log.happinessLevel ? happinessByLevel(log.happinessLevel) : null;
-                      const HappinessIcon = happiness?.icon;
-                      return (
-                        <li key={log._id}>
-                          <div
-                            className="craving-tracker-list-icon"
-                            style={happiness ? { backgroundColor: happiness.color, color: "#fff" } : undefined}
-                          >
-                            {HappinessIcon ? <HappinessIcon size={18} /> : <Activity size={18} />}
-                          </div>
-                          <div className="craving-tracker-list-body">
-                            <p className="craving-tracker-mood">{happiness?.label || "ยังไม่ระบุระดับความสุข"}</p>
-                            <p className="craving-tracker-meta">
-                              {new Date(log.date).toLocaleDateString("th-TH")}
-                              {context && ` · ${context.label}`}
-                            </p>
-                            {log.note && <p className="craving-tracker-note">{log.note}</p>}
-                          </div>
-                          {log.cravingLevel != null && (
-                            <span className="craving-tracker-badge">อยาก {log.cravingLevel}/10</span>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  {visibleCount < group.items.length && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary craving-tracker-load-more"
-                      onClick={() => showMoreForMonth(group.key, group.items.length)}
-                    >
-                      <ChevronDown size={15} />
-                      <span>ดูเพิ่มเติม ({group.items.length - visibleCount} รายการที่เหลือในเดือนนี้)</span>
-                    </button>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </section>
-
         <aside className="craving-tracker-sidebar">
-          <WeeklyCheckInWidget />
-
           <form className="craving-tracker-form" onSubmit={handleSubmit}>
             <h2 className="craving-tracker-form-title">
               {streak?.loggedToday ? "แก้ไขบันทึกวันนี้" : "บันทึกวันนี้"}
@@ -305,6 +235,7 @@ function CravingTracker() {
             </button>
           </form>
 
+          <WeeklyCheckInWidget />
           <section className="craving-tracker-risk">
             <div className="craving-tracker-risk-header">
               <h2>ผลประเมินความเสี่ยง</h2>
@@ -327,6 +258,76 @@ function CravingTracker() {
             </button>
           </section>
         </aside>
+
+        <section>
+          {loading ? (
+            <div className="emotion-calendar-card">
+              <AsyncState />
+            </div>
+          ) : (
+            <EmotionCalendar logs={logs} onSelectEmptyDay={setBackfillDateKey} />
+          )}
+          <p className="craving-tracker-backfill-hint">
+            แตะวันที่ว่างในปฏิทิน (เส้นประ) เพื่อบันทึกความรู้สึกย้อนหลังในวันที่คุณไม่ได้เข้ามา
+          </p>
+
+          <h2 className="craving-tracker-list-heading">ประวัติการบันทึก</h2>
+          {loading ? (
+            <AsyncState />
+          ) : logs.length === 0 ? (
+            <p className="craving-tracker-empty">ยังไม่มีบันทึก</p>
+          ) : (
+            historyGroups.map((group) => {
+              const visibleCount = getMonthVisibleCount(group.key);
+              const visibleItems = group.items.slice(0, visibleCount);
+              return (
+                <div key={group.key} className="craving-tracker-month-group">
+                  <h3 className="craving-tracker-month-heading">{monthGroupLabel(group.year, group.month)}</h3>
+                  <ul className="craving-tracker-list">
+                    {visibleItems.map((log) => {
+                      const context = CONTEXT_OPTIONS.find((c) => c.value === log.context);
+                      const happiness = log.happinessLevel ? happinessByLevel(log.happinessLevel) : null;
+                      const HappinessIcon = happiness?.icon;
+                      return (
+                        <li key={log._id}>
+                          <div
+                            className="craving-tracker-list-icon"
+                            style={happiness ? { backgroundColor: happiness.color, color: "#fff" } : undefined}
+                          >
+                            {HappinessIcon ? <HappinessIcon size={18} /> : <Activity size={18} />}
+                          </div>
+                          <div className="craving-tracker-list-body">
+                            <p className="craving-tracker-mood">{happiness?.label || "ยังไม่ระบุระดับความสุข"}</p>
+                            <p className="craving-tracker-meta">
+                              {new Date(log.date).toLocaleDateString("th-TH")}
+                              {context && ` · ${context.label}`}
+                            </p>
+                            {log.note && <p className="craving-tracker-note">{log.note}</p>}
+                          </div>
+                          {log.cravingLevel != null && (
+                            <span className="craving-tracker-badge">อยาก {log.cravingLevel}/10</span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {visibleCount < group.items.length && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary craving-tracker-load-more"
+                      onClick={() => showMoreForMonth(group.key, group.items.length)}
+                    >
+                      <ChevronDown size={15} />
+                      <span>ดูเพิ่มเติม ({group.items.length - visibleCount} รายการที่เหลือในเดือนนี้)</span>
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </section>
+
+
       </div>
 
       {missingDaysPromptOpen && (

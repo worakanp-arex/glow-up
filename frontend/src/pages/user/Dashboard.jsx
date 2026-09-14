@@ -2,7 +2,7 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { LayoutDashboard, BookOpen, HeartHandshake, Search, User, Users } from "lucide-react";
+import { Activity, Award, CalendarCheck, Lightbulb, LayoutDashboard, BookOpen, HeartHandshake, Search, User, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import DailyCheckin from "../../components/user/DailyCheckin.jsx";
 import StreakWidget from "../../components/user/StreakWidget.jsx";
@@ -17,6 +17,15 @@ import FamilyDashboard from "../family/FamilyDashboard.jsx";
 import * as emotionService from "../../services/emotionService.js";
 import * as familyService from "../../services/familyService.js";
 import "./Dashboard.css";
+
+const OVERVIEW_LINKS = [
+  { to: "/jobs", label: "ค้นหางาน", detail: "ค้นหาโอกาสงานที่เหมาะกับคุณ", icon: Search },
+  { to: "/craving-tracker", label: "บันทึกอารมณ์", detail: "บันทึกความรู้สึกและความอยาก", icon: Activity },
+  { to: "/weekly-checkin", label: "เช็คอินรายสัปดาห์", detail: "ทบทวนการดูแลตัวเองในสัปดาห์นี้", icon: CalendarCheck },
+  { to: "/learning", label: "ฝึกทักษะชีวิต", detail: "บทเรียนสั้นและสถานการณ์ฝึกฝน", icon: Lightbulb },
+  { to: "/streak", label: "ภารกิจและคะแนน", detail: "ดูคะแนนสะสมและรางวัลของฉัน", icon: Award },
+  { to: "/profile", label: "โปรไฟล์ของฉัน", detail: "จัดการทักษะและเอกสารสมัครงาน", icon: User },
+];
 
 const QUICK_LINKS = [
   { to: "/jobs", label: "ค้นหางาน", icon: Search },
@@ -65,7 +74,7 @@ function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="dashboard-greeting">
-        <PageHeader icon={LayoutDashboard}>สวัสดี, {user.name}</PageHeader>
+        <PageHeader icon={LayoutDashboard} description="ทุกก้าวเล็ก ๆ มีความหมาย วันนี้มาดูแลตัวเองไปด้วยกัน">สวัสดี, {user.name}</PageHeader>
         <StatusBadge status={user.verifiedStatus} />
       </div>
 
@@ -83,6 +92,7 @@ function Dashboard() {
           <MyCoursesWidget />
           <CounsellingStatusWidget />
           <CommunityPreviewWidget />
+          {OVERVIEW_LINKS.map(({ to, label, detail, icon: Icon }) => <Link key={to} to={to} className="overview-action-card"><span className="overview-action-icon"><Icon size={20} /></span><div><h2>{label}</h2><p>{detail}</p></div></Link>)}
         </div>
       </div>
 

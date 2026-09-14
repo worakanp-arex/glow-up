@@ -74,7 +74,7 @@ export async function checkAndAwardMissions(userId) {
 
   if (newlyCompletedMissions.length > 0) {
     for (const { mission } of newlyCompletedMissions) {
-      await notifyUser(userId, `คุณสำเร็จภารกิจ "${mission.title}" แล้ว!`, "reward");
+      await notifyUser(userId, `คุณสำเร็จภารกิจ "${mission.title}" แล้ว!`, "reward", { link: "/streak" });
     }
     await notifyLinkedFamily(userId, newlyCompletedMissions.length);
   }
@@ -89,7 +89,7 @@ export async function checkAndAwardMissions(userId) {
 async function notifyLinkedFamily(recoveringUserId) {
   const links = await FamilyLink.find({ recoveringUser: recoveringUserId, status: "active" });
   for (const link of links) {
-    await notifyUser(link.familyUser, "มีความคืบหน้าใหม่ในเส้นทางฟื้นฟูที่คุณติดตามอยู่", "milestone");
+    await notifyUser(link.familyUser, "มีความคืบหน้าใหม่ในเส้นทางฟื้นฟูที่คุณติดตามอยู่", "milestone", { link: "/dashboard" });
   }
 }
 
@@ -140,4 +140,11 @@ export async function myMissionProgress(req, res) {
   });
 
   res.json(result);
+}
+
+export async function myPointsSummary(req, res) {
+  await checkAndAwardMissions(req.user.id);
+  const totalPoints = await getTotalPoints(req.user.id);
+  const completedMissions = await UserMission.countDocuments({ user: req.user.id, completed: true });
+  res.json({ totalPoints, completedMissions });
 }

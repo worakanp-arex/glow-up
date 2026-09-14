@@ -2,13 +2,15 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import { Briefcase } from "lucide-react";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import JobPreview from "../../components/jobs/JobPreview.jsx";
 import * as jobService from "../../services/jobService.js";
 import "./JobDetail.css";
 
 function JobDetail() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const fromApplications = searchParams.get("from") === "my-applications";
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -22,7 +24,7 @@ function JobDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const pageHeader = <PageHeader icon={Briefcase} backTo={"/jobs"} backLabel="ค้นหางาน">{job?.title || "รายละเอียดงาน"}</PageHeader>;
+  const pageHeader = <PageHeader icon={Briefcase} backTo={fromApplications ? "/my-applications" : "/jobs"} backLabel={fromApplications ? "ใบสมัครของฉัน" : "ค้นหางาน"}>{job?.title || "รายละเอียดงาน"}</PageHeader>;
 
   if (loadError) return <div className="job-detail-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 

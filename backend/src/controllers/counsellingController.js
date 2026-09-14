@@ -106,7 +106,7 @@ export async function claimSession(req, res) {
   }
 
   await notifyUser(session.user._id, STATUS_MESSAGE.active(session.topic), "counselling", {
-    link: "/counselling",
+    link: `/counselling/${session._id}`,
   });
   res.json(session);
 }
@@ -143,7 +143,7 @@ export async function addMessage(req, res) {
       notifyTarget,
       `มีข้อความใหม่ในคำขอปรึกษาเรื่อง "${session.topic}"`,
       "counselling",
-      { link: req.user.role === "user" ? "/counselling" : `/counsellor/requests/${session._id}` }
+      { link: senderRole === "user" ? `/counsellor/requests/${session._id}` : `/counselling/${session._id}` }
     );
   }
 
@@ -171,7 +171,7 @@ export async function updateSchedule(req, res) {
   await session.populate("counsellor", COUNSELLOR_SUMMARY_FIELDS);
 
   await notifyUser(session.user._id, STATUS_MESSAGE.scheduled(session.topic), "counselling", {
-    link: "/counselling",
+    link: `/counselling/${session._id}`,
   });
   res.json(session);
 }
@@ -195,7 +195,7 @@ export async function updateStatus(req, res) {
 
   const messageFn = STATUS_MESSAGE[status];
   if (messageFn) {
-    await notifyUser(session.user, messageFn(session.topic), "counselling", { link: "/counselling" });
+    await notifyUser(session.user, messageFn(session.topic), "counselling", { link: `/counselling/${session._id}` });
   }
 
   await session.populate("user", USER_SUMMARY_FIELDS);

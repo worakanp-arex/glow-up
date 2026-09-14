@@ -23,6 +23,7 @@ function MissionIcon({ name, ...props }) {
 function MissionBoard() {
   const [missions, setMissions] = useState([]);
   const [rewards, setRewards] = useState([]);
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,12 +32,15 @@ function MissionBoard() {
         setMissions(missionData);
         setRewards(rewardData);
       })
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return <p className="mission-board-loading">กำลังโหลดภารกิจ...</p>;
   }
+
+  if (error) return <p role="alert">โหลดภารกิจไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</p>;
 
   if (missions.length === 0) {
     return null;
@@ -49,6 +53,9 @@ function MissionBoard() {
         <span>ภารกิจและรางวัล</span>
       </h2>
 
+      <div className="mission-total"><strong>สำเร็จ {missions.filter(item => item.completed).length} / {missions.length} ภารกิจ</strong>
+        <span>ได้รับแล้ว {missions.reduce((sum, item) => sum + (item.completed ? item.mission.rewardPoints || 0 : 0), 0)} / {missions.reduce((sum, item) => sum + (item.mission.rewardPoints || 0), 0)} แต้มจากชุดภารกิจนี้</span>
+      </div>
       <ul className="mission-board-list">
         {missions.map(({ mission, progress, completed }) => (
           <li key={mission._id} className={completed ? "completed" : ""}>
@@ -64,8 +71,8 @@ function MissionBoard() {
                 />
               </span>
               <span className="mission-board-progress-label">
-                {progress}/{mission.targetValue}
-                {mission.rewardPoints > 0 && ` · +${mission.rewardPoints} แต้ม`}
+                {completed ? "สำเร็จแล้ว" : `${progress}/${mission.targetValue}`}
+                {mission.rewardPoints > 0 && ` · ${completed ? "ได้รับ" : "เมื่อสำเร็จ +"}${mission.rewardPoints} แต้ม`}
               </span>
             </span>
           </li>

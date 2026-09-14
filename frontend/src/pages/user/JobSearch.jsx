@@ -2,6 +2,8 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMobileLayout } from "../../hooks/useMobileLayout.js";
 import { MapPin, Search, Wallet } from "lucide-react";
 import JobPreview from "../../components/jobs/JobPreview.jsx";
 import * as jobService from "../../services/jobService.js";
@@ -20,6 +22,8 @@ function initials(name) {
 }
 
 function JobSearch() {
+  const navigate = useNavigate();
+  const mobile = useMobileLayout();
   const [jobs, setJobs] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
@@ -265,7 +269,7 @@ function JobSearch() {
                 key={job._id}
                 type="button"
                 className={`job-list-card${selectedJobId === job._id ? " selected" : ""}`}
-                onClick={() => setSelectedJobId(job._id)}
+                onClick={() => mobile ? navigate(`/jobs/${job._id}`) : setSelectedJobId(job._id)}
               >
                 <div className="job-list-card-header">
                   <h2>{job.title}</h2>
@@ -298,9 +302,9 @@ function JobSearch() {
             <Pagination page={page} pageCount={Math.max(1, Math.ceil(total / Number(resultLimit)))} setPage={setPage} total={total} />
           </div>
 
-          <div className="job-search-preview">
+          {!mobile && <div className="job-search-preview">
             <JobPreview job={selectedJob} />
-          </div>
+          </div>}
         </div>
       )}
     </div>

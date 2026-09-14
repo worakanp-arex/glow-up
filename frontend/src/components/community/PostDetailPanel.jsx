@@ -69,7 +69,7 @@ function CommentItem({ comment, canEdit, canDelete, onSave, onDelete }) {
 // master-detail panel — `onChange` reports post-level patches (likes, saves,
 // comment count, edits) so an embedding list can stay in sync; `onDeleted`
 // lets each embedding decide what "gone" means (navigate away vs. clear selection).
-function PostDetailPanel({ postId, onChange, onDeleted }) {
+function PostDetailPanel({ postId, onChange, onDeleted, reaction }) {
   const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -85,8 +85,8 @@ function PostDetailPanel({ postId, onChange, onDeleted }) {
       .finally(() => setLoading(false));
   }, [postId]);
 
-  async function handleLike() {
-    const updated = await postService.likePost(postId);
+  async function handleLike(_id, liked) {
+    const updated = await postService.likePost(postId, liked);
     setPost((prev) => ({ ...prev, likes: updated.likes, likedByMe: updated.likedByMe }));
     onChange?.({ likes: updated.likes, likedByMe: updated.likedByMe });
   }
@@ -156,7 +156,7 @@ function PostDetailPanel({ postId, onChange, onDeleted }) {
     <div className="post-detail-panel">
       <ul className="post-detail-panel-post-wrapper">
         <PostCard
-          post={{ ...post, commentCount: post.comments.length }}
+          post={{ ...post, ...(reaction ? { likes: reaction.likes, likedByMe: reaction.likedByMe } : {}), commentCount: post.comments.length }}
           currentUserId={user._id}
           onLike={handleLike}
           onToggleSave={handleToggleSave}

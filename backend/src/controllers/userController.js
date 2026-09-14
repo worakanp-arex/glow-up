@@ -221,7 +221,7 @@ export async function verifyUser(req, res) {
   }
 
   const message = status === "verified" ? "บัญชีของคุณได้รับการยืนยันแล้ว" : "บัญชีของคุณถูกปฏิเสธการยืนยันตัวตน";
-  await notifyUser(user._id, message, "system");
+  await notifyUser(user._id, message, "system", { link: "/profile" });
 
   res.json(user);
 }
@@ -244,4 +244,12 @@ export async function deleteUser(req, res) {
     return res.status(404).json({ message: "Not found" });
   }
   res.status(204).send();
+}
+
+export async function myRecoverySummary(req, res) {
+  const records = await RehabilitationRecord.find({ user: req.user.id }).select("status startDate endDate");
+  const ongoing = records.some(record => record.status === "ongoing");
+  const completed = records.filter(record => record.status === "completed" && record.endDate && record.endDate <= new Date())
+    .sort((a, b) => b.endDate - a.endDate);
+  res.json({ ongoing, endDate: ongoing ? null : completed[0]?.endDate || null });
 }

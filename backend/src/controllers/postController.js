@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Post from "../models/Post.js";
 import Comment from "../models/Comment.js";
 import SavedPost from "../models/SavedPost.js";
@@ -162,19 +163,17 @@ export async function deleteComment(req, res) {
 }
 
 export async function likePost(req, res) {
-  const post = await Post.findById(req.params.id);
-  if (!post) {
-    return res.status(404).json({ message: "Not found" });
-  }
-
-  const alreadyLiked = post.likedBy.some((id) => id.toString() === req.user.id);
-  const update = alreadyLiked
-    ? { $pull: { likedBy: req.user.id }, $inc: { likes: -1 } }
-    : { $addToSet: { likedBy: req.user.id }, $inc: { likes: 1 } };
-
-  const updated = await Post.findByIdAndUpdate(req.params.id, update, { new: true });
-  const savedIds = await getSavedIdSet(req.user.id);
-  res.json(serializePost(updated, req.user.id, savedIds));
+  // Apply the requested state atomically, then derive the count from membership.
+  // Returning only the reaction avoids replacing a populated author in clients.
+  const userId = new mongoose.Types.ObjectId(req.user.id);
+  const members = { $ifNull: ["$likedBy", []] };
+  const liked = typeof req.body.liked === "boolean" ? req.body.liked : { $not: [{ $in: [userId, members] }] };
+  const updated = await Post.findByIdAndUpdate(req.params.id, [
+    { $set: { likedBy: { $cond: [liked, { $setUnion: [members, [userId]] }, { $setDifference: [members, [userId]] }] } } },
+    { $set: { likes: { $size: "$likedBy" } } },
+  ], { new: true });
+  if (!updated) return res.status(404).json({ message: "Not found" });
+  res.json({ likes: updated.likes, likedByMe: updated.likedBy.some(id => id.toString() === req.user.id) });
 }
 
 export async function flagPostForReview(req, res) {

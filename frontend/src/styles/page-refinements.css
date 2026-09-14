@@ -1,0 +1,95 @@
+/* Shared page refinements: readable summaries and form-first handheld flows. */
+.layout .dashboard-greeting { background: radial-gradient(ellipse at 95% 0%, var(--color-primary-200), transparent 60%), linear-gradient(120deg, var(--color-surface), var(--color-primary-50)); border-color: var(--color-primary-200); position: relative; }
+.dashboard-greeting .page-heading-icon { background: var(--color-surface); box-shadow: var(--shadow-sm); }
+.overview-action-card { display: flex; align-items: center; gap: 16px; padding: 22px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); color: var(--color-text); text-decoration: none; transition: border-color .2s, box-shadow .2s; }
+.overview-action-card:hover { border-color: var(--color-primary-300); box-shadow: var(--shadow-sm); }
+.overview-action-icon { width: 40px; height: 40px; display: grid; place-items: center; flex-shrink: 0; border-radius: 12px; background: var(--color-primary-50); color: var(--color-primary-700); }
+.overview-action-card h2 { font-size: 1rem; margin: 0 0 6px; }
+.overview-action-card p { margin: 0; font-size: .875rem; color: var(--color-text-secondary); line-height: 1.6; }
+.layout .profile-top-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); align-items: start; }
+.layout .profile-banner-top { height: 112px; background: radial-gradient(circle at 85% 5%, var(--color-primary-200), transparent 65%), linear-gradient(130deg, var(--color-primary-700), var(--color-primary-400)); }
+.layout .profile-banner-avatar { width: 152px; height: 152px; top: 36px; left: 24px; border-width: 5px; }
+.layout .profile-banner-body { padding: 92px 24px 24px; }
+.profile-banner-name { overflow-wrap: anywhere; }
+.profile-top-right .points-summary, .profile-top-right .profile-card { margin-bottom: 0; }
+.profile-recovery { display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; padding: 14px; border-radius: 12px; background: var(--color-primary-50); font-size: .875rem; }
+.profile-recovery > svg { flex-shrink: 0; color: var(--color-primary-600); margin-top: 2px; }
+.profile-recovery p { margin: 6px 0; color: var(--color-text); font-size: 1.15rem; }
+.profile-recovery small { color: var(--color-text-secondary); }
+.mission-total { display: flex; flex-direction: column; gap: 6px; padding: 14px; margin-bottom: 18px; border-radius: 12px; background: var(--color-primary-50); font-size: .875rem; }
+.mission-total span { color: var(--color-text-secondary); }
+.layout .counselling-layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.layout .counselling-sidebar { position: static; min-width: 0; }
+.layout .counselling-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; }
+.counselling-form > :is(h2, .counselling-error, button), .counselling-form > .counselling-field:first-of-type { grid-column: 1 / -1; }
+.counselling-form > label, .counselling-form > .counselling-field { min-width: 0; }
+.mood-select select { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--color-border); color: var(--color-text); background: var(--color-surface); text-overflow: ellipsis; }
+.mood-select p { display: flex; align-items: flex-start; gap: 8px; font-size: .8125rem; line-height: 1.6; color: var(--color-text-secondary); margin: 8px 0 0; }
+.mood-select svg { flex-shrink: 0; color: var(--color-primary-600); }
+.counselling-list-link { flex-wrap: wrap; }
+.counselling-list-body { flex: 1; min-width: 150px; }
+.counselling-list .counselling-status-badge { margin-left: auto; }
+.craving-tracker-layout > section { grid-column: 1; grid-row: 1; min-width: 0; }
+.craving-tracker-layout > aside { grid-column: 2; grid-row: 1; min-width: 0; }
+.layout .job-preview-applied-note.application-tone-pending { background: var(--color-warning-bg); color: var(--color-warning); }
+.layout .job-preview-applied-note.application-tone-interview { background: var(--color-primary-50); color: var(--color-primary-700); }
+.layout .job-preview-applied-note.application-tone-passed { background: var(--color-success-bg); color: var(--color-success); }
+.layout .job-preview-applied-note.application-tone-rejected { background: var(--color-danger-bg); color: var(--color-danger); }
+.layout .job-preview-applied-note.application-tone-cancelled, .job-availability-note { background: var(--color-surface-hover); color: var(--color-text-secondary); }
+.job-availability-note { display: flex; align-items: center; gap: 8px; padding: 14px; border-radius: 10px; font-size: .875rem; }
+.app-match-breakdown { font-size: .8125rem; line-height: 1.6; display: flex; flex-direction: column; gap: 6px; text-align: left; }
+.app-match-breakdown small { color: var(--color-text-secondary); }
+.app-match-breakdown p { margin: 0; color: var(--color-text-secondary); }
+.app-match-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.app-match-tags .matched { padding: 4px 8px; border-radius: 8px; background: var(--color-success-bg); color: var(--color-success); }
+.app-card-side { min-width: 0; max-width: 380px; }
+.post-report-status { margin: 10px 0 0; color: var(--color-text-secondary); font-size: .75rem; }
+.notification-bell-panel { width: 360px; max-height: min(520px, 75dvh); }
+.notification-panel-heading { display: flex; align-items: center; justify-content: space-between; padding: 16px 14px 8px; gap: 10px; }
+.notification-panel-heading span { font-size: .75rem; color: var(--color-text-secondary); }
+.notification-panel-actions { display: flex; gap: 8px; padding: 8px 14px 12px; border-bottom: 1px solid var(--color-border); }
+.notification-panel-actions button { flex: 1; min-height: 44px; padding: 8px; font: inherit; font-size: .75rem; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-primary-700); cursor: pointer; }
+.notification-panel-actions button:disabled { opacity: .45; cursor: default; }
+.notification-bell-panel > .dialog-error { padding: 0 14px; font-size: .8rem; }
+.news-section, [id^="news-"] { scroll-margin-top: 140px; }
+@media (max-width: 860px) {
+  .layout .job-search-form { display: flex; flex-direction: column; align-items: stretch; }
+  .layout .job-search-form input { flex: auto; width: 100%; min-width: 0; }
+  .layout .job-search-form button { width: 100%; min-height: 44px; justify-content: center; }
+  .layout .job-list-card.selected { border-color: var(--color-border); background: var(--color-surface); box-shadow: none; }
+  .craving-tracker-layout > aside, .craving-tracker-layout > section { grid-column: auto; grid-row: auto; position: static; }
+  .layout .profile-top-row { grid-template-columns: minmax(0, 1fr); }
+  .layout .notification-bell-panel { position: fixed; top: 66px; right: 12px; width: min(360px, calc(100vw - 24px)); }
+}
+@media (max-width: 600px) {
+  .layout .counselling-form { grid-template-columns: minmax(0, 1fr); padding: 16px; gap: 16px; }
+  .layout .counselling-form > * { grid-column: auto; }
+  .layout .counselling-type-picker { gap: 6px; }
+  .layout .counselling-type-btn { padding: 10px 6px; }
+  .layout .craving-tracker-form { padding: 16px; }
+  .layout .profile-banner-avatar { width: 128px; height: 128px; left: 18px; top: 28px; }
+  .layout .profile-banner-top { height: 90px; }
+  .layout .profile-banner-body { padding: 82px 18px 18px; }
+  .layout .profile-card { padding: 16px; }
+  .layout .profile-top-row, .layout .profile-top-right { gap: 14px; }
+  .layout .streak-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .layout .streak-stat-card { padding: 12px 6px; }
+  .layout .streak-hero { padding: 18px 14px; }
+  .layout .streak-hero > svg { width: 130px; height: 130px; }
+  .layout .mission-board { padding: 16px; }
+  .app-card-side { max-width: none; width: 100%; }
+  .layout .app-card-match { align-items: flex-start; width: 100%; }
+  .news-section, [id^="news-"] { scroll-margin-top: 76px; }
+}
+
+.counselling-sent { grid-column: 1 / -1; padding: 12px; border-radius: 10px; background: var(--color-success-bg); color: var(--color-success); font-size: .875rem; }
+@media (max-width: 600px) {
+  .layout .dashboard-greeting { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .layout .dashboard-greeting > .status-badge { justify-self: start; margin-left: 44px; }
+  .layout .profile-skill-add-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .layout .profile-skill-add-form > input { grid-column: 1 / -1; width: 100%; }
+}@media (max-width: 600px) {
+  .layout .counselling-form .datetime-picker-panel { position: static; width: 100%; margin-top: 8px; padding: 12px; }
+  .layout .counselling-form .datetime-picker-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .layout .counselling-form .datetime-picker-cell { min-height: 36px; padding: 0; }
+}

@@ -124,7 +124,7 @@ async function notifyUsersOfNewArticle(items) {
   const recipients = await User.find({ role: "user" }).select("_id");
   await Promise.allSettled(
     recipients.map((recipient) =>
-      notifyUser(recipient._id, `มีบทความใหม่: ${newest.title}`, "news", { link: "/" })
+      notifyUser(recipient._id, `มีบทความใหม่: ${newest.title}`, "news", { link: `/#news-${encodeURIComponent(newest.id)}` })
     )
   );
 }

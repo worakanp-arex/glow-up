@@ -10,6 +10,7 @@ import * as emotionService from "../services/emotionService.js";
 import * as courseService from "../services/courseService.js";
 import * as familyService from "../services/familyService.js";
 import StatusBadge from "../components/common/StatusBadge.jsx";
+import PointsSummary from "../components/user/PointsSummary.jsx";
 import StreakWidget from "../components/user/StreakWidget.jsx";
 import "./Profile.css";
 
@@ -63,6 +64,8 @@ function Profile() {
   const [skillLevel, setSkillLevel] = useState(3);
   const [skillsLoading, setSkillsLoading] = useState(user.role === "user");
 
+  const [recovery, setRecovery] = useState(null);
+  const [recoveryError, setRecoveryError] = useState(false);
   const [streak, setStreak] = useState(null);
   const [myCourses, setMyCourses] = useState([]);
 
@@ -83,6 +86,7 @@ function Profile() {
 
   useEffect(() => {
     if (user.role !== "user") return;
+    userService.getMyRecoverySummary().then(setRecovery).catch(() => setRecoveryError(true));
     emotionService.getMyStreak().then(setStreak).catch(() => setStreak(null));
   }, [user.role]);
 
@@ -250,6 +254,7 @@ function Profile() {
           <button
             type="button"
             className="profile-banner-avatar"
+            aria-label="เปลี่ยนรูปโปรไฟล์"
             onClick={() => avatarInputRef.current?.click()}
             disabled={avatarUploading}
           >
@@ -294,6 +299,11 @@ function Profile() {
                 </li>
               )}
             </ul>
+            {user.role === "user" && <div className="profile-recovery">
+              <Heart size={18} aria-hidden="true" /><div><strong>ระยะเวลาหลังสิ้นสุดการบำบัด</strong>
+              <p>{recoveryError ? "โหลดประวัติไม่สำเร็จ" : !recovery ? "กำลังโหลด..." : recovery.ongoing ? "อยู่ระหว่างการบำบัด" : recovery.endDate ? (Math.max(0, Math.floor((Date.now() - new Date(recovery.endDate).getTime()) / 86400000)).toLocaleString("th-TH") + " วัน") : "ยังไม่มีวันที่สิ้นสุดการบำบัด"}</p>
+              {recovery?.endDate && <small>นับจาก {new Date(recovery.endDate).toLocaleDateString("th-TH")}</small>}</div>
+            </div>}
             <p className="profile-avatar-hint">
               {avatarUploading ? "กำลังอัปโหลดรูป..." : "คลิกที่รูปเพื่อเปลี่ยนรูปโปรไฟล์"}
             </p>
@@ -302,6 +312,7 @@ function Profile() {
 
         {user.role === "user" && (
           <div className="profile-top-right">
+            <PointsSummary />
             <div className="profile-card profile-skills-card">
               <h2>
                 <Sparkles size={18} />

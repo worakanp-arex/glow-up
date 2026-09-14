@@ -6,12 +6,14 @@ import {
   updateMission,
   deleteMission,
   myMissionProgress,
+  myPointsSummary,
 } from "../controllers/missionController.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
+router.get("/me/summary", verifyToken, requireRole("user"), asyncHandler(myPointsSummary));
 router.get("/me", verifyToken, requireRole("user"), asyncHandler(myMissionProgress));
 
 router.get("/", verifyToken, asyncHandler(listMissions));

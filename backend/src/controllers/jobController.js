@@ -188,7 +188,7 @@ export async function confirmJob(req, res) {
     status === "verified"
       ? `ประกาศงาน "${job.title}" ได้รับการยืนยันแล้ว`
       : `ประกาศงาน "${job.title}" ถูกปฏิเสธ`;
-  await notifyUser(job.employer, message, "job");
+  await notifyUser(job.employer, message, "job", { link: "/employer/jobs" });
 
   res.json(await attachSkills(job));
 }

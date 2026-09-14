@@ -44,12 +44,12 @@ export function deleteComment(postId, commentId) {
   return api.delete(`/posts/${postId}/comments/${commentId}`).then((res) => res.data);
 }
 
-export function likePost(postId) {
-  return api.put(`/posts/${postId}/like`).then((res) => res.data);
+export function likePost(postId, liked) {
+  return api.put(`/posts/${postId}/like`, { liked }, { silent: true }).then((res) => res.data);
 }
 
 export function flagPost(postId) {
-  return api.put(`/posts/${postId}/flag`).then((res) => res.data);
+  return api.put(`/posts/${postId}/flag`, {}, { silent: true }).then((res) => res.data);
 }
 
 export function unflagPost(postId) {

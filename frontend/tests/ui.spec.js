@@ -114,7 +114,7 @@ test("application cards show the supplied skill match", async ({ page }) => {
   await fixture(page); await page.goto("/my-applications");
   await expect(page.locator(".my-applications-list > li")).toHaveCount(10);
   await expect(page.locator(".app-card-match").first()).toContainText("50%");
-  await expect(page.locator(".app-card-match").first()).toContainText("1/2");
+  await expect(page.locator(".app-card-match").first()).toContainText("1 / 2 แต้มทักษะ");
   await expect(page.locator(".app-card-match").first()).toContainText("Customer service");
 });
 

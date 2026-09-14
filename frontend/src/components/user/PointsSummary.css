@@ -1,0 +1,5 @@
+.points-summary { display: flex; align-items: center; gap: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--color-primary-200); border-radius: 16px; background: linear-gradient(120deg, var(--color-primary-50), var(--color-surface)); color: var(--color-primary-700); }
+.points-summary > svg { flex-shrink: 0; }
+.points-summary div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.points-summary strong { font-size: 1.6rem; color: var(--color-text); }
+.points-summary small { color: var(--color-text-secondary); line-height: 1.6; }

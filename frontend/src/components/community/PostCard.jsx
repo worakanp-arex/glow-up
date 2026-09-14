@@ -1,4 +1,5 @@
-import { useState } from "react";
+import ConfirmDialog from "../common/ConfirmDialog.jsx";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Bookmark, Flag, Heart, Lock, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import * as postService from "../../services/postService.js";
@@ -19,6 +20,12 @@ function PostCard({
   selected = false,
   linkToDetail = true,
 }) {
+  const likePending = useRef(false);
+  const [liking, setLiking] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportBusy, setReportBusy] = useState(false);
+  const [reportError, setReportError] = useState("");
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(post.content || "");
   const [tagsInput, setTagsInput] = useState((post.tags || []).join(", "));
@@ -57,10 +64,25 @@ function PostCard({
     await onDeleted(post._id);
   }
 
+  async function handleLike() {
+    if (likePending.current) return;
+    likePending.current = true;
+    setLiking(true);
+    setActionError("");
+    try { await onLike(post._id, !post.likedByMe); }
+    catch { setActionError("ส่งกำลังใจไม่สำเร็จ กรุณาลองอีกครั้ง"); }
+    finally { likePending.current = false; setLiking(false); }
+  }
+
   async function handleFlag() {
-    if (flagged || !window.confirm("รายงานเนื้อหาโพสต์นี้ให้เจ้าหน้าที่ตรวจสอบ?")) return;
-    await postService.flagPost(post._id);
-    setFlagged(true);
+    setReportBusy(true);
+    setReportError("");
+    try {
+      await postService.flagPost(post._id);
+      setFlagged(true);
+      setReportOpen(false);
+    } catch { setReportError("รายงานไม่สำเร็จ กรุณาลองอีกครั้ง"); }
+    finally { setReportBusy(false); }
   }
 
   return (
@@ -155,11 +177,14 @@ function PostCard({
         <p className="post-card-content">{post.content}</p>
       )}
 
+      {actionError && <p role="alert" className="dialog-error">{actionError}</p>}
       <div className="post-card-footer">
         <button
           type="button"
           className={`post-card-like-button${post.likedByMe ? " liked" : ""}`}
-          onClick={() => onLike(post._id)}
+          onClick={handleLike}
+          disabled={liking}
+          aria-pressed={Boolean(post.likedByMe)}
         >
           <Heart size={16} fill={post.likedByMe ? "currentColor" : "none"} />
           <span>{post.likes} กำลังใจ</span>
@@ -202,7 +227,7 @@ function PostCard({
           <button
             type="button"
             className={`post-card-flag-button${flagged ? " flagged" : ""}`}
-            onClick={handleFlag}
+            onClick={() => { setReportError(""); setReportOpen(true); }}
             disabled={flagged}
             aria-label={flagged ? "รายงานแล้ว" : "รายงานเนื้อหา"}
             title={flagged ? "รายงานแล้ว รอเจ้าหน้าที่ตรวจสอบ" : "รายงานเนื้อหา"}
@@ -211,6 +236,8 @@ function PostCard({
           </button>
         )}
       </div>
+      {flagged && <p className="post-report-status" role="status">รายงานแล้ว รอเจ้าหน้าที่ตรวจสอบ</p>}
+      {reportOpen && <ConfirmDialog title="รายงานเนื้อหา" confirmLabel="ส่งรายงาน" busy={reportBusy} error={reportError} onConfirm={handleFlag} onClose={() => setReportOpen(false)}><p>ต้องการส่งโพสต์นี้ให้เจ้าหน้าที่ตรวจสอบใช่ไหม?</p></ConfirmDialog>}
     </li>
   );
 }

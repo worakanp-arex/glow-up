@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle2, ExternalLink, MapPin, Paperclip, Send, ShieldCheck, Wallet } from "lucide-react";
+import { Clock, ExternalLink, MapPin, Paperclip, Send, ShieldCheck, Wallet } from "lucide-react";
 import * as applicationService from "../../services/applicationService.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import StatusBadge from "../common/StatusBadge.jsx";
@@ -13,19 +13,21 @@ function initials(name) {
 function JobPreview({ job, showTitle = true }) {
   const { user, isAuthenticated } = useAuth();
   const [applying, setApplying] = useState(false);
-  const [justApplied, setJustApplied] = useState(false);
+  const [justApplied, setJustApplied] = useState(null);
   const [error, setError] = useState("");
   const [attachmentFiles, setAttachmentFiles] = useState({});
   const [myApplications, setMyApplications] = useState([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(isAuthenticated && user?.role === "user");
+  const [applicationsError, setApplicationsError] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated || user.role !== "user") return;
-    applicationService.getMyApplications().then(setMyApplications);
+    applicationService.getMyApplications().then(setMyApplications).catch(() => setApplicationsError(true)).finally(() => setApplicationsLoading(false));
   }, [isAuthenticated, user?.role]);
 
   useEffect(() => {
     setApplying(false);
-    setJustApplied(false);
+    setJustApplied(null);
     setError("");
     setAttachmentFiles({});
   }, [job?._id]);
@@ -35,8 +37,12 @@ function JobPreview({ job, showTitle = true }) {
   }
 
   const existingApplication = myApplications.find((app) => app.job?._id === job._id);
-  const alreadyApplied = Boolean(existingApplication) || justApplied;
+  const alreadyApplied = Boolean(existingApplication) || justApplied === job._id;
   const attachmentRequests = job.attachmentRequests || [];
+  const expired = job.status === "expired" || (job.expiredAt && new Date(job.expiredAt) <= new Date());
+  const accepting = job.status === "open" && job.verifiedStatus === "verified" && !expired;
+  const applicationStatus = existingApplication?.status || "pending";
+  const statusMessages = { pending: "ส่งใบสมัครแล้ว · รอนายจ้างพิจารณา", interview: "ได้รับนัดสัมภาษณ์ · ดูรายละเอียดในใบสมัคร", passed: "ผ่านการคัดเลือกแล้ว", rejected: "ใบสมัครไม่ได้รับการคัดเลือก", cancelled: "คุณยกเลิกใบสมัครนี้แล้ว" };
 
   function handleAttachmentChange(name, file) {
     setAttachmentFiles((prev) => ({ ...prev, [name]: file }));
@@ -55,14 +61,14 @@ function JobPreview({ job, showTitle = true }) {
     try {
       const files = attachmentRequests.map((name) => attachmentFiles[name]);
       const application = await applicationService.applyToJob(job._id, files);
-      setJustApplied(true);
+      setJustApplied(job._id);
       setMyApplications((prev) => [{ ...application, job }, ...prev]);
     } catch (err) {
       if (err.response?.status === 409) {
         // Someone else applied from another tab/session in the meantime — refresh
         // the list so the UI settles into the same calm "already applied" state.
-        setJustApplied(true);
-        applicationService.getMyApplications().then(setMyApplications);
+        setJustApplied(job._id);
+        applicationService.getMyApplications().then(setMyApplications).catch(() => setApplicationsError(true));
       } else {
         setError(err.response?.data?.message || "สมัครงานไม่สำเร็จ");
       }
@@ -137,15 +143,16 @@ function JobPreview({ job, showTitle = true }) {
         {error && <p className="job-preview-error">{error}</p>}
 
         {isAuthenticated && user.role === "user" && alreadyApplied && (
-          <div className="job-preview-applied-note">
-            <CheckCircle2 size={16} />
-            <span>คุณสมัครงานนี้ไปแล้ว</span>
+          <div className={`job-preview-applied-note application-tone-${applicationStatus}`}>
+            <span>{statusMessages[applicationStatus] || "ส่งใบสมัครแล้ว"}</span>
             {existingApplication && <StatusBadge status={existingApplication.status} />}
             <Link to="/my-applications">ดูใบสมัครของฉัน</Link>
           </div>
         )}
 
-        {isAuthenticated && user.role === "user" && !alreadyApplied && attachmentRequests.length > 0 && (
+        {!accepting && <p className="job-availability-note"><Clock size={16} />{expired ? "หมดเขตรับสมัครแล้ว" : job.status === "closed" ? "ตำแหน่งนี้ปิดรับสมัครแล้ว" : "ประกาศนี้ยังไม่เปิดรับสมัคร"}</p>}
+        {applicationsError && <p className="job-preview-error" role="alert">ตรวจสอบใบสมัครไม่สำเร็จ กรุณาโหลดหน้าใหม่ก่อนสมัคร</p>}
+        {isAuthenticated && user.role === "user" && !alreadyApplied && accepting && attachmentRequests.length > 0 && (
           <div className="job-preview-attachments">
             <p className="job-preview-attachments-title">
               <Paperclip size={14} />
@@ -163,15 +170,15 @@ function JobPreview({ job, showTitle = true }) {
           </div>
         )}
 
-        {isAuthenticated && user.role === "user" && !alreadyApplied && (
+        {isAuthenticated && user.role === "user" && !alreadyApplied && accepting && (
           <button
             type="button"
             className="job-preview-apply-button"
             onClick={handleApply}
-            disabled={applying}
+            disabled={applying || applicationsLoading || applicationsError}
           >
             <Send size={16} />
-            <span>{applying ? "กำลังสมัคร..." : "สมัครงาน"}</span>
+            <span>{applicationsLoading ? "ตรวจสอบใบสมัคร..." : applying ? "กำลังสมัคร..." : "สมัครงาน"}</span>
           </button>
         )}
 

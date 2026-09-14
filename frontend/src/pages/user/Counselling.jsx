@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { HeartHandshake, ChevronDown, MessageCircle, Phone, Send, Video } from "lucide-react";
 import * as counsellingService from "../../services/counsellingService.js";
+import MoodSelect from "../../components/common/MoodSelect.jsx";
 import DateTimePicker from "../../components/common/DateTimePicker.jsx";
-import { MOOD_OPTIONS, moodByValue } from "../../constants/mood.js";
+import { MOOD_OPTIONS } from "../../constants/mood.js";
 import {
   COUNSELLING_STATUS_LABELS,
   COUNSELLING_STATUS_CLASS,
@@ -42,6 +43,7 @@ function Counselling() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [sentSession, setSentSession] = useState(null);
   const [historyLimit, setHistoryLimit] = useState(HISTORY_PAGE_SIZE);
 
   const historyGroups = useMemo(
@@ -73,6 +75,7 @@ function Counselling() {
       return;
     }
     setError("");
+    setSentSession(null);
     setSubmitting(true);
     try {
       const session = await counsellingService.createSession({
@@ -80,6 +83,7 @@ function Counselling() {
         preferredAt: new Date(form.preferredAt).toISOString(),
       });
       setSessions((prev) => [session, ...prev]);
+      setSentSession(session);
       setForm(INITIAL_FORM);
     } catch (err) {
       setError(err.response?.data?.message || "ส่งคำขอไม่สำเร็จ");
@@ -88,7 +92,6 @@ function Counselling() {
     }
   }
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
   return (
     <div className="counselling-page">
@@ -97,9 +100,73 @@ function Counselling() {
       </>}>ขอรับคำปรึกษา</PageHeader>
 
       <div className="counselling-layout">
+        <aside className="counselling-sidebar">
+          <form className="counselling-form" onSubmit={handleSubmit}>
+            <h2 className="counselling-form-title">ส่งคำขอใหม่</h2>
+
+            <div className="counselling-field">
+              <span className="counselling-field-label">ช่องทางที่ต้องการ</span>
+              <div className="counselling-type-picker" role="radiogroup" aria-label="ช่องทางที่ต้องการ">
+                {SESSION_TYPE_OPTIONS.map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={form.sessionType === value}
+                    className={`counselling-type-btn${form.sessionType === value ? " active" : ""}`}
+                    onClick={() => setForm((prev) => ({ ...prev, sessionType: value }))}
+                  >
+                    <Icon size={18} />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <label>
+              หัวข้อการคุย
+              <input
+                type="text"
+                name="topic"
+                value={form.topic}
+                onChange={handleChange}
+                placeholder="เช่น อยากปรึกษาเรื่องความเครียดในที่ทำงาน"
+                required
+              />
+            </label>
+
+            <label>
+              รายละเอียดที่อยากปรึกษา
+              <textarea name="message" value={form.message} onChange={handleChange} rows={4} required />
+            </label>
+
+            <div className="counselling-field">
+              <span className="counselling-field-label">ตอนนี้คุณรู้สึกอย่างไร</span>
+              <MoodSelect options={MOOD_OPTIONS} value={form.mood} onChange={value => setForm(prev => ({ ...prev, mood: value }))} />
+            </div>
+
+            <div className="counselling-field">
+              <span className="counselling-field-label">วันเวลาที่สะดวก</span>
+              <DateTimePicker
+                value={form.preferredAt}
+                onChange={(value) => setForm((prev) => ({ ...prev, preferredAt: value }))}
+                min={nowAsDatetimeLocal()}
+              />
+            </div>
+
+            {error && <p className="counselling-error">{error}</p>}
+            {sentSession && <p className="counselling-sent" role="status">ส่งคำขอแล้ว <Link to={`/counselling/${sentSession._id}`}>ติดตามคำขอนี้</Link></p>}
+
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              <Send size={16} />
+              <span>{submitting ? "กำลังส่งคำขอ..." : "ส่งคำขอ"}</span>
+            </button>
+          </form>
+        </aside>
+
         <section>
           <h2>คำขอที่ผ่านมา</h2>
-          {loading ? (
+          {loadError ? <AsyncState error description="โหลดคำขอที่ผ่านมาไม่สำเร็จ คุณยังส่งคำขอใหม่ได้" onRetry={() => window.location.reload()} /> : loading ? (
             <AsyncState />
           ) : sessions.length === 0 ? (
             <p className="counselling-empty">ยังไม่มีคำขอรับคำปรึกษา</p>
@@ -152,85 +219,7 @@ function Counselling() {
           )}
         </section>
 
-        <aside className="counselling-sidebar">
-          <form className="counselling-form" onSubmit={handleSubmit}>
-            <h2 className="counselling-form-title">ส่งคำขอใหม่</h2>
 
-            <div className="counselling-field">
-              <span className="counselling-field-label">ช่องทางที่ต้องการ</span>
-              <div className="counselling-type-picker" role="radiogroup" aria-label="ช่องทางที่ต้องการ">
-                {SESSION_TYPE_OPTIONS.map(({ value, label, icon: Icon }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    role="radio"
-                    aria-checked={form.sessionType === value}
-                    className={`counselling-type-btn${form.sessionType === value ? " active" : ""}`}
-                    onClick={() => setForm((prev) => ({ ...prev, sessionType: value }))}
-                  >
-                    <Icon size={18} />
-                    <span>{label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <label>
-              หัวข้อการคุย
-              <input
-                type="text"
-                name="topic"
-                value={form.topic}
-                onChange={handleChange}
-                placeholder="เช่น อยากปรึกษาเรื่องความเครียดในที่ทำงาน"
-                required
-              />
-            </label>
-
-            <label>
-              รายละเอียดที่อยากปรึกษา
-              <textarea name="message" value={form.message} onChange={handleChange} rows={4} required />
-            </label>
-
-            <div className="counselling-field">
-              <span className="counselling-field-label">ตอนนี้คุณรู้สึกอย่างไร</span>
-              <div className="counselling-mood-picker" role="radiogroup" aria-label="อารมณ์ในตอนนี้">
-                {MOOD_OPTIONS.map(({ value, label, icon: Icon }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    role="radio"
-                    aria-checked={form.mood === value}
-                    title={label}
-                    className={`counselling-mood-btn${form.mood === value ? " active" : ""}`}
-                    onClick={() => setForm((prev) => ({ ...prev, mood: value }))}
-                  >
-                    <Icon size={18} />
-                  </button>
-                ))}
-              </div>
-              <span className="counselling-mood-selected-label">
-                {form.mood ? moodByValue(form.mood).label : "แตะเพื่อเลือกอารมณ์"}
-              </span>
-            </div>
-
-            <div className="counselling-field">
-              <span className="counselling-field-label">วันเวลาที่สะดวก</span>
-              <DateTimePicker
-                value={form.preferredAt}
-                onChange={(value) => setForm((prev) => ({ ...prev, preferredAt: value }))}
-                min={nowAsDatetimeLocal()}
-              />
-            </div>
-
-            {error && <p className="counselling-error">{error}</p>}
-
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
-              <Send size={16} />
-              <span>{submitting ? "กำลังส่งคำขอ..." : "ส่งคำขอ"}</span>
-            </button>
-          </form>
-        </aside>
       </div>
     </div>
   );

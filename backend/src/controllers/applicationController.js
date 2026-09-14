@@ -126,7 +126,8 @@ export async function updateApplicationStatus(req, res) {
   await notifyUser(
     application.user,
     `ใบสมัครตำแหน่ง "${application.job.title}" เปลี่ยนสถานะเป็น "${STATUS_LABELS[status]}"`,
-    "job"
+    "job",
+    { link: `/jobs/${application.job._id}?from=my-applications` }
   );
 
   res.json(application);
@@ -150,7 +151,8 @@ export async function cancelApplication(req, res) {
   await notifyUser(
     application.job.employer,
     `ผู้สมัครยกเลิกใบสมัครตำแหน่ง "${application.job.title}"`,
-    "job"
+    "job",
+    { link: `/employer/applications/${application._id}` }
   );
 
   res.json(application);

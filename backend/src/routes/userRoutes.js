@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   updateMe,
+  myRecoverySummary,
   getPublicProfile,
   uploadMyAvatar,
   uploadMyResume,
@@ -23,6 +24,7 @@ import { uploadAvatar, uploadResume, uploadCertificate } from "../middleware/upl
 
 const router = Router();
 
+router.get("/me/recovery-summary", verifyToken, requireRole("user"), asyncHandler(myRecoverySummary));
 router.put("/me", verifyToken, asyncHandler(updateMe));
 router.get("/:id/public", verifyToken, asyncHandler(getPublicProfile));
 

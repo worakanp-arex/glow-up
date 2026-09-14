@@ -60,7 +60,7 @@ function MyApplications() {
             <li key={app._id}>
               <div className="app-card-main">
                 <div className="app-card-info">
-                  <Link to={`/jobs/${app.job._id}`} className="app-card-title">
+                  <Link to={`/jobs/${app.job._id}?from=my-applications`} className="app-card-title">
                     {app.job.title}
                   </Link>
                   {employerName && (
@@ -79,10 +79,16 @@ function MyApplications() {
                   <div className="app-card-match">
                     <span className="app-card-match-label">ทักษะตรงกับงาน</span>
                     <span className="app-card-match-score">{app.match ? app.match.score + "%" : "ยังไม่ระบุ"}</span>
-                    {app.match && <small>{app.match.matchedSkills.length}/{app.match.totalSkills} ทักษะ · {app.match.matchedSkills.join(", ") || "ลองเพิ่มทักษะในโปรไฟล์"}</small>}
+                    {app.match && <div className="app-match-breakdown">
+                      <strong>{app.match.matchedSkills.length} / {app.match.totalSkills} แต้มทักษะ</strong>
+                      <small>ตรง 1 ทักษะ = 1 แต้ม · แยกจากคะแนนภารกิจ</small>
+                      <div className="app-match-tags">{app.match.matchedSkills.map(skill => <span key={skill} className="matched">✓ {skill} · 1 แต้ม</span>)}</div>
+                      {app.match.matchedSkills.length === 0 && <Link to="/profile">เพิ่มทักษะในโปรไฟล์</Link>}
+                      {app.match.missingSkills?.length > 0 && <p>ทักษะที่ยังไม่ตรง: {app.match.missingSkills.join(", ")}</p>}
+                    </div>}
                   </div>
                   <StatusBadge status={app.status} />
-                  <Link to={`/jobs/${app.job._id}`} className="app-card-detail-btn">
+                  <Link to={`/jobs/${app.job._id}?from=my-applications`} className="app-card-detail-btn">
                     ดูรายละเอียดงาน
                   </Link>
                 </div>

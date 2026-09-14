@@ -3,7 +3,8 @@ import Pagination from "../../components/common/Pagination.jsx";
 import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useMobileLayout } from "../../hooks/useMobileLayout.js";
+import { Link, useNavigate } from "react-router-dom";
 import { Users, Send } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as postService from "../../services/postService.js";
@@ -18,6 +19,8 @@ function initials(name) {
 }
 
 function Community() {
+  const mobile = useMobileLayout();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const isStaff = STAFF_ROLES.includes(user.role);
   const [posts, setPosts] = useState([]);
@@ -66,9 +69,10 @@ function Community() {
     }
   }
 
-  async function handleLike(postId) {
-    const updated = await postService.likePost(postId);
+  async function handleLike(postId, liked) {
+    const updated = await postService.likePost(postId, liked);
     setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, ...updated } : p)));
+    return updated;
   }
 
   async function handleToggleSave(postId) {
@@ -146,7 +150,7 @@ function Community() {
                 onToggleSave={handleToggleSave}
                 onUpdated={handleUpdated}
                 onDeleted={handleDeleted}
-                onSelect={setSelectedPostId}
+                onSelect={id => mobile ? navigate(`/community/${id}`) : setSelectedPostId(id)}
                 selected={post._id === selectedPostId}
               />
             )
@@ -190,11 +194,13 @@ function Community() {
               </button>
             </form>
           </aside>
-        ) : (
+        ) : !mobile && (
           <aside className="community-sidebar community-detail-sidebar">
             {selectedPostId ? (
               <PostDetailPanel
+                key={selectedPostId}
                 postId={selectedPostId}
+                reaction={posts.find(p => p._id === selectedPostId)}
                 onChange={(patch) => handlePanelChange(selectedPostId, patch)}
                 onDeleted={() => handlePanelDeleted(selectedPostId)}
               />

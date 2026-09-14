@@ -24,7 +24,7 @@ function NewsSection({ limit = 6, title = "อัปเดตความรู�
   }, [limit]);
 
   return (
-    <section className="news-section">
+    <section id="news" className="news-section">
       <Reveal className="news-section-heading">
         <span className="news-section-eyebrow">
           <Newspaper size={14} />
@@ -42,6 +42,7 @@ function NewsSection({ limit = 6, title = "อัปเดตความรู�
               <Reveal
                 as="a"
                 key={article.id}
+                id={`news-${article.id}`}
                 href={article.link}
                 target="_blank"
                 rel="noopener noreferrer"

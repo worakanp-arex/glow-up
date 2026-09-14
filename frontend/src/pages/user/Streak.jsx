@@ -6,8 +6,8 @@ import { Award, CalendarCheck, Flame } from "lucide-react";
 import PlantGrowth, { stageLabel, streakToStage } from "../../components/user/PlantGrowth.jsx";
 import MissionBoard from "../../components/user/MissionBoard.jsx";
 import * as emotionService from "../../services/emotionService.js";
-import { WEEKDAY_LABELS, buildCalendarCells, formatThaiDate } from "../../utils/calendarGrid.js";
-import { happinessByLevel } from "../../constants/happiness.js";
+import CheckinCalendar from "../../components/user/CheckinCalendar.jsx";
+import PointsSummary from "../../components/user/PointsSummary.jsx";
 import "./Streak.css";
 
 function Streak() {
@@ -83,37 +83,8 @@ function Streak() {
         </div>
       </div>
 
-      <div className="streak-calendar-section">
-        <h2>ปฏิทินการเช็คอิน 12 สัปดาห์ล่าสุด</h2>
-        <div className="streak-calendar">
-          <div className="streak-calendar-weekdays">
-            {WEEKDAY_LABELS.map((label) => (
-              <span key={label}>{label}</span>
-            ))}
-          </div>
-          <div className="streak-calendar-grid">
-            {buildCalendarCells(streak.history).map((day, index) => {
-              if (!day) {
-                return <span key={`blank-${index}`} className="streak-calendar-cell streak-calendar-cell-blank" />;
-              }
-              const happiness = day.happinessLevel ? happinessByLevel(day.happinessLevel) : null;
-              const title = happiness
-                ? `${formatThaiDate(day.date)} — ${happiness.label}`
-                : day.done
-                  ? `${formatThaiDate(day.date)} — เช็คอินแล้ว`
-                  : formatThaiDate(day.date);
-              return (
-                <span
-                  key={day.date}
-                  className={`streak-calendar-cell${day.done ? " streak-calendar-cell-done" : ""}`}
-                  style={happiness ? { backgroundColor: happiness.color } : undefined}
-                  title={title}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <PointsSummary />
+      <CheckinCalendar history={streak.history} />
 
       <MissionBoard />
     </div>

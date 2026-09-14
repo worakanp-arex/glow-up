@@ -16,3 +16,13 @@ export async function markAsRead(req, res) {
   }
   res.json(notification);
 }
+
+export async function markAllAsRead(req, res) {
+  await Notification.updateMany({ user: req.user.id, status: "unread" }, { $set: { status: "read" } });
+  res.json({ success: true });
+}
+
+export async function clearMyNotifications(req, res) {
+  await Notification.deleteMany({ user: req.user.id });
+  res.status(204).send();
+}
