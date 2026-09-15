@@ -89,7 +89,7 @@ export async function checkAndAwardMissions(userId) {
 async function notifyLinkedFamily(recoveringUserId) {
   const links = await FamilyLink.find({ recoveringUser: recoveringUserId, status: "active" });
   for (const link of links) {
-    await notifyUser(link.familyUser, "มีความคืบหน้าใหม่ในเส้นทางฟื้นฟูที่คุณติดตามอยู่", "milestone", { link: "/dashboard" });
+    await notifyUser(link.familyUser, "มีความคืบหน้าใหม่ในเส้นทางฟื้นฟูที่คุณติดตามอยู่", "milestone", { link: "/family/dashboard" });
   }
 }
 

@@ -49,6 +49,7 @@ const PostsModeration = lazy(() => import("../pages/admin/PostsModeration.jsx"))
 const JobCategories = lazy(() => import("../pages/admin/JobCategories.jsx"));
 const Assessments = lazy(() => import("../pages/admin/Assessments.jsx"));
 const UserEmotionHistory = lazy(() => import("../pages/admin/UserEmotionHistory.jsx"));
+const FamilyHome = lazy(() => import("../pages/family/FamilyHome.jsx"));
 const FamilyAcceptInvite = lazy(() => import("../pages/family/FamilyAcceptInvite.jsx"));
 
 function AppRoutes() {
@@ -65,6 +66,10 @@ function AppRoutes() {
 
         <Route path="jobs" element={<JobSearch />} />
         <Route path="jobs/:id" element={<JobDetail />} />
+
+        <Route element={<ProtectedRoute roles={["family", "user"]} />}>
+          <Route path="family/dashboard" element={<FamilyHome />} />
+        </Route>
 
         <Route element={<ProtectedRoute roles={["user"]} />}>
           <Route path="dashboard" element={<UserDashboard />} />

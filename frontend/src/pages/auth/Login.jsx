@@ -1,6 +1,7 @@
+import { inviteReturnTo } from "../../utils/authNavigation.js";
 import PageHeader from "../../components/common/PageHeader.jsx";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton.jsx";
@@ -8,6 +9,7 @@ import "./Login.css";
 
 const DASHBOARD_BY_ROLE = {
   user: "/dashboard",
+  family: "/family/dashboard",
   employer: "/employer/dashboard",
   admin: "/admin",
 };
@@ -15,7 +17,9 @@ const DASHBOARD_BY_ROLE = {
 function Login() {
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [searchParams] = useSearchParams();
+  const returnTo = inviteReturnTo(searchParams);
+  const [form, setForm] = useState({ email: searchParams.get("email") || "", password: "" });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,7 +34,7 @@ function Login() {
     setSubmitting(true);
     try {
       const user = await login(form.email, form.password);
-      navigate(DASHBOARD_BY_ROLE[user.role] || "/");
+      navigate((["family", "user"].includes(user.role) && returnTo) || DASHBOARD_BY_ROLE[user.role] || "/");
     } catch (err) {
       setError(err.response?.data?.message || "เข้าสู่ระบบไม่สำเร็จ");
     } finally {
@@ -43,7 +47,7 @@ function Login() {
     setSubmitting(true);
     try {
       const user = await loginWithGoogle(credential);
-      navigate(DASHBOARD_BY_ROLE[user.role] || "/");
+      navigate((["family", "user"].includes(user.role) && returnTo) || DASHBOARD_BY_ROLE[user.role] || "/");
     } catch (err) {
       if (err.response?.status === 400 && err.response.data?.message?.includes("นโยบายความเป็นส่วนตัว")) {
         setError("บัญชี Google นี้ยังไม่เคยสมัครสมาชิก กรุณาไปที่หน้าสมัครสมาชิกเพื่อยอมรับนโยบายความเป็นส่วนตัวก่อน");
@@ -95,7 +99,7 @@ function Login() {
         </button>
 
         <p className="login-switch">
-          ยังไม่มีบัญชี? <Link to="/register">สมัครสมาชิก</Link>
+          ยังไม่มีบัญชี? <Link to={`/register?${searchParams.toString()}`}>สมัครสมาชิก</Link>
         </p>
       </form>
     </div>

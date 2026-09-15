@@ -11,6 +11,7 @@ import "./Users.css";
 
 const ROLE_LABELS = {
   user: "ผู้หางาน",
+  family: "ครอบครัว/ผู้ดูแล",
   employer: "นายจ้าง",
   admin: "ผู้ดูแลระบบ",
   counsellor: "บุคลากรทางการแพทย์",
@@ -107,6 +108,7 @@ function Users() {
         <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
           <option value="">ทุกบทบาท</option>
           <option value="user">ผู้หางาน</option>
+                    <option value="family">ครอบครัว/ผู้ดูแล</option>
           <option value="employer">นายจ้าง</option>
           <option value="counsellor">บุคลากรทางการแพทย์</option>
           <option value="admin">ผู้ดูแลระบบ</option>
@@ -231,6 +233,7 @@ function Users() {
                     onChange={(e) => setEditForm((f) => ({ ...f, role: e.target.value }))}
                   >
                     <option value="user">ผู้หางาน</option>
+                    <option value="family">ครอบครัว/ผู้ดูแล</option>
                     <option value="employer">นายจ้าง</option>
                     <option value="counsellor">บุคลากรทางการแพทย์</option>
                     <option value="admin">ผู้ดูแลระบบ</option>

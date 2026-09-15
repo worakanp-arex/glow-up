@@ -25,7 +25,7 @@ router.post(
     body("name").trim().notEmpty().withMessage("name is required"),
     body("email").isEmail().withMessage("valid email is required").normalizeEmail(),
     body("password").isLength({ min: 6 }).withMessage("password must be at least 6 characters"),
-    body("role").isIn(["user", "employer"]).withMessage("role must be 'user' or 'employer'"),
+    body("role").isIn(["user", "employer", "family"]).withMessage("role must be 'user', 'employer' or 'family'"),
   ],
   validate,
   asyncHandler(requestRegistrationOtp)

@@ -18,6 +18,7 @@ const FAMILY_STATUS_LABELS = { pending: "รอการตอบรับ", act
 
 const ROLE_LABELS = {
   user: "ผู้หางาน",
+  family: "ครอบครัว/ผู้ดูแล",
   employer: "นายจ้าง",
   admin: "ผู้ดูแลระบบ",
   counsellor: "บุคลากรทางการแพทย์",

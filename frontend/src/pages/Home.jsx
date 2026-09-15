@@ -11,6 +11,7 @@ import "./Home.css";
 
 const DASHBOARD_BY_ROLE = {
   user: "/dashboard",
+  family: "/family/dashboard",
   employer: "/employer/dashboard",
   admin: "/admin",
   counsellor: "/counsellor",

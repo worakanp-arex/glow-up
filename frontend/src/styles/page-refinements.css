@@ -93,3 +93,11 @@
   .layout .counselling-form .datetime-picker-grid { grid-template-columns: repeat(7, minmax(0, 1fr)); }
   .layout .counselling-form .datetime-picker-cell { min-height: 36px; padding: 0; }
 }
+.register-family-note { padding: 12px 14px; margin: 0; border-radius: 12px; background: var(--color-primary-50); color: var(--color-text-secondary); font-size: .85rem; line-height: 1.7; }
+.layout .register-role-toggle { display: grid; grid-template-columns: 1fr 1fr 1.4fr; border-radius: 12px; }
+.layout .register-role-toggle button { min-width: 0; min-height: 44px; padding: 8px 6px; border-radius: 9px; font-size: .8125rem; }
+.family-welcome-card { padding: 24px; border-radius: 16px; border: 1px solid var(--color-border); background: var(--color-surface); }
+.family-welcome-card > svg { color: var(--color-primary-600); }
+.family-welcome-card h2 { font-size: 1.15rem; }
+.family-welcome-card p { color: var(--color-text-secondary); line-height: 1.8; overflow-wrap: anywhere; }
+@media(max-width: 600px) { .family-welcome-card { padding: 18px; } }

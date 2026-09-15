@@ -64,8 +64,8 @@ function generateOtp() {
 
 export async function requestRegistrationOtp(req, res) {
   const { role } = req.body;
-  if (!["user", "employer"].includes(role)) {
-    return res.status(400).json({ message: "role must be 'user' or 'employer'" });
+  if (!["user", "employer", "family"].includes(role)) {
+    return res.status(400).json({ message: "role must be 'user', 'employer' or 'family'" });
   }
 
   if (!isTruthyConsent(req.body.pdpaConsent)) {
@@ -223,7 +223,7 @@ export async function googleAuth(req, res) {
       if (!isTruthyConsent(pdpaConsent)) {
         return res.status(400).json({ message: "กรุณายอมรับนโยบายความเป็นส่วนตัวก่อนสมัครสมาชิก" });
       }
-      const chosenRole = ["user", "employer"].includes(role) ? role : "user";
+      const chosenRole = ["user", "employer", "family"].includes(role) ? role : "user";
       user = await User.create({
         name: payload.name || email,
         email,

@@ -167,7 +167,7 @@ export async function createUserByAdmin(req, res) {
   if (!name || !email || !password || !role) {
     return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
   }
-  if (!["user", "employer", "admin", "counsellor"].includes(role)) {
+  if (!["user", "family", "employer", "admin", "counsellor"].includes(role)) {
     return res.status(400).json({ message: "Invalid role" });
   }
 

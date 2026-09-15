@@ -9,9 +9,10 @@ import "./FamilyAcceptInvite.css";
 function FamilyAcceptInvite() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const token = searchParams.get("token") || "";
   const email = searchParams.get("email") || "";
+  const authParams = new URLSearchParams({ role: "family", email, redirect: `/family/accept?${searchParams.toString()}` }).toString();
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -23,7 +24,7 @@ function FamilyAcceptInvite() {
     try {
       await familyService.acceptFamilyInvite({ email, token });
       setDone(true);
-      setTimeout(() => navigate("/dashboard"), 1500);
+      setTimeout(() => navigate(user?.role === "family" ? "/family/dashboard" : "/dashboard"), 1500);
     } catch (err) {
       setError(err.response?.data?.message || "ยืนยันคำเชิญไม่สำเร็จ");
     } finally {
@@ -44,12 +45,12 @@ function FamilyAcceptInvite() {
     return (
       <div className="family-accept-page">
         <PageHeader icon={Heart}>เข้าร่วมติดตามความคืบหน้า</PageHeader>
-        <p>กรุณาเข้าสู่ระบบหรือสมัครสมาชิกด้วยอีเมล {email} ก่อน แล้วกลับมาที่ลิงก์นี้อีกครั้งเพื่อยืนยันคำเชิญ</p>
+        <p>กรุณาเข้าสู่ระบบหรือสมัครสมาชิกด้วยอีเมล {email} ระบบจะพากลับมายืนยันคำเชิญหลังเสร็จสิ้น</p>
         <div className="family-accept-actions">
-          <Link to="/login" className="btn btn-primary">
+          <Link to={`/login?${authParams}`} className="btn btn-primary">
             เข้าสู่ระบบ
           </Link>
-          <Link to="/register" className="btn btn-secondary">
+          <Link to={`/register?${authParams}`} className="btn btn-secondary">
             สมัครสมาชิก
           </Link>
         </div>

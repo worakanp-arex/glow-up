@@ -59,7 +59,7 @@ export async function inviteFamilyMember(req, res) {
 export async function acceptFamilyInvite(req, res) {
   const email = req.body.email?.toLowerCase();
   const recipient = await User.findById(req.user.id).select("email role");
-  if (!recipient || recipient.email.toLowerCase() !== email || recipient.role !== "user") {
+  if (!recipient || recipient.email.toLowerCase() !== email || !["user", "family"].includes(recipient.role)) {
     return res.status(403).json({ message: "กรุณาเข้าสู่ระบบด้วยบัญชีผู้ใช้งานที่ได้รับคำเชิญ" });
   }
   const { token } = req.body;

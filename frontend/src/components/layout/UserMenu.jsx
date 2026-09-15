@@ -6,6 +6,7 @@ import "./UserMenu.css";
 
 const DASHBOARD_BY_ROLE = {
   user: "/dashboard",
+  family: "/family/dashboard",
   employer: "/employer/dashboard",
   admin: "/admin",
   counsellor: "/counsellor",
@@ -13,6 +14,7 @@ const DASHBOARD_BY_ROLE = {
 
 const ROLE_LABELS = {
   user: "ผู้หางาน",
+  family: "ครอบครัว/ผู้ดูแล",
   employer: "นายจ้าง",
   admin: "ผู้ดูแลระบบ",
   counsellor: "บุคลากรทางการแพทย์",

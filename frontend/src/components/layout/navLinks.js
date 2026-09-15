@@ -17,6 +17,12 @@ export const LINKS_BY_ROLE = {
     { to: "/streak", label: "ความก้าวหน้าและรางวัล" },
     { to: "/about", label: "เกี่ยวกับเรา" },
   ],
+  family: [
+    { to: "/family/dashboard", label: "ติดตามครอบครัว" },
+    { to: "/community", label: "ชุมชนฟื้นฟู" },
+    { to: "/profile", label: "โปรไฟล์ของฉัน" },
+    { to: "/about", label: "เกี่ยวกับเรา" },
+  ],
   employer: [
     { to: "/employer/dashboard", label: "หน้าหลัก" },
     { to: "/jobs", label: "ค้นหางาน" },

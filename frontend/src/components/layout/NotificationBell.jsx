@@ -67,6 +67,7 @@ function NotificationBell() {
   }
 
   function destination(notification) {
+    if (notification.type === "milestone") return "/family/dashboard";
     if (notification.type === "news") return notification.link?.includes("#news") ? notification.link : "/#news";
     if (notification.type === "counselling") {
       const id = notification.link?.match(/^\/(?:counselling|counsellor\/requests)\/([^/?#]+)$/)?.[1];

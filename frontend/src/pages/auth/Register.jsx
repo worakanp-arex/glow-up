@@ -1,6 +1,7 @@
+import { inviteReturnTo } from "../../utils/authNavigation.js";
 import PageHeader from "../../components/common/PageHeader.jsx";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Camera, ChevronDown, ShieldCheck, UserPlus } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as authService from "../../services/authService.js";
@@ -9,6 +10,7 @@ import "./Register.css";
 
 const DASHBOARD_BY_ROLE = {
   user: "/dashboard",
+  family: "/family/dashboard",
   employer: "/employer/dashboard",
 };
 
@@ -39,8 +41,10 @@ function buildPayload(form, avatarFile) {
 function Register() {
   const { completeRegistration, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = inviteReturnTo(searchParams);
   const [step, setStep] = useState("details");
-  const [form, setForm] = useState(INITIAL_FORM);
+  const [form, setForm] = useState(() => ({ ...INITIAL_FORM, role: searchParams.get("role") === "family" ? "family" : "user", email: searchParams.get("email") || "" }));
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [error, setError] = useState("");
@@ -82,7 +86,7 @@ function Register() {
     setSubmitting(true);
     try {
       const user = await loginWithGoogle(credential, form.role, form.pdpaConsent);
-      navigate(DASHBOARD_BY_ROLE[user.role] || "/");
+      navigate((["family", "user"].includes(user.role) && returnTo) || DASHBOARD_BY_ROLE[user.role] || "/");
     } catch (err) {
       setError(err.response?.data?.message || "เข้าสู่ระบบด้วย Google ไม่สำเร็จ");
     } finally {
@@ -126,7 +130,7 @@ function Register() {
     setSubmitting(true);
     try {
       const user = await completeRegistration({ email: form.email, otp });
-      navigate(DASHBOARD_BY_ROLE[user.role] || "/");
+      navigate((["family", "user"].includes(user.role) && returnTo) || DASHBOARD_BY_ROLE[user.role] || "/");
     } catch (err) {
       setError(err.response?.data?.message || "ยืนยัน OTP ไม่สำเร็จ");
     } finally {
@@ -247,8 +251,10 @@ function Register() {
           >
             นายจ้าง
           </button>
+          <button type="button" role="radio" aria-checked={form.role === "family"} className={form.role === "family" ? "active" : ""} onClick={() => handleRoleChange("family")}>ครอบครัว/ผู้ดูแล</button>
         </div>
 
+        {form.role === "family" && <p className="register-family-note">สมัครเพื่อติดตามและให้กำลังใจคนในครอบครัว หลังสมัครให้เปิดลิงก์คำเชิญที่ส่งมาทางอีเมล คุณจะเห็นความคืบหน้าเมื่อเจ้าของข้อมูลเชิญและคุณยืนยันแล้ว</p>}
         <div className="register-field-row">
           <label>
             {form.role === "employer" ? "ชื่อผู้ติดต่อ" : "ชื่อ-นามสกุล"}
@@ -346,7 +352,7 @@ function Register() {
         </button>
 
         <p className="register-switch">
-          มีบัญชีอยู่แล้ว? <Link to="/login">เข้าสู่ระบบ</Link>
+          มีบัญชีอยู่แล้ว? <Link to={`/login?${searchParams.toString()}`}>เข้าสู่ระบบ</Link>
         </p>
       </form>
     </div>
