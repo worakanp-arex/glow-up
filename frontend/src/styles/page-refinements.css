@@ -1,11 +1,6 @@
 /* Shared page refinements: readable summaries and form-first handheld flows. */
 .layout .dashboard-greeting { background: radial-gradient(ellipse at 95% 0%, var(--color-primary-200), transparent 60%), linear-gradient(120deg, var(--color-surface), var(--color-primary-50)); border-color: var(--color-primary-200); position: relative; }
 .dashboard-greeting .page-heading-icon { background: var(--color-surface); box-shadow: var(--shadow-sm); }
-.overview-action-card { display: flex; align-items: center; gap: 16px; padding: 22px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); color: var(--color-text); text-decoration: none; transition: border-color .2s, box-shadow .2s; }
-.overview-action-card:hover { border-color: var(--color-primary-300); box-shadow: var(--shadow-sm); }
-.overview-action-icon { width: 40px; height: 40px; display: grid; place-items: center; flex-shrink: 0; border-radius: 12px; background: var(--color-primary-50); color: var(--color-primary-700); }
-.overview-action-card h2 { font-size: 1rem; margin: 0 0 6px; }
-.overview-action-card p { margin: 0; font-size: .875rem; color: var(--color-text-secondary); line-height: 1.6; }
 .layout .profile-top-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); align-items: start; }
 .layout .profile-banner-top { height: 112px; background: radial-gradient(circle at 85% 5%, var(--color-primary-200), transparent 65%), linear-gradient(130deg, var(--color-primary-700), var(--color-primary-400)); }
 .layout .profile-banner-avatar { width: 152px; height: 152px; top: 36px; left: 24px; border-width: 5px; }

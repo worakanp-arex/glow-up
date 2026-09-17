@@ -139,6 +139,26 @@
   background-color: transparent;
 }
 
+.streak-games-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-800));
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.streak-games-link:hover {
+  transform: translateY(-2px);
+}
+
 @media (max-width: 480px) {
   .streak-stats {
     grid-template-columns: 1fr;

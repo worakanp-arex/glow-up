@@ -19,6 +19,7 @@ const JobDetail = lazy(() => import("../pages/user/JobDetail.jsx"));
 const MyApplications = lazy(() => import("../pages/user/MyApplications.jsx"));
 const CravingTracker = lazy(() => import("../pages/user/CravingTracker.jsx"));
 const Streak = lazy(() => import("../pages/user/Streak.jsx"));
+const RecoveryGame = lazy(() => import("../pages/user/RecoveryGame.jsx"));
 const WeeklyCheckIn = lazy(() => import("../pages/user/WeeklyCheckIn.jsx"));
 const MicroLessons = lazy(() => import("../pages/user/MicroLessons.jsx"));
 const LessonDetail = lazy(() => import("../pages/user/LessonDetail.jsx"));
@@ -36,6 +37,7 @@ const CounsellingDetail = lazy(() => import("../pages/counselling/CounsellingDet
 const CounsellorQueue = lazy(() => import("../pages/counsellor/Queue.jsx"));
 const PatientProfile = lazy(() => import("../pages/counsellor/PatientProfile.jsx"));
 const CourseManagement = lazy(() => import("../pages/counsellor/CourseManagement.jsx"));
+const ActivityMissionManagement = lazy(() => import("../pages/counsellor/ActivityMissionManagement.jsx"));
 const Analytics = lazy(() => import("../pages/counsellor/Analytics.jsx"));
 const EmployerDashboard = lazy(() => import("../pages/employer/Dashboard.jsx"));
 const PostJob = lazy(() => import("../pages/employer/PostJob.jsx"));
@@ -76,6 +78,7 @@ function AppRoutes() {
           <Route path="my-applications" element={<MyApplications />} />
           <Route path="craving-tracker" element={<CravingTracker />} />
           <Route path="streak" element={<Streak />} />
+          <Route path="games" element={<RecoveryGame />} />
           <Route path="weekly-checkin" element={<WeeklyCheckIn />} />
           <Route path="learning" element={<MicroLessons />} />
           <Route path="learning/:id" element={<LessonDetail />} />
@@ -103,6 +106,7 @@ function AppRoutes() {
           <Route path="counsellor/patients/:userId" element={<PatientProfile />} />
           <Route path="community/mine" element={<MyPosts />} />
           <Route path="counsellor/courses" element={<CourseManagement />} />
+          <Route path="counsellor/activity-missions" element={<ActivityMissionManagement />} />
           <Route path="counsellor/lessons" element={<LessonManagement />} />
           <Route path="counsellor/analytics" element={<Analytics />} />
           <Route path="admin/posts-moderation" element={<PostsModeration />} />

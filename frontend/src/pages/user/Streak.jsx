@@ -2,7 +2,7 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Award, CalendarCheck, Flame } from "lucide-react";
+import { Award, CalendarCheck, Flame, Gamepad2 } from "lucide-react";
 import PlantGrowth, { stageLabel, streakToStage } from "../../components/user/PlantGrowth.jsx";
 import MissionBoard from "../../components/user/MissionBoard.jsx";
 import * as emotionService from "../../services/emotionService.js";
@@ -85,6 +85,11 @@ function Streak() {
 
       <PointsSummary />
       <CheckinCalendar history={streak.history} />
+
+      <Link to="/games" className="streak-games-link">
+        <Gamepad2 size={18} />
+        <span>ทำเควสวันนี้ (ภารกิจ + เกม) →</span>
+      </Link>
 
       <MissionBoard />
     </div>

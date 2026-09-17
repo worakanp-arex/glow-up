@@ -1,0 +1,79 @@
+.daily-quiz-card {
+  padding: 1.25rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.daily-quiz-card.embedded {
+  padding: 0;
+  border: none;
+}
+
+.daily-quiz-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.daily-quiz-card h3 svg {
+  color: var(--color-primary-600);
+}
+
+.daily-quiz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.daily-quiz-question-text {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.daily-quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.daily-quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.daily-quiz-option:has(input:checked) {
+  border-color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+  color: var(--color-text);
+}
+
+.daily-quiz-done {
+  margin: 0;
+  padding: 0.4rem 0.9rem;
+  display: inline-block;
+  border-radius: var(--radius-full);
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.daily-quiz-error {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  color: var(--color-danger);
+}

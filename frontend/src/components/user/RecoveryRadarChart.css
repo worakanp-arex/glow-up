@@ -1,0 +1,120 @@
+.recovery-radar {
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.recovery-radar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.3rem;
+}
+
+.recovery-radar-header h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.recovery-radar-table-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.recovery-radar-table-toggle:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.recovery-radar-caption {
+  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.recovery-radar-svg {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.recovery-radar-grid-ring {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.recovery-radar-spoke {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.recovery-radar-data-fill {
+  fill: var(--color-primary-500);
+  fill-opacity: 0.22;
+  stroke: none;
+}
+
+.recovery-radar-data-stroke {
+  fill: none;
+  stroke: var(--color-primary-600);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.recovery-radar-vertex {
+  fill: var(--color-primary-600);
+  stroke: var(--color-surface);
+  stroke-width: 1.5;
+  cursor: pointer;
+  outline: none;
+}
+
+.recovery-radar-vertex:focus-visible {
+  stroke: var(--color-primary-300);
+  stroke-width: 3;
+}
+
+.recovery-radar-label {
+  fill: var(--color-text-secondary);
+  font-size: 9.5px;
+  font-weight: 500;
+}
+
+.recovery-radar-hover-value {
+  fill: var(--color-text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.recovery-radar-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.recovery-radar-data-table th,
+.recovery-radar-data-table td {
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.recovery-radar-data-table th {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+}

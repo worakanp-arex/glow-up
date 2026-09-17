@@ -20,8 +20,7 @@
   color: var(--color-text);
 }
 
-.dashboard-section h2,
-.dashboard-quicklinks h2 {
+.dashboard-section h2 {
   margin: 0 0 0.9rem;
   font-size: 1rem;
   color: var(--color-text);
@@ -33,36 +32,38 @@
   gap: 1.25rem;
 }
 
-.dashboard-news {
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--color-border);
+/* With 5 widgets, the last one is often left alone on its own row inside a
+   fluid auto-fit grid — span it full-width instead of leaving a gap next to
+   it. Mirrors the same fix already applied to .streak-widget on mobile. */
+@media (min-width: 601px) {
+  .dashboard-grid .community-widget {
+    grid-column: 1 / -1;
+  }
 }
 
-.dashboard-links {
+.dashboard-quest-link {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.dashboard-links a {
-  display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 500;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-800));
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
   text-decoration: none;
-  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  transition: transform 0.15s ease;
 }
 
-.dashboard-links a:hover {
-  color: var(--color-primary-700);
-  border-color: var(--color-primary-200);
-  background-color: var(--color-primary-50);
+.dashboard-quest-link:hover {
+  transform: translateY(-2px);
+}
+
+.dashboard-news {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  opacity: 0.92;
 }
 
 @media (max-width: 860px) {

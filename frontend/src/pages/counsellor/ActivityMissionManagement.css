@@ -1,0 +1,147 @@
+.activity-mission-management-page {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.activity-mission-management-form {
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.activity-mission-management-form h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 1.1rem;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.activity-mission-management-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.activity-mission-management-form label,
+.activity-mission-management-description-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.activity-mission-management-description-field {
+  margin-bottom: 1.25rem;
+}
+
+.activity-mission-management-form input,
+.activity-mission-management-form select,
+.activity-mission-management-form textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.activity-mission-management-form input:focus,
+.activity-mission-management-form select:focus,
+.activity-mission-management-form textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px var(--color-primary-50);
+}
+
+.activity-mission-management-error {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.activity-mission-management-list-heading {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.activity-mission-management-empty {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.activity-mission-management-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-mission-management-list li {
+  padding: 1rem 1.25rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.activity-mission-management-list-title {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.92rem;
+}
+
+.activity-mission-management-list-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  align-items: center;
+}
+
+.activity-mission-management-list-category {
+  padding: 0.15rem 0.6rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.activity-mission-management-list-points {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 860px) {
+  .activity-mission-management-page {
+    padding: 2rem 1.25rem 3rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .activity-mission-management-page {
+    padding: 1.5rem 1rem 2.5rem;
+  }
+
+  .activity-mission-management-form {
+    padding: 1.1rem;
+  }
+}

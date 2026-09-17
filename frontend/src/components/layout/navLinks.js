@@ -15,6 +15,7 @@ export const LINKS_BY_ROLE = {
     { to: "/weekly-checkin", label: "เช็คอินรายสัปดาห์" },
     { to: "/learning", label: "บทเรียนและการฝึกฝน" },
     { to: "/streak", label: "ความก้าวหน้าและรางวัล" },
+    { to: "/games", label: "เกมฟื้นฟู" },
     { to: "/about", label: "เกี่ยวกับเรา" },
   ],
   family: [
@@ -33,6 +34,7 @@ export const LINKS_BY_ROLE = {
     { to: "/counsellor", label: "คำขอรับคำปรึกษา", end: true },
     { to: "/community", label: "ชุมชนฟื้นฟู" },
     { to: "/counsellor/courses", label: "จัดการคอร์สเรียน" },
+    { to: "/counsellor/activity-missions", label: "จัดการภารกิจประจำวัน" },
     { to: "/counsellor/lessons", label: "จัดการทักษะปฏิเสธ" },
     { to: "/counsellor/analytics", label: "ภาพรวมผู้ใช้งาน" },
     { to: "/admin/posts-moderation", label: "ตรวจสอบโพสต์ที่ถูกรายงาน" },

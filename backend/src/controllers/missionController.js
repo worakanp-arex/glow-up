@@ -1,12 +1,10 @@
 import Mission from "../models/Mission.js";
 import UserMission from "../models/UserMission.js";
-import Reward from "../models/Reward.js";
-import UserReward from "../models/UserReward.js";
 import EmotionLog from "../models/EmotionLog.js";
-import FamilyLink from "../models/FamilyLink.js";
 import ScenarioAttempt from "../models/ScenarioAttempt.js";
 import { computeStreakStats } from "../services/streakService.js";
 import { notifyUser } from "../services/notificationService.js";
+import { getTotalPoints, checkAndAwardRewards, notifyLinkedFamily } from "../services/rewardService.js";
 import { createCrudController } from "./crudFactory.js";
 import { insertOnce } from "../utils/insertOnce.js";
 
@@ -82,44 +80,6 @@ export async function checkAndAwardMissions(userId) {
   const newlyEarnedRewards = await checkAndAwardRewards(userId);
 
   return { newlyCompletedMissions, newlyEarnedRewards };
-}
-
-// Tells any actively-linked family member a milestone was reached, without
-// revealing which mission or any health data — just that progress happened.
-async function notifyLinkedFamily(recoveringUserId) {
-  const links = await FamilyLink.find({ recoveringUser: recoveringUserId, status: "active" });
-  for (const link of links) {
-    await notifyUser(link.familyUser, "มีความคืบหน้าใหม่ในเส้นทางฟื้นฟูที่คุณติดตามอยู่", "milestone", { link: "/family/dashboard" });
-  }
-}
-
-async function getTotalPoints(userId) {
-  const completed = await UserMission.find({ user: userId, completed: true }).populate("mission", "rewardPoints");
-  return completed.reduce((sum, um) => sum + (um.mission?.rewardPoints || 0), 0);
-}
-
-async function checkAndAwardRewards(userId) {
-  const totalPoints = await getTotalPoints(userId);
-  const earnedRewardIds = new Set(
-    (await UserReward.find({ user: userId }).select("reward")).map((ur) => ur.reward.toString())
-  );
-
-  const eligibleRewards = await Reward.find({ pointsRequired: { $lte: totalPoints } });
-  const newlyEarnedRewards = [];
-
-  for (const reward of eligibleRewards) {
-    if (earnedRewardIds.has(reward._id.toString())) continue;
-    const created = await insertOnce(UserReward, { user: userId, reward: reward._id }, { earnedAt: new Date() });
-    if (!created) continue;
-    newlyEarnedRewards.push(reward);
-    await notifyUser(userId, `คุณได้รับรางวัล "${reward.name}" แล้ว!`, "reward");
-  }
-
-  if (newlyEarnedRewards.length > 0) {
-    await notifyLinkedFamily(userId);
-  }
-
-  return newlyEarnedRewards;
 }
 
 export async function myMissionProgress(req, res) {
