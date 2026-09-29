@@ -59,3 +59,9 @@ export function unflagPost(postId) {
 export function getFlaggedPosts() {
   return api.get("/posts/flagged").then((res) => res.data);
 }
+
+export function getFlaggedPostsPage(params, signal) {
+  return api
+    .get("/posts/flagged", { params, signal })
+    .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+}

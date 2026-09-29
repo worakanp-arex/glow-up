@@ -2,12 +2,14 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMobileLayout } from "../../hooks/useMobileLayout.js";
-import { MapPin, Search, Wallet } from "lucide-react";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { Compass, MapPin, Search, Wallet } from "lucide-react";
 import JobPreview from "../../components/jobs/JobPreview.jsx";
 import * as jobService from "../../services/jobService.js";
 import * as jobCategoryService from "../../services/jobCategoryService.js";
+import * as careerService from "../../services/careerService.js";
 import { THAI_PROVINCES } from "../../constants/provinces.js";
 import "./JobSearch.css";
 
@@ -24,6 +26,9 @@ function initials(name) {
 function JobSearch() {
   const navigate = useNavigate();
   const mobile = useMobileLayout();
+  const { user, isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get("category") || "";
   const [jobs, setJobs] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [location, setLocation] = useState("");
@@ -32,20 +37,32 @@ function JobSearch() {
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [appliedFilters, setAppliedFilters] = useState({});
+  const [appliedFilters, setAppliedFilters] = useState(categoryFromUrl ? { category: categoryFromUrl } : {});
 
   const [categories, setCategories] = useState([]);
   const [openFilter, setOpenFilter] = useState(null);
   const [minSalary, setMinSalary] = useState("");
   const [maxSalary, setMaxSalary] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(categoryFromUrl);
   const [province, setProvince] = useState("");
   const [deadlineWithinDays, setDeadlineWithinDays] = useState("");
   const [resultLimit, setResultLimit] = useState("10");
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     jobCategoryService.getJobCategories().then(setCategories).catch(() => setCategories([]));
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== "user") return;
+    careerService.getRecommendedCareers().then(setRecommendations).catch(() => setRecommendations([]));
+  }, [isAuthenticated, user?.role]);
+
+  function selectRecommendedCategory(categoryId) {
+    setCategory(categoryId);
+    setPage(1);
+    setAppliedFilters((prev) => ({ ...prev, category: categoryId }));
+  }
 
   function buildParams() {
     const params = {};
@@ -242,6 +259,30 @@ function JobSearch() {
           )}
         </div>
       </div>
+
+      {recommendations.length > 0 && (
+        <section className="job-search-recommendations">
+          <h2>
+            <Compass size={16} />
+            <span>อาชีพแนะนำสำหรับคุณ</span>
+          </h2>
+          <ul>
+            {recommendations.map((rec) => (
+              <li key={rec.category._id}>
+                <div>
+                  <p className="job-search-recommendations-name">{rec.category.name}</p>
+                  <p className="job-search-recommendations-meta">
+                    ตรงกัน {rec.match.score}% · {rec.jobCount} ตำแหน่งงาน
+                  </p>
+                </div>
+                <button type="button" className="btn btn-secondary" onClick={() => selectRecommendedCategory(rec.category._id)}>
+                  ดูตำแหน่งงาน
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {loading ? (
         <AsyncState />

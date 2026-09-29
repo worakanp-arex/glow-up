@@ -16,8 +16,20 @@ export function getMyJobs() {
   return api.get("/jobs/mine").then((res) => res.data);
 }
 
+export function getMyJobsPage(params, signal) {
+  return api
+    .get("/jobs/mine", { params, signal })
+    .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+}
+
 export function getAllJobsForAdmin() {
   return api.get("/jobs/admin/all").then((res) => res.data);
+}
+
+export function getAllJobsForAdminPage(params, signal) {
+  return api
+    .get("/jobs/admin/all", { params, signal })
+    .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
 }
 
 export function createJob(payload) {

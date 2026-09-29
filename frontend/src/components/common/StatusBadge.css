@@ -21,7 +21,8 @@
 }
 
 .status-badge-rejected,
-.status-badge-closed {
+.status-badge-closed,
+.status-badge-suspended {
   background-color: var(--color-danger-bg);
   color: var(--color-danger);
 }

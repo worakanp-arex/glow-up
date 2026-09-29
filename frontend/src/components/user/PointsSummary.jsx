@@ -15,8 +15,13 @@ export default function PointsSummary() {
     <Award size={28} aria-hidden="true" />
     <div><span>คะแนนของฉัน</span>
       {error ? <button type="button" onClick={load}>โหลดคะแนนอีกครั้ง</button> : <>
-        <strong>{summary ? `${summary.totalPoints ?? 0} แต้ม` : "กำลังโหลด..."}</strong>
-        <small>คะแนนสะสมจากภารกิจที่สำเร็จ{summary && ` ${summary.completedMissions ?? 0} ภารกิจ`}</small>
+        <strong>
+          {summary ? `${summary.totalPoints ?? 0} แต้ม · เลเวล ${summary.level ?? 1}` : "กำลังโหลด..."}
+        </strong>
+        <small>
+          คะแนนสะสมจากภารกิจที่สำเร็จ{summary && ` ${summary.completedMissions ?? 0} ภารกิจ`}
+          {summary && summary.pointsToNextLevel > 0 && ` · อีก ${summary.pointsToNextLevel} แต้มเลื่อนเลเวล`}
+        </small>
       </>}
     </div>
   </section>;

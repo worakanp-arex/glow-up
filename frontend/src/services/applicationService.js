@@ -21,6 +21,12 @@ export function getJobApplicants(jobId) {
   return api.get(`/applications/jobs/${jobId}/applicants`).then((res) => res.data);
 }
 
+export function getJobApplicantsPage(jobId, params, signal) {
+  return api
+    .get(`/applications/jobs/${jobId}/applicants`, { params, signal })
+    .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+}
+
 export function getApplication(id) {
   return api.get(`/applications/${id}`).then((res) => res.data);
 }

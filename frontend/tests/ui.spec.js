@@ -35,7 +35,12 @@ async function fixture(page, role = "user", options = {}) {
     else if (p === "/overview") data = summary;
     else if (p === "/risk/all") data = summary.risk;
     else if (p === "/admin/dashboard") data = { users: { total: 12, employers: 3, pendingVerifications: 2 }, jobs: { total: 23, pending: 2, open: 21 }, applications: { total: 0, byStatus: {} }, risk: summary.risk };
-    else if (p === "/users") data = Array.from({ length: 23 }, (_, i) => ({ ...user, _id: String(i), name: `สมาชิก ${i + 1}` }));
+    else if (p === "/users") {
+      const allUsers = Array.from({ length: 23 }, (_, i) => ({ ...user, _id: String(i), name: `สมาชิก ${i + 1}` }));
+      const start = ((Number(url.searchParams.get("page")) || 1) - 1) * (Number(url.searchParams.get("limit")) || 10);
+      data = url.searchParams.has("page") ? allUsers.slice(start, start + (Number(url.searchParams.get("limit")) || 10)) : allUsers;
+      return route.fulfill({ json: data, headers: { "X-Total-Count": String(allUsers.length) } });
+    }
     else if (["/jobs", "/jobs/mine", "/jobs/admin/all"].includes(p)) {
       if (options.failJobs) return route.fulfill({ status: 500, json: { message: "โหลดรายการไม่สำเร็จ" } });
       const start = ((Number(url.searchParams.get("page")) || 1) - 1) * (Number(url.searchParams.get("limit")) || 10);

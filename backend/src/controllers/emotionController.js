@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import { computeStreakStats } from "../services/streakService.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
 import { checkAndAwardMissions } from "./missionController.js";
+import { runRiskAssessment } from "../services/riskAssessmentService.js";
 
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -40,6 +41,7 @@ export async function createEmotionLog(req, res) {
   );
 
   await checkAndAwardMissions(req.user.id);
+  await runRiskAssessment(req.user.id);
 
   res.status(201).json(log);
 }

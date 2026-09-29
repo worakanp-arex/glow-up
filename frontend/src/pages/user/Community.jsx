@@ -10,6 +10,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import * as postService from "../../services/postService.js";
 import PostCard from "../../components/community/PostCard.jsx";
 import PostDetailPanel from "../../components/community/PostDetailPanel.jsx";
+import { AUDIENCE_ROLES } from "../../constants/postAudience.js";
 import "./Community.css";
 
 const STAFF_ROLES = ["counsellor", "admin"];
@@ -30,6 +31,7 @@ function Community() {
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [commentsEnabled, setCommentsEnabled] = useState(true);
+  const [visibleToRoles, setVisibleToRoles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const textareaRef = useRef(null);
@@ -50,6 +52,10 @@ function Community() {
     textareaRef.current?.focus();
   }
 
+  function toggleAudienceRole(role) {
+    setVisibleToRoles((prev) => (prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!content.trim()) return;
@@ -59,11 +65,12 @@ function Community() {
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean);
-      const post = await postService.createPost({ content, tags, commentsEnabled });
+      const post = await postService.createPost({ content, tags, commentsEnabled, visibleToRoles });
       setPosts((prev) => [post, ...prev]);
       setContent("");
       setTagsInput("");
       setCommentsEnabled(true);
+      setVisibleToRoles([]);
     } finally {
       setSubmitting(false);
     }
@@ -189,6 +196,25 @@ function Community() {
                 />
                 <span>เปิดให้แสดงความคิดเห็น</span>
               </label>
+
+              <div className="community-composer-audience">
+                <span className="community-composer-audience-label">ใครเห็นโพสต์นี้ได้บ้าง</span>
+                <label className="community-composer-toggle">
+                  <input type="checkbox" checked={visibleToRoles.length === 0} onChange={() => setVisibleToRoles([])} />
+                  <span>ทุกคน</span>
+                </label>
+                {AUDIENCE_ROLES.map(({ value, label }) => (
+                  <label key={value} className="community-composer-toggle">
+                    <input
+                      type="checkbox"
+                      checked={visibleToRoles.includes(value)}
+                      onChange={() => toggleAudienceRole(value)}
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+
               <button type="submit" disabled={submitting}>
                 {submitting ? "กำลังโพสต์..." : "โพสต์"}
               </button>

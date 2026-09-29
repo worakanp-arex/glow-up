@@ -2,6 +2,7 @@ import Course from "../models/Course.js";
 import UserCourse from "../models/UserCourse.js";
 import { createCrudController } from "./crudFactory.js";
 import { publicUrl } from "../middleware/upload.js";
+import { paginationOptions, escapeRegex } from "../utils/pagination.js";
 
 const { getOne } = createCrudController(Course);
 export { getOne as getCourse };
@@ -11,12 +12,17 @@ export async function listCourses(req, res) {
   if (req.query.category) filter.category = req.query.category;
   if (req.query.tag) filter.tags = req.query.tag;
   if (req.query.q) {
-    const regex = new RegExp(req.query.q.trim(), "i");
+    const regex = new RegExp(escapeRegex(req.query.q.trim()), "i");
     filter.$or = [{ title: regex }, { description: regex }, { tags: regex }];
   }
 
-  const courses = await Course.find(filter).sort({ createdAt: -1 });
-  res.json(courses);
+  const pagination = paginationOptions(req.query);
+  const query = Course.find(filter).sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Course.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  res.json(await query);
 }
 
 export async function createCourse(req, res) {
@@ -52,7 +58,15 @@ export async function enrollCourse(req, res) {
     return res.status(409).json({ message: "Already enrolled" });
   }
 
-  const enrollment = await UserCourse.create({ user: req.user.id, course: course._id });
+  let enrollment;
+  try {
+    enrollment = await UserCourse.create({ user: req.user.id, course: course._id });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ message: "Already enrolled" });
+    }
+    throw err;
+  }
   await enrollment.populate("course");
   res.status(201).json(enrollment);
 }

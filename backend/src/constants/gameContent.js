@@ -1,5 +1,8 @@
-// Recovery-domain axes shared by the radar chart and every mini-game's domain
-// tag. Order is fixed — the radar chart renders axes in this exact order.
+// Recovery-domain axes shared by the radar chart, ActivityMission/GamePlay
+// category enums, and every mini-game's domain tag. Order is fixed — the
+// radar chart renders axes in this exact order. This is the single 8-category
+// taxonomy the spec calls for; ActivityMission and GamePlay both reuse these
+// same 8 keys instead of keeping separate category lists.
 export const RECOVERY_DOMAINS = [
   { key: "self_awareness", label: "ตระหนักรู้ตนเอง" },
   { key: "coping", label: "ทักษะรับมือ" },
@@ -7,6 +10,8 @@ export const RECOVERY_DOMAINS = [
   { key: "physical", label: "สุขภาพกาย" },
   { key: "learning", label: "การเรียนรู้" },
   { key: "self_monitoring", label: "การติดตามตนเอง" },
+  { key: "social", label: "สังคม/ความสัมพันธ์" },
+  { key: "mindfulness", label: "จิตใจ/สติ" },
 ];
 
 export const WHEEL_SEGMENTS = [
@@ -18,6 +23,8 @@ export const WHEEL_SEGMENTS = [
   { label: "สู้ต่อไป +3", points: 3, domain: "self_monitoring" },
   { label: "โบนัส! +10", points: 10, domain: "self_awareness" },
   { label: "กำลังใจ +4", points: 4, domain: "coping" },
+  { label: "เพื่อนช่วยได้ +5", points: 5, domain: "social" },
+  { label: "ใจสงบ +4", points: 4, domain: "mindfulness" },
 ];
 
 // Trigger <-> coping-response pairs for the memory-match game. Each pair

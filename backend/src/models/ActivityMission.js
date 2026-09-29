@@ -6,7 +6,7 @@ const activityMissionSchema = new mongoose.Schema(
     description: { type: String },
     category: {
       type: String,
-      enum: ["routine", "physical", "learning"],
+      enum: ["routine", "physical", "learning", "self_awareness", "coping", "self_monitoring", "social", "mindfulness"],
       required: true,
     },
     icon: { type: String },

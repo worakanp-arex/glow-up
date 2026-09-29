@@ -4,6 +4,7 @@ const LABELS = {
   pending: "รอดำเนินการ",
   verified: "ยืนยันแล้ว",
   rejected: "ปฏิเสธ",
+  suspended: "ระงับการใช้งาน",
   open: "เปิดรับ",
   closed: "ปิดรับ",
   expired: "หมดอายุ",

@@ -2,8 +2,19 @@ import mongoose from "mongoose";
 import Post from "../models/Post.js";
 import Comment from "../models/Comment.js";
 import SavedPost from "../models/SavedPost.js";
+import { sanitizeText } from "../utils/sanitizeText.js";
+import { paginationOptions } from "../utils/pagination.js";
 
 const USER_PUBLIC_FIELDS = "name role avatarUrl specialization";
+const STAFF_ROLES = ["admin", "counsellor"];
+
+// Staff (admin/counsellor) see every post, for moderation. Everyone else
+// only sees posts with no audience restriction (visibleToRoles: []) or ones
+// that explicitly include their own role.
+function visibilityFilter(role) {
+  if (STAFF_ROLES.includes(role)) return {};
+  return { $or: [{ visibleToRoles: { $size: 0 } }, { visibleToRoles: role }] };
+}
 
 function serializePost(post, userId, savedIds) {
   const obj = post.toObject ? post.toObject() : post;
@@ -24,27 +35,45 @@ async function getSavedIdSet(userId) {
 }
 
 export async function listPosts(req, res) {
-  const [posts, savedIds] = await Promise.all([
-    Post.find().populate("user", USER_PUBLIC_FIELDS).sort({ createdAt: -1 }),
-    getSavedIdSet(req.user.id),
-  ]);
+  const filter = visibilityFilter(req.user.role);
+  const pagination = paginationOptions(req.query);
+  const postQuery = Post.find(filter).populate("user", USER_PUBLIC_FIELDS).sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Post.countDocuments(filter));
+    postQuery.skip(pagination.skip).limit(pagination.limit);
+  }
+  const [posts, savedIds] = await Promise.all([postQuery, getSavedIdSet(req.user.id)]);
   res.json(await Promise.all(posts.map((post) => withCommentCount(post, req.user.id, savedIds))));
 }
 
 export async function myPosts(req, res) {
-  const [posts, savedIds] = await Promise.all([
-    Post.find({ user: req.user.id }).populate("user", USER_PUBLIC_FIELDS).sort({ createdAt: -1 }),
-    getSavedIdSet(req.user.id),
-  ]);
+  const filter = { user: req.user.id };
+  const pagination = paginationOptions(req.query);
+  const postQuery = Post.find(filter).populate("user", USER_PUBLIC_FIELDS).sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Post.countDocuments(filter));
+    postQuery.skip(pagination.skip).limit(pagination.limit);
+  }
+  const [posts, savedIds] = await Promise.all([postQuery, getSavedIdSet(req.user.id)]);
   res.json(await Promise.all(posts.map((post) => withCommentCount(post, req.user.id, savedIds))));
 }
 
 // Preserves the user's save order (most-recently-saved first) rather than
 // falling back to the posts' own createdAt order.
 export async function mySavedPosts(req, res) {
-  const saved = await SavedPost.find({ user: req.user.id }).sort({ createdAt: -1 });
+  const filter = { user: req.user.id };
+  const pagination = paginationOptions(req.query);
+  const savedQuery = SavedPost.find(filter).sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await SavedPost.countDocuments(filter));
+    savedQuery.skip(pagination.skip).limit(pagination.limit);
+  }
+  const saved = await savedQuery;
   const postIds = saved.map((s) => s.post);
-  const posts = await Post.find({ _id: { $in: postIds } }).populate("user", USER_PUBLIC_FIELDS);
+  const posts = await Post.find({ _id: { $in: postIds }, ...visibilityFilter(req.user.role) }).populate(
+    "user",
+    USER_PUBLIC_FIELDS
+  );
   const postById = new Map(posts.map((p) => [p._id.toString(), p]));
   const savedIds = new Set(postIds.map((id) => id.toString()));
   const ordered = postIds.map((id) => postById.get(id.toString())).filter(Boolean);
@@ -52,8 +81,8 @@ export async function mySavedPosts(req, res) {
 }
 
 export async function getPost(req, res) {
-  const post = await Post.findByIdAndUpdate(
-    req.params.id,
+  const post = await Post.findOneAndUpdate(
+    { _id: req.params.id, ...visibilityFilter(req.user.role) },
     { $inc: { views: 1 } },
     { new: true }
   ).populate("user", USER_PUBLIC_FIELDS);
@@ -70,12 +99,13 @@ export async function getPost(req, res) {
 }
 
 export async function createPost(req, res) {
-  const { content, tags, commentsEnabled } = req.body;
+  const { content, tags, commentsEnabled, visibleToRoles } = req.body;
   const post = await Post.create({
     user: req.user.id,
-    content,
+    content: sanitizeText(content),
     tags: Array.isArray(tags) ? tags : [],
     commentsEnabled: commentsEnabled !== undefined ? Boolean(commentsEnabled) : true,
+    visibleToRoles: Array.isArray(visibleToRoles) ? visibleToRoles : [],
   });
   await post.populate("user", USER_PUBLIC_FIELDS);
   res.status(201).json({ ...serializePost(post, req.user.id), commentCount: 0 });
@@ -90,10 +120,11 @@ export async function updatePost(req, res) {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  const { content, tags, commentsEnabled } = req.body;
-  if (content !== undefined) post.content = content;
+  const { content, tags, commentsEnabled, visibleToRoles } = req.body;
+  if (content !== undefined) post.content = sanitizeText(content);
   if (tags !== undefined) post.tags = Array.isArray(tags) ? tags : [];
   if (commentsEnabled !== undefined) post.commentsEnabled = Boolean(commentsEnabled);
+  if (visibleToRoles !== undefined) post.visibleToRoles = Array.isArray(visibleToRoles) ? visibleToRoles : [];
   await post.save();
   await post.populate("user", USER_PUBLIC_FIELDS);
 
@@ -125,7 +156,7 @@ export async function addComment(req, res) {
     return res.status(403).json({ message: "โพสต์นี้ปิดการแสดงความคิดเห็น" });
   }
 
-  const comment = await Comment.create({ post: post._id, user: req.user.id, content: req.body.content });
+  const comment = await Comment.create({ post: post._id, user: req.user.id, content: sanitizeText(req.body.content) });
   await comment.populate("user", USER_PUBLIC_FIELDS);
   res.status(201).json(comment);
 }
@@ -139,7 +170,7 @@ export async function updateComment(req, res) {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  comment.content = req.body.content;
+  comment.content = sanitizeText(req.body.content);
   await comment.save();
   await comment.populate("user", USER_PUBLIC_FIELDS);
   res.json(comment);
@@ -193,9 +224,14 @@ export async function clearPostFlag(req, res) {
 }
 
 export async function listFlaggedPosts(req, res) {
-  const posts = await Post.find({ needsReview: true })
-    .populate("user", USER_PUBLIC_FIELDS)
-    .sort({ createdAt: -1 });
+  const filter = { needsReview: true };
+  const pagination = paginationOptions(req.query);
+  const query = Post.find(filter).populate("user", USER_PUBLIC_FIELDS).sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Post.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  const posts = await query;
   res.json(posts.map((post) => serializePost(post, req.user.id)));
 }
 

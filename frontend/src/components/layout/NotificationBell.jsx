@@ -17,6 +17,7 @@ const TYPE_ICONS = {
   milestone: Heart,
   riskAlert: AlertTriangle,
   counselling: MessageCircle,
+  familyMessage: Heart,
 };
 
 function NotificationBell() {

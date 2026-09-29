@@ -6,7 +6,7 @@ const activityMissionLogSchema = new mongoose.Schema(
     activityMission: { type: mongoose.Schema.Types.ObjectId, ref: "ActivityMission", required: true },
     category: {
       type: String,
-      enum: ["routine", "physical", "learning"],
+      enum: ["routine", "physical", "learning", "self_awareness", "coping", "self_monitoring", "social", "mindfulness"],
       required: true,
     },
     dateKey: { type: String, required: true },

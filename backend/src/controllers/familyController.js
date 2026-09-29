@@ -4,8 +4,11 @@ import User from "../models/User.js";
 import UserMission from "../models/UserMission.js";
 import UserReward from "../models/UserReward.js";
 import { computeStreakStats } from "../services/streakService.js";
+import { getTotalPoints } from "../services/rewardService.js";
 import { sendFamilyInviteEmail } from "../services/emailService.js";
+import { notifyUser } from "../services/notificationService.js";
 import EmotionLog from "../models/EmotionLog.js";
+import { computeLevel } from "../utils/level.js";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -36,6 +39,18 @@ export async function inviteFamilyMember(req, res) {
   const email = req.body.email?.toLowerCase();
   if (!email) {
     return res.status(400).json({ message: "กรุณากรอกอีเมลของสมาชิกครอบครัว" });
+  }
+
+  // Spec allows only 1 invited family member at a time; revoke the existing
+  // one first to invite someone else.
+  const existingActive = await FamilyLink.findOne({
+    recoveringUser: req.user.id,
+    status: { $in: ["pending", "active"] },
+  });
+  if (existingActive) {
+    return res.status(409).json({
+      message: "คุณสามารถเชิญสมาชิกครอบครัวได้เพียง 1 คน กรุณายกเลิกคำเชิญ/สิทธิ์เดิมก่อนเชิญคนใหม่",
+    });
   }
 
   const rawToken = crypto.randomBytes(32).toString("hex");
@@ -133,6 +148,9 @@ export async function getLinkedUserSummary(req, res) {
   const rewards = await UserReward.find({ user: link.recoveringUser })
     .populate("reward", "name icon")
     .sort({ earnedAt: -1 });
+  // Level is derived only from cumulative points earned (missions/activities/games),
+  // never from health-adjacent data — safe to expose in the family view.
+  const totalPoints = await getTotalPoints(link.recoveringUser);
 
   res.json({
     name: recoveringUser.name,
@@ -142,6 +160,28 @@ export async function getLinkedUserSummary(req, res) {
     currentStage: streakToStage(streakStats.currentStreak),
     currentStageLabel: STAGE_LABELS[streakToStage(streakStats.currentStreak)],
     completedMissions,
+    level: computeLevel(totalPoints),
     rewardsEarned: rewards.map((r) => ({ name: r.reward.name, icon: r.reward.icon, earnedAt: r.earnedAt })),
   });
+}
+
+// A family member sending a short encouragement message to the recovering
+// user they're actively linked to. Reuses the notification system rather
+// than a dedicated message thread/model — this is one-way, fire-and-forget
+// encouragement, not a conversation.
+export async function sendEncouragementMessage(req, res) {
+  const link = await FamilyLink.findById(req.params.linkId);
+  if (!link || link.status !== "active" || link.familyUser?.toString() !== req.user.id) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  const sender = await User.findById(req.user.id).select("name");
+  await notifyUser(
+    link.recoveringUser,
+    `${sender.name} ส่งกำลังใจถึงคุณ: "${req.body.message}"`,
+    "familyMessage",
+    { link: "/profile" }
+  );
+
+  res.status(201).json({ sent: true });
 }

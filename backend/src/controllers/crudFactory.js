@@ -1,8 +1,15 @@
+import { paginationOptions } from "../utils/pagination.js";
+
 export function createCrudController(Model) {
   return {
     async getAll(req, res) {
-      const docs = await Model.find().sort({ createdAt: -1 });
-      res.json(docs);
+      const pagination = paginationOptions(req.query);
+      const query = Model.find().sort({ createdAt: -1 });
+      if (pagination) {
+        res.setHeader("X-Total-Count", await Model.countDocuments());
+        query.skip(pagination.skip).limit(pagination.limit);
+      }
+      res.json(await query);
     },
 
     async getOne(req, res) {

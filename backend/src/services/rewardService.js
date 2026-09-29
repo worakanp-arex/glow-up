@@ -4,15 +4,20 @@ import GamePlay from "../models/GamePlay.js";
 import Reward from "../models/Reward.js";
 import UserReward from "../models/UserReward.js";
 import FamilyLink from "../models/FamilyLink.js";
+import FamilyMissionLog from "../models/FamilyMissionLog.js";
 import { notifyUser } from "./notificationService.js";
 import { insertOnce } from "../utils/insertOnce.js";
 
+const DEFAULT_FAMILY_MESSAGE = "มีความคืบหน้าใหม่ในเส้นทางฟื้นฟูที่คุณติดตามอยู่";
+
 // Tells any actively-linked family member a milestone was reached, without
 // revealing which mission or any health data — just that progress happened.
-export async function notifyLinkedFamily(recoveringUserId) {
+// `message` lets callers send a specific milestone-day announcement instead
+// of the generic default (e.g. crossing a 7/30/90/180/365-day streak).
+export async function notifyLinkedFamily(recoveringUserId, message = DEFAULT_FAMILY_MESSAGE) {
   const links = await FamilyLink.find({ recoveringUser: recoveringUserId, status: "active" });
   for (const link of links) {
-    await notifyUser(link.familyUser, "มีความคืบหน้าใหม่ในเส้นทางฟื้นฟูที่คุณติดตามอยู่", "milestone", { link: "/family/dashboard" });
+    await notifyUser(link.familyUser, message, "milestone", { link: "/family/dashboard" });
   }
 }
 
@@ -20,15 +25,18 @@ export async function notifyLinkedFamily(recoveringUserId) {
 // logged ActivityMissionLog docs, and GamePlay docs rather than stored as a
 // mutable counter, so they can never drift out of sync.
 export async function getTotalPoints(userId) {
-  const [completedMissions, activityLogs, gamePlays] = await Promise.all([
+  const [completedMissions, activityLogs, gamePlays, familyMissionLogs] = await Promise.all([
     UserMission.find({ user: userId, completed: true }).populate("mission", "rewardPoints"),
     ActivityMissionLog.find({ user: userId }).select("pointsAwarded"),
     GamePlay.find({ user: userId }).select("pointsAwarded"),
+    FamilyMissionLog.find({ recoveringUser: userId, completed: true }).select("pointsAwarded"),
   ]);
+
   const missionPoints = completedMissions.reduce((sum, um) => sum + (um.mission?.rewardPoints || 0), 0);
   const activityPoints = activityLogs.reduce((sum, log) => sum + (log.pointsAwarded || 0), 0);
   const gamePoints = gamePlays.reduce((sum, play) => sum + (play.pointsAwarded || 0), 0);
-  return missionPoints + activityPoints + gamePoints;
+  const familyMissionPoints = familyMissionLogs.reduce((sum, log) => sum + (log.pointsAwarded || 0), 0);
+  return missionPoints + activityPoints + gamePoints + familyMissionPoints;
 }
 
 export async function checkAndAwardRewards(userId) {

@@ -262,6 +262,129 @@
   margin-bottom: 1.5rem;
 }
 
+/* ---------- Real-world risk situations ---------- */
+
+.craving-tracker-risk-situations {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.craving-tracker-risk-situations-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.craving-tracker-risk-situations-hint {
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.craving-tracker-risk-situation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 560px;
+}
+
+.craving-tracker-risk-situation-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.craving-tracker-risk-situation-toggle {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+}
+
+.craving-tracker-risk-situation-form input,
+.craving-tracker-risk-situation-form select,
+.craving-tracker-risk-situation-form textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.craving-tracker-risk-situation-error {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.craving-tracker-risk-situation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.craving-tracker-risk-situation-item {
+  padding: 1rem 1.25rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.craving-tracker-risk-situation-item-handled_well {
+  border-left-color: var(--color-success);
+}
+
+.craving-tracker-risk-situation-item-partially_handled {
+  border-left-color: var(--color-warning);
+}
+
+.craving-tracker-risk-situation-item-relapsed {
+  border-left-color: var(--color-danger);
+}
+
+.craving-tracker-risk-situation-item-situation {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  color: var(--color-text);
+}
+
+.craving-tracker-risk-situation-item-skill {
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+
+.craving-tracker-risk-situation-item-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
 .craving-tracker-month-heading {
   margin: 0 0 0.75rem;
   font-size: 0.82rem;

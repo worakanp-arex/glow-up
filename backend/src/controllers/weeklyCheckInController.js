@@ -2,6 +2,7 @@ import WeeklyCheckIn from "../models/WeeklyCheckIn.js";
 import User from "../models/User.js";
 import { toIsoWeekKey } from "../utils/dateKey.js";
 import { notifyUser } from "../services/notificationService.js";
+import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
 export async function submitWeeklyCheckIn(req, res) {
   const { stressLevel, moodTrend, selfHarmRiskFlag, notes } = req.body;
@@ -48,6 +49,9 @@ export async function getWeeklyCheckInsForUser(req, res) {
   const targetUser = await User.findById(req.params.userId).select("role");
   if (!targetUser || targetUser.role !== "user") {
     return res.status(404).json({ message: "ไม่พบผู้ใช้งานนี้" });
+  }
+  if (req.user.role === "counsellor" && !(await counsellorCanAccessPatient(req.user.id, targetUser._id))) {
+    return res.status(403).json({ message: "คุณไม่ได้รับมอบหมายให้ดูแลผู้ใช้งานนี้" });
   }
   const checkIns = await WeeklyCheckIn.find({ user: targetUser._id }).sort({ createdAt: -1 });
   res.json(checkIns);

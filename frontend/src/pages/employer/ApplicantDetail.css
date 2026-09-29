@@ -115,6 +115,15 @@
   font-size: 0.8rem !important;
 }
 
+.applicant-detail-match-note small {
+  display: block;
+  margin: -0.3rem 0 0.4rem;
+}
+
+.applicant-detail-match-tags {
+  margin: 0 0 0.3rem !important;
+}
+
 .applicant-detail-attachments-title {
   display: flex;
   align-items: center;

@@ -19,3 +19,23 @@ export async function applicationMatches(userId, applications) {
   return applications.map((application) => ({ ...application.toObject(),
     match: scoreSkills(required.filter((s) => String(s.job) === String(application.job?._id)).map((s) => s.skill), owned.map((s) => s.skill)) }));
 }
+
+// Employer-side counterpart to applicationMatches: one job, many applicants.
+export async function jobApplicantMatches(jobId, applications) {
+  const userIds = applications.map((application) => application.user?._id || application.user).filter(Boolean);
+  const [required, owned] = await Promise.all([
+    JobSkill.find({ job: jobId }).populate("skill"),
+    UserSkill.find({ user: { $in: userIds } }).select("user skill"),
+  ]);
+  const requiredSkills = required.map((s) => s.skill);
+  const ownedByUser = new Map();
+  for (const userSkill of owned) {
+    const key = String(userSkill.user);
+    if (!ownedByUser.has(key)) ownedByUser.set(key, []);
+    ownedByUser.get(key).push(userSkill.skill);
+  }
+  return applications.map((application) => {
+    const userKey = String(application.user?._id || application.user);
+    return { ...application.toObject(), match: scoreSkills(requiredSkills, ownedByUser.get(userKey) || []) };
+  });
+}

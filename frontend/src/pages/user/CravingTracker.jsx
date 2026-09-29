@@ -1,9 +1,10 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useMemo, useState } from "react";
-import { Activity, ChevronDown, Send } from "lucide-react";
+import { Activity, AlertTriangle, ChevronDown, Plus, Send } from "lucide-react";
 import * as emotionService from "../../services/emotionService.js";
 import * as riskService from "../../services/riskService.js";
+import * as riskSituationService from "../../services/riskSituationService.js";
 import { HAPPINESS_LEVELS, happinessByLevel } from "../../constants/happiness.js";
 import { CONTEXT_OPTIONS } from "../../constants/emotionContext.js";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
@@ -18,6 +19,13 @@ const MISSING_DAYS_WINDOW = 7;
 
 const RISK_LABELS = { low: "ต่ำ", medium: "ปานกลาง", high: "สูง" };
 const RISK_CLASS = { low: "craving-tracker-risk-low", medium: "craving-tracker-risk-medium", high: "craving-tracker-risk-high" };
+
+const OUTCOME_LABELS = {
+  handled_well: "รับมือได้ดี ไม่กระทบ",
+  partially_handled: "รับมือได้บางส่วน",
+  relapsed: "กลับไปใช้ซ้ำ",
+};
+const INITIAL_RISK_SITUATION_FORM = { situation: "", skillUsed: true, skillDescription: "", outcome: "handled_well" };
 
 const INITIAL_FORM = { happinessLevel: null, cravingLevel: 5, context: "work", note: "" };
 
@@ -47,6 +55,10 @@ function CravingTracker() {
   const [backfillDateKey, setBackfillDateKey] = useState(null);
   const [missingDays, setMissingDays] = useState([]);
   const [missingDaysPromptOpen, setMissingDaysPromptOpen] = useState(false);
+  const [riskSituationLogs, setRiskSituationLogs] = useState([]);
+  const [riskSituationForm, setRiskSituationForm] = useState(INITIAL_RISK_SITUATION_FORM);
+  const [submittingRiskSituation, setSubmittingRiskSituation] = useState(false);
+  const [riskSituationError, setRiskSituationError] = useState("");
 
   const historyGroups = useMemo(() => groupByMonth(logs, "date"), [logs]);
 
@@ -77,6 +89,25 @@ function CravingTracker() {
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    riskSituationService.getMyRiskSituationLogs().then(setRiskSituationLogs).catch(() => setRiskSituationLogs([]));
+  }, []);
+
+  async function handleRiskSituationSubmit(e) {
+    e.preventDefault();
+    setRiskSituationError("");
+    setSubmittingRiskSituation(true);
+    try {
+      const created = await riskSituationService.createRiskSituationLog(riskSituationForm);
+      setRiskSituationLogs((prev) => [created, ...prev]);
+      setRiskSituationForm(INITIAL_RISK_SITUATION_FORM);
+    } catch (err) {
+      setRiskSituationError(err.response?.data?.message || "บันทึกไม่สำเร็จ");
+    } finally {
+      setSubmittingRiskSituation(false);
+    }
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -329,6 +360,79 @@ function CravingTracker() {
 
 
       </div>
+
+      <section className="craving-tracker-risk-situations">
+        <h2 className="craving-tracker-risk-situations-heading">
+          <AlertTriangle size={18} />
+          <span>บันทึกสถานการณ์เสี่ยงที่พบจริง</span>
+        </h2>
+        <p className="craving-tracker-risk-situations-hint">
+          บันทึกสถานการณ์เสี่ยงที่คุณพบเจอจริง และผลลัพธ์จากการใช้ทักษะรับมือ/ปฏิเสธ
+        </p>
+
+        <form className="craving-tracker-risk-situation-form" onSubmit={handleRiskSituationSubmit}>
+          <label>
+            เกิดอะไรขึ้น
+            <textarea
+              value={riskSituationForm.situation}
+              onChange={(e) => setRiskSituationForm((f) => ({ ...f, situation: e.target.value }))}
+              rows={3}
+              required
+            />
+          </label>
+          <label className="craving-tracker-risk-situation-toggle">
+            <input
+              type="checkbox"
+              checked={riskSituationForm.skillUsed}
+              onChange={(e) => setRiskSituationForm((f) => ({ ...f, skillUsed: e.target.checked }))}
+            />
+            <span>คุณได้ใช้ทักษะรับมือ/ปฏิเสธในสถานการณ์นี้</span>
+          </label>
+          {riskSituationForm.skillUsed && (
+            <label>
+              ใช้ทักษะอะไร / ทำอย่างไร
+              <input
+                type="text"
+                value={riskSituationForm.skillDescription}
+                onChange={(e) => setRiskSituationForm((f) => ({ ...f, skillDescription: e.target.value }))}
+              />
+            </label>
+          )}
+          <label>
+            ผลลัพธ์
+            <select
+              value={riskSituationForm.outcome}
+              onChange={(e) => setRiskSituationForm((f) => ({ ...f, outcome: e.target.value }))}
+            >
+              {Object.entries(OUTCOME_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </label>
+          {riskSituationError && <p className="craving-tracker-risk-situation-error">{riskSituationError}</p>}
+          <button type="submit" className="btn btn-primary" disabled={submittingRiskSituation}>
+            <Plus size={16} />
+            <span>{submittingRiskSituation ? "กำลังบันทึก..." : "บันทึกสถานการณ์"}</span>
+          </button>
+        </form>
+
+        {riskSituationLogs.length > 0 && (
+          <ul className="craving-tracker-risk-situation-list">
+            {riskSituationLogs.map((log) => (
+              <li key={log._id} className={`craving-tracker-risk-situation-item craving-tracker-risk-situation-item-${log.outcome}`}>
+                <p className="craving-tracker-risk-situation-item-situation">{log.situation}</p>
+                {log.skillDescription && (
+                  <p className="craving-tracker-risk-situation-item-skill">ทักษะที่ใช้: {log.skillDescription}</p>
+                )}
+                <p className="craving-tracker-risk-situation-item-meta">
+                  <span>{OUTCOME_LABELS[log.outcome]}</span>
+                  <span>{new Date(log.occurredAt).toLocaleDateString("th-TH")}</span>
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {missingDaysPromptOpen && (
         <div className="backfill-modal-overlay" onClick={() => setMissingDaysPromptOpen(false)}>

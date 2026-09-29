@@ -7,8 +7,14 @@ import { notifyUser } from "../services/notificationService.js";
 import { getTotalPoints, checkAndAwardRewards, notifyLinkedFamily } from "../services/rewardService.js";
 import { createCrudController } from "./crudFactory.js";
 import { insertOnce } from "../utils/insertOnce.js";
+import { computeLevel, pointsToNextLevel } from "../utils/level.js";
+import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
 const { getAll, getOne, create, update, remove } = createCrudController(Mission);
+
+// Recognized sobriety-streak milestones (in days) that get a specific family
+// notification instead of the generic "new progress" message.
+const MILESTONE_STREAK_DAYS = new Set([7, 30, 90, 180, 365]);
 
 export {
   getAll as listMissions,
@@ -73,8 +79,15 @@ export async function checkAndAwardMissions(userId) {
   if (newlyCompletedMissions.length > 0) {
     for (const { mission } of newlyCompletedMissions) {
       await notifyUser(userId, `คุณสำเร็จภารกิจ "${mission.title}" แล้ว!`, "reward", { link: "/streak" });
+
+      const isDayMilestone = mission.type === "streak" && MILESTONE_STREAK_DAYS.has(mission.targetValue);
+      await notifyLinkedFamily(
+        userId,
+        isDayMilestone
+          ? `🎉 ผู้ที่คุณติดตามผ่านหมุดหมาย ${mission.targetValue} วันติดต่อกันในเส้นทางฟื้นฟูแล้ว!`
+          : undefined
+      );
     }
-    await notifyLinkedFamily(userId, newlyCompletedMissions.length);
   }
 
   const newlyEarnedRewards = await checkAndAwardRewards(userId);
@@ -102,9 +115,44 @@ export async function myMissionProgress(req, res) {
   res.json(result);
 }
 
+// Counsellor/admin marks a "custom" mission complete for a specific user —
+// the only Mission type that isn't recomputed automatically from activity
+// (see currentValueForMission above), so it needs an explicit approval step.
+export async function approveCustomMission(req, res) {
+  const mission = await Mission.findOne({ _id: req.params.id, type: "custom", active: true });
+  if (!mission) {
+    return res.status(404).json({ message: "ไม่พบภารกิจแบบกำหนดเองนี้" });
+  }
+  const { userId } = req.body;
+  if (req.user.role === "counsellor" && !(await counsellorCanAccessPatient(req.user.id, userId))) {
+    return res.status(403).json({ message: "คุณไม่ได้รับมอบหมายให้ดูแลผู้ใช้งานนี้" });
+  }
+
+  const identity = { user: userId, mission: mission._id };
+  await insertOnce(UserMission, identity, { progress: 0, completed: false });
+  const userMission = await UserMission.findOneAndUpdate(
+    { ...identity, completed: false },
+    { $set: { completed: true, completedAt: new Date(), progress: mission.targetValue } },
+    { new: true }
+  );
+
+  if (userMission) {
+    await notifyUser(userId, `คุณสำเร็จภารกิจ "${mission.title}" แล้ว!`, "reward", { link: "/streak" });
+    await notifyLinkedFamily(userId);
+    await checkAndAwardRewards(userId);
+  }
+
+  res.json(userMission || (await UserMission.findOne(identity)));
+}
+
 export async function myPointsSummary(req, res) {
   await checkAndAwardMissions(req.user.id);
   const totalPoints = await getTotalPoints(req.user.id);
   const completedMissions = await UserMission.countDocuments({ user: req.user.id, completed: true });
-  res.json({ totalPoints, completedMissions });
+  res.json({
+    totalPoints,
+    completedMissions,
+    level: computeLevel(totalPoints),
+    pointsToNextLevel: pointsToNextLevel(totalPoints),
+  });
 }

@@ -199,6 +199,27 @@
   color: var(--color-text-secondary);
 }
 
+.post-card-audience-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.post-card-audience-edit-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.post-card-audience-badge {
+  margin: -0.4rem 0 0.85rem;
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+}
+
 .post-card-edit-actions {
   display: flex;
   gap: 0.5rem;

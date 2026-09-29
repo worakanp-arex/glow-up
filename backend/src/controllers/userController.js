@@ -5,6 +5,7 @@ import RehabilitationRecord from "../models/RehabilitationRecord.js";
 import UserSkill from "../models/UserSkill.js";
 import { notifyUser } from "../services/notificationService.js";
 import { UPLOAD_ROOT, publicUrl } from "../middleware/upload.js";
+import { paginationOptions } from "../utils/pagination.js";
 
 function removeUploadedFile(fileUrl) {
   if (!fileUrl || !fileUrl.startsWith("/uploads/")) return;
@@ -201,14 +202,25 @@ export async function listUsers(req, res) {
   if (req.query.role) filter.role = req.query.role;
   if (req.query.verifiedStatus) filter.verifiedStatus = req.query.verifiedStatus;
 
-  const users = await User.find(filter).sort({ createdAt: -1 });
-  res.json(users);
+  const pagination = paginationOptions(req.query);
+  const query = User.find(filter).sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await User.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  res.json(await query);
 }
+
+const VERIFY_STATUS_MESSAGES = {
+  verified: "บัญชีของคุณได้รับการยืนยันแล้ว",
+  rejected: "บัญชีของคุณถูกปฏิเสธการยืนยันตัวตน",
+  suspended: "บัญชีของคุณถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ",
+};
 
 export async function verifyUser(req, res) {
   const { status } = req.body;
-  if (!["verified", "rejected"].includes(status)) {
-    return res.status(400).json({ message: "status must be 'verified' or 'rejected'" });
+  if (!["verified", "rejected", "suspended"].includes(status)) {
+    return res.status(400).json({ message: "status must be 'verified', 'rejected' or 'suspended'" });
   }
 
   const user = await User.findByIdAndUpdate(
@@ -220,8 +232,7 @@ export async function verifyUser(req, res) {
     return res.status(404).json({ message: "Not found" });
   }
 
-  const message = status === "verified" ? "บัญชีของคุณได้รับการยืนยันแล้ว" : "บัญชีของคุณถูกปฏิเสธการยืนยันตัวตน";
-  await notifyUser(user._id, message, "system", { link: "/profile" });
+  await notifyUser(user._id, VERIFY_STATUS_MESSAGES[status], "system", { link: "/profile" });
 
   res.json(user);
 }

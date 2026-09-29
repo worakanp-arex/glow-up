@@ -25,7 +25,12 @@ const userSchema = new mongoose.Schema(
     taxId: { type: String },
     specialization: { type: String },
     hospital: { type: String },
-    verifiedStatus: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
+    verifiedStatus: { type: String, enum: ["pending", "verified", "rejected", "suspended"], default: "pending" },
+    // Which counsellor is responsible for this user's care (role "user" only).
+    // Set automatically the first time a counsellor claims one of their
+    // counselling sessions; gates which counsellor can view their full
+    // clinical profile (see utils/patientAccess.js).
+    assignedCounsellor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     avatarUrl: { type: String },
     resetPasswordTokenHash: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },

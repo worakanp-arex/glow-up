@@ -23,3 +23,7 @@ export function getMyFamilyLinks() {
 export function getLinkedUserSummary(linkId) {
   return api.get(`/family/links/${linkId}/summary`).then((res) => res.data);
 }
+
+export function sendEncouragementMessage(linkId, message) {
+  return api.post(`/family/links/${linkId}/messages`, { message }).then((res) => res.data);
+}

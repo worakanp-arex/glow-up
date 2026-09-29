@@ -1,18 +1,8 @@
-import EmotionLog from "../models/EmotionLog.js";
 import RiskAssessment from "../models/RiskAssessment.js";
-import { assessRisk } from "../services/riskPredictionService.js";
+import { runRiskAssessment } from "../services/riskAssessmentService.js";
 
 export async function getMyRisk(req, res) {
-  const emotionLogs = await EmotionLog.find({ user: req.user.id }).sort({ date: -1 }).limit(30);
-  const result = await assessRisk(req.user, emotionLogs);
-
-  const assessment = await RiskAssessment.create({
-    user: req.user.id,
-    riskScore: result.riskScore,
-    level: result.level,
-    triggerFactors: result.triggerFactors,
-  });
-
+  const assessment = await runRiskAssessment(req.user.id);
   res.status(201).json(assessment);
 }
 

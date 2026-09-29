@@ -50,9 +50,12 @@ const JobsModeration = lazy(() => import("../pages/admin/JobsModeration.jsx"));
 const PostsModeration = lazy(() => import("../pages/admin/PostsModeration.jsx"));
 const JobCategories = lazy(() => import("../pages/admin/JobCategories.jsx"));
 const Assessments = lazy(() => import("../pages/admin/Assessments.jsx"));
+const MissionManagement = lazy(() => import("../pages/admin/MissionManagement.jsx"));
 const UserEmotionHistory = lazy(() => import("../pages/admin/UserEmotionHistory.jsx"));
 const FamilyHome = lazy(() => import("../pages/family/FamilyHome.jsx"));
 const FamilyAcceptInvite = lazy(() => import("../pages/family/FamilyAcceptInvite.jsx"));
+const FamilyGuide = lazy(() => import("../pages/family/FamilyGuide.jsx"));
+const FamilyGuideDetail = lazy(() => import("../pages/family/FamilyGuideDetail.jsx"));
 
 function AppRoutes() {
   return (
@@ -71,6 +74,11 @@ function AppRoutes() {
 
         <Route element={<ProtectedRoute roles={["family", "user"]} />}>
           <Route path="family/dashboard" element={<FamilyHome />} />
+        </Route>
+
+        <Route element={<ProtectedRoute roles={["family"]} />}>
+          <Route path="family/guide" element={<FamilyGuide />} />
+          <Route path="family/guide/:id" element={<FamilyGuideDetail />} />
         </Route>
 
         <Route element={<ProtectedRoute roles={["user"]} />}>
@@ -127,6 +135,7 @@ function AppRoutes() {
           <Route path="admin/jobs" element={<JobsModeration />} />
           <Route path="admin/job-categories" element={<JobCategories />} />
           <Route path="admin/assessments" element={<Assessments />} />
+          <Route path="admin/missions" element={<MissionManagement />} />
         </Route>
         <Route path="*" element={<div className="not-found-page"><PageHeader icon={SearchX} backTo="/" backLabel="หน้าหลัก">ไม่พบหน้าที่คุณต้องการ</PageHeader><AsyncState empty title="404" description="ลิงก์อาจเปลี่ยนไป กลับไปเริ่มต้นอีกครั้งได้เลย"><Link to="/" className="btn btn-primary">กลับหน้าหลัก</Link></AsyncState></div>} />
       </Route>

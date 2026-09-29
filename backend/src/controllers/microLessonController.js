@@ -5,7 +5,13 @@ const { getOne } = createCrudController(MicroLesson);
 export { getOne as getMicroLesson };
 
 export async function listActiveLessons(req, res) {
-  const lessons = await MicroLesson.find({ active: true }).sort({ order: 1, createdAt: -1 });
+  // Lessons created before the `audience` field existed have no value set —
+  // treat those as "user" so they keep showing up for existing installs.
+  const filter =
+    req.user.role === "family"
+      ? { active: true, audience: "family" }
+      : { active: true, $or: [{ audience: "user" }, { audience: { $exists: false } }] };
+  const lessons = await MicroLesson.find(filter).sort({ order: 1, createdAt: -1 });
   res.json(lessons);
 }
 

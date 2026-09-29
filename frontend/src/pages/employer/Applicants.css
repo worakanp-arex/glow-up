@@ -140,6 +140,13 @@
   color: var(--color-primary-600);
 }
 
+.applicants-match-score {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
 @media (max-width: 520px) {
   .applicants-list li {
     flex-direction: column;

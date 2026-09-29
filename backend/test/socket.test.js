@@ -45,3 +45,15 @@ test("Socket.IO binds the room to the verified identity and ignores client room 
   await received;
   assert.equal(socket.rooms.has("victim"), false);
 });
+test("disconnecting a socket clears its JWT-expiry timer instead of leaking it", { timeout: 5000 }, async (t) => {
+  const { io, connect } = await start(t);
+  const clearSpy = t.mock.method(global, "clearTimeout");
+  const connected = new Promise((resolve) => io.once("connection", resolve));
+  const token = jwt.sign({ id: "owner", role: "user" }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  const { ws } = await connect(token);
+  const socket = await connected;
+  const disconnected = new Promise((resolve) => socket.once("disconnect", resolve));
+  ws.close();
+  await disconnected;
+  assert.ok(clearSpy.mock.callCount() >= 1, "clearTimeout should run on disconnect");
+});

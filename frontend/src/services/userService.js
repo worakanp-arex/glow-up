@@ -35,6 +35,12 @@ export function listUsers(params) {
   return api.get("/users", { params }).then((res) => res.data);
 }
 
+export function listUsersPage(params, signal) {
+  return api
+    .get("/users", { params, signal })
+    .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+}
+
 export function createUser(payload) {
   return api.post("/users", payload).then((res) => res.data);
 }

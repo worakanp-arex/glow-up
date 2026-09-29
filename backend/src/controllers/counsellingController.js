@@ -6,6 +6,8 @@ import EmotionLog from "../models/EmotionLog.js";
 import { computeStreakStats } from "../services/streakService.js";
 import { notifyUser } from "../services/notificationService.js";
 import { detectMeetingPlatform } from "../utils/meetingLink.js";
+import { paginationOptions } from "../utils/pagination.js";
+import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
 const USER_SUMMARY_FIELDS = "name email phone avatarUrl verifiedStatus";
 const COUNSELLOR_SUMMARY_FIELDS = "name specialization hospital avatarUrl";
@@ -45,10 +47,16 @@ export async function createSession(req, res) {
 }
 
 export async function mySessions(req, res) {
-  const sessions = await CounsellingSession.find({ user: req.user.id })
+  const filter = { user: req.user.id };
+  const pagination = paginationOptions(req.query);
+  const query = CounsellingSession.find(filter)
     .populate("counsellor", COUNSELLOR_SUMMARY_FIELDS)
     .sort({ createdAt: -1 });
-  res.json(sessions);
+  if (pagination) {
+    res.setHeader("X-Total-Count", await CounsellingSession.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  res.json(await query);
 }
 
 export async function listQueue(req, res) {
@@ -56,11 +64,16 @@ export async function listQueue(req, res) {
   if (req.query.status) filter.status = req.query.status;
   if (req.query.user) filter.user = req.query.user;
 
-  const sessions = await CounsellingSession.find(filter)
+  const pagination = paginationOptions(req.query);
+  const query = CounsellingSession.find(filter)
     .populate("user", USER_SUMMARY_FIELDS)
     .populate("counsellor", COUNSELLOR_SUMMARY_FIELDS)
     .sort({ createdAt: -1 });
-  res.json(sessions);
+  if (pagination) {
+    res.setHeader("X-Total-Count", await CounsellingSession.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  res.json(await query);
 }
 
 export async function mySchedule(req, res) {
@@ -104,6 +117,10 @@ export async function claimSession(req, res) {
       message: exists ? "เคสนี้มีบุคลากรรับไปแล้ว" : "Not found",
     });
   }
+
+  // First counsellor to claim any of this user's sessions becomes their
+  // assigned counsellor, gating access to the full clinical profile.
+  await User.updateOne({ _id: session.user._id, assignedCounsellor: null }, { assignedCounsellor: req.user.id });
 
   await notifyUser(session.user._id, STATUS_MESSAGE.active(session.topic), "counselling", {
     link: `/counselling/${session._id}`,
@@ -211,6 +228,10 @@ export async function getPatientProfile(req, res) {
   );
   if (!targetUser || targetUser.role !== "user") {
     return res.status(404).json({ message: "ไม่พบผู้ใช้งานนี้" });
+  }
+
+  if (req.user.role === "counsellor" && !(await counsellorCanAccessPatient(req.user.id, targetUser._id))) {
+    return res.status(403).json({ message: "คุณไม่ได้รับมอบหมายให้ดูแลผู้ใช้งานนี้" });
   }
 
   const [rehabRecords, riskAssessments, logs] = await Promise.all([

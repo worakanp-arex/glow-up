@@ -14,13 +14,16 @@ import {
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { validate } from "../middleware/validate.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
-import { uploadAvatar } from "../middleware/upload.js";
+import { uploadAvatar, verifyUploadedFile } from "../middleware/upload.js";
+import { authLimiter, otpRequestLimiter } from "../middleware/rateLimiters.js";
 
 const router = Router();
 
 router.post(
   "/register/request-otp",
+  otpRequestLimiter,
   uploadAvatar.single("avatar"),
+  asyncHandler(verifyUploadedFile("avatar")),
   [
     body("name").trim().notEmpty().withMessage("name is required"),
     body("email").isEmail().withMessage("valid email is required").normalizeEmail(),
@@ -33,6 +36,7 @@ router.post(
 
 router.post(
   "/register/verify-otp",
+  authLimiter,
   [
     body("email").isEmail().withMessage("valid email is required").normalizeEmail(),
     body("otp").trim().isLength({ min: 6, max: 6 }).withMessage("otp must be 6 digits"),
@@ -43,6 +47,7 @@ router.post(
 
 router.post(
   "/login",
+  authLimiter,
   [
     body("email").isEmail().withMessage("valid email is required").normalizeEmail(),
     body("password").notEmpty().withMessage("password is required"),
@@ -51,10 +56,11 @@ router.post(
   asyncHandler(login)
 );
 
-router.post("/google", [body("credential").notEmpty()], validate, asyncHandler(googleAuth));
+router.post("/google", authLimiter, [body("credential").notEmpty()], validate, asyncHandler(googleAuth));
 
 router.post(
   "/forgot-password",
+  authLimiter,
   [body("email").isEmail().withMessage("valid email is required").normalizeEmail()],
   validate,
   asyncHandler(forgotPassword)
@@ -62,6 +68,7 @@ router.post(
 
 router.post(
   "/reset-password",
+  authLimiter,
   [
     body("email").isEmail().withMessage("valid email is required").normalizeEmail(),
     body("token").notEmpty().withMessage("token is required"),

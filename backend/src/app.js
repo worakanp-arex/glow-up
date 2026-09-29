@@ -7,6 +7,8 @@ import { asyncHandler } from "./middleware/asyncHandler.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
+import helmet from "helmet";
+import { sanitizeMongoOperators } from "./middleware/sanitizeMongoOperators.js";
 import { UPLOAD_ROOT } from "./middleware/upload.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -31,21 +33,26 @@ import familyRoutes from "./routes/familyRoutes.js";
 import weeklyCheckInRoutes from "./routes/weeklyCheckInRoutes.js";
 import microLessonRoutes from "./routes/microLessonRoutes.js";
 import scenarioRoutes from "./routes/scenarioRoutes.js";
+import goalRoutes from "./routes/goalRoutes.js";
+import riskSituationRoutes from "./routes/riskSituationRoutes.js";
+import careerRoutes from "./routes/careerRoutes.js";
+import familyMissionRoutes from "./routes/familyMissionRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173", credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 app.use(morgan("dev"));
-app.use((req, res, next) => {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("Referrer-Policy", "same-origin");
-  next();
-});
+app.use(sanitizeMongoOperators);
+app.use(helmet());
 app.use("/uploads/avatars", (req, res, next) => {
   if (!/\.(png|jpe?g|webp)$/i.test(req.path)) return res.sendStatus(404);
+  // Avatars are intentionally public and rendered cross-origin by the
+  // frontend; helmet's default same-origin CORP would silently break that
+  // <img> loading, so relax it for this route only.
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
 }, express.static(path.join(UPLOAD_ROOT, "avatars")));
 app.get("/uploads/:kind/:filename", verifyToken, asyncHandler(authorizeDownload), (req, res, next) => {
@@ -82,6 +89,10 @@ app.use("/api/family", familyRoutes);
 app.use("/api/weekly-checkins", weeklyCheckInRoutes);
 app.use("/api/micro-lessons", microLessonRoutes);
 app.use("/api/scenarios", scenarioRoutes);
+app.use("/api/goals", goalRoutes);
+app.use("/api/risk-situations", riskSituationRoutes);
+app.use("/api/careers", careerRoutes);
+app.use("/api/family-missions", familyMissionRoutes);
 
 app.use(errorHandler);
 

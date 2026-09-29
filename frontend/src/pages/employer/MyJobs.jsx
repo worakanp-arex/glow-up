@@ -1,6 +1,5 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
-import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -9,24 +8,32 @@ import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as jobService from "../../services/jobService.js";
 import "./MyJobs.css";
 
+const PAGE_SIZE = 10;
+
 function MyJobs() {
   const [jobs, setJobs] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const pagination = usePagination(jobs);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
-    load();
-  }, []);
-
-  function load() {
+    const controller = new AbortController();
     setLoading(true);
+    setLoadError(null);
     jobService
-      .getMyJobs()
-      .then(setJobs)
-      .catch((error) => setLoadError(error))
-      .finally(() => setLoading(false));
-  }
+      .getMyJobsPage({ page, limit: PAGE_SIZE }, controller.signal)
+      .then(({ items, total: count }) => {
+        if (controller.signal.aborted) return;
+        setJobs(items);
+        setTotal(count);
+      })
+      .catch((error) => { if (!controller.signal.aborted) setLoadError(error); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [page]);
+
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   async function handleToggleStatus(job) {
     const nextStatus = job.status === "open" ? "closed" : "open";
@@ -56,7 +63,7 @@ function MyJobs() {
       {jobs.length === 0 && <p className="my-jobs-empty">คุณยังไม่มีประกาศงาน</p>}
 
       <ul className="my-jobs-list">
-        {pagination.items.map((job) => (
+        {jobs.map((job) => (
           <li key={job._id}>
             <div className="my-jobs-icon">
               <Briefcase size={20} />
@@ -110,7 +117,7 @@ function MyJobs() {
           </li>
         ))}
       </ul>
-      <Pagination {...pagination} />
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} total={total} />
     </div>
   );
 }

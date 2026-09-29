@@ -1,6 +1,5 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
-import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Check, ClipboardCheck, Trash2, X } from "lucide-react";
@@ -8,24 +7,32 @@ import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as jobService from "../../services/jobService.js";
 import "./JobsModeration.css";
 
+const PAGE_SIZE = 10;
+
 function JobsModeration() {
   const [jobs, setJobs] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const pagination = usePagination(jobs);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
-    load();
-  }, []);
-
-  function load() {
+    const controller = new AbortController();
     setLoading(true);
+    setLoadError(null);
     jobService
-      .getAllJobsForAdmin()
-      .then(setJobs)
-      .catch((error) => setLoadError(error))
-      .finally(() => setLoading(false));
-  }
+      .getAllJobsForAdminPage({ page, limit: PAGE_SIZE }, controller.signal)
+      .then(({ items, total: count }) => {
+        if (controller.signal.aborted) return;
+        setJobs(items);
+        setTotal(count);
+      })
+      .catch((error) => { if (!controller.signal.aborted) setLoadError(error); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [page]);
+
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   async function handleConfirm(job, status) {
     const updated = await jobService.confirmJob(job._id, status);
@@ -51,7 +58,7 @@ function JobsModeration() {
       {jobs.length === 0 && <p className="jobs-moderation-empty">ยังไม่มีประกาศงานในระบบ</p>}
 
       <ul className="jobs-moderation-list">
-        {pagination.items.map((job) => (
+        {jobs.map((job) => (
           <li key={job._id}>
             <div className="jobs-moderation-info">
               <p className="jobs-moderation-title">{job.title}</p>
@@ -89,7 +96,7 @@ function JobsModeration() {
           </li>
         ))}
       </ul>
-      <Pagination {...pagination} />
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} total={total} />
     </div>
   );
 }

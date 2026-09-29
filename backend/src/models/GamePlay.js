@@ -7,7 +7,7 @@ const gamePlaySchema = new mongoose.Schema(
     dateKey: { type: String, required: true },
     domain: {
       type: String,
-      enum: ["self_awareness", "coping", "routine", "physical", "learning", "self_monitoring"],
+      enum: ["self_awareness", "coping", "routine", "physical", "learning", "self_monitoring", "social", "mindfulness"],
       required: true,
     },
     pointsAwarded: { type: Number, required: true },

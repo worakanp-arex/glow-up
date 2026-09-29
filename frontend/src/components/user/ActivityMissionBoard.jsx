@@ -1,14 +1,30 @@
 import { useEffect, useState } from "react";
-import { BookOpen, CheckCircle2, Dumbbell, Home, ListTodo } from "lucide-react";
+import { BookOpen, Brain, CheckCircle2, Compass, Dumbbell, Home, LifeBuoy, LineChart, ListTodo, Users } from "lucide-react";
 import * as activityMissionService from "../../services/activityMissionService.js";
 import "./ActivityMissionBoard.css";
 
+// The full 8-category taxonomy shared with ActivityMissionManagement.jsx and
+// the backend's RECOVERY_DOMAINS (gameContent.js).
 const CATEGORY_META = {
   routine: { label: "งานบ้าน / กิจวัตร", icon: Home },
   physical: { label: "ออกกำลังกาย", icon: Dumbbell },
   learning: { label: "การเรียนรู้", icon: BookOpen },
+  self_awareness: { label: "ตระหนักรู้ตนเอง", icon: Compass },
+  coping: { label: "ทักษะรับมือ", icon: LifeBuoy },
+  self_monitoring: { label: "การติดตามตนเอง", icon: LineChart },
+  social: { label: "สังคม / ความสัมพันธ์", icon: Users },
+  mindfulness: { label: "จิตใจ / สติ", icon: Brain },
 };
-const CATEGORY_ORDER = ["routine", "physical", "learning"];
+const CATEGORY_ORDER = [
+  "routine",
+  "physical",
+  "learning",
+  "self_awareness",
+  "coping",
+  "self_monitoring",
+  "social",
+  "mindfulness",
+];
 
 function ActivityItem({ item, onLog }) {
   const { activity, loggedToday } = item;

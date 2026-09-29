@@ -6,9 +6,16 @@ import { UserRound, AlertTriangle, Award, Building2, CalendarCheck, ClipboardLis
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
 import * as counsellingService from "../../services/counsellingService.js";
 import * as weeklyCheckInService from "../../services/weeklyCheckInService.js";
+import * as riskSituationService from "../../services/riskSituationService.js";
+import * as missionService from "../../services/missionService.js";
 import "./PatientProfile.css";
 
 const MOOD_TREND_LABELS = { improving: "ดีขึ้น", stable: "เหมือนเดิม", worsening: "แย่ลง" };
+const OUTCOME_LABELS = {
+  handled_well: "รับมือได้ดี",
+  partially_handled: "รับมือได้บางส่วน",
+  relapsed: "กลับไปใช้ซ้ำ",
+};
 
 const RISK_LABELS = { low: "ต่ำ", medium: "ปานกลาง", high: "สูง" };
 const RISK_CLASS = {
@@ -34,6 +41,9 @@ function PatientProfile() {
   const [loadError, setLoadError] = useState(null);
   const [error, setError] = useState("");
   const [weeklyCheckIns, setWeeklyCheckIns] = useState([]);
+  const [riskSituations, setRiskSituations] = useState([]);
+  const [customMissions, setCustomMissions] = useState([]);
+  const [approvingId, setApprovingId] = useState(null);
 
   useEffect(() => {
     counsellingService
@@ -47,6 +57,27 @@ function PatientProfile() {
   useEffect(() => {
     weeklyCheckInService.getUserWeeklyCheckIns(userId).then(setWeeklyCheckIns).catch(() => setWeeklyCheckIns([]));
   }, [userId]);
+
+  useEffect(() => {
+    riskSituationService.getRiskSituationLogsForUser(userId).then(setRiskSituations).catch(() => setRiskSituations([]));
+  }, [userId]);
+
+  useEffect(() => {
+    missionService
+      .getMissions()
+      .then((missions) => setCustomMissions(missions.filter((m) => m.type === "custom" && m.active)))
+      .catch(() => setCustomMissions([]));
+  }, []);
+
+  async function handleApproveMission(missionId) {
+    setApprovingId(missionId);
+    try {
+      await missionService.approveCustomMission(missionId, userId);
+      setCustomMissions((prev) => prev.map((m) => (m._id === missionId ? { ...m, approvedForPatient: true } : m)));
+    } finally {
+      setApprovingId(null);
+    }
+  }
 
   const pageHeader = <PageHeader icon={UserRound} backTo={"/counsellor"} backLabel="คำขอรับคำปรึกษา">{"ข้อมูลผู้รับคำปรึกษา"}</PageHeader>;
 
@@ -167,6 +198,61 @@ function PatientProfile() {
                   <span className="patient-profile-weekly-risk-tag">
                     <AlertTriangle size={13} />
                     เสี่ยงทำร้ายตนเอง
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {customMissions.length > 0 && (
+        <section className="patient-profile-card">
+          <h2>
+            <Award size={16} />
+            <span>ภารกิจที่กำหนดเอง (อนุมัติเมื่อผู้ใช้ทำสำเร็จ)</span>
+          </h2>
+          <ul className="patient-profile-weekly-list">
+            {customMissions.map((mission) => (
+              <li key={mission._id}>
+                <span>{mission.title}</span>
+                <span>+{mission.rewardPoints} แต้ม</span>
+                {mission.approvedForPatient ? (
+                  <span className="patient-profile-weekly-risk-tag">อนุมัติแล้ว</span>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => handleApproveMission(mission._id)}
+                    disabled={approvingId === mission._id}
+                  >
+                    {approvingId === mission._id ? "กำลังอนุมัติ..." : "อนุมัติ"}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="patient-profile-card">
+        <h2>
+          <AlertTriangle size={16} />
+          <span>สถานการณ์เสี่ยงที่พบจริง</span>
+        </h2>
+        {riskSituations.length === 0 ? (
+          <p className="patient-profile-empty">ยังไม่มีการบันทึกสถานการณ์เสี่ยง</p>
+        ) : (
+          <ul className="patient-profile-weekly-list">
+            {riskSituations.map((log) => (
+              <li key={log._id} className={log.outcome === "relapsed" ? "risk" : ""}>
+                <span className="patient-profile-weekly-week">{formatDate(log.occurredAt)}</span>
+                <span>{log.situation}</span>
+                <span>{OUTCOME_LABELS[log.outcome] || log.outcome}</span>
+                {log.outcome === "relapsed" && (
+                  <span className="patient-profile-weekly-risk-tag">
+                    <AlertTriangle size={13} />
+                    กลับไปใช้ซ้ำ
                   </span>
                 )}
               </li>

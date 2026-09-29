@@ -1,8 +1,9 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { Award, Flame, Heart, Sparkles, Users } from "lucide-react";
+import { Award, Flame, Heart, Send, Sparkles, TrendingUp, Users } from "lucide-react";
 import * as familyService from "../../services/familyService.js";
+import FamilyMissionsWidget from "../../components/common/FamilyMissionsWidget.jsx";
 import "./FamilyDashboard.css";
 
 function initials(name) {
@@ -14,6 +15,9 @@ function FamilyDashboard({ links }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -23,6 +27,20 @@ function FamilyDashboard({ links }) {
       .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, [selectedLinkId]);
+
+  async function handleSendMessage(e) {
+    e.preventDefault();
+    if (!message.trim()) return;
+    setSending(true);
+    setSent(false);
+    try {
+      await familyService.sendEncouragementMessage(selectedLinkId, message.trim());
+      setMessage("");
+      setSent(true);
+    } finally {
+      setSending(false);
+    }
+  }
 
   if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
@@ -74,6 +92,11 @@ function FamilyDashboard({ links }) {
               <span className="family-dashboard-stat-value">{summary.completedMissions}</span>
               <span className="family-dashboard-stat-label">ภารกิจสำเร็จ</span>
             </div>
+            <div className="family-dashboard-stat-card">
+              <TrendingUp size={20} />
+              <span className="family-dashboard-stat-value">{summary.level}</span>
+              <span className="family-dashboard-stat-label">เลเวล</span>
+            </div>
           </div>
 
           {summary.rewardsEarned.length > 0 && (
@@ -86,6 +109,24 @@ function FamilyDashboard({ links }) {
               </ul>
             </div>
           )}
+
+          <FamilyMissionsWidget />
+
+          <form className="family-dashboard-message-form" onSubmit={handleSendMessage}>
+            <h3>ส่งข้อความให้กำลังใจ</h3>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder={`เขียนข้อความให้กำลังใจถึง ${summary.name}...`}
+              rows={3}
+              maxLength={500}
+            />
+            {sent && <p className="family-dashboard-message-sent">ส่งข้อความแล้ว!</p>}
+            <button type="submit" className="btn btn-primary" disabled={sending || !message.trim()}>
+              <Send size={15} />
+              <span>{sending ? "กำลังส่ง..." : "ส่งกำลังใจ"}</span>
+            </button>
+          </form>
         </>
       )}
     </div>

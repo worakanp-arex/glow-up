@@ -1,6 +1,5 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
-import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -8,24 +7,32 @@ import { Check, ShieldAlert, Trash2 } from "lucide-react";
 import * as postService from "../../services/postService.js";
 import "./PostsModeration.css";
 
+const PAGE_SIZE = 10;
+
 function PostsModeration() {
   const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const pagination = usePagination(posts);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
-    load();
-  }, []);
-
-  function load() {
+    const controller = new AbortController();
     setLoading(true);
+    setLoadError(null);
     postService
-      .getFlaggedPosts()
-      .then(setPosts)
-      .catch((error) => setLoadError(error))
-      .finally(() => setLoading(false));
-  }
+      .getFlaggedPostsPage({ page, limit: PAGE_SIZE }, controller.signal)
+      .then(({ items, total: count }) => {
+        if (controller.signal.aborted) return;
+        setPosts(items);
+        setTotal(count);
+      })
+      .catch((error) => { if (!controller.signal.aborted) setLoadError(error); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [page]);
+
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   async function handleClear(post) {
     await postService.unflagPost(post._id);
@@ -53,7 +60,7 @@ function PostsModeration() {
       {posts.length === 0 && <p className="posts-moderation-empty">ไม่มีโพสต์ที่รอตรวจสอบในขณะนี้</p>}
 
       <ul className="posts-moderation-list">
-        {pagination.items.map((post) => (
+        {posts.map((post) => (
           <li key={post._id}>
             <div className="posts-moderation-info">
               <p className="posts-moderation-author">
@@ -78,7 +85,7 @@ function PostsModeration() {
           </li>
         ))}
       </ul>
-      <Pagination {...pagination} />
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} total={total} />
     </div>
   );
 }

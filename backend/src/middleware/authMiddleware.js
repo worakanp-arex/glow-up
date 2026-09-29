@@ -12,8 +12,11 @@ export async function verifyToken(req, res, next) {
 
   try {
     const claims = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
-    const user = await User.findById(claims.id).select("role");
+    const user = await User.findById(claims.id).select("role verifiedStatus");
     if (!user) return res.status(401).json({ message: "กรุณาเข้าสู่ระบบอีกครั้ง" });
+    if (user.verifiedStatus === "suspended") {
+      return res.status(403).json({ message: "บัญชีของคุณถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ" });
+    }
     req.user = { id: claims.id, role: user.role };
     next();
   } catch {

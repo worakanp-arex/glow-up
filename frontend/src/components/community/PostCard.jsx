@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Bookmark, Flag, Heart, Lock, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import * as postService from "../../services/postService.js";
+import { AUDIENCE_ROLES, AUDIENCE_LABEL_BY_VALUE } from "../../constants/postAudience.js";
 import "./PostCard.css";
 
 function initials(name) {
@@ -30,6 +31,7 @@ function PostCard({
   const [content, setContent] = useState(post.content || "");
   const [tagsInput, setTagsInput] = useState((post.tags || []).join(", "));
   const [commentsEnabled, setCommentsEnabled] = useState(post.commentsEnabled !== false);
+  const [visibleToRoles, setVisibleToRoles] = useState(post.visibleToRoles || []);
   const [saving, setSaving] = useState(false);
   const [flagged, setFlagged] = useState(Boolean(post.needsReview));
 
@@ -41,7 +43,12 @@ function PostCard({
     setContent(post.content || "");
     setTagsInput((post.tags || []).join(", "));
     setCommentsEnabled(post.commentsEnabled !== false);
+    setVisibleToRoles(post.visibleToRoles || []);
     setEditing(true);
+  }
+
+  function toggleAudienceRole(role) {
+    setVisibleToRoles((prev) => (prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]));
   }
 
   async function handleSave(e) {
@@ -52,7 +59,7 @@ function PostCard({
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean);
-      await onUpdated(post._id, { content, tags, commentsEnabled });
+      await onUpdated(post._id, { content, tags, commentsEnabled, visibleToRoles });
       setEditing(false);
     } finally {
       setSaving(false);
@@ -123,6 +130,12 @@ function PostCard({
         )}
       </div>
 
+      {post.visibleToRoles?.length > 0 && (
+        <p className="post-card-audience-badge">
+          เห็นเฉพาะ: {post.visibleToRoles.map((role) => AUDIENCE_LABEL_BY_VALUE[role] || role).join(", ")}
+        </p>
+      )}
+
       {post.tags?.length > 0 && (
         <div className="post-card-tags">
           {post.tags.map((tag) => (
@@ -150,6 +163,25 @@ function PostCard({
             />
             <span>เปิดให้แสดงความคิดเห็น</span>
           </label>
+          {isStaffAuthor && (
+            <div className="post-card-audience-edit">
+              <span className="post-card-audience-edit-label">ใครเห็นโพสต์นี้ได้บ้าง</span>
+              <label className="post-card-comments-toggle">
+                <input type="checkbox" checked={visibleToRoles.length === 0} onChange={() => setVisibleToRoles([])} />
+                <span>ทุกคน</span>
+              </label>
+              {AUDIENCE_ROLES.map(({ value, label }) => (
+                <label key={value} className="post-card-comments-toggle">
+                  <input
+                    type="checkbox"
+                    checked={visibleToRoles.includes(value)}
+                    onChange={() => toggleAudienceRole(value)}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+          )}
           <div className="post-card-edit-actions">
             <button type="submit" className="btn btn-primary" disabled={saving}>
               {saving ? "กำลังบันทึก..." : "บันทึก"}

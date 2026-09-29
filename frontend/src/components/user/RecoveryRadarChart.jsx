@@ -61,7 +61,7 @@ function RecoveryRadarChart({ data }) {
           </tbody>
         </table>
       ) : (
-        <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="recovery-radar-svg" role="img" aria-label="กราฟใยแมงมุมแสดงพัฒนาการ 6 ด้าน">
+        <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="recovery-radar-svg" role="img" aria-label={`กราฟใยแมงมุมแสดงพัฒนาการ ${count} ด้าน`}>
           {GRID_STEPS.map((fraction) => (
             <polygon key={fraction} points={polygonPoints(count, fraction)} className="recovery-radar-grid-ring" />
           ))}

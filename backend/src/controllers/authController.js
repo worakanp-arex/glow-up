@@ -177,6 +177,9 @@ export async function login(req, res) {
   if (!(await user.comparePassword(password))) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
+  if (user.verifiedStatus === "suspended") {
+    return res.status(403).json({ message: "บัญชีของคุณถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ" });
+  }
 
   const token = signToken(user);
   setTokenCookie(res, token);

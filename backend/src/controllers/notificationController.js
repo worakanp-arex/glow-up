@@ -1,8 +1,15 @@
 import Notification from "../models/Notification.js";
+import { paginationOptions } from "../utils/pagination.js";
 
 export async function myNotifications(req, res) {
-  const notifications = await Notification.find({ user: req.user.id }).sort({ createdAt: -1 });
-  res.json(notifications);
+  const filter = { user: req.user.id };
+  const pagination = paginationOptions(req.query);
+  const query = Notification.find(filter).sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Notification.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  res.json(await query);
 }
 
 export async function markAsRead(req, res) {

@@ -11,6 +11,7 @@ import ApplicationStatusCard from "../../components/user/ApplicationStatusCard.j
 import MyCoursesWidget from "../../components/user/MyCoursesWidget.jsx";
 import CounsellingStatusWidget from "../../components/user/CounsellingStatusWidget.jsx";
 import CommunityPreviewWidget from "../../components/user/CommunityPreviewWidget.jsx";
+import FamilyMissionsWidget from "../../components/common/FamilyMissionsWidget.jsx";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import NewsSection from "../../components/common/NewsSection.jsx";
 import FamilyDashboard from "../family/FamilyDashboard.jsx";
@@ -60,6 +61,8 @@ function Dashboard() {
         <PageHeader icon={LayoutDashboard} description="ทุกก้าวเล็ก ๆ มีความหมาย วันนี้มาดูแลตัวเองไปด้วยกัน">สวัสดี, {user.name}</PageHeader>
         <StatusBadge status={user.verifiedStatus} />
       </div>
+
+      <FamilyMissionsWidget />
 
       <WeeklyCheckInWidget />
 

@@ -6,7 +6,8 @@ import * as microLessonService from "../../services/microLessonService.js";
 import * as scenarioService from "../../services/scenarioService.js";
 import "./LessonManagement.css";
 
-const INITIAL_LESSON_FORM = { title: "", body: "", category: "" };
+const INITIAL_LESSON_FORM = { title: "", body: "", category: "", audience: "user" };
+const AUDIENCE_LABELS = { user: "ผู้ใช้งาน (ผู้ผ่านการบำบัด)", family: "ครอบครัว/ผู้ดูแล" };
 const EMPTY_OPTION = { text: "", isCorrect: false, feedback: "" };
 const INITIAL_SCENARIO_FORM = { title: "", lesson: "", prompt: "", options: [{ ...EMPTY_OPTION }, { ...EMPTY_OPTION }] };
 
@@ -130,6 +131,17 @@ function LessonManagement() {
               placeholder="เช่น เพื่อนชวน, งานเลี้ยง"
             />
           </label>
+          <label>
+            กลุ่มเป้าหมาย
+            <select
+              value={lessonForm.audience}
+              onChange={(e) => setLessonForm((f) => ({ ...f, audience: e.target.value }))}
+            >
+              {Object.entries(AUDIENCE_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </label>
         </div>
         <label className="lesson-management-body-field">
           เนื้อหาบทเรียน
@@ -158,6 +170,7 @@ function LessonManagement() {
               <div className="lesson-management-list-body">
                 <p className="lesson-management-list-title">{lesson.title}</p>
                 {lesson.category && <span className="lesson-management-list-category">{lesson.category}</span>}
+                <span className="lesson-management-list-category">{AUDIENCE_LABELS[lesson.audience] || AUDIENCE_LABELS.user}</span>
               </div>
               <button type="button" onClick={() => handleDeleteLesson(lesson._id)} aria-label="ลบบทเรียน">
                 <Trash2 size={14} />

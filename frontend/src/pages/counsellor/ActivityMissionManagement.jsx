@@ -5,7 +5,16 @@ import { ListTodo, Plus } from "lucide-react";
 import * as activityMissionService from "../../services/activityMissionService.js";
 import "./ActivityMissionManagement.css";
 
-const CATEGORY_LABELS = { routine: "งานบ้าน / กิจวัตร", physical: "ออกกำลังกาย", learning: "การเรียนรู้" };
+const CATEGORY_LABELS = {
+  routine: "งานบ้าน / กิจวัตร",
+  physical: "ออกกำลังกาย",
+  learning: "การเรียนรู้",
+  self_awareness: "ตระหนักรู้ตนเอง",
+  coping: "ทักษะรับมือ",
+  self_monitoring: "การติดตามตนเอง",
+  social: "สังคม / ความสัมพันธ์",
+  mindfulness: "จิตใจ / สติ",
+};
 const INITIAL_FORM = { title: "", description: "", category: "routine", points: 5 };
 
 function ActivityMissionManagement() {

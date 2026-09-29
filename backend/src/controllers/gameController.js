@@ -174,6 +174,8 @@ const DOMAIN_TARGETS = {
   physical: 10,
   learning: 12,
   self_monitoring: 14,
+  social: 10,
+  mindfulness: 12,
 };
 
 export async function getMyRadar(req, res) {
@@ -194,6 +196,8 @@ export async function getMyRadar(req, res) {
     physical: 0,
     learning: completedCourses.length,
     self_monitoring: computeStreakStats(emotionLogs).currentStreak,
+    social: 0,
+    mindfulness: 0,
   };
 
   for (const log of activityLogs) {

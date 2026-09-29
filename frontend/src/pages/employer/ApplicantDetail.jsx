@@ -128,10 +128,23 @@ function ApplicantDetail() {
         <p>
           สถานะยืนยันตัวตน: <StatusBadge status={application.user.verifiedStatus} />
         </p>
-        <p className="applicant-detail-match-note">
-          <Sparkles size={13} />
-          คะแนนจับคู่ AI: จะเปิดใช้งานในเฟสถัดไป
-        </p>
+        <div className="applicant-detail-match-note">
+          <p>
+            <Sparkles size={13} />
+            คะแนนทักษะตรงกับงาน: <strong>{application.match ? `${application.match.score}%` : "ยังไม่ระบุ"}</strong>
+          </p>
+          {application.match && (
+            <>
+              <small>{application.match.matchedSkills.length} / {application.match.totalSkills} ทักษะที่ตรงกับที่ประกาศ</small>
+              {application.match.matchedSkills.length > 0 && (
+                <p className="applicant-detail-match-tags">ทักษะที่ตรง: {application.match.matchedSkills.join(", ")}</p>
+              )}
+              {application.match.missingSkills?.length > 0 && (
+                <p className="applicant-detail-match-tags">ทักษะที่ยังไม่ตรง: {application.match.missingSkills.join(", ")}</p>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {(application.user.education || application.user.experience) && (

@@ -1,10 +1,9 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import Pagination from "../../components/common/Pagination.jsx";
-import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarHeart, Check, Filter, Pencil, Plus, Trash2, UserPlus, Users as UsersIcon, X } from "lucide-react";
+import { Ban, CalendarHeart, Check, Filter, Pencil, Plus, RotateCcw, Trash2, UserPlus, Users as UsersIcon, X } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as userService from "../../services/userService.js";
 import "./Users.css";
@@ -18,13 +17,16 @@ const ROLE_LABELS = {
 };
 
 const INITIAL_STAFF_FORM = { name: "", email: "", password: "", phone: "", specialization: "", hospital: "" };
+const PAGE_SIZE = 10;
 
 function Users() {
   const [users, setUsers] = useState([]);
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [appliedFilters, setAppliedFilters] = useState({});
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const pagination = usePagination(users);
   const [loadError, setLoadError] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", phone: "", role: "user" });
@@ -33,26 +35,31 @@ function Users() {
   const [creatingStaff, setCreatingStaff] = useState(false);
   const [staffError, setStaffError] = useState("");
 
-  function load(params = {}) {
-    setLoading(true);
-    userService
-      .listUsers(params)
-      .then(setUsers)
-      .catch((error) => setLoadError(error))
-      .finally(() => setLoading(false));
-  }
-
   useEffect(() => {
-    load();
-  }, []);
+    const controller = new AbortController();
+    setLoading(true);
+    setLoadError(null);
+    userService
+      .listUsersPage({ ...appliedFilters, page, limit: PAGE_SIZE }, controller.signal)
+      .then(({ items, total: count }) => {
+        if (controller.signal.aborted) return;
+        setUsers(items);
+        setTotal(count);
+      })
+      .catch((error) => { if (!controller.signal.aborted) setLoadError(error); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [appliedFilters, page]);
 
   function applyFilters() {
-    pagination.setPage(1);
+    setPage(1);
     const params = {};
     if (roleFilter) params.role = roleFilter;
     if (statusFilter) params.verifiedStatus = statusFilter;
-    load(params);
+    setAppliedFilters(params);
   }
+
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   async function handleVerify(user, status) {
     const updated = await userService.verifyUser(user._id, status);
@@ -118,6 +125,7 @@ function Users() {
           <option value="pending">รอดำเนินการ</option>
           <option value="verified">ยืนยันแล้ว</option>
           <option value="rejected">ปฏิเสธ</option>
+          <option value="suspended">ระงับการใช้งาน</option>
         </select>
         <button type="button" className="btn btn-secondary" onClick={applyFilters}>
           <Filter size={15} />
@@ -209,7 +217,7 @@ function Users() {
         {users.length === 0 && <p className="users-empty">ไม่พบผู้ใช้งานที่ตรงกับเงื่อนไข</p>}
 
         <ul className="users-list">
-          {pagination.items.map((user) => (
+          {users.map((user) => (
             <li key={user._id}>
               {editingId === user._id ? (
                 <form
@@ -287,6 +295,27 @@ function Users() {
                         </button>
                       </>
                     )}
+                    {user.verifiedStatus === "suspended" ? (
+                      <button
+                        type="button"
+                        className="users-action-approve"
+                        onClick={() => handleVerify(user, "verified")}
+                        title="ยกเลิกการระงับ"
+                      >
+                        <RotateCcw size={16} />
+                      </button>
+                    ) : (
+                      user.role !== "admin" && (
+                        <button
+                          type="button"
+                          className="users-action-reject"
+                          onClick={() => handleVerify(user, "suspended")}
+                          title="ระงับการใช้งานชั่วคราว"
+                        >
+                          <Ban size={16} />
+                        </button>
+                      )
+                    )}
                     {user.role === "user" && (
                       <Link to={`/admin/users/${user._id}/emotion`} title="ดูปฏิทินอารมณ์">
                         <CalendarHeart size={16} />
@@ -305,7 +334,7 @@ function Users() {
           ))}
         </ul>
       </div>
-      <Pagination {...pagination} />
+      <Pagination page={page} pageCount={pageCount} setPage={setPage} total={total} />
     </div>
   );
 }

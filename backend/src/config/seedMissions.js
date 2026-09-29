@@ -13,6 +13,9 @@ const MISSIONS = [
   { title: "เช็คอิน 3 วันติดต่อกัน", type: "streak", targetValue: 3, rewardPoints: 10, badgeIcon: "Flame" },
   { title: "เช็คอิน 7 วันติดต่อกัน", type: "streak", targetValue: 7, rewardPoints: 25, badgeIcon: "Flame" },
   { title: "เช็คอิน 30 วันติดต่อกัน", type: "streak", targetValue: 30, rewardPoints: 100, badgeIcon: "Flame" },
+  { title: "เช็คอิน 90 วันติดต่อกัน", type: "streak", targetValue: 90, rewardPoints: 250, badgeIcon: "Flame" },
+  { title: "เช็คอิน 180 วันติดต่อกัน", type: "streak", targetValue: 180, rewardPoints: 400, badgeIcon: "Flame" },
+  { title: "เช็คอิน 365 วันติดต่อกัน", type: "streak", targetValue: 365, rewardPoints: 600, badgeIcon: "Flame" },
   { title: "เช็คอินสะสม 10 ครั้ง", type: "totalCheckins", targetValue: 10, rewardPoints: 15, badgeIcon: "CalendarCheck" },
   { title: "เช็คอินสะสม 50 ครั้ง", type: "totalCheckins", targetValue: 50, rewardPoints: 60, badgeIcon: "CalendarCheck" },
   {

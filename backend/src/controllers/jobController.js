@@ -94,16 +94,29 @@ export async function getJob(req, res) {
 }
 
 export async function listAllJobsForAdmin(req, res) {
-  const jobs = await Job.find()
+  const pagination = paginationOptions(req.query);
+  const query = Job.find()
     .populate("employer", EMPLOYER_PUBLIC_FIELDS)
     .populate("category")
     .sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Job.countDocuments());
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  const jobs = await query;
   const withSkills = await Promise.all(jobs.map(attachSkills));
   res.json(withSkills);
 }
 
 export async function myJobs(req, res) {
-  const jobs = await Job.find({ employer: req.user.id }).populate("category").sort({ createdAt: -1 });
+  const filter = { employer: req.user.id };
+  const pagination = paginationOptions(req.query);
+  const query = Job.find(filter).populate("category").sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Job.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  const jobs = await query;
   const withSkills = await Promise.all(jobs.map(attachSkills));
   res.json(withSkills);
 }

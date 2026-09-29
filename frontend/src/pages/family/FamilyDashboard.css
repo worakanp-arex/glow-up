@@ -102,7 +102,7 @@
 
 .family-dashboard-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -162,12 +162,46 @@
   font-weight: 500;
 }
 
+.family-dashboard-message-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.family-dashboard-message-form h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.family-dashboard-message-form textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.family-dashboard-message-sent {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-success);
+}
+
 @media (max-width: 520px) {
   .family-dashboard-page {
     padding: 1.5rem 1rem 3rem;
   }
 
   .family-dashboard-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 }

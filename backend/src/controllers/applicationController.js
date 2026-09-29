@@ -1,9 +1,10 @@
-import { applicationMatches } from "../services/jobMatchService.js";
+import { applicationMatches, jobApplicantMatches } from "../services/jobMatchService.js";
 import Application from "../models/Application.js";
 import Job from "../models/Job.js";
 import User from "../models/User.js";
 import { notifyUser } from "../services/notificationService.js";
 import { publicUrl } from "../middleware/upload.js";
+import { paginationOptions } from "../utils/pagination.js";
 
 const STATUS_LABELS = {
   pending: "รอดำเนินการ",
@@ -62,9 +63,16 @@ export async function applyToJob(req, res) {
 }
 
 export async function myApplications(req, res) {
-  const applications = await Application.find({ user: req.user.id })
+  const filter = { user: req.user.id };
+  const pagination = paginationOptions(req.query);
+  const query = Application.find(filter)
     .populate({ path: "job", populate: { path: "employer", select: "name companyName avatarUrl" } })
     .sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Application.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  const applications = await query;
   res.json(await applicationMatches(req.user.id, applications));
 }
 
@@ -78,10 +86,15 @@ export async function jobApplicants(req, res) {
   }
   if (!(await assertEmployerVerified(req, res))) return;
 
-  const applications = await Application.find({ job: job._id })
-    .populate("user", APPLICANT_PROFILE_FIELDS)
-    .sort({ createdAt: -1 });
-  res.json(applications);
+  const filter = { job: job._id };
+  const pagination = paginationOptions(req.query);
+  const query = Application.find(filter).populate("user", APPLICANT_PROFILE_FIELDS).sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Application.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  const applications = await query;
+  res.json(await jobApplicantMatches(job._id, applications));
 }
 
 export async function getApplication(req, res) {
@@ -95,7 +108,8 @@ export async function getApplication(req, res) {
     return res.status(403).json({ message: "Forbidden" });
   }
   if (!(await assertEmployerVerified(req, res))) return;
-  res.json(application);
+  const [withMatch] = await jobApplicantMatches(application.job._id, [application]);
+  res.json(withMatch);
 }
 
 export async function updateApplicationStatus(req, res) {

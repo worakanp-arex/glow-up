@@ -20,6 +20,7 @@ export const LINKS_BY_ROLE = {
   ],
   family: [
     { to: "/family/dashboard", label: "ติดตามครอบครัว" },
+    { to: "/family/guide", label: "คู่มือสำหรับครอบครัว" },
     { to: "/community", label: "ชุมชนฟื้นฟู" },
     { to: "/profile", label: "โปรไฟล์ของฉัน" },
     { to: "/about", label: "เกี่ยวกับเรา" },
@@ -46,6 +47,7 @@ export const LINKS_BY_ROLE = {
     { to: "/admin/jobs", label: "ตรวจสอบประกาศงาน" },
     { to: "/admin/job-categories", label: "หมวดหมู่งาน" },
     { to: "/admin/assessments", label: "ผลประเมินความเสี่ยง" },
+    { to: "/admin/missions", label: "จัดการภารกิจและรางวัล" },
     { to: "/admin/posts-moderation", label: "ตรวจสอบโพสต์ที่ถูกรายงาน" },
     { to: "/about", label: "เกี่ยวกับเรา" },
   ],

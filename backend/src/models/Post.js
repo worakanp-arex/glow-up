@@ -6,6 +6,10 @@ const postSchema = new mongoose.Schema(
     content: { type: String },
     tags: { type: [String], default: [] },
     commentsEnabled: { type: Boolean, default: true },
+    // Which roles can see this post — set by the staff author. Empty means
+    // visible to everyone; staff (admin/counsellor) always see every post
+    // regardless of this field, for moderation.
+    visibleToRoles: { type: [String], enum: ["user", "family", "employer"], default: [] },
     // Set when a user flags the post's content (e.g. health-related claims)
     // for staff review — cleared once a counsellor/admin has reviewed it.
     needsReview: { type: Boolean, default: false },
