@@ -1,0 +1,89 @@
+/*
+ * Site-wide visual refresh: softer, roomier cards, pill tabs and a shared
+ * card primitive. Brand colour (primary scale), Prompt font and logo are
+ * unchanged — this file only adjusts shape, spacing and surfaces.
+ */
+:root {
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --card-border: 1px solid var(--color-border);
+  --card-shadow: 0 1px 2px rgb(31 66 100 / 4%), 0 8px 24px rgb(31 66 100 / 5%);
+  --card-pad: 28px;
+}
+
+/* ---------- Shared card primitive ---------- */
+.ui-card {
+  min-width: 0;
+  padding: var(--card-pad);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--card-shadow);
+}
+.ui-card-soft { background: var(--color-primary-50); border-color: var(--color-primary-100); box-shadow: none; }
+.ui-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.ui-card-head h2 { margin: 0; font-size: 1.15rem; font-weight: 600; line-height: 1.5; color: var(--color-text); }
+.ui-card-head p { margin: 2px 0 0; font-size: .8rem; color: var(--color-text-muted); line-height: 1.6; }
+.ui-card-head > svg { flex-shrink: 0; color: var(--color-primary-600); }
+.ui-card-link { flex-shrink: 0; border: 0; background: none; padding: 0; font: inherit; font-size: .8rem; font-weight: 600; color: var(--color-primary-600); text-decoration: none; cursor: pointer; }
+.ui-card-link:hover { text-decoration: underline; }
+.ui-divider { height: 1px; margin: 18px 0; border: 0; background: var(--color-border); }
+.ui-muted { color: var(--color-text-muted); font-size: .8rem; }
+
+/* ---------- Chips, pills, tabs ---------- */
+.ui-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 8px; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .72rem; font-weight: 500; line-height: 1.6; }
+.ui-chip-neutral { background: var(--color-surface-hover); color: var(--color-text-secondary); }
+.ui-chip-peach { background: color-mix(in srgb, #f2a071 18%, var(--color-surface)); color: #a4522a; }
+.ui-chip-lilac { background: color-mix(in srgb, #8b7fd6 16%, var(--color-surface)); color: #5a4db0; }
+:root[data-theme="dark"] .ui-chip-peach { color: #f5b691; }
+:root[data-theme="dark"] .ui-chip-lilac { color: #b9b0f0; }
+
+.ui-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 14px; margin-bottom: 24px; border-bottom: 1px solid var(--color-border); }
+.ui-tab { min-height: 42px; padding: 8px 18px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--color-text-secondary); font: inherit; font-size: .85rem; font-weight: 500; cursor: pointer; transition: background-color .15s, color .15s, border-color .15s; }
+.ui-tab:hover { background: var(--color-surface-hover); color: var(--color-text); }
+.ui-tab[aria-selected="true"], .ui-tab.active { background: var(--color-primary-50); border-color: var(--color-primary-200); color: var(--color-primary-700); font-weight: 600; }
+
+/* ---------- Progress bar ---------- */
+.ui-progress { height: 6px; border-radius: 999px; background: var(--color-primary-50); overflow: hidden; }
+.ui-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--color-primary-500); transition: width .3s ease; }
+
+/* ---------- Buttons ---------- */
+.ui-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 20px; border: 1px solid transparent; border-radius: 12px; font: inherit; font-size: .875rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color .15s, border-color .15s, transform .15s, box-shadow .15s; }
+.ui-btn-primary { background: var(--color-primary-500); color: #fff; box-shadow: 0 6px 16px rgb(40 127 194 / 20%); }
+.ui-btn-primary:hover:not(:disabled) { background: var(--color-primary-600); transform: translateY(-1px); }
+.ui-btn-outline { background: var(--color-surface); border-color: var(--color-border-strong); color: var(--color-primary-700); }
+.ui-btn-outline:hover:not(:disabled) { background: var(--color-primary-50); border-color: var(--color-primary-200); }
+.ui-btn-block { width: 100%; }
+
+/* ---------- Form fields ---------- */
+.ui-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; font-size: .82rem; font-weight: 600; color: var(--color-text); }
+.ui-field :is(input, select, textarea) { width: 100%; padding: 10px 14px; font-size: .875rem; font-weight: 400; }
+.layout-content .ui-field :is(input, select, textarea) { border-color: var(--color-border-strong); border-radius: 12px; }
+.ui-field small { font-weight: 400; color: var(--color-text-muted); }
+
+/* ---------- Switch ---------- */
+.ui-switch { position: relative; flex-shrink: 0; width: 46px; height: 26px; padding: 0; border: 0; border-radius: 999px; background: var(--color-ink-300); cursor: pointer; transition: background-color .2s; }
+.ui-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 20%); transition: transform .2s; }
+.ui-switch[aria-checked="true"] { background: var(--color-primary-500); }
+.ui-switch[aria-checked="true"]::after { transform: translateX(20px); }
+
+/* ---------- Site-wide surface refresh ---------- */
+.layout-content :is([class$="-card"], [class$="-widget"], .profile-card) { border-radius: var(--radius-lg); }
+.layout .btn { border-radius: 12px; }
+.layout-content :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) { border-radius: 12px; }
+.layout-content [class$="-empty"] { border-radius: var(--radius-lg); }
+.layout-content [class*="table-wrap"] { border-radius: var(--radius-lg); }
+.async-state-icon { border-radius: 18px; }
+
+@media (max-width: 600px) {
+  :root { --card-pad: 18px; }
+  .ui-tabs { flex-wrap: nowrap; overflow-x: auto; margin-inline: -4px; padding-inline: 4px; scrollbar-width: none; }
+  .ui-tab { flex-shrink: 0; padding: 8px 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-progress > span, .ui-switch, .ui-switch::after { transition: none; }
+}
+
+/* Small "private" hint used next to card titles. */
+.checkin-private { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--color-text-muted); }

@@ -76,6 +76,37 @@
   font-size: 0.85rem;
 }
 
+.mission-management-level-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mission-management-level-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.mission-management-level-form input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  width: 140px;
+}
+
+.mission-management-level-saved {
+  font-size: 0.8rem;
+  color: var(--color-success);
+}
+
 .mission-management-empty {
   color: var(--color-text-muted);
   font-size: 0.9rem;

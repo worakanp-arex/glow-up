@@ -9,12 +9,11 @@ import { RECOVERY_DOMAINS, WHEEL_SEGMENTS, COPING_PAIRS, QUIZ_BANK } from "../co
 
 const GAME_TYPES = ["wheel", "memory", "quiz"];
 
-async function isUnlockedToday(userId, dateKey) {
-  const [activityToday, emotionToday] = await Promise.all([
-    ActivityMissionLog.exists({ user: userId, dateKey }),
-    EmotionLog.exists({ user: userId, dateKey }),
-  ]);
-  return Boolean(activityToday || emotionToday);
+// Games are open to play any time and as often as the user likes. Only the
+// first play of each game per Bangkok day is recorded and earns points (the
+// unique index on GamePlay enforces that); later plays are practice rounds.
+function isDuplicate(err) {
+  return err?.code === 11000;
 }
 
 function pickTodaysQuiz(dateKey) {
@@ -29,10 +28,7 @@ function pickTodaysQuiz(dateKey) {
 
 export async function getGameHubStatus(req, res) {
   const dateKey = toBangkokDateKey(new Date());
-  const [unlocked, todaysPlays] = await Promise.all([
-    isUnlockedToday(req.user.id, dateKey),
-    GamePlay.find({ user: req.user.id, dateKey }),
-  ]);
+  const todaysPlays = await GamePlay.find({ user: req.user.id, dateKey });
 
   const playedByType = new Map(todaysPlays.map((p) => [p.gameType, p]));
   const games = {};
@@ -43,15 +39,11 @@ export async function getGameHubStatus(req, res) {
       : { played: false };
   }
 
-  res.json({ unlocked, games });
+  res.json({ unlocked: true, games, wheelSegments: WHEEL_SEGMENTS.map((segment) => segment.label) });
 }
 
 export async function spinWheel(req, res) {
   const dateKey = toBangkokDateKey(new Date());
-  if (!(await isUnlockedToday(req.user.id, dateKey))) {
-    return res.status(403).json({ message: "ทำภารกิจประจำวันอย่างน้อย 1 อย่างก่อน เพื่อปลดล็อกเกมวันนี้" });
-  }
-
   const segment = WHEEL_SEGMENTS[Math.floor(Math.random() * WHEEL_SEGMENTS.length)];
   const segmentIndex = WHEEL_SEGMENTS.indexOf(segment);
 
@@ -66,14 +58,12 @@ export async function spinWheel(req, res) {
       resultLabel: segment.label,
     });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({ message: "วันนี้หมุนวงล้อไปแล้ว" });
-    }
+    if (isDuplicate(err)) return res.json({ segmentIndex, segment, practice: true, pointsAwarded: 0 });
     throw err;
   }
 
   await checkAndAwardRewards(req.user.id);
-  res.status(201).json({ segmentIndex, segment, play });
+  res.status(201).json({ segmentIndex, segment, play, practice: false, pointsAwarded: segment.points });
 }
 
 export async function getMemoryPairs(req, res) {
@@ -84,10 +74,6 @@ export async function getMemoryPairs(req, res) {
 
 export async function submitMemoryResult(req, res) {
   const dateKey = toBangkokDateKey(new Date());
-  if (!(await isUnlockedToday(req.user.id, dateKey))) {
-    return res.status(403).json({ message: "ทำภารกิจประจำวันอย่างน้อย 1 อย่างก่อน เพื่อปลดล็อกเกมวันนี้" });
-  }
-
   const moves = Number(req.body.moves) || COPING_PAIRS.length * 2;
   const minMoves = COPING_PAIRS.length;
   let points = 5;
@@ -105,14 +91,12 @@ export async function submitMemoryResult(req, res) {
       resultLabel: `${moves} ครั้ง`,
     });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({ message: "วันนี้เล่นเกมจับคู่ไปแล้ว" });
-    }
+    if (isDuplicate(err)) return res.json({ moves, practice: true, pointsAwarded: 0 });
     throw err;
   }
 
   await checkAndAwardRewards(req.user.id);
-  res.status(201).json({ pointsAwarded: points, play });
+  res.status(201).json({ moves, practice: false, pointsAwarded: points, play });
 }
 
 export async function getDailyQuiz(req, res) {
@@ -131,10 +115,6 @@ export async function getDailyQuiz(req, res) {
 
 export async function submitQuiz(req, res) {
   const dateKey = toBangkokDateKey(new Date());
-  if (!(await isUnlockedToday(req.user.id, dateKey))) {
-    return res.status(403).json({ message: "ทำภารกิจประจำวันอย่างน้อย 1 อย่างก่อน เพื่อปลดล็อกเกมวันนี้" });
-  }
-
   const todaysQuestions = pickTodaysQuiz(dateKey);
   const answers = req.body.answers || {};
   let correctCount = 0;
@@ -142,6 +122,8 @@ export async function submitQuiz(req, res) {
     if (answers[question.id] === question.correctIndex) correctCount += 1;
   }
   const points = correctCount * 3;
+  // Revealed only after submitting, so the player can see what they missed.
+  const answerKey = todaysQuestions.map(({ id, correctIndex }) => ({ id, correctIndex }));
 
   let play;
   try {
@@ -154,14 +136,14 @@ export async function submitQuiz(req, res) {
       resultLabel: `${correctCount}/${todaysQuestions.length} ข้อ`,
     });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({ message: "วันนี้ทำแบบทดสอบไปแล้ว" });
+    if (isDuplicate(err)) {
+      return res.json({ correctCount, total: todaysQuestions.length, answerKey, practice: true, pointsAwarded: 0 });
     }
     throw err;
   }
 
   await checkAndAwardRewards(req.user.id);
-  res.status(201).json({ correctCount, total: todaysQuestions.length, pointsAwarded: points, play });
+  res.status(201).json({ correctCount, total: todaysQuestions.length, answerKey, practice: false, pointsAwarded: points, play });
 }
 
 // Normalization targets are heuristic (documented, not clinically derived) —

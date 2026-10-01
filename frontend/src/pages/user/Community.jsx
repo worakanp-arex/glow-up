@@ -4,7 +4,7 @@ import { usePagination } from "../../hooks/usePagination.js";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
 import { useMobileLayout } from "../../hooks/useMobileLayout.js";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Users, Send } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as postService from "../../services/postService.js";
@@ -24,9 +24,17 @@ function Community() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isStaff = STAFF_ROLES.includes(user.role);
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Saved posts live on this page as a tab (?tab=saved) so switching keeps the
+  // same layout and detail panel instead of jumping to another page.
+  const tab = !isStaff && searchParams.get("tab") === "saved" ? "saved" : "all";
   const [posts, setPosts] = useState([]);
+  const [savedPosts, setSavedPosts] = useState(null);
+  const [savedError, setSavedError] = useState(null);
+  const [savedReload, setSavedReload] = useState(0);
   const [loading, setLoading] = useState(true);
-  const pagination = usePagination(posts);
+  const visiblePosts = tab === "saved" ? savedPosts ?? [] : posts;
+  const pagination = usePagination(visiblePosts);
   const [loadError, setLoadError] = useState(null);
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
@@ -46,6 +54,46 @@ function Community() {
       .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (tab !== "saved") return;
+    let cancelled = false;
+    setSavedError(null);
+    postService
+      .getSavedPosts()
+      .then((data) => {
+        if (cancelled) return;
+        setSavedPosts(data);
+        setSelectedPostId((prev) => (data.some((p) => p._id === prev) ? prev : data[0]?._id ?? null));
+      })
+      .catch((error) => !cancelled && setSavedError(error));
+    return () => { cancelled = true; };
+  }, [tab, savedReload]);
+
+  function switchTab(next) {
+    if (next === tab) return;
+    if (next === "all") setSelectedPostId(posts[0]?._id ?? null);
+    else setSavedPosts(null);
+    setSearchParams(next === "saved" ? { tab: "saved" } : {}, { replace: true });
+  }
+
+  function patchPost(postId, patch) {
+    setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, ...patch } : p)));
+    setSavedPosts((prev) => {
+      if (!prev) return prev;
+      if (patch.savedByMe === false) {
+        const remaining = prev.filter((p) => p._id !== postId);
+        if (tab === "saved") setSelectedPostId((sel) => (sel === postId ? remaining[0]?._id ?? null : sel));
+        return remaining;
+      }
+      return prev.map((p) => (p._id === postId ? { ...p, ...patch } : p));
+    });
+  }
+
+  function removePost(postId) {
+    setPosts((prev) => prev.filter((p) => p._id !== postId));
+    setSavedPosts((prev) => prev && prev.filter((p) => p._id !== postId));
+  }
 
   function focusComposer() {
     textareaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -78,35 +126,33 @@ function Community() {
 
   async function handleLike(postId, liked) {
     const updated = await postService.likePost(postId, liked);
-    setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, ...updated } : p)));
+    patchPost(postId, updated);
     return updated;
   }
 
   async function handleToggleSave(postId) {
     const { savedByMe } = await postService.toggleSavePost(postId);
-    setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, savedByMe } : p)));
+    patchPost(postId, { savedByMe });
   }
 
   async function handleUpdated(postId, payload) {
     const updated = await postService.updatePost(postId, payload);
-    setPosts((prev) => prev.map((p) => (p._id === postId ? updated : p)));
+    patchPost(postId, updated);
   }
 
   async function handleDeleted(postId) {
     await postService.deletePost(postId);
-    setPosts((prev) => prev.filter((p) => p._id !== postId));
+    removePost(postId);
   }
 
   function handlePanelChange(postId, patch) {
-    setPosts((prev) => prev.map((p) => (p._id === postId ? { ...p, ...patch } : p)));
+    patchPost(postId, patch);
   }
 
   function handlePanelDeleted(postId) {
-    setPosts((prev) => {
-      const remaining = prev.filter((p) => p._id !== postId);
-      setSelectedPostId(remaining[0]?._id ?? null);
-      return remaining;
-    });
+    const remaining = visiblePosts.filter((p) => p._id !== postId);
+    removePost(postId);
+    setSelectedPostId(remaining[0]?._id ?? null);
   }
 
   if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
@@ -126,12 +172,17 @@ function Community() {
           </button>
         )}>ชุมชนฟื้นฟู</PageHeader>
 
-      <div className="community-tabs">
-        <span className="active">ทั้งหมด</span>
+      <div className="community-tabs" role={isStaff ? undefined : "tablist"}>
         {isStaff ? (
-          <Link to="/community/mine">โพสต์ของฉัน</Link>
+          <>
+            <span className="active">ทั้งหมด</span>
+            <Link to="/community/mine">โพสต์ของฉัน</Link>
+          </>
         ) : (
-          <Link to="/community/saved">โพสต์ที่บันทึกไว้</Link>
+          <>
+            <button type="button" role="tab" aria-selected={tab === "all"} className={tab === "all" ? "active" : ""} onClick={() => switchTab("all")}>ทั้งหมด</button>
+            <button type="button" role="tab" aria-selected={tab === "saved"} className={tab === "saved" ? "active" : ""} onClick={() => switchTab("saved")}>โพสต์ที่บันทึกไว้</button>
+          </>
         )}
       </div>
 
@@ -162,7 +213,14 @@ function Community() {
               />
             )
           )}
-          {posts.length === 0 && <p className="community-empty">ยังไม่มีโพสต์ในชุมชน</p>}
+          {tab === "all" && posts.length === 0 && <p className="community-empty">ยังไม่มีโพสต์ในชุมชน</p>}
+          {tab === "saved" && (savedError ? (
+            <AsyncState error description={savedError.response?.data?.message} onRetry={() => setSavedReload((n) => n + 1)} />
+          ) : savedPosts === null ? (
+            <AsyncState />
+          ) : savedPosts.length === 0 && (
+            <p className="community-empty">คุณยังไม่ได้บันทึกโพสต์ไว้</p>
+          ))}
         </ul>
 
         {isStaff ? (
@@ -222,11 +280,11 @@ function Community() {
           </aside>
         ) : !mobile && (
           <aside className="community-sidebar community-detail-sidebar">
-            {selectedPostId ? (
+            {selectedPostId && visiblePosts.some(p => p._id === selectedPostId) ? (
               <PostDetailPanel
                 key={selectedPostId}
                 postId={selectedPostId}
-                reaction={posts.find(p => p._id === selectedPostId)}
+                reaction={visiblePosts.find(p => p._id === selectedPostId)}
                 onChange={(patch) => handlePanelChange(selectedPostId, patch)}
                 onDeleted={() => handlePanelDeleted(selectedPostId)}
               />

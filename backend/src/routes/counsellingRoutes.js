@@ -10,6 +10,7 @@ import {
   addMessage,
   updateSchedule,
   updateStatus,
+  recordOutcome,
   getPatientProfile,
 } from "../controllers/counsellingController.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
@@ -94,6 +95,14 @@ router.put(
   [objectIdParam("id"), body("status").isIn(["active", "closed", "cancelled"])],
   validate,
   asyncHandler(updateStatus)
+);
+router.put(
+  "/:id/outcome",
+  verifyToken,
+  requireRole("admin", "counsellor"),
+  [objectIdParam("id"), body("summary").trim().notEmpty().isLength({ max: 4000 })],
+  validate,
+  asyncHandler(recordOutcome)
 );
 
 export default router;

@@ -1,33 +1,12 @@
 import { useEffect, useState } from "react";
-import { BookOpen, Brain, CheckCircle2, Compass, Dumbbell, Home, LifeBuoy, LineChart, ListTodo, Users } from "lucide-react";
+import { CheckCircle2, Clock, ListTodo, XCircle } from "lucide-react";
 import * as activityMissionService from "../../services/activityMissionService.js";
+import * as missionCategoryService from "../../services/missionCategoryService.js";
+import { resolveIcon } from "../../utils/lucideIcon.js";
 import "./ActivityMissionBoard.css";
 
-// The full 8-category taxonomy shared with ActivityMissionManagement.jsx and
-// the backend's RECOVERY_DOMAINS (gameContent.js).
-const CATEGORY_META = {
-  routine: { label: "งานบ้าน / กิจวัตร", icon: Home },
-  physical: { label: "ออกกำลังกาย", icon: Dumbbell },
-  learning: { label: "การเรียนรู้", icon: BookOpen },
-  self_awareness: { label: "ตระหนักรู้ตนเอง", icon: Compass },
-  coping: { label: "ทักษะรับมือ", icon: LifeBuoy },
-  self_monitoring: { label: "การติดตามตนเอง", icon: LineChart },
-  social: { label: "สังคม / ความสัมพันธ์", icon: Users },
-  mindfulness: { label: "จิตใจ / สติ", icon: Brain },
-};
-const CATEGORY_ORDER = [
-  "routine",
-  "physical",
-  "learning",
-  "self_awareness",
-  "coping",
-  "self_monitoring",
-  "social",
-  "mindfulness",
-];
-
 function ActivityItem({ item, onLog }) {
-  const { activity, loggedToday } = item;
+  const { activity, loggedToday, approvalStatus } = item;
   const [expanded, setExpanded] = useState(false);
   const [form, setForm] = useState({ durationMinutes: "", distanceKm: "", fatigueLevel: 3, enjoymentLevel: 3, note: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -71,10 +50,22 @@ function ActivityItem({ item, onLog }) {
         </div>
         <span className="activity-mission-item-points">+{activity.points} แต้ม</span>
         {loggedToday ? (
-          <span className="activity-mission-item-done">
-            <CheckCircle2 size={16} />
-            <span>ทำแล้ววันนี้</span>
-          </span>
+          approvalStatus === "pending" ? (
+            <span className="activity-mission-item-pending">
+              <Clock size={16} />
+              <span>รอการอนุมัติ</span>
+            </span>
+          ) : approvalStatus === "rejected" ? (
+            <span className="activity-mission-item-rejected">
+              <XCircle size={16} />
+              <span>ไม่ได้รับการอนุมัติ</span>
+            </span>
+          ) : (
+            <span className="activity-mission-item-done">
+              <CheckCircle2 size={16} />
+              <span>ทำแล้ววันนี้</span>
+            </span>
+          )
         ) : (
           <button type="button" className="btn btn-secondary" onClick={() => setExpanded((v) => !v)}>
             บันทึกว่าทำแล้ว
@@ -125,21 +116,28 @@ function ActivityItem({ item, onLog }) {
 
 function ActivityMissionBoard({ onLogged, embedded = false }) {
   const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    activityMissionService
-      .getMyTodayActivities()
-      .then(setItems)
+    Promise.all([activityMissionService.getMyTodayActivities(), missionCategoryService.getMissionCategories()])
+      .then(([itemsData, categoryData]) => {
+        setItems(itemsData);
+        setCategories(categoryData);
+      })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
   async function handleLog(activityId, payload) {
-    await activityMissionService.logActivity(activityId, payload);
+    const { log } = await activityMissionService.logActivity(activityId, payload);
     setItems((prev) =>
-      prev.map((item) => (item.activity._id === activityId ? { ...item, loggedToday: true } : item))
+      prev.map((item) =>
+        item.activity._id === activityId
+          ? { ...item, loggedToday: true, approvalStatus: log.requiresApproval ? "pending" : null }
+          : item
+      )
     );
     onLogged?.();
   }
@@ -148,10 +146,12 @@ function ActivityMissionBoard({ onLogged, embedded = false }) {
   if (error) return <p role="alert">โหลดภารกิจไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</p>;
   if (items.length === 0) return null;
 
-  const byCategory = CATEGORY_ORDER.map((category) => ({
-    category,
-    items: items.filter((item) => item.activity.category === category),
-  })).filter((group) => group.items.length > 0);
+  const byCategory = categories
+    .map((cat) => ({
+      category: cat,
+      items: items.filter((item) => item.activity.category === cat.key),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <div className={`activity-mission-board${embedded ? " embedded" : ""}`}>
@@ -162,13 +162,12 @@ function ActivityMissionBoard({ onLogged, embedded = false }) {
         </h2>
       )}
       {byCategory.map(({ category, items: groupItems }) => {
-        const meta = CATEGORY_META[category];
-        const Icon = meta.icon;
+        const Icon = resolveIcon(category.icon);
         return (
-          <div key={category} className="activity-mission-group">
+          <div key={category.key} className="activity-mission-group">
             <h3>
               <Icon size={16} />
-              <span>{meta.label}</span>
+              <span>{category.label}</span>
             </h3>
             <ul className="activity-mission-list">
               {groupItems.map((item) => (

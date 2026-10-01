@@ -33,7 +33,7 @@ function NewsSection({ limit = 6, title = "อัปเดตความรู�
         <h2>{title}</h2>
       </Reveal>
 
-      <div className="news-section-grid">
+      {(loading || news.length > 0) && <div className="news-section-grid">
         {loading
           ? Array.from({ length: Math.min(limit, 3) }).map((_, index) => (
               <div key={index} className="news-section-card news-section-skeleton" />
@@ -67,7 +67,7 @@ function NewsSection({ limit = 6, title = "อัปเดตความรู�
                 </div>
               </Reveal>
             ))}
-      </div>
+      </div>}
 
       {!loading && news.length === 0 && <p className="news-section-empty">ยังไม่มีข่าวสารในขณะนี้</p>}
 

@@ -1,8 +1,12 @@
 import ActivityMission from "../models/ActivityMission.js";
 import ActivityMissionLog from "../models/ActivityMissionLog.js";
+import User from "../models/User.js";
 import { checkAndAwardRewards } from "../services/rewardService.js";
+import { notifyUser } from "../services/notificationService.js";
 import { createCrudController } from "./crudFactory.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
+
+const USER_LOG_FIELDS = "name avatarUrl";
 
 const { getAll, getOne, create, update } = createCrudController(ActivityMission);
 
@@ -24,13 +28,17 @@ export async function myTodayActivities(req, res) {
     ActivityMissionLog.find({ user: req.user.id, dateKey }),
   ]);
 
-  const loggedMissionIds = new Set(todayLogs.map((log) => log.activityMission.toString()));
+  const logByMissionId = new Map(todayLogs.map((log) => [log.activityMission.toString(), log]));
 
   res.json(
-    activities.map((activity) => ({
-      activity,
-      loggedToday: loggedMissionIds.has(activity._id.toString()),
-    }))
+    activities.map((activity) => {
+      const log = logByMissionId.get(activity._id.toString());
+      return {
+        activity,
+        loggedToday: Boolean(log),
+        approvalStatus: !log || !log.requiresApproval ? null : log.approved === true ? "approved" : log.approved === false ? "rejected" : "pending",
+      };
+    })
   );
 }
 
@@ -56,6 +64,7 @@ export async function logActivity(req, res) {
       enjoymentLevel: activity.category === "physical" ? enjoymentLevel : undefined,
       note,
       pointsAwarded: activity.points,
+      requiresApproval: activity.requiresApproval,
     });
   } catch (err) {
     if (err.code === 11000) {
@@ -64,9 +73,61 @@ export async function logActivity(req, res) {
     throw err;
   }
 
-  const newlyEarnedRewards = await checkAndAwardRewards(req.user.id);
+  if (activity.requiresApproval) {
+    const staff = await User.find({ role: { $in: ["admin", "counsellor"] } }).select("_id");
+    const reportingUser = await User.findById(req.user.id).select("name");
+    for (const member of staff) {
+      await notifyUser(
+        member._id,
+        `${reportingUser.name} ทำภารกิจ "${activity.title}" รอการอนุมัติจากคุณ`,
+        "system",
+        { link: "/counsellor/activity-missions" }
+      );
+    }
+  }
+
+  // Points from an approval-required mission aren't counted until approved
+  // (see rewardService.getTotalPoints), so skip the reward check for those.
+  const newlyEarnedRewards = activity.requiresApproval ? [] : await checkAndAwardRewards(req.user.id);
 
   res.status(201).json({ log, newlyEarnedRewards });
+}
+
+export async function listPendingActivityApprovals(req, res) {
+  const logs = await ActivityMissionLog.find({ requiresApproval: true, approved: null })
+    .populate("user", USER_LOG_FIELDS)
+    .populate("activityMission", "title category points")
+    .sort({ createdAt: -1 });
+  res.json(logs);
+}
+
+export async function reviewActivityLog(req, res) {
+  const { approved } = req.body;
+  const log = await ActivityMissionLog.findOne({ _id: req.params.id, requiresApproval: true, approved: null });
+  if (!log) {
+    return res.status(404).json({ message: "ไม่พบรายการที่รออนุมัติ" });
+  }
+
+  log.approved = approved;
+  log.approvedBy = req.user.id;
+  log.approvedAt = new Date();
+  await log.save();
+
+  const activity = await ActivityMission.findById(log.activityMission).select("title");
+  await notifyUser(
+    log.user,
+    approved
+      ? `ภารกิจ "${activity?.title || ""}" ของคุณได้รับการอนุมัติแล้ว +${log.pointsAwarded} แต้ม`
+      : `ภารกิจ "${activity?.title || ""}" ของคุณไม่ได้รับการอนุมัติ`,
+    "system",
+    { link: "/games" }
+  );
+
+  if (approved) {
+    await checkAndAwardRewards(log.user);
+  }
+
+  res.json(log);
 }
 
 export async function myActivityHistory(req, res) {

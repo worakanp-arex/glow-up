@@ -1,8 +1,12 @@
-// Recovery-domain axes shared by the radar chart, ActivityMission/GamePlay
-// category enums, and every mini-game's domain tag. Order is fixed — the
-// radar chart renders axes in this exact order. This is the single 8-category
-// taxonomy the spec calls for; ActivityMission and GamePlay both reuse these
-// same 8 keys instead of keeping separate category lists.
+// Recovery-domain axes for the radar chart, GamePlay's domain enum, and
+// every mini-game's domain tag (wheel segments, quiz questions). Order is
+// fixed — the radar chart renders axes in this exact order. These are also
+// the 8 default categories seeded into the admin-managed MissionCategory
+// catalog (see missionCategoryController.js) that ActivityMission now reads
+// its category list from — admins can rename or add to that catalog, but
+// any category beyond these 8 won't have a radar axis or game content of
+// its own; ActivityMissionLog points still count toward the user's total
+// regardless of category.
 export const RECOVERY_DOMAINS = [
   { key: "self_awareness", label: "ตระหนักรู้ตนเอง" },
   { key: "coping", label: "ทักษะรับมือ" },

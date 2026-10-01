@@ -5,12 +5,15 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import JobPreview from "../../components/jobs/JobPreview.jsx";
 import * as jobService from "../../services/jobService.js";
+import { useJobSeeker } from "../../hooks/useJobSeeker.js";
+import { skillMatch } from "../../utils/skillMatch.js";
 import "./JobDetail.css";
 
 function JobDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const fromApplications = searchParams.get("from") === "my-applications";
+  const { mySkillIds, savedIds, toggleSaved } = useJobSeeker();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -38,7 +41,7 @@ function JobDetail() {
   return (
     <div className="job-detail-page">
       {pageHeader}
-      <JobPreview job={job} showTitle={false} />
+      <JobPreview job={job} showTitle={false} saved={savedIds.has(job._id)} onToggleSave={toggleSaved} match={skillMatch(job, mySkillIds)} />
     </div>
   );
 }

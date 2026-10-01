@@ -1,41 +1,45 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { ListTodo, Plus } from "lucide-react";
+import { CheckCircle2, ListTodo, Plus, X } from "lucide-react";
 import * as activityMissionService from "../../services/activityMissionService.js";
+import * as missionCategoryService from "../../services/missionCategoryService.js";
 import "./ActivityMissionManagement.css";
 
-const CATEGORY_LABELS = {
-  routine: "งานบ้าน / กิจวัตร",
-  physical: "ออกกำลังกาย",
-  learning: "การเรียนรู้",
-  self_awareness: "ตระหนักรู้ตนเอง",
-  coping: "ทักษะรับมือ",
-  self_monitoring: "การติดตามตนเอง",
-  social: "สังคม / ความสัมพันธ์",
-  mindfulness: "จิตใจ / สติ",
-};
-const INITIAL_FORM = { title: "", description: "", category: "routine", points: 5 };
+const INITIAL_FORM = { title: "", description: "", category: "", points: 5, requiresApproval: false };
 
 function ActivityMissionManagement() {
   const [activities, setActivities] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [pendingApprovals, setPendingApprovals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [reviewingId, setReviewingId] = useState(null);
 
   useEffect(() => {
-    activityMissionService
-      .getActivityMissions()
-      .then(setActivities)
+    Promise.all([
+      activityMissionService.getActivityMissions(),
+      missionCategoryService.getMissionCategories(),
+      activityMissionService.getPendingActivityApprovals(),
+    ])
+      .then(([activityData, categoryData, pendingData]) => {
+        setActivities(activityData);
+        setCategories(categoryData);
+        setPendingApprovals(pendingData);
+        setForm((f) => ({ ...f, category: f.category || categoryData[0]?.key || "" }));
+      })
       .catch((err) => setLoadError(err))
       .finally(() => setLoading(false));
   }, []);
 
+  const categoryLabelByKey = Object.fromEntries(categories.map((c) => [c.key, c.label]));
+
   function handleChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   }
 
   async function handleSubmit(e) {
@@ -48,13 +52,24 @@ function ActivityMissionManagement() {
         description: form.description,
         category: form.category,
         points: Number(form.points),
+        requiresApproval: form.requiresApproval,
       });
       setActivities((prev) => [created, ...prev]);
-      setForm(INITIAL_FORM);
+      setForm((f) => ({ ...INITIAL_FORM, category: f.category }));
     } catch (err) {
       setError(err.response?.data?.message || "เพิ่มภารกิจไม่สำเร็จ");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleReview(logId, approved) {
+    setReviewingId(logId);
+    try {
+      await activityMissionService.reviewActivityLog(logId, approved);
+      setPendingApprovals((prev) => prev.filter((log) => log._id !== logId));
+    } finally {
+      setReviewingId(null);
     }
   }
 
@@ -84,9 +99,9 @@ function ActivityMissionManagement() {
           <label>
             หมวดหมู่
             <select name="category" value={form.category} onChange={handleChange}>
-              {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
+              {categories.map((cat) => (
+                <option key={cat.key} value={cat.key}>
+                  {cat.label}
                 </option>
               ))}
             </select>
@@ -100,6 +115,10 @@ function ActivityMissionManagement() {
           คำอธิบายภารกิจ
           <textarea name="description" value={form.description} onChange={handleChange} rows={2} />
         </label>
+        <label className="activity-mission-management-approval-toggle">
+          <input type="checkbox" name="requiresApproval" checked={form.requiresApproval} onChange={handleChange} />
+          <span>ต้องให้เจ้าหน้าที่อนุมัติก่อนจึงจะได้รับแต้ม</span>
+        </label>
 
         {error && <p className="activity-mission-management-error">{error}</p>}
 
@@ -107,6 +126,48 @@ function ActivityMissionManagement() {
           {submitting ? "กำลังเพิ่ม..." : "เพิ่มภารกิจ"}
         </button>
       </form>
+
+      {pendingApprovals.length > 0 && (
+        <>
+          <h2 className="activity-mission-management-list-heading">รอการอนุมัติ ({pendingApprovals.length})</h2>
+          <ul className="activity-mission-management-list">
+            {pendingApprovals.map((log) => (
+              <li key={log._id}>
+                <div className="activity-mission-management-list-body">
+                  <p className="activity-mission-management-list-title">
+                    {log.user?.name} — {log.activityMission?.title}
+                  </p>
+                  <p className="activity-mission-management-list-meta">
+                    <span className="activity-mission-management-list-category">{categoryLabelByKey[log.category] || log.category}</span>
+                    <span className="activity-mission-management-list-points">+{log.pointsAwarded} แต้ม</span>
+                    {log.note && <span>บันทึก: {log.note}</span>}
+                  </p>
+                </div>
+                <div className="activity-mission-management-review-actions">
+                  <button
+                    type="button"
+                    className="activity-mission-management-approve"
+                    onClick={() => handleReview(log._id, true)}
+                    disabled={reviewingId === log._id}
+                    title="อนุมัติ"
+                  >
+                    <CheckCircle2 size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="activity-mission-management-reject"
+                    onClick={() => handleReview(log._id, false)}
+                    disabled={reviewingId === log._id}
+                    title="ไม่อนุมัติ"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       <h2 className="activity-mission-management-list-heading">ภารกิจทั้งหมด</h2>
       {loading ? (
@@ -120,8 +181,9 @@ function ActivityMissionManagement() {
               <div className="activity-mission-management-list-body">
                 <p className="activity-mission-management-list-title">{activity.title}</p>
                 <p className="activity-mission-management-list-meta">
-                  <span className="activity-mission-management-list-category">{CATEGORY_LABELS[activity.category]}</span>
+                  <span className="activity-mission-management-list-category">{categoryLabelByKey[activity.category] || activity.category}</span>
                   <span className="activity-mission-management-list-points">+{activity.points} แต้ม</span>
+                  {activity.requiresApproval && <span>ต้องอนุมัติ</span>}
                 </p>
               </div>
             </li>

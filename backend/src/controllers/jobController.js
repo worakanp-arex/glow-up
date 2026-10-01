@@ -2,7 +2,9 @@ import Job from "../models/Job.js";
 import { paginationOptions, escapeRegex } from "../utils/pagination.js";
 import JobSkill from "../models/JobSkill.js";
 import Application from "../models/Application.js";
+import SavedJob from "../models/SavedJob.js";
 import { notifyUser } from "../services/notificationService.js";
+import { notifyMatchingUsersForJob } from "../services/jobMatchService.js";
 
 const EMPLOYER_EDITABLE_FIELDS = [
   "title",
@@ -77,6 +79,46 @@ export async function listJobs(req, res) {
   const jobs = await query;
   const withSkills = await Promise.all(jobs.map(attachSkills));
   res.json(withSkills);
+}
+
+// Bookmarks for job seekers. Only jobs that are still publicly listed are
+// returned, so a saved job that closes simply drops out of the list.
+export async function mySavedJobs(req, res) {
+  const saved = await SavedJob.find({ user: req.user.id }).sort({ createdAt: -1 }).select("job");
+  const jobs = await Job.find({
+    _id: { $in: saved.map((item) => item.job) },
+    status: "open",
+    verifiedStatus: "verified",
+    $or: [{ expiredAt: null }, { expiredAt: { $gt: new Date() } }],
+  })
+    .populate("employer", EMPLOYER_PUBLIC_FIELDS)
+    .populate("category");
+  const order = new Map(saved.map((item, index) => [item.job.toString(), index]));
+  jobs.sort((a, b) => order.get(a._id.toString()) - order.get(b._id.toString()));
+  res.json(await Promise.all(jobs.map(attachSkills)));
+}
+
+export async function mySavedJobIds(req, res) {
+  const saved = await SavedJob.find({ user: req.user.id }).select("job");
+  res.json(saved.map((item) => item.job));
+}
+
+export async function saveJob(req, res) {
+  const job = await Job.findOne({ _id: req.params.id, status: "open", verifiedStatus: "verified" }).select("_id");
+  if (!job) {
+    return res.status(404).json({ message: "ไม่พบตำแหน่งงานนี้" });
+  }
+  await SavedJob.updateOne(
+    { user: req.user.id, job: job._id },
+    { $setOnInsert: { user: req.user.id, job: job._id } },
+    { upsert: true }
+  );
+  res.status(201).json({ saved: true });
+}
+
+export async function unsaveJob(req, res) {
+  await SavedJob.deleteOne({ user: req.user.id, job: req.params.id });
+  res.json({ saved: false });
 }
 
 export async function getJob(req, res) {
@@ -202,6 +244,10 @@ export async function confirmJob(req, res) {
       ? `ประกาศงาน "${job.title}" ได้รับการยืนยันแล้ว`
       : `ประกาศงาน "${job.title}" ถูกปฏิเสธ`;
   await notifyUser(job.employer, message, "job", { link: "/employer/jobs" });
+
+  if (status === "verified") {
+    await notifyMatchingUsersForJob(job);
+  }
 
   res.json(await attachSkills(job));
 }

@@ -1,64 +1,39 @@
 import { useCallback, useEffect, useState } from "react";
-import { Brain, Gamepad2, HelpCircle, ListTodo, PartyPopper, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BookOpen, CheckCircle2, Clock, Gamepad2, Heart, Leaf, Play, Sparkles, Star } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
+import ImageSlot from "../../components/common/ImageSlot.jsx";
 import * as gameService from "../../services/gameService.js";
-import ActivityMissionBoard from "../../components/user/ActivityMissionBoard.jsx";
+import { getMyPointsSummary } from "../../services/missionService.js";
+import { GameModal } from "../../components/user/games/GameShell.jsx";
 import SpinWheel from "../../components/user/games/SpinWheel.jsx";
 import CopingMemoryGame from "../../components/user/games/CopingMemoryGame.jsx";
 import DailyQuiz from "../../components/user/games/DailyQuiz.jsx";
-import QuestRow from "../../components/user/games/QuestRow.jsx";
 import RecoveryRadarChart from "../../components/user/RecoveryRadarChart.jsx";
 import "./RecoveryGame.css";
 
-const QUEST_DEFS = [
-  {
-    key: "activity",
-    title: "ภารกิจประจำวัน",
-    icon: ListTodo,
-    subtitle: "เลือกทำภารกิจอย่างน้อย 1 อย่าง (หรือเช็คอินอารมณ์ที่หน้าหลัก) เพื่อปลดล็อกเควสถัดไป",
-  },
-  { key: "wheel", title: "วงล้อสุ่มรางวัล", icon: Sparkles, subtitle: "หมุนวงล้อรับแต้มโบนัสแบบสุ่ม" },
-  { key: "memory", title: "จับคู่การ์ดทักษะรับมือ", icon: Brain, subtitle: "จับคู่สิ่งกระตุ้นกับวิธีรับมือให้ครบทุกคู่" },
-  { key: "quiz", title: "แบบทดสอบประจำวัน", icon: HelpCircle, subtitle: "ตอบคำถามความรู้ฟื้นฟู 3 ข้อ" },
+// Points mirror the backend scoring in gameController (memory ≤10,
+// quiz 3/answer, wheel 3–10). Only the first play per day earns XP.
+const GAMES = [
+  { key: "memory", title: "จับคู่ ดูแลใจ", description: "ฝึกความจำและการเชื่อมโยง จับคู่สิ่งกระตุ้นกับวิธีรับมือ", level: "สบาย ๆ", tone: "lilac", minutes: 3, xp: "+10 XP", icon: Heart, image: "/images/games/memory.png" },
+  { key: "quiz", title: "เลือกทางของคุณ", description: "ฝึกตัดสินใจผ่านสถานการณ์ 3 ข้อ", level: "ลองคิดสักนิด", tone: "peach", minutes: 4, xp: "+9 XP", icon: BookOpen, image: "/images/games/quiz.png" },
+  { key: "wheel", title: "วงล้อก้าวเล็ก ๆ", description: "สุ่มไอเดียกิจกรรมสำหรับวันนี้", level: "เริ่มง่าย", tone: "sky", minutes: 1, xp: "+3–10 XP", icon: Star, image: "/images/games/wheel.png" },
 ];
-
-function buildQuests(status) {
-  return QUEST_DEFS.map((def) => {
-    if (def.key === "activity") {
-      return { ...def, done: status.unlocked, locked: false, doneSummary: "ทำภารกิจวันนี้แล้ว" };
-    }
-    const game = status.games[def.key];
-    return {
-      ...def,
-      done: game.played,
-      locked: !status.unlocked,
-      doneSummary: game.resultLabel ? `ได้ ${game.resultLabel}` : "เล่นแล้ววันนี้",
-    };
-  });
-}
-
-function firstIncompleteKey(quests) {
-  return quests.find((q) => !q.done && !q.locked)?.key ?? null;
-}
 
 function RecoveryGame() {
   const [status, setStatus] = useState(null);
   const [radar, setRadar] = useState(null);
-  const [expandedKey, setExpandedKey] = useState(null);
+  const [points, setPoints] = useState(null);
+  const [openKey, setOpenKey] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
   const loadAll = useCallback(() => {
+    getMyPointsSummary().then(setPoints).catch(() => {});
     return Promise.all([gameService.getGameHubStatus(), gameService.getMyRadar()]).then(([statusData, radarData]) => {
       setStatus(statusData);
       setRadar(radarData);
-      const quests = buildQuests(statusData);
-      setExpandedKey((prev) => {
-        const prevQuest = quests.find((q) => q.key === prev);
-        if (prev === null || !prevQuest || prevQuest.done) return firstIncompleteKey(quests);
-        return prev;
-      });
     });
   }, []);
 
@@ -72,18 +47,16 @@ function RecoveryGame() {
     loadAll().catch(() => {});
   }, [loadAll]);
 
-  function handleToggle(key) {
-    setExpandedKey((prev) => (prev === key ? null : key));
-  }
+  const closeGame = useCallback(() => setOpenKey(null), []);
 
   const pageHeader = (
     <PageHeader
       icon={Gamepad2}
-      backTo="/streak"
-      backLabel="ความก้าวหน้าและรางวัล"
-      description="ทำเควสวันนี้ตามลำดับ ภารกิจ → เกม รับแต้มสะสม และดูพัฒนาการของคุณในแต่ละด้าน"
+      eyebrow="Play a little, grow a little"
+      description="เลือกเกมที่อยากลอง เล่นเพื่อฝึกทักษะและให้เวลากับตัวเอง"
+      actions={points && <span className="games-xp"><Sparkles size={15} aria-hidden="true" />{points.totalPoints ?? 0} XP</span>}
     >
-      เควสฟื้นฟูวันนี้
+      พักสักนิด มาเล่นกัน
     </PageHeader>
   );
 
@@ -105,55 +78,88 @@ function RecoveryGame() {
     );
   }
 
-  const quests = buildQuests(status);
-  const doneCount = quests.filter((q) => q.done).length;
-  const allDone = doneCount === quests.length;
+  const playedCount = GAMES.filter((g) => status.games[g.key].played).length;
+  const openGame = GAMES.find((g) => g.key === openKey);
 
   return (
     <div className="recovery-game-page">
       {pageHeader}
 
-      <div className="quest-progress">
-        <span className="quest-progress-label">
-          วันนี้ทำไปแล้ว {doneCount}/{quests.length} เควส
-        </span>
-        <div className="quest-progress-bar">
-          <div className="quest-progress-fill" style={{ width: `${(doneCount / quests.length) * 100}%` }} />
+      <section className="ui-card games-intro">
+        <span className="games-intro-icon" aria-hidden="true"><Gamepad2 size={20} /></span>
+        <div>
+          <strong>เวลาสั้น ๆ ก็เป็นก้าวที่ดีได้</strong>
+          <span>ไม่มีการแข่งกับใคร เล่นในจังหวะของคุณ</span>
         </div>
-      </div>
+        <p className="games-intro-count">เล่นแล้ว <b>{playedCount}</b> / {GAMES.length} เกมวันนี้</p>
+      </section>
 
-      {allDone && (
-        <div className="quest-all-done">
-          <PartyPopper size={18} />
-          <span>ทำครบทุกเควสวันนี้แล้ว เก่งมาก! กลับมาทำเควสใหม่ได้พรุ่งนี้</span>
-        </div>
-      )}
-
-      <ul className="quest-list">
-        {quests.map((quest) => {
-          const status_ = quest.locked ? "locked" : quest.done ? "done" : "current";
-          const expanded = expandedKey === quest.key;
+      <ul className="games-grid">
+        {GAMES.map((game) => {
+          const gameStatus = status.games[game.key];
+          const played = gameStatus.played;
           return (
-            <QuestRow
-              key={quest.key}
-              icon={quest.icon}
-              title={quest.title}
-              subtitle={quest.subtitle}
-              doneSummary={quest.doneSummary}
-              status={status_}
-              expanded={expanded}
-              onToggle={() => handleToggle(quest.key)}
-            >
-              {quest.key === "activity" && <ActivityMissionBoard onLogged={refresh} embedded />}
-              {quest.key === "wheel" && <SpinWheel status={status.games.wheel} onPlayed={refresh} embedded />}
-              {quest.key === "memory" && <CopingMemoryGame status={status.games.memory} onPlayed={refresh} embedded />}
-              {quest.key === "quiz" && <DailyQuiz status={status.games.quiz} onPlayed={refresh} embedded />}
-            </QuestRow>
+            <li key={game.key} className="ui-card game-card">
+              <button type="button" className="game-card-media" onClick={() => setOpenKey(game.key)} aria-label={`เล่น ${game.title}`}>
+                <ImageSlot src={game.image} alt="" tone={game.tone} />
+                <span className="game-card-play" aria-hidden="true"><Play size={16} fill="currentColor" /></span>
+              </button>
+              <div className="game-card-body">
+                <div className="game-card-meta">
+                  <span className={`ui-chip ui-chip-${game.tone === "sky" ? "neutral" : game.tone}`}>{game.level}</span>
+                  <span className="ui-muted"><Clock size={13} aria-hidden="true" />{game.minutes} นาที</span>
+                </div>
+                <h2>{game.title}</h2>
+                <p>{game.description}</p>
+                <div className="game-card-foot">
+                  <span className={`game-card-xp${played ? " is-earned" : ""}`}>
+                    {played ? <CheckCircle2 size={13} aria-hidden="true" /> : <Sparkles size={13} aria-hidden="true" />}
+                    {played ? `ได้ +${gameStatus.pointsAwarded ?? 0} XP แล้ววันนี้` : game.xp}
+                  </span>
+                  <button type="button" className="ui-btn ui-btn-primary" onClick={() => setOpenKey(game.key)}>
+                    {played ? "เล่นอีกครั้ง" : "เริ่มเล่น"}
+                  </button>
+                </div>
+              </div>
+            </li>
           );
         })}
       </ul>
 
+      <section className="ui-card games-wins">
+        <div>
+          <p className="games-wins-eyebrow">Your small wins</p>
+          <h2>ทุกครั้งที่ลอง มีความหมาย</h2>
+          <p className="ui-muted">รับคะแนนครั้งแรกของแต่ละเกมในรอบวันนี้ เล่นซ้ำได้โดยไม่ต้องกังวลเรื่องคะแนน</p>
+        </div>
+        <ul className="games-wins-badges">
+          {GAMES.map((game) => (
+            <li key={game.key} className={status.games[game.key].played ? "is-earned" : ""}>
+              <span aria-hidden="true"><game.icon size={20} /></span>
+              <small>{game.title}</small>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       {radar && <RecoveryRadarChart data={radar} />}
+
+      <section className="ui-card games-cta">
+        <span className="games-cta-icon" aria-hidden="true"><Leaf size={20} /></span>
+        <div>
+          <strong>พร้อมเปลี่ยนสิ่งที่เรียนรู้เป็นการลงมือทำ?</strong>
+          <span>เลือกภารกิจเล็ก ๆ ที่เหมาะกับคุณวันนี้</span>
+        </div>
+        <Link to="/streak#daily-activities" className="ui-btn ui-btn-outline">ไปที่ภารกิจของฉัน</Link>
+      </section>
+
+      {openGame && (
+        <GameModal title={openGame.title} subtitle={openGame.description} onClose={closeGame}>
+          {openGame.key === "memory" && <CopingMemoryGame onPlayed={refresh} onClose={closeGame} />}
+          {openGame.key === "quiz" && <DailyQuiz onPlayed={refresh} onClose={closeGame} />}
+          {openGame.key === "wheel" && <SpinWheel segments={status.wheelSegments || []} onPlayed={refresh} onClose={closeGame} />}
+        </GameModal>
+      )}
     </div>
   );
 }

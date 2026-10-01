@@ -7,7 +7,7 @@ import { notifyUser } from "../services/notificationService.js";
 import { getTotalPoints, checkAndAwardRewards, notifyLinkedFamily } from "../services/rewardService.js";
 import { createCrudController } from "./crudFactory.js";
 import { insertOnce } from "../utils/insertOnce.js";
-import { computeLevel, pointsToNextLevel } from "../utils/level.js";
+import { computeLevel, getPointsPerLevel, pointsToNextLevel } from "../utils/level.js";
 import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
 const { getAll, getOne, create, update, remove } = createCrudController(Mission);
@@ -152,7 +152,8 @@ export async function myPointsSummary(req, res) {
   res.json({
     totalPoints,
     completedMissions,
-    level: computeLevel(totalPoints),
-    pointsToNextLevel: pointsToNextLevel(totalPoints),
+    level: await computeLevel(totalPoints),
+    pointsToNextLevel: await pointsToNextLevel(totalPoints),
+    pointsPerLevel: await getPointsPerLevel(),
   });
 }

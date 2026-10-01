@@ -2,8 +2,9 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Award, CalendarCheck, CheckCircle2, Flame, Gamepad2, Plus, Target, Trash2 } from "lucide-react";
+import { Award, CalendarCheck, CheckCircle2, ChevronRight, ClipboardList, Flame, Gamepad2, Plus, Target, Trash2 } from "lucide-react";
 import PlantGrowth, { stageLabel, streakToStage } from "../../components/user/PlantGrowth.jsx";
+import ActivityMissionBoard from "../../components/user/ActivityMissionBoard.jsx";
 import MissionBoard from "../../components/user/MissionBoard.jsx";
 import * as emotionService from "../../services/emotionService.js";
 import * as goalService from "../../services/goalService.js";
@@ -133,7 +134,7 @@ function Streak() {
     setGoals((prev) => prev.filter((g) => g._id !== id));
   }
 
-  const pageHeader = <PageHeader icon={Award} backTo={"/dashboard"} backLabel="หน้าหลัก">{"ความก้าวหน้าและรางวัล"}</PageHeader>;
+  const pageHeader = <PageHeader icon={Award} eyebrow="Keep growing" backTo={"/dashboard"} backLabel="หน้าหลัก" description="ดูต้นไม้ของคุณ ภารกิจวันนี้ และเป้าหมายที่กำลังไปให้ถึง">{"ความก้าวหน้าและรางวัล"}</PageHeader>;
 
   if (loadError) return <div className="streak-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
@@ -160,108 +161,134 @@ function Streak() {
   return (
     <div className="streak-page">
       {pageHeader}
-      <div className="streak-hero">
-        <PlantGrowth streak={streak.currentStreak} size={200} />
-        <h2 className="page-context-title">{stageLabel(stage)}</h2>
-        <p>
-          {streak.currentStreak > 0
-            ? `เช็คอินต่อเนื่องมาแล้ว ${streak.currentStreak} วัน — เก็บสถิติไว้ให้ต้นไม้ของคุณเติบโตต่อไป`
-            : "เริ่มเช็คอินวันนี้เพื่อปลูกต้นไม้ต้นแรกของคุณ"}
-        </p>
-        {!streak.loggedToday && (
-          <Link to="/dashboard" className="btn btn-primary">
-            เช็คอินวันนี้
-          </Link>
-        )}
-      </div>
 
-      <div className="streak-stats">
-        <div className="streak-stat-card">
-          <Flame size={20} />
-          <span className="streak-stat-value">{streak.currentStreak}</span>
-          <span className="streak-stat-label">วันติดต่อกัน</span>
+      <section className="streak-hero">
+        <div className="streak-hero-plant"><PlantGrowth streak={streak.currentStreak} size={170} /></div>
+        <div className="streak-hero-copy">
+          <p className="streak-hero-eyebrow">ต้นไม้ของคุณตอนนี้</p>
+          <h2 className="page-context-title">{stageLabel(stage)}</h2>
+          <p>
+            {streak.currentStreak > 0
+              ? `เช็คอินต่อเนื่องมาแล้ว ${streak.currentStreak} วัน — เก็บสถิติไว้ให้ต้นไม้ของคุณเติบโตต่อไป`
+              : "เริ่มเช็คอินวันนี้เพื่อปลูกต้นไม้ต้นแรกของคุณ"}
+          </p>
+          {!streak.loggedToday && (
+            <Link to="/dashboard" className="ui-btn ui-btn-primary">
+              เช็คอินวันนี้
+            </Link>
+          )}
         </div>
-        <div className="streak-stat-card">
-          <Award size={20} />
-          <span className="streak-stat-value">{streak.longestStreak}</span>
-          <span className="streak-stat-label">สถิติสูงสุด</span>
-        </div>
-        <div className="streak-stat-card">
-          <CalendarCheck size={20} />
-          <span className="streak-stat-value">{streak.totalCheckIns}</span>
-          <span className="streak-stat-label">วันที่เช็คอินทั้งหมด</span>
-        </div>
-      </div>
-
-      <PointsSummary />
-      <CheckinCalendar history={streak.history} />
-
-      <Link to="/games" className="streak-games-link">
-        <Gamepad2 size={18} />
-        <span>ทำเควสวันนี้ (ภารกิจ + เกม) →</span>
-      </Link>
-
-      <MissionBoard />
-
-      <section className="streak-goals">
-        <h2 className="streak-goals-heading">
-          <Target size={18} />
-          <span>เป้าหมายของฉัน</span>
-        </h2>
-        <p className="streak-goals-hint">ตั้งเป้าหมายระยะสั้นและระยะยาว แล้วอัปเดตความคืบหน้าของตัวเองได้ตลอดเวลา</p>
-
-        <form className="streak-goals-form" onSubmit={handleGoalSubmit}>
-          <div className="streak-goals-form-grid">
-            <label>
-              ชื่อเป้าหมาย
-              <input
-                type="text"
-                value={goalForm.title}
-                onChange={(e) => setGoalForm((f) => ({ ...f, title: e.target.value }))}
-                required
-              />
-            </label>
-            <label>
-              ระยะเวลา
-              <select value={goalForm.term} onChange={(e) => setGoalForm((f) => ({ ...f, term: e.target.value }))}>
-                <option value="short">ระยะสั้น</option>
-                <option value="long">ระยะยาว</option>
-              </select>
-            </label>
-            <label>
-              เป้าหมายภายในวันที่ (ถ้ามี)
-              <input
-                type="date"
-                value={goalForm.targetDate}
-                onChange={(e) => setGoalForm((f) => ({ ...f, targetDate: e.target.value }))}
-              />
-            </label>
+        <div className="streak-stats">
+          <div className="streak-stat-card">
+            <Flame size={18} />
+            <span className="streak-stat-value">{streak.currentStreak}</span>
+            <span className="streak-stat-label">วันติดต่อกัน</span>
           </div>
-          <label className="streak-goals-form-description">
-            รายละเอียดเพิ่มเติม
-            <textarea
-              value={goalForm.description}
-              onChange={(e) => setGoalForm((f) => ({ ...f, description: e.target.value }))}
-              rows={2}
-            />
-          </label>
-          {goalError && <p className="streak-goals-error">{goalError}</p>}
-          <button type="submit" className="btn btn-primary" disabled={submittingGoal}>
-            <Plus size={16} />
-            <span>{submittingGoal ? "กำลังเพิ่ม..." : "เพิ่มเป้าหมาย"}</span>
-          </button>
-        </form>
-
-        {goals.length === 0 ? (
-          <p className="streak-goals-empty">ยังไม่มีเป้าหมาย</p>
-        ) : (
-          <ul className="goals-list">
-            {goals.map((goal) => (
-              <GoalCard key={goal._id} goal={goal} onSave={handleSaveGoal} onDelete={handleDeleteGoal} />
-            ))}
-          </ul>
-        )}
+          <div className="streak-stat-card">
+            <Award size={18} />
+            <span className="streak-stat-value">{streak.longestStreak}</span>
+            <span className="streak-stat-label">สถิติสูงสุด</span>
+          </div>
+          <div className="streak-stat-card">
+            <CalendarCheck size={18} />
+            <span className="streak-stat-value">{streak.totalCheckIns}</span>
+            <span className="streak-stat-label">เช็คอินทั้งหมด</span>
+          </div>
+        </div>
       </section>
+
+      <div className="streak-layout">
+        <div className="streak-main">
+          <section className="ui-card streak-activities" id="daily-activities">
+            <ActivityMissionBoard />
+          </section>
+
+          <MissionBoard />
+
+          <section className="ui-card streak-goals">
+            <div className="ui-card-head">
+              <div>
+                <h2 className="streak-goals-heading">เป้าหมายของฉัน</h2>
+                <p>ตั้งเป้าหมายระยะสั้นและระยะยาว แล้วอัปเดตความคืบหน้าของตัวเองได้ตลอดเวลา</p>
+              </div>
+              <Target size={18} aria-hidden="true" />
+            </div>
+
+            <form className="streak-goals-form" onSubmit={handleGoalSubmit}>
+              <div className="streak-goals-form-grid">
+                <label className="ui-field">
+                  ชื่อเป้าหมาย
+                  <input
+                    type="text"
+                    value={goalForm.title}
+                    onChange={(e) => setGoalForm((f) => ({ ...f, title: e.target.value }))}
+                    required
+                  />
+                </label>
+                <label className="ui-field">
+                  ระยะเวลา
+                  <select value={goalForm.term} onChange={(e) => setGoalForm((f) => ({ ...f, term: e.target.value }))}>
+                    <option value="short">ระยะสั้น</option>
+                    <option value="long">ระยะยาว</option>
+                  </select>
+                </label>
+                <label className="ui-field">
+                  เป้าหมายภายในวันที่ (ถ้ามี)
+                  <input
+                    type="date"
+                    value={goalForm.targetDate}
+                    onChange={(e) => setGoalForm((f) => ({ ...f, targetDate: e.target.value }))}
+                  />
+                </label>
+              </div>
+              <label className="ui-field streak-goals-form-description">
+                รายละเอียดเพิ่มเติม
+                <textarea
+                  value={goalForm.description}
+                  onChange={(e) => setGoalForm((f) => ({ ...f, description: e.target.value }))}
+                  rows={2}
+                />
+              </label>
+              {goalError && <p className="streak-goals-error">{goalError}</p>}
+              <button type="submit" className="ui-btn ui-btn-primary" disabled={submittingGoal}>
+                <Plus size={16} />
+                <span>{submittingGoal ? "กำลังเพิ่ม..." : "เพิ่มเป้าหมาย"}</span>
+              </button>
+            </form>
+
+            {goals.length === 0 ? (
+              <p className="streak-goals-empty">ยังไม่มีเป้าหมาย</p>
+            ) : (
+              <ul className="goals-list">
+                {goals.map((goal) => (
+                  <GoalCard key={goal._id} goal={goal} onSave={handleSaveGoal} onDelete={handleDeleteGoal} />
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        <aside className="streak-side">
+          <PointsSummary />
+          <CheckinCalendar history={streak.history} />
+          <Link to="/games" className="ui-card streak-games-link">
+            <span className="streak-games-icon" aria-hidden="true"><Gamepad2 size={20} /></span>
+            <span className="streak-games-copy">
+              <strong>พักสักนิด มาเล่นกัน</strong>
+              <small>เกมสั้น ๆ ฝึกทักษะและรับ XP</small>
+            </span>
+            <ChevronRight size={18} aria-hidden="true" />
+          </Link>
+          <Link to="/weekly-checkin" className="ui-card streak-games-link">
+            <span className="streak-games-icon is-weekly" aria-hidden="true"><ClipboardList size={20} /></span>
+            <span className="streak-games-copy">
+              <strong>แบบประเมินรายสัปดาห์</strong>
+              <small>ใช้เวลาไม่ถึงนาที</small>
+            </span>
+            <ChevronRight size={18} aria-hidden="true" />
+          </Link>
+        </aside>
+      </div>
     </div>
   );
 }

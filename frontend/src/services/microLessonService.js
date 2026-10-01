@@ -23,3 +23,15 @@ export function updateLesson(id, payload) {
 export function deleteLesson(id) {
   return api.delete(`/micro-lessons/${id}`).then((res) => res.data);
 }
+
+export function getSavedLessonIds() {
+  return api.get("/micro-lessons/saved").then((res) => res.data);
+}
+
+export function saveLesson(id) {
+  return api.post(`/micro-lessons/${id}/save`).then((res) => res.data);
+}
+
+export function unsaveLesson(id) {
+  return api.delete(`/micro-lessons/${id}/save`).then((res) => res.data);
+}

@@ -24,7 +24,6 @@
   .layout .async-state-icon { width: 44px; height: 44px; border-radius: 12px; }
   .layout .login-page, .layout .register-page { margin: 20px auto; max-width: calc(100% - 24px); border-radius: 16px; }
   .layout .login-form, .layout .register-form { padding: 24px 18px; }
-  .layout .job-search-form { padding: 12px; gap: 8px; }
   .layout :is(.job-list-card, .post-card, .course-card) { border-radius: 12px; }
   .layout :is(.users-list, .my-applications-list, .applicants-list) > li { padding: 14px; }
   .layout .pagination { margin-top: 12px; padding-top: 12px; gap: 8px; }

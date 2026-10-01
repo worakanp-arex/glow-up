@@ -2,473 +2,120 @@
   max-width: var(--content-width);
   margin: 0 auto;
   padding: 2.5rem 1.5rem;
-}
-
-.craving-tracker-page h1 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-  color: var(--color-text);
-}
-
-.craving-tracker-intro {
-  margin: 0 0 2rem;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-}
-
-.craving-tracker-page h2 {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-}
-
-.craving-tracker-layout {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (max-width: 860px) {
-  .craving-tracker-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.craving-tracker-sidebar {
-  position: sticky;
-  top: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 24px;
 }
+
+.layout .craving-tracker-page > .page-header { margin-bottom: 0; }
 
 /* ---------- Check-in form ---------- */
+.craving-tracker-form { display: flex; flex-direction: column; gap: 22px; }
+.craving-tracker-form .checkin-sub { margin-bottom: 0; }
+.craving-tracker-form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 40%); gap: 28px; align-items: start; }
+.craving-tracker-form-row .ui-field select { min-height: 48px; }
+.craving-tracker-form .checkin-foot .ui-btn { min-width: 180px; }
 
-.craving-tracker-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+/* ---------- Calendar + history ---------- */
+.craving-tracker-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
 }
+.craving-tracker-calendar { min-width: 0; }
+.craving-tracker-layout .emotion-calendar-card { margin-bottom: 0; }
+.craving-tracker-backfill-hint { margin: 10px 4px 0; font-size: .75rem; line-height: 1.6; color: var(--color-text-muted); }
 
-.craving-tracker-form-title {
-  margin: 0 !important;
-  font-size: 1rem !important;
-  color: var(--color-text) !important;
-}
+.craving-tracker-history .ui-card-head { margin-bottom: 8px; }
+.craving-tracker-empty { margin: 0; padding: 28px 12px; text-align: center; font-size: .85rem; color: var(--color-text-muted); }
+.craving-tracker-month-group + .craving-tracker-month-group { margin-top: 12px; }
+.craving-tracker-month-heading { margin: 8px 0 4px; font-size: .72rem; font-weight: 600; letter-spacing: .04em; color: var(--color-text-muted); }
+.craving-tracker-list { list-style: none; margin: 0; padding: 0; }
+.craving-tracker-list li { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--color-border); }
+.craving-tracker-list li:last-child { border-bottom: 0; }
+.craving-tracker-list-icon { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: color-mix(in srgb, var(--happiness-color, var(--color-ink-300)) 30%, var(--color-surface)); color: color-mix(in srgb, var(--happiness-color, var(--color-ink-500)) 70%, var(--color-ink-900)); }
+:root[data-theme="dark"] .craving-tracker-list-icon { color: color-mix(in srgb, var(--happiness-color, var(--color-ink-500)) 60%, #fff); }
+.craving-tracker-list-body { flex: 1; min-width: 0; }
+.craving-tracker-mood { margin: 0; font-size: .875rem; font-weight: 600; color: var(--color-text); }
+.craving-tracker-meta { margin: 2px 0 0; font-size: .72rem; color: var(--color-text-muted); }
+.craving-tracker-note { margin: 4px 0 0; font-size: .78rem; line-height: 1.6; color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.craving-tracker-badge { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding: 4px 10px; border-radius: 10px; background: var(--color-surface-hover); font-size: .62rem; color: var(--color-text-muted); line-height: 1.4; }
+.craving-tracker-badge b { font-size: .78rem; font-weight: 600; color: var(--color-text-secondary); }
+.craving-tracker-load-more { margin-top: 8px; min-height: 40px; font-size: .78rem; }
+.craving-tracker-private-note { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--color-surface-hover); font-size: .75rem; color: var(--color-text-muted); }
 
-.craving-tracker-field-label {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.craving-tracker-happiness-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.craving-tracker-happiness-picker {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.craving-tracker-happiness-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-strong);
-  background-color: var(--color-surface);
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.craving-tracker-happiness-btn:hover {
-  transform: translateY(-2px);
-  border-color: var(--happiness-color);
-  color: var(--happiness-color);
-}
-
-.craving-tracker-happiness-btn.active {
-  background-color: var(--happiness-color);
-  border-color: var(--happiness-color);
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-.craving-tracker-happiness-selected-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.craving-tracker-form textarea {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  font-family: inherit;
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  resize: vertical;
-}
-
-.craving-tracker-form textarea:focus {
-  outline: none;
-  border-color: var(--color-primary-400);
-  box-shadow: 0 0 0 3px var(--color-primary-50);
-}
-
-.craving-tracker-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.craving-tracker-form input[type="text"],
-.craving-tracker-form select {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
-  font-family: inherit;
-  background-color: var(--color-surface);
-  color: var(--color-text);
-}
-
-.craving-tracker-form input[type="text"]:focus,
-.craving-tracker-form select:focus {
-  outline: none;
-  border-color: var(--color-primary-400);
-  box-shadow: 0 0 0 3px var(--color-primary-50);
-}
-
-.craving-tracker-range {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.craving-tracker-range input[type="range"] {
-  flex: 1;
-  accent-color: var(--color-primary-500);
-}
-
-.craving-tracker-level-value {
-  min-width: 1.5rem;
-  text-align: center;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.craving-tracker-form .btn-primary {
-  width: 100%;
-  justify-content: center;
-}
-
-/* ---------- Risk assessment ---------- */
-
-.craving-tracker-risk {
-  padding: 1.5rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.craving-tracker-risk-header {
-  margin-bottom: 0.75rem;
-}
-
-.craving-tracker-risk-header h2 {
-  margin: 0;
-}
-
-.craving-tracker-assess-button {
-  width: 100%;
-  justify-content: center;
-}
+/* ---------- Weekly check-in, risk, real situations ---------- */
+.craving-tracker-lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 24px; align-items: start; }
+.craving-tracker-lower-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
 .craving-tracker-risk-result {
   margin: 0 0 1rem;
-  padding: 0.6rem 0.8rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.88rem;
-  color: var(--color-text-secondary);
-  background-color: var(--color-ink-100);
-}
-
-.craving-tracker-risk-low strong {
-  color: var(--color-success);
-}
-
-.craving-tracker-risk-medium strong {
-  color: var(--color-warning);
-}
-
-.craving-tracker-risk-high strong {
-  color: var(--color-danger);
-}
-
-.craving-tracker-risk-note {
-  color: var(--color-text-muted);
-}
-
-/* ---------- Calendar ---------- */
-
-.craving-tracker-layout .emotion-calendar-card {
-  margin-bottom: 0.6rem;
-}
-
-.craving-tracker-backfill-hint {
-  margin: 0 0 2rem;
-  font-size: 0.78rem;
-  color: var(--color-text-faint);
-}
-
-/* ---------- History list ---------- */
-
-.craving-tracker-list-heading {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-}
-
-.craving-tracker-empty {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  text-align: center;
-  padding: 2rem 0;
-}
-
-.craving-tracker-month-group {
-  margin-bottom: 1.5rem;
-}
-
-/* ---------- Real-world risk situations ---------- */
-
-.craving-tracker-risk-situations {
-  margin-top: 2.5rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.craving-tracker-risk-situations-heading {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.4rem;
-  font-size: 1rem;
-  color: var(--color-text);
-}
-
-.craving-tracker-risk-situations-hint {
-  margin: 0 0 1.25rem;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
-}
-
-.craving-tracker-risk-situation-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  max-width: 560px;
-}
-
-.craving-tracker-risk-situation-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  padding: 12px 14px;
+  border-radius: 12px;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
+  background-color: var(--color-surface-hover);
+}
+.craving-tracker-risk-low strong { color: var(--color-success); }
+.craving-tracker-risk-medium strong { color: var(--color-warning); }
+.craving-tracker-risk-high strong { color: var(--color-danger); }
+.craving-tracker-risk-note { color: var(--color-text-muted); }
+
+.craving-tracker-risk-situation-form { display: flex; flex-direction: column; gap: 16px; }
+.craving-tracker-risk-situation-form > .ui-btn { align-self: flex-end; }
+.craving-tracker-risk-situation-toggle { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: var(--color-text-secondary); cursor: pointer; }
+.craving-tracker-risk-situation-toggle input { width: 18px; height: 18px; accent-color: var(--color-primary-500); }
+.craving-tracker-risk-situation-error { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--color-danger-bg); color: var(--color-danger); font-size: .82rem; }
+
+.craving-tracker-risk-situation-list { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.craving-tracker-risk-situation-item { padding: 14px 16px; border: 1px solid var(--color-border); border-left: 4px solid var(--color-border-strong); border-radius: 14px; background: var(--color-surface); }
+.craving-tracker-risk-situation-item-handled_well { border-left-color: var(--color-success); }
+.craving-tracker-risk-situation-item-partially_handled { border-left-color: var(--color-warning); }
+.craving-tracker-risk-situation-item-relapsed { border-left-color: var(--color-danger); }
+.craving-tracker-risk-situation-item-situation { margin: 0 0 .4rem; font-size: .88rem; color: var(--color-text); overflow-wrap: anywhere; }
+.craving-tracker-risk-situation-item-skill { margin: 0 0 .4rem; font-size: .8rem; color: var(--color-text-secondary); }
+.craving-tracker-risk-situation-item-meta { display: flex; justify-content: space-between; gap: .5rem; margin: 0; font-size: .75rem; color: var(--color-text-muted); }
+
+@media (max-width: 960px) {
+  .craving-tracker-layout, .craving-tracker-lower { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .craving-tracker-page { gap: 18px; }
+  .craving-tracker-form-row { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .craving-tracker-form .checkin-foot .ui-btn, .craving-tracker-risk-situation-form > .ui-btn { width: 100%; }
 }
 
-.craving-tracker-risk-situation-toggle {
-  flex-direction: row !important;
-  align-items: center;
-  gap: 0.5rem !important;
+/* ---------- Fixed-height history box (scrolls inside) ---------- */
+.craving-tracker-layout { align-items: stretch; }
+.craving-tracker-history { display: flex; flex-direction: column; min-height: 0; }
+.craving-tracker-history-scroll { flex: 1; min-height: 0; margin-right: -10px; padding-right: 10px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.craving-tracker-history-scroll:focus-visible { outline-offset: 2px; }
+.craving-tracker-history-scroll .craving-tracker-month-heading { position: sticky; top: 0; z-index: 1; margin: 0; padding: 6px 0; background: var(--color-surface); }
+@media (min-width: 961px) {
+  /* Let the calendar set the row height; the history fills it and scrolls. */
+  .craving-tracker-history { contain: size; }
+}
+@media (max-width: 960px) {
+  .craving-tracker-history-scroll { max-height: 440px; }
 }
 
-.craving-tracker-risk-situation-form input,
-.craving-tracker-risk-situation-form select,
-.craving-tracker-risk-situation-form textarea {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  font-family: inherit;
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  resize: vertical;
-}
+/* ---------- Lower row balance ---------- */
+.craving-tracker-lower { align-items: stretch; }
+.craving-tracker-lower-col > .craving-tracker-summary { flex: 1; }
+.craving-tracker-risk-situation-list { max-height: 300px; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; }
 
-.craving-tracker-risk-situation-error {
-  margin: 0;
-  padding: 0.6rem 0.75rem;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-  font-size: 0.85rem;
-}
-
-.craving-tracker-risk-situation-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.craving-tracker-risk-situation-item {
-  padding: 1rem 1.25rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-left: 4px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.craving-tracker-risk-situation-item-handled_well {
-  border-left-color: var(--color-success);
-}
-
-.craving-tracker-risk-situation-item-partially_handled {
-  border-left-color: var(--color-warning);
-}
-
-.craving-tracker-risk-situation-item-relapsed {
-  border-left-color: var(--color-danger);
-}
-
-.craving-tracker-risk-situation-item-situation {
-  margin: 0 0 0.4rem;
-  font-size: 0.9rem;
-  color: var(--color-text);
-}
-
-.craving-tracker-risk-situation-item-skill {
-  margin: 0 0 0.4rem;
-  font-size: 0.82rem;
-  color: var(--color-text-secondary);
-}
-
-.craving-tracker-risk-situation-item-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-}
-
-.craving-tracker-month-heading {
-  margin: 0 0 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-}
-
-.craving-tracker-load-more {
-  margin: 1rem 0 0;
-  width: 100%;
-  justify-content: center;
-}
-
-.craving-tracker-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.craving-tracker-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  padding: 1.1rem 1.25rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.craving-tracker-list li:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.craving-tracker-list-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
-  color: var(--color-primary-600);
-  flex-shrink: 0;
-}
-
-.craving-tracker-list-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.craving-tracker-mood {
-  margin: 0 0 0.2rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.craving-tracker-meta {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
-
-.craving-tracker-note {
-  margin: 0.4rem 0 0;
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-}
-
-.craving-tracker-badge {
-  flex-shrink: 0;
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-700);
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
+.craving-tracker-summary { display: flex; flex-direction: column; }
+.craving-tracker-summary-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.craving-tracker-summary-stats > div { padding: 12px 10px; border-radius: 12px; background: var(--color-surface-hover); text-align: center; }
+.craving-tracker-summary-stats dt { font-size: .68rem; color: var(--color-text-muted); }
+.craving-tracker-summary-stats dd { margin: 4px 0 0; font-size: 1.25rem; font-weight: 600; color: var(--color-primary-600); }
+.craving-tracker-summary-stats dd small { font-size: .7rem; font-weight: 400; color: var(--color-text-muted); }
+.craving-tracker-summary-stats .craving-tracker-summary-mood { font-size: .95rem; line-height: 1.9; }
+.craving-tracker-summary-outcomes { display: flex; flex-direction: column; gap: 6px; margin: 16px 0 0; padding: 0; list-style: none; }
+.craving-tracker-summary-outcomes li { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-left: 3px solid var(--color-border-strong); border-radius: 8px; background: var(--color-surface-hover); font-size: .78rem; color: var(--color-text-secondary); }
+.craving-tracker-summary-outcomes .is-handled_well { border-left-color: var(--color-success); }
+.craving-tracker-summary-outcomes .is-partially_handled { border-left-color: var(--color-warning); }
+.craving-tracker-summary-outcomes .is-relapsed { border-left-color: var(--color-danger); }
+.craving-tracker-summary-tip { display: flex; align-items: flex-start; gap: 8px; margin: auto 0 0; padding-top: 16px; font-size: .72rem; line-height: 1.6; color: var(--color-text-muted); }
+.craving-tracker-summary-tip svg { flex-shrink: 0; margin-top: 2px; color: var(--color-primary-600); }

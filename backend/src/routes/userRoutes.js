@@ -35,6 +35,12 @@ router.put(
   verifyToken,
   [
     PROFILE_TEXT_FIELD("name"),
+    PROFILE_TEXT_FIELD("nickname"),
+    PROFILE_TEXT_FIELD("province"),
+    body("bio").optional().trim().isLength({ max: 1000 }),
+    body("familySharing").optional().isObject(),
+    body("familySharing.progress").optional().isBoolean({ strict: true }),
+    body("familySharing.missions").optional().isBoolean({ strict: true }),
     PROFILE_TEXT_FIELD("phone"),
     body("age").optional().isInt({ min: 0, max: 120 }),
     PROFILE_TEXT_FIELD("gender"),

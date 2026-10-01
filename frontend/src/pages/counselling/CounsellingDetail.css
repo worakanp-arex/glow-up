@@ -1,66 +1,41 @@
 .counselling-detail-page {
-  max-width: 1000px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 }
 
-.counselling-detail-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 1.25rem;
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
-  text-decoration: none;
-}
-
-.counselling-detail-back:hover {
-  color: var(--color-primary-600);
-}
-
-.counselling-detail-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.counselling-detail-header-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
-  color: var(--color-primary-600);
-  flex-shrink: 0;
-}
-
-.counselling-detail-header-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.counselling-detail-header-body h1 {
-  margin: 0 0 0.3rem;
-  font-size: 1.35rem;
-  color: var(--color-text);
+.counselling-detail-page .page-header {
+  margin-bottom: 1.75rem;
 }
 
 .counselling-detail-meta {
-  margin: 0;
-  font-size: 0.85rem;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
   color: var(--color-text-muted);
 }
 
+/* ---------- status badge (also used by the counselling list) ---------- */
+
 .counselling-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   flex-shrink: 0;
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: var(--radius-full);
   font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.counselling-detail-page .counselling-status-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .counselling-status-pending {
@@ -88,23 +63,26 @@
   color: var(--color-danger);
 }
 
+/* ---------- layout & cards ---------- */
+
 .counselling-detail-layout {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: 1.5rem;
   align-items: start;
 }
 
-@media (max-width: 860px) {
-  .counselling-detail-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.counselling-detail-main {
+.counselling-detail-main,
+.counselling-detail-sidebar {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  min-width: 0;
+}
+
+.counselling-detail-sidebar {
+  position: sticky;
+  top: 100px;
 }
 
 .counselling-detail-card {
@@ -115,44 +93,91 @@
   box-shadow: var(--shadow-sm);
 }
 
-.counselling-detail-card h2 {
-  margin: 0 0 0.9rem;
-  font-size: 0.95rem;
-  color: var(--color-text-secondary);
-}
-
-.counselling-detail-message {
-  margin: 0 0 1rem;
-  color: var(--color-text);
-  line-height: 1.65;
-  white-space: pre-line;
-}
-
-.counselling-detail-tags {
+.counselling-detail-card-head {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
 }
 
-.counselling-detail-tag {
+.counselling-detail-card h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.counselling-detail-private {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-ink-50);
-  color: var(--color-text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
 }
+
+/* ---------- request details ---------- */
+
+.counselling-detail-message {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid var(--color-primary-400);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--color-primary-50);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  line-height: 1.75;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.counselling-detail-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.counselling-detail-fact {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-ink-50);
+}
+
+.counselling-detail-fact dt {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.counselling-detail-fact dt svg {
+  color: var(--color-primary-600);
+}
+
+.counselling-detail-fact dd {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+/* ---------- schedule & outcome forms ---------- */
 
 .counselling-detail-scheduled {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin: 0 0 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-success-bg);
+  color: var(--color-success);
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--color-text);
 }
 
 .counselling-detail-empty-note {
@@ -167,7 +192,7 @@
 .counselling-schedule-form {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.85rem;
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
@@ -177,45 +202,92 @@
 .counselling-schedule-field {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
   font-size: 0.85rem;
+  font-weight: 500;
   color: var(--color-text-secondary);
 }
 
-.counselling-schedule-form input {
-  padding: 0.55rem 0.7rem;
+.counselling-schedule-form :is(input, textarea) {
+  padding: 0.6rem 0.8rem;
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   font-size: 0.9rem;
   font-family: inherit;
+  font-weight: 400;
   background-color: var(--color-surface);
   color: var(--color-text);
 }
 
-.counselling-schedule-form input:focus {
+.counselling-schedule-form :is(input, textarea):focus {
   outline: none;
   border-color: var(--color-primary-400);
   box-shadow: 0 0 0 3px var(--color-primary-50);
 }
 
 .counselling-schedule-form .btn {
-  align-self: flex-start;
+  align-self: flex-end;
 }
 
 /* ---------- message thread ---------- */
 
+.counselling-thread-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.counselling-thread-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0.35rem;
+  border-radius: 14px;
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+}
+
+.counselling-thread-empty p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.counselling-thread-empty small {
+  max-width: 320px;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
 .counselling-thread {
   list-style: none;
-  margin: 0 0 1.25rem;
-  padding: 0;
+  margin: 0 0 1rem;
+  padding: 0.25rem 0.25rem 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-height: 520px;
+  overflow-y: auto;
 }
 
 .counselling-thread-item {
   display: flex;
-  gap: 0.75rem;
+  align-items: flex-end;
+  gap: 0.6rem;
+  max-width: 85%;
+}
+
+.counselling-thread-item.is-mine {
+  flex-direction: row-reverse;
+  align-self: flex-end;
 }
 
 .counselling-thread-avatar {
@@ -226,15 +298,16 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-full);
-  background-color: var(--color-primary-500);
-  color: #ffffff;
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
   font-size: 0.85rem;
   font-weight: 600;
   overflow: hidden;
 }
 
 .counselling-thread-item.counsellor .counselling-thread-avatar {
-  background-color: var(--color-primary-700);
+  background-color: var(--color-primary-600);
+  color: #ffffff;
 }
 
 .counselling-thread-avatar img {
@@ -244,72 +317,166 @@
 }
 
 .counselling-thread-body {
-  flex: 1;
   min-width: 0;
-  padding: 0.7rem 0.9rem;
-  background-color: var(--color-ink-50);
-  border-radius: var(--radius-md);
+  padding: 0.7rem 0.95rem;
+  background-color: var(--color-ink-100);
+  border-radius: 16px 16px 16px 4px;
+}
+
+.counselling-thread-item.is-mine .counselling-thread-body {
+  background-color: var(--color-primary-600);
+  border-radius: 16px 16px 4px 16px;
 }
 
 .counselling-thread-author {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 0.5rem;
-  margin: 0 0 0.3rem;
-  font-size: 0.85rem;
+  margin: 0 0 0.2rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-text);
 }
 
 .counselling-thread-time {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 400;
-  color: var(--color-text-faint);
+  color: var(--color-text-muted);
 }
 
 .counselling-thread-content {
   margin: 0;
   font-size: 0.9rem;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--color-text-secondary);
   white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.counselling-thread-item.is-mine :is(.counselling-thread-author, .counselling-thread-content) {
+  color: #ffffff;
+}
+
+.counselling-thread-item.is-mine .counselling-thread-time {
+  color: rgb(255 255 255 / 75%);
 }
 
 .counselling-reply-form {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
   padding-top: 1rem;
   border-top: 1px solid var(--color-border);
 }
 
 .counselling-reply-form textarea {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
+  min-height: 88px;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-md);
   font-size: 0.9rem;
   font-family: inherit;
-  background-color: var(--color-surface);
+  background-color: var(--color-ink-50);
   color: var(--color-text);
   resize: vertical;
 }
 
 .counselling-reply-form textarea:focus {
   outline: none;
-  border-color: var(--color-primary-400);
-  box-shadow: 0 0 0 3px var(--color-primary-50);
+  background-color: var(--color-surface);
 }
 
 .counselling-reply-form .btn {
   align-self: flex-end;
+  min-height: 42px;
+  padding: 0.55rem 1.2rem;
 }
 
 /* ---------- sidebar ---------- */
 
-.counselling-detail-sidebar {
+.counselling-progress {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.counselling-progress-step {
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 1.1rem;
+}
+
+.counselling-progress-step:last-child {
+  padding-bottom: 0;
+}
+
+.counselling-progress-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 26px;
+  bottom: 2px;
+  left: 11px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+
+.counselling-progress-step.is-done:not(:last-child)::after {
+  background: var(--color-primary-300);
+}
+
+.counselling-progress-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: #ffffff;
+}
+
+.counselling-progress-step.is-done .counselling-progress-dot {
+  border-color: var(--color-primary-600);
+  background: var(--color-primary-600);
+}
+
+.counselling-progress-step.is-current .counselling-progress-dot {
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+  box-shadow: 0 0 0 4px var(--color-primary-50);
+}
+
+.counselling-progress-step.is-cancelled .counselling-progress-dot {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+}
+
+.counselling-progress-copy {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  padding-top: 1px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.counselling-progress-step:is(.is-done, .is-current) .counselling-progress-copy > span {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.counselling-progress-step.is-cancelled .counselling-progress-copy > span {
+  color: var(--color-danger);
+}
+
+.counselling-progress-copy small {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
 }
 
 .counselling-person {
@@ -319,15 +486,19 @@
   margin-bottom: 1rem;
 }
 
+.counselling-person:last-child {
+  margin-bottom: 0;
+}
+
 .counselling-person-avatar {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   border-radius: var(--radius-full);
-  background-color: var(--color-primary-500);
+  background-color: var(--color-primary-600);
   color: #ffffff;
   font-weight: 600;
   overflow: hidden;
@@ -344,12 +515,39 @@
   font-weight: 600;
   color: var(--color-text);
   font-size: 0.92rem;
+  overflow-wrap: anywhere;
 }
 
 .counselling-person-meta {
   margin: 0.1rem 0 0;
   font-size: 0.8rem;
+  line-height: 1.6;
   color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.counselling-person-waiting {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: var(--radius-md);
+  background: var(--color-ink-50);
+}
+
+.counselling-person-waiting-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 1px dashed var(--color-primary-300);
+  border-radius: 50%;
+  color: var(--color-primary-600);
+}
+
+.counselling-person-waiting .counselling-person-name {
+  font-size: 0.875rem;
 }
 
 .counselling-profile-link {
@@ -380,4 +578,34 @@
 
 .counselling-cancel-btn:hover {
   background-color: var(--color-danger-bg);
+}
+
+@media (max-width: 860px) {
+  .counselling-detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .counselling-detail-sidebar {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .counselling-detail-card {
+    padding: 1.1rem;
+  }
+
+  .counselling-detail-card-head {
+    flex-wrap: wrap;
+  }
+
+  .counselling-thread-item {
+    max-width: 100%;
+  }
+
+  .counselling-reply-form .btn,
+  .counselling-schedule-form .btn {
+    align-self: stretch;
+  }
 }

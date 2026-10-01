@@ -1,16 +1,29 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Clock, ExternalLink, MapPin, Paperclip, Send, ShieldCheck, Wallet } from "lucide-react";
+import { Bookmark, Briefcase, Check, Clock, ExternalLink, MapPin, Paperclip, Plus, Send, ShieldCheck } from "lucide-react";
 import * as applicationService from "../../services/applicationService.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import StatusBadge from "../common/StatusBadge.jsx";
+import { initials } from "../../utils/initials.js";
 import "./JobPreview.css";
 
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
+
+// Split a free-text description into an intro paragraph block and a list of
+// bullet lines ("-", "•", "*" or "1."), so duties read as a list.
+function splitDescription(text) {
+  const about = [];
+  const duties = [];
+  for (const raw of (text || "").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const bullet = line.match(/^(?:[-•*]|\d+[.)])\s*(.+)$/);
+    if (bullet) duties.push(bullet[1]);
+    else about.push(line);
+  }
+  return { about, duties };
 }
 
-function JobPreview({ job, showTitle = true }) {
+function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match = null }) {
   const { user, isAuthenticated } = useAuth();
   const [applying, setApplying] = useState(false);
   const [justApplied, setJustApplied] = useState(null);
@@ -36,6 +49,8 @@ function JobPreview({ job, showTitle = true }) {
     return <div className="job-preview job-preview-empty">เลือกตำแหน่งงานเพื่อดูรายละเอียด</div>;
   }
 
+  const isSeeker = isAuthenticated && user.role === "user";
+  const companyName = job.employer?.companyName || job.employer?.name;
   const existingApplication = myApplications.find((app) => app.job?._id === job._id);
   const alreadyApplied = Boolean(existingApplication) || justApplied === job._id;
   const attachmentRequests = job.attachmentRequests || [];
@@ -43,6 +58,8 @@ function JobPreview({ job, showTitle = true }) {
   const accepting = job.status === "open" && job.verifiedStatus === "verified" && !expired;
   const applicationStatus = existingApplication?.status || "pending";
   const statusMessages = { pending: "ส่งใบสมัครแล้ว · รอนายจ้างพิจารณา", interview: "ได้รับนัดสัมภาษณ์ · ดูรายละเอียดในใบสมัคร", passed: "ผ่านการคัดเลือกแล้ว", rejected: "ใบสมัครไม่ได้รับการคัดเลือก", cancelled: "คุณยกเลิกใบสมัครนี้แล้ว" };
+  const { about, duties } = splitDescription(job.description);
+  const canApply = isSeeker && !alreadyApplied && accepting;
 
   function handleAttachmentChange(name, file) {
     setAttachmentFiles((prev) => ({ ...prev, [name]: file }));
@@ -78,117 +95,147 @@ function JobPreview({ job, showTitle = true }) {
   }
 
   return (
-    <div className="job-preview">
-      <div className="job-preview-banner">
-        <div className="job-preview-banner-top" />
-        <div className="job-preview-logo">
-          {job.employer?.avatarUrl ? (
-            <img src={job.employer.avatarUrl} alt="" />
-          ) : (
-            <span>{initials(job.employer?.companyName || job.employer?.name)}</span>
-          )}
-        </div>
-      </div>
-
-      <div className="job-preview-body">
-        {showTitle && <h2 className="job-preview-title">{job.title}</h2>}
-        <p className="job-preview-company">
-          <span>{job.employer?.companyName || job.employer?.name}</span>
-          {job.employer?.businessType && (
-            <span className="job-preview-business-type">{job.employer.businessType}</span>
-          )}
-          {job.employer?.verifiedStatus === "verified" && (
-            <span className="job-preview-verified-badge">
-              <ShieldCheck size={13} />
-              นายจ้างยืนยันตัวตนแล้ว
-            </span>
-          )}
-        </p>
-
-        <div className="job-preview-meta">
-          {job.category?.name && <span className="job-preview-category">{job.category.name}</span>}
-          {job.location && (
-            <span>
-              <MapPin size={14} />
-              {job.location}
-            </span>
-          )}
-          {job.salary && (
-            <span>
-              <Wallet size={14} />
-              {job.salary.toLocaleString()} บาท
-            </span>
-          )}
-        </div>
-
-        {job.skills?.length > 0 && (
-          <div className="job-preview-skills">
-            {job.skills.map((skill) => (
-              <span key={skill._id} className="job-preview-skill-tag">
-                {skill.skillName}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {job.description && <p className="job-preview-description">{job.description}</p>}
-
-        {job.externalUrl && (
-          <a href={job.externalUrl} target="_blank" rel="noreferrer" className="job-preview-external-link">
-            <ExternalLink size={16} />
-            <span>ดูประกาศต้นฉบับ</span>
-          </a>
-        )}
-
-        {error && <p className="job-preview-error">{error}</p>}
-
-        {isAuthenticated && user.role === "user" && alreadyApplied && (
-          <div className={`job-preview-applied-note application-tone-${applicationStatus}`}>
-            <span>{statusMessages[applicationStatus] || "ส่งใบสมัครแล้ว"}</span>
-            {existingApplication && <StatusBadge status={existingApplication.status} />}
-            <Link to="/my-applications">ดูใบสมัครของฉัน</Link>
-          </div>
-        )}
-
-        {!accepting && <p className="job-availability-note"><Clock size={16} />{expired ? "หมดเขตรับสมัครแล้ว" : job.status === "closed" ? "ตำแหน่งนี้ปิดรับสมัครแล้ว" : "ประกาศนี้ยังไม่เปิดรับสมัคร"}</p>}
-        {applicationsError && <p className="job-preview-error" role="alert">ตรวจสอบใบสมัครไม่สำเร็จ กรุณาโหลดหน้าใหม่ก่อนสมัคร</p>}
-        {isAuthenticated && user.role === "user" && !alreadyApplied && accepting && attachmentRequests.length > 0 && (
-          <div className="job-preview-attachments">
-            <p className="job-preview-attachments-title">
-              <Paperclip size={14} />
-              <span>เอกสารเพิ่มเติมที่ต้องแนบ</span>
-            </p>
-            {attachmentRequests.map((name) => (
-              <label key={name} className="job-preview-attachment-field">
-                {name}
-                <input
-                  type="file"
-                  onChange={(e) => handleAttachmentChange(name, e.target.files[0])}
-                />
-              </label>
-            ))}
-          </div>
-        )}
-
-        {isAuthenticated && user.role === "user" && !alreadyApplied && accepting && (
+    <article className="job-preview">
+      <div className="job-preview-top">
+        <span className="job-preview-logo" aria-hidden="true">
+          {job.employer?.avatarUrl ? <img src={job.employer.avatarUrl} alt="" /> : initials(companyName)}
+        </span>
+        {isSeeker && onToggleSave && (
           <button
             type="button"
-            className="job-preview-apply-button"
-            onClick={handleApply}
-            disabled={applying || applicationsLoading || applicationsError}
+            className={`job-save-btn${saved ? " is-saved" : ""}`}
+            onClick={() => onToggleSave(job._id)}
+            aria-pressed={saved}
+            aria-label={saved ? "เลิกบันทึกงานนี้" : "บันทึกงานนี้"}
           >
-            <Send size={16} />
-            <span>{applicationsLoading ? "ตรวจสอบใบสมัคร..." : applying ? "กำลังสมัคร..." : "สมัครงาน"}</span>
+            <Bookmark size={16} fill={saved ? "currentColor" : "none"} />
           </button>
         )}
-
-        {!isAuthenticated && (
-          <p className="job-preview-login-hint">
-            <Link to="/login">เข้าสู่ระบบ</Link> เพื่อสมัครงานนี้
-          </p>
-        )}
       </div>
-    </div>
+
+      {showTitle && <h2 className="job-preview-title">{job.title}</h2>}
+      <p className="job-preview-company">
+        <span>{companyName}</span>
+        {job.employer?.verifiedStatus === "verified" && (
+          <span className="job-preview-verified-badge"><ShieldCheck size={13} />ยืนยันตัวตนแล้ว</span>
+        )}
+      </p>
+
+      <div className="job-preview-meta">
+        {job.location && <span><MapPin size={14} aria-hidden="true" />{job.location}</span>}
+        {job.category?.name && <span><Briefcase size={14} aria-hidden="true" />{job.category.name}</span>}
+        {job.employer?.businessType && <span>{job.employer.businessType}</span>}
+      </div>
+
+      {job.salary > 0 && <p className="job-preview-salary">{job.salary.toLocaleString()} <small>บาท/เดือน</small></p>}
+
+      {isSeeker && match && (
+        <section className="job-match" aria-label="ความตรงกันของทักษะ">
+          <div className="job-match-head">
+            <strong>ทักษะของคุณตรง {match.score}%</strong>
+            <span>{match.matched.length} จาก {match.total} ทักษะ</span>
+          </div>
+          <div className="ui-progress"><span style={{ width: `${match.score}%` }} /></div>
+          <div className="job-match-chips">
+            {match.matched.map((skill) => <span key={skill._id} className="is-have"><Check size={12} aria-hidden="true" />{skill.skillName}</span>)}
+            {match.missing.map((skill) => <span key={skill._id}><Plus size={12} aria-hidden="true" />{skill.skillName}</span>)}
+          </div>
+          <p className="job-match-note">
+            เทียบจากทักษะในโปรไฟล์ ไม่ใช่โอกาสได้รับการจ้างงาน · <Link to="/profile?tab=skills">แก้ไขทักษะ</Link>
+          </p>
+        </section>
+      )}
+
+      {!isSeeker && job.skills?.length > 0 && (
+        <section className="job-preview-section">
+          <h3>ทักษะที่ต้องการ</h3>
+          <div className="job-match-chips">
+            {job.skills.map((skill) => <span key={skill._id}>{skill.skillName}</span>)}
+          </div>
+        </section>
+      )}
+
+      {about.length > 0 && (
+        <section className="job-preview-section">
+          <h3>เกี่ยวกับงานนี้</h3>
+          {about.map((line, i) => <p key={i}>{line}</p>)}
+        </section>
+      )}
+
+      {duties.length > 0 && (
+        <section className="job-preview-section">
+          <h3>หน้าที่หลัก</h3>
+          <ul>{duties.map((line, i) => <li key={i}>{line}</li>)}</ul>
+        </section>
+      )}
+
+      {attachmentRequests.length > 0 && (
+        <section className="job-preview-section">
+          <h3>เอกสารที่ต้องเตรียม</h3>
+          <div className="job-match-chips">
+            {attachmentRequests.map((name) => <span key={name}><Paperclip size={12} aria-hidden="true" />{name}</span>)}
+          </div>
+        </section>
+      )}
+
+      {job.externalUrl && (
+        <a href={job.externalUrl} target="_blank" rel="noreferrer" className="job-preview-external-link">
+          <ExternalLink size={15} />
+          <span>ดูประกาศต้นฉบับ</span>
+        </a>
+      )}
+
+      {error && <p className="job-preview-error">{error}</p>}
+
+      {isSeeker && alreadyApplied && (
+        <div className={`job-preview-applied-note application-tone-${applicationStatus}`}>
+          <span>{statusMessages[applicationStatus] || "ส่งใบสมัครแล้ว"}</span>
+          {existingApplication && <StatusBadge status={existingApplication.status} />}
+          <Link to="/my-applications">ดูใบสมัครของฉัน</Link>
+        </div>
+      )}
+
+      {!accepting && <p className="job-availability-note"><Clock size={16} />{expired ? "หมดเขตรับสมัครแล้ว" : job.status === "closed" ? "ตำแหน่งนี้ปิดรับสมัครแล้ว" : "ประกาศนี้ยังไม่เปิดรับสมัคร"}</p>}
+      {applicationsError && <p className="job-preview-error" role="alert">ตรวจสอบใบสมัครไม่สำเร็จ กรุณาโหลดหน้าใหม่ก่อนสมัคร</p>}
+
+      {canApply && attachmentRequests.length > 0 && (
+        <div className="job-preview-attachments">
+          <p className="job-preview-attachments-title">
+            <Paperclip size={14} />
+            <span>แนบเอกสารก่อนสมัคร</span>
+          </p>
+          {attachmentRequests.map((name) => (
+            <label key={name} className="job-preview-attachment-field">
+              {name}
+              <input type="file" onChange={(e) => handleAttachmentChange(name, e.target.files[0])} />
+            </label>
+          ))}
+        </div>
+      )}
+
+      {(canApply || !isAuthenticated) && (
+        <footer className="job-preview-foot">
+          {job.salary > 0 ? (
+            <div className="job-preview-foot-salary"><small>เงินเดือน</small><strong>{job.salary.toLocaleString()} <span>บาท/เดือน</span></strong></div>
+          ) : <span />}
+          {canApply ? (
+            <button
+              type="button"
+              className="ui-btn ui-btn-primary job-preview-apply-button"
+              onClick={handleApply}
+              disabled={applying || applicationsLoading || applicationsError}
+            >
+              <Send size={16} />
+              <span>{applicationsLoading ? "ตรวจสอบใบสมัคร..." : applying ? "กำลังสมัคร..." : "สมัครงาน"}</span>
+            </button>
+          ) : (
+            <p className="job-preview-login-hint">
+              <Link to="/login">เข้าสู่ระบบ</Link> เพื่อสมัครงานนี้
+            </p>
+          )}
+        </footer>
+      )}
+    </article>
   );
 }
 

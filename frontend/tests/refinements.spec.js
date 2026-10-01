@@ -156,12 +156,12 @@ test("calendar has day numbers, check-in detail and bounded month navigation", a
   await page.screenshot({ path: info.outputPath("calendar.png"), fullPage: true });
 });
 
-test("profile features a large avatar, actual recovery date and points", async ({ page }, info) => {
+test("profile shows the avatar, actual recovery date and growth points", async ({ page }, info) => {
   await setup(page); await page.goto("/profile");
   await expect(page.locator(".profile-recovery")).toContainText("1/1/2568");
-  await expect(page.locator(".points-summary")).toContainText("75 แต้ม");
+  await expect(page.locator(".growth-card")).toContainText("75 / 100 XP");
   const avatar = await page.locator(".profile-banner-avatar").boundingBox();
-  expect(avatar.width).toBeGreaterThanOrEqual(128);
+  expect(avatar.width).toBeGreaterThanOrEqual(72);
   await page.screenshot({ path: info.outputPath("profile.png"), fullPage: true });
 });
 
@@ -172,8 +172,10 @@ test("counselling starts with a request and a descriptive mood dropdown", async 
   await select.selectOption("anxious");
   await expect(page.locator(".mood-select p")).toContainText("กังวลใจ ไม่สบายใจ");
   await expect(page.locator(".mood-select svg")).toBeVisible();
+  // The request form comes first: beside the history on wide screens, above it on narrow ones.
   const form = await page.locator(".counselling-form").boundingBox(), history = await page.getByRole("heading", { name: "คำขอที่ผ่านมา" }).boundingBox();
-  expect(history.y).toBeGreaterThan(form.y + form.height);
+  if (info.project.name === "mobile") expect(history.y).toBeGreaterThan(form.y + form.height);
+  else expect(history.x).toBeGreaterThan(form.x + form.width);
   await page.screenshot({ path: info.outputPath("counselling.png"), fullPage: true });
 });
 
@@ -224,7 +226,7 @@ test("new counselling request works when history fails and the mobile date picke
   await page.getByRole("button", { name: "เดือนถัดไป" }).click();
   await page.locator(".datetime-picker-grid button").first().click();
   await page.getByRole("button", { name: "ตกลง", exact: true }).click();
-  await page.getByRole("button", { name: "ส่งคำขอ", exact: true }).click();
+  await page.getByRole("button", { name: "ส่งคำขอปรึกษา", exact: true }).click();
   await expect(page.locator(".counselling-sent")).toContainText("ส่งคำขอแล้ว");
   await expect(page.getByRole("link", { name: "ติดตามคำขอนี้" })).toHaveAttribute("href", "/counselling/new-session");
   expect(sent.mood).toBe("stressed");

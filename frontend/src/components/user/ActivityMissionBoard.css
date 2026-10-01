@@ -112,6 +112,26 @@
   font-weight: 500;
 }
 
+.activity-mission-item-pending {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--color-warning);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.activity-mission-item-rejected {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--color-danger);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .activity-mission-log-form {
   margin-top: 0.75rem;
   padding-top: 0.75rem;

@@ -140,7 +140,18 @@ export async function getLinkedUserSummary(req, res) {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  const recoveringUser = await User.findById(link.recoveringUser).select("name avatarUrl");
+  const recoveringUser = await User.findById(link.recoveringUser).select("name avatarUrl familySharing");
+  if (!recoveringUser) {
+    return res.status(404).json({ message: "ไม่พบข้อมูลผู้ใช้" });
+  }
+  const sharing = {
+    progress: recoveringUser.familySharing?.progress !== false,
+    missions: recoveringUser.familySharing?.missions !== false,
+  };
+  if (!sharing.progress) {
+    return res.json({ name: recoveringUser.name, avatarUrl: recoveringUser.avatarUrl, sharing, rewardsEarned: [] });
+  }
+
   const logs = await EmotionLog.find({ user: link.recoveringUser }).select("date happinessLevel");
   const streakStats = computeStreakStats(logs);
 
@@ -155,12 +166,13 @@ export async function getLinkedUserSummary(req, res) {
   res.json({
     name: recoveringUser.name,
     avatarUrl: recoveringUser.avatarUrl,
+    sharing,
     currentStreak: streakStats.currentStreak,
     longestStreak: streakStats.longestStreak,
     currentStage: streakToStage(streakStats.currentStreak),
     currentStageLabel: STAGE_LABELS[streakToStage(streakStats.currentStreak)],
     completedMissions,
-    level: computeLevel(totalPoints),
+    level: await computeLevel(totalPoints),
     rewardsEarned: rewards.map((r) => ({ name: r.reward.name, icon: r.reward.icon, earnedAt: r.earnedAt })),
   });
 }

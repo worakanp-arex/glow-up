@@ -1,6 +1,7 @@
 import FamilyMission from "../models/FamilyMission.js";
 import FamilyMissionLog from "../models/FamilyMissionLog.js";
 import FamilyLink from "../models/FamilyLink.js";
+import User from "../models/User.js";
 import { notifyUser } from "../services/notificationService.js";
 import { checkAndAwardRewards } from "../services/rewardService.js";
 import { insertOnce } from "../utils/insertOnce.js";
@@ -16,9 +17,14 @@ async function findMyActiveLink(req) {
     : FamilyLink.findOne({ recoveringUser: req.user.id, status: "active" });
 }
 
+async function missionsShared(link) {
+  const owner = await User.findById(link.recoveringUser).select("familySharing");
+  return owner?.familySharing?.missions !== false;
+}
+
 export async function myTodayFamilyMissions(req, res) {
   const link = await findMyActiveLink(req);
-  if (!link) return res.json([]);
+  if (!link || !(await missionsShared(link))) return res.json([]);
 
   const dateKey = toBangkokDateKey(new Date());
   const [missions, logs] = await Promise.all([
@@ -49,6 +55,9 @@ export async function confirmFamilyMission(req, res) {
   const link = await findMyActiveLink(req);
   if (!link) {
     return res.status(403).json({ message: "ยังไม่มีการเชื่อมโยงครอบครัวที่ใช้งานอยู่" });
+  }
+  if (!(await missionsShared(link))) {
+    return res.status(403).json({ message: "ภารกิจร่วมกันถูกปิดการแบ่งปันไว้" });
   }
 
   const dateKey = toBangkokDateKey(new Date());

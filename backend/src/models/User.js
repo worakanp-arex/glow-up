@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
+    nickname: { type: String },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: {
       type: String,
@@ -18,6 +19,8 @@ const userSchema = new mongoose.Schema(
     age: { type: Number },
     gender: { type: String },
     address: { type: String },
+    province: { type: String },
+    bio: { type: String },
     education: { type: String },
     experience: { type: String },
     companyName: { type: String },
@@ -32,6 +35,12 @@ const userSchema = new mongoose.Schema(
     // clinical profile (see utils/patientAccess.js).
     assignedCounsellor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     avatarUrl: { type: String },
+    // What an active family follower may see (role "user" only). Both default
+    // on so links created before this setting existed keep behaving the same.
+    familySharing: {
+      progress: { type: Boolean, default: true },
+      missions: { type: Boolean, default: true },
+    },
     resetPasswordTokenHash: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
     pdpaConsent: { type: Boolean, required: true },

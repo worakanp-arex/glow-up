@@ -193,6 +193,28 @@ export async function updateSchedule(req, res) {
   res.json(session);
 }
 
+export async function recordOutcome(req, res) {
+  const session = await CounsellingSession.findById(req.params.id);
+  if (!session) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  if (req.user.role === "counsellor" && session.counsellor?.toString() !== req.user.id) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  session.outcome = {
+    summary: req.body.summary,
+    recordedAt: new Date(),
+    recordedBy: req.user.id,
+  };
+  await session.save();
+  await session.populate("user", USER_SUMMARY_FIELDS);
+  await session.populate("counsellor", COUNSELLOR_SUMMARY_FIELDS);
+  await session.populate("outcome.recordedBy", "name");
+
+  res.json(session);
+}
+
 export async function updateStatus(req, res) {
   const { status } = req.body;
   if (!["active", "closed", "cancelled"].includes(status)) {

@@ -15,6 +15,9 @@ function removeUploadedFile(fileUrl) {
 
 const OWN_PROFILE_FIELDS = [
   "name",
+  "nickname",
+  "province",
+  "bio",
   "phone",
   "age",
   "gender",
@@ -40,6 +43,12 @@ function pick(source, fields) {
 
 export async function updateMe(req, res) {
   const updates = pick(req.body, OWN_PROFILE_FIELDS);
+  // Dotted paths so toggling one sharing option doesn't reset the other.
+  for (const key of ["progress", "missions"]) {
+    if (typeof req.body.familySharing?.[key] === "boolean") {
+      updates[`familySharing.${key}`] = req.body.familySharing[key];
+    }
+  }
   const user = await User.findByIdAndUpdate(req.user.id, updates, {
     new: true,
     runValidators: true,

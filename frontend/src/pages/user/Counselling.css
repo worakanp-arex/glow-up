@@ -1,297 +1,102 @@
 .counselling-page {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
-}
-
-.counselling-page h1 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-  color: var(--color-text);
-}
-
-.counselling-intro {
-  margin: 0 0 2rem;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
+  padding: 2.5rem 1.5rem 4rem;
 }
 
 .counselling-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 28px;
   align-items: start;
 }
 
+.counselling-sidebar, .counselling-side { min-width: 0; }
+.counselling-side { display: flex; flex-direction: column; gap: 24px; }
+
+/* ---------- Request form ---------- */
+.counselling-form { display: flex; flex-direction: column; gap: 22px; }
+.counselling-form-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.counselling-form-title { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--color-text); }
+.counselling-field { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.counselling-field-label { font-size: .82rem; font-weight: 600; color: var(--color-text); }
+
+.counselling-type-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.counselling-type-btn { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 10px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text-secondary); font: inherit; font-size: .85rem; cursor: pointer; transition: background-color .15s, border-color .15s, color .15s; }
+.counselling-type-btn:hover { background: var(--color-surface-hover); }
+.counselling-type-btn.active { background: var(--color-primary-50); border-color: var(--color-primary-400); color: var(--color-primary-700); font-weight: 600; }
+
+.counselling-topic-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.counselling-topic-chips button { padding: 4px 12px; border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-surface); color: var(--color-text-secondary); font: inherit; font-size: .72rem; cursor: pointer; }
+.counselling-topic-chips button:hover, .counselling-topic-chips button.active { border-color: var(--color-primary-300); background: var(--color-primary-50); color: var(--color-primary-700); }
+
+.counselling-note { display: flex; align-items: center; gap: 8px; margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--color-surface-hover); font-size: .78rem; color: var(--color-text-secondary); }
+.counselling-note svg { color: var(--color-text-muted); }
+.counselling-form .ui-btn { min-height: 50px; }
+
+.counselling-error { margin: 0; padding: 10px 12px; border-radius: 10px; background-color: var(--color-danger-bg); color: var(--color-danger); font-size: .85rem; }
+
+/* ---------- Appointments / history ---------- */
+.counselling-history .ui-card-head { margin-bottom: 16px; }
+.counselling-history-sub { margin: 2px 0 0; font-size: .75rem; font-weight: 400; color: var(--color-text-muted); }
+.counselling-history-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 16px; border-radius: 12px; background: var(--color-surface-hover); }
+.counselling-history-tabs button { min-height: 38px; border: 0; border-radius: 9px; background: none; color: var(--color-text-secondary); font: inherit; font-size: .8rem; cursor: pointer; }
+.counselling-history-tabs button[aria-selected="true"] { background: var(--color-surface); color: var(--color-primary-700); font-weight: 600; box-shadow: var(--shadow-sm); }
+
+.counselling-none { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 32px 12px; text-align: center; }
+.counselling-none svg { margin-bottom: 8px; color: var(--color-primary-300); }
+.counselling-none strong { font-size: .95rem; color: var(--color-text-secondary); }
+.counselling-none span { font-size: .78rem; line-height: 1.7; color: var(--color-text-muted); }
+
+.counselling-month-group + .counselling-month-group { margin-top: 12px; }
+.counselling-month-heading { margin: 0 0 6px; font-size: .72rem; font-weight: 600; color: var(--color-text-muted); }
+.counselling-load-more { margin-top: 12px; min-height: 40px; font-size: .78rem; }
+.counselling-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.counselling-list-link { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--color-border); border-radius: 14px; text-decoration: none; color: inherit; transition: background-color .15s, border-color .15s; }
+.counselling-list-link:hover { background: var(--color-primary-50); border-color: var(--color-primary-200); }
+.counselling-list-icon { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px; background: var(--color-primary-50); color: var(--color-primary-600); }
+.counselling-topic { margin: 0; font-size: .85rem; font-weight: 600; color: var(--color-text); overflow-wrap: anywhere; }
+.counselling-meta { margin: 2px 0 0; font-size: .72rem; color: var(--color-text-muted); }
+
+.counselling-status-badge { flex-shrink: 0; padding: .2rem .65rem; border-radius: var(--radius-full); font-size: .72rem; font-weight: 600; white-space: nowrap; }
+.counselling-status-pending { background-color: var(--color-warning-bg); color: var(--color-warning); }
+.counselling-status-active { background-color: var(--color-info-bg); color: var(--color-info); }
+.counselling-status-scheduled { background-color: var(--color-success-bg); color: var(--color-success); }
+.counselling-status-closed { background-color: var(--color-ink-200); color: var(--color-ink-600); }
+.counselling-status-cancelled { background-color: var(--color-danger-bg); color: var(--color-danger); }
+
+.counselling-reassure { display: flex; align-items: flex-start; gap: 14px; padding: 0 8px; }
+.counselling-reassure > span { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: color-mix(in srgb, #8b7fd6 14%, var(--color-surface)); color: #6c5fc7; }
+.counselling-reassure strong { font-size: .9rem; }
+.counselling-reassure p { margin: 4px 0 0; font-size: .78rem; line-height: 1.7; color: var(--color-text-muted); }
+
 @media (max-width: 860px) {
-  .counselling-layout {
-    grid-template-columns: 1fr;
-  }
+  .counselling-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .counselling-type-picker { gap: 6px; }
+  .counselling-type-btn { flex-direction: column; gap: 4px; padding: 10px 6px; font-size: .78rem; }
 }
 
-.counselling-page h2 {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  color: var(--color-text-secondary);
+/* ---------- Right column fills the form's height; long lists scroll ---------- */
+.counselling-layout { align-items: stretch; }
+.counselling-history { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.counselling-history-scroll { flex: 1; min-height: 0; overflow-y: auto; margin-right: -8px; padding-right: 8px; scrollbar-width: thin; }
+.counselling-none { height: 100%; justify-content: center; }
+@media (min-width: 861px) {
+  .counselling-side { contain: size; }
+  .counselling-history { min-height: 260px; }
+}
+@media (max-width: 860px) {
+  .counselling-history-scroll { max-height: 420px; }
 }
 
-.counselling-empty {
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  text-align: center;
-  padding: 2rem 0;
-}
-
-.counselling-month-group {
-  margin-bottom: 1.5rem;
-}
-
-.counselling-month-heading {
-  margin: 0 0 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-}
-
-.counselling-load-more {
-  width: 100%;
-  justify-content: center;
-}
-
-.counselling-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.counselling-list-link {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  padding: 1.1rem 1.25rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.counselling-list-link:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.counselling-list-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
-  color: var(--color-primary-600);
-  flex-shrink: 0;
-}
-
-.counselling-list-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.counselling-topic {
-  margin: 0 0 0.2rem;
-  font-weight: 600;
-  color: var(--color-text);
-  font-size: 0.92rem;
-}
-
-.counselling-meta {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-}
-
-.counselling-status-badge {
-  flex-shrink: 0;
-  padding: 0.2rem 0.65rem;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.counselling-status-pending {
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning);
-}
-
-.counselling-status-active {
-  background-color: var(--color-info-bg);
-  color: var(--color-info);
-}
-
-.counselling-status-scheduled {
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
-}
-
-.counselling-status-closed {
-  background-color: var(--color-ink-200);
-  color: var(--color-ink-600);
-}
-
-.counselling-status-cancelled {
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-}
-
-/* ---------- Sidebar form ---------- */
-
-.counselling-sidebar {
-  position: sticky;
-  top: 1.5rem;
-}
-
-.counselling-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.counselling-form-title {
-  margin: 0 !important;
-  font-size: 1rem !important;
-  color: var(--color-text) !important;
-}
-
-.counselling-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.counselling-form input[type="text"],
-.counselling-form select,
-.counselling-form textarea {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
-  font-family: inherit;
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  resize: vertical;
-}
-
-.counselling-form input[type="text"]:focus,
-.counselling-form select:focus,
-.counselling-form textarea:focus {
-  outline: none;
-  border-color: var(--color-primary-400);
-  box-shadow: 0 0 0 3px var(--color-primary-50);
-}
-
-.counselling-form .btn-primary {
-  width: 100%;
-  justify-content: center;
-}
-
-.counselling-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.counselling-field-label {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.counselling-type-picker {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-}
-
-.counselling-type-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.6rem 0.4rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface);
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-}
-
-.counselling-type-btn.active {
-  border-color: var(--color-primary-400);
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-700);
-}
-
-.counselling-mood-picker {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.4rem;
-}
-
-.counselling-mood-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-
-.counselling-mood-btn:hover {
-  transform: translateY(-1px);
-}
-
-.counselling-mood-btn.active {
-  border-color: var(--color-primary-400);
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-700);
-}
-
-.counselling-mood-selected-label {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-}
-
-.counselling-error {
-  margin: 0;
-  padding: 0.6rem 0.75rem;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-  font-size: 0.85rem;
-}
+.counselling-steps h2 { margin: 0 0 14px; font-size: .95rem; font-weight: 600; }
+.counselling-steps ol { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.counselling-steps li { display: flex; align-items: flex-start; gap: 12px; }
+.counselling-steps li > span { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .78rem; font-weight: 600; }
+.counselling-steps strong { display: block; font-size: .85rem; }
+.counselling-steps small { font-size: .74rem; color: var(--color-text-muted); }
+.counselling-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--color-border); text-align: center; }
+.counselling-counts dt { font-size: .68rem; color: var(--color-text-muted); }
+.counselling-counts dd { margin: 2px 0 0; font-size: 1.2rem; font-weight: 600; color: var(--color-primary-600); }

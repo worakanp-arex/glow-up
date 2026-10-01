@@ -1,172 +1,86 @@
 .weekly-checkin-page {
-  max-width: 620px;
+  max-width: var(--content-width);
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 2.5rem 1.5rem 4rem;
 }
 
-.weekly-checkin-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  margin-bottom: 1.5rem;
+.weekly-checkin-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: stretch; }
+.weekly-checkin-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+@media (min-width: 961px) {
+  /* The form sets the row height; the history fills the rest and scrolls. */
+  .weekly-checkin-side { contain: size; }
 }
 
-.weekly-checkin-back:hover {
-  color: var(--color-primary-600);
+/* ---------- Form ---------- */
+.weekly-checkin-form { display: flex; flex-direction: column; gap: 22px; }
+.weekly-checkin-form .checkin-title { margin-top: 4px; }
+.weekly-checkin-field { margin: 0; padding: 0; border: 0; min-width: 0; }
+.weekly-checkin-field legend { margin-bottom: 10px; padding: 0; font-size: .85rem; font-weight: 600; color: var(--color-text); }
+
+.weekly-checkin-stress-picker { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.weekly-checkin-stress-btn { --tone: var(--color-primary-500); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 4px; border: 1px solid var(--color-border-strong); border-radius: 14px; background: var(--color-surface); color: var(--color-text-secondary); font: inherit; cursor: pointer; transition: border-color .15s, background-color .15s; }
+.weekly-checkin-stress-btn b { font-size: 1.2rem; }
+.weekly-checkin-stress-btn small { font-size: .68rem; }
+.weekly-checkin-stress-btn.level-1 { --tone: var(--happiness-6); }
+.weekly-checkin-stress-btn.level-2 { --tone: var(--happiness-5); }
+.weekly-checkin-stress-btn.level-3 { --tone: var(--color-primary-400); }
+.weekly-checkin-stress-btn.level-4 { --tone: var(--happiness-3); }
+.weekly-checkin-stress-btn.level-5 { --tone: var(--happiness-2); }
+.weekly-checkin-stress-btn:hover { border-color: var(--tone); }
+.weekly-checkin-stress-btn.active { border-color: var(--tone); background: color-mix(in srgb, var(--tone) 18%, var(--color-surface)); color: var(--color-text); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 22%, transparent); }
+
+.weekly-checkin-trend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.weekly-checkin-trend-btn { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 10px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text-secondary); font: inherit; font-size: .8rem; cursor: pointer; }
+.weekly-checkin-trend-btn:hover { background: var(--color-surface-hover); }
+.weekly-checkin-trend-btn.active { border-color: var(--color-primary-400); background: var(--color-primary-50); color: var(--color-primary-700); font-weight: 600; }
+.trend-improving svg { color: var(--color-success); }
+.trend-worsening svg { color: var(--color-danger); }
+
+.weekly-checkin-risk-flag { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 12px; font-size: .85rem; color: var(--color-text-secondary); cursor: pointer; }
+.weekly-checkin-risk-flag input { width: 18px; height: 18px; accent-color: var(--color-danger); }
+.weekly-checkin-risk-note { margin: -8px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--color-danger-bg); color: var(--color-danger); font-size: .82rem; line-height: 1.7; }
+
+/* ---------- Done state ---------- */
+.weekly-checkin-done { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 28px 12px 12px; text-align: center; }
+.weekly-checkin-done-icon { display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: 8px; border-radius: 50%; background: var(--color-success-bg); color: var(--color-success); }
+.weekly-checkin-done h2 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+.weekly-checkin-done > p { margin: 0; font-size: .88rem; color: var(--color-text-secondary); }
+.weekly-checkin-done-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; max-width: 420px; margin: 20px 0 0; }
+.weekly-checkin-done-summary > div { padding: 14px; border-radius: 14px; background: var(--color-surface-hover); }
+.weekly-checkin-done-summary dt { font-size: .72rem; color: var(--color-text-muted); }
+.weekly-checkin-done-summary dd { margin: 4px 0 0; font-size: 1.4rem; font-weight: 600; color: var(--color-primary-600); }
+.weekly-checkin-done-summary dd small { font-size: .75rem; font-weight: 400; color: var(--color-text-muted); }
+.weekly-checkin-done-summary dd.is-text { font-size: .9rem; line-height: 2.1; }
+.weekly-checkin-done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
+
+/* ---------- History + help ---------- */
+.weekly-checkin-history { display: flex; flex-direction: column; flex: 1; min-height: 220px; }
+.weekly-checkin-history .ui-card-head { margin-bottom: 8px; }
+.weekly-checkin-history ul { flex: 1; min-height: 0; margin: 0 -8px 0 0; padding: 0 8px 0 0; list-style: none; overflow-y: auto; scrollbar-width: thin; }
+.weekly-checkin-history li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.weekly-checkin-history li:last-child { border-bottom: 0; }
+.weekly-checkin-history li > div { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.weekly-checkin-history-week { font-size: .85rem; }
+.weekly-checkin-history li small { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; color: var(--color-text-muted); }
+.weekly-checkin-history-stress { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary-50); color: var(--color-primary-700); font-weight: 700; }
+.weekly-checkin-history-stress.level-4, .weekly-checkin-history-stress.level-5 { background: color-mix(in srgb, var(--happiness-2) 20%, var(--color-surface)); color: color-mix(in srgb, var(--happiness-2) 75%, var(--color-ink-900)); }
+.weekly-checkin-history-label { flex-shrink: 0; font-size: .7rem; color: var(--color-text-muted); }
+.weekly-checkin-history-empty { margin: 0; font-size: .82rem; color: var(--color-text-muted); }
+
+.weekly-checkin-help { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.weekly-checkin-help-icon { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 6px; border-radius: 12px; background: var(--color-surface); color: var(--color-primary-600); }
+.weekly-checkin-help h2 { margin: 0; font-size: 1rem; font-weight: 600; }
+.weekly-checkin-help p { margin: 0 0 10px; font-size: .8rem; color: var(--color-text-secondary); }
+.weekly-checkin-hotline { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: .78rem; font-weight: 600; color: var(--color-danger); text-decoration: none; }
+
+@media (max-width: 960px) {
+  .weekly-checkin-layout { grid-template-columns: minmax(0, 1fr); }
+  .weekly-checkin-history ul { max-height: 360px; }
 }
-
-.weekly-checkin-page h1 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.4rem;
-  font-size: 1.4rem;
-  color: var(--color-text);
-}
-
-.weekly-checkin-subtitle {
-  margin: 0 0 1.5rem;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-}
-
-.weekly-checkin-done {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 1.25rem 1.5rem;
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
-  border-radius: var(--radius-lg);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.weekly-checkin-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.75rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.weekly-checkin-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
-
-.weekly-checkin-form select,
-.weekly-checkin-form textarea {
-  padding: 0.6rem 0.8rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  font-family: inherit;
-  background-color: var(--color-surface);
-  color: var(--color-text);
-}
-
-.weekly-checkin-form textarea {
-  resize: vertical;
-}
-
-.weekly-checkin-stress-picker {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.weekly-checkin-stress-btn {
-  flex: 1;
-  padding: 0.6rem 0;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface);
-  color: var(--color-text-secondary);
-  font-size: 0.95rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.weekly-checkin-stress-btn.active {
-  background-color: var(--color-primary-500);
-  border-color: var(--color-primary-500);
-  color: #ffffff;
-}
-
-.weekly-checkin-risk-flag {
-  flex-direction: row !important;
-  align-items: center;
-  gap: 0.5rem !important;
-}
-
-.weekly-checkin-risk-note {
-  margin: -0.5rem 0 0;
-  padding: 0.75rem 0.9rem;
-  border-radius: var(--radius-md);
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-  font-size: 0.82rem;
-  line-height: 1.6;
-}
-
-.weekly-checkin-history {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.weekly-checkin-history h2 {
-  margin: 0 0 1rem;
-  font-size: 0.95rem;
-  color: var(--color-text);
-}
-
-.weekly-checkin-history ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.weekly-checkin-history li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 0.6rem 0.85rem;
-  border-radius: var(--radius-md);
-  background-color: var(--color-ink-50);
-  font-size: 0.82rem;
-  color: var(--color-text-secondary);
-}
-
-.weekly-checkin-history-week {
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-@media (max-width: 520px) {
-  .weekly-checkin-page {
-    padding: 1.5rem 1rem 3rem;
-  }
-
-  .weekly-checkin-form {
-    padding: 1.25rem;
-  }
+@media (max-width: 600px) {
+  .weekly-checkin-stress-picker { gap: 4px; }
+  .weekly-checkin-stress-btn { padding: 10px 2px; }
+  .weekly-checkin-stress-btn small { font-size: .6rem; }
+  .weekly-checkin-trend { grid-template-columns: minmax(0, 1fr); }
+  .weekly-checkin-done-actions .ui-btn { flex: 1 1 100%; }
 }

@@ -27,7 +27,13 @@ export async function notifyLinkedFamily(recoveringUserId, message = DEFAULT_FAM
 export async function getTotalPoints(userId) {
   const [completedMissions, activityLogs, gamePlays, familyMissionLogs] = await Promise.all([
     UserMission.find({ user: userId, completed: true }).populate("mission", "rewardPoints"),
-    ActivityMissionLog.find({ user: userId }).select("pointsAwarded"),
+    // Logs from a mission that requires approval only count once approved;
+    // `requiresApproval: { $ne: true }` also matches pre-migration logs that
+    // predate this field, so their points keep counting as before.
+    ActivityMissionLog.find({
+      user: userId,
+      $or: [{ requiresApproval: { $ne: true } }, { approved: true }],
+    }).select("pointsAwarded"),
     GamePlay.find({ user: userId }).select("pointsAwarded"),
     FamilyMissionLog.find({ recoveringUser: userId, completed: true }).select("pointsAwarded"),
   ]);

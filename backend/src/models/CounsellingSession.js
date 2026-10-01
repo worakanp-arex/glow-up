@@ -38,6 +38,14 @@ const counsellingSessionSchema = new mongoose.Schema(
     },
 
     messages: [messageSchema],
+
+    // Structured clinical outcome, separate from the free-form chat thread —
+    // filled in by the assigned counsellor (or admin) after the session.
+    outcome: {
+      summary: { type: String },
+      recordedAt: { type: Date },
+      recordedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    },
   },
   { timestamps: true }
 );

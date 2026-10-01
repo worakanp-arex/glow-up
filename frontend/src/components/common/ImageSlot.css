@@ -1,0 +1,6 @@
+.image-slot { position: relative; overflow: hidden; background: var(--color-primary-50); }
+.image-slot-lilac { background: color-mix(in srgb, #8b7fd6 14%, var(--color-surface)); }
+.image-slot-peach { background: color-mix(in srgb, #f2a071 16%, var(--color-surface)); }
+.image-slot-sky { background: color-mix(in srgb, var(--color-primary-400) 20%, var(--color-surface)); }
+.image-slot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.image-slot.is-missing img { visibility: hidden; }

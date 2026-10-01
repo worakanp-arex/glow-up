@@ -1,4 +1,5 @@
 import MicroLesson from "../models/MicroLesson.js";
+import SavedLesson from "../models/SavedLesson.js";
 import { createCrudController } from "./crudFactory.js";
 
 const { getOne } = createCrudController(MicroLesson);
@@ -13,6 +14,29 @@ export async function listActiveLessons(req, res) {
       : { active: true, $or: [{ audience: "user" }, { audience: { $exists: false } }] };
   const lessons = await MicroLesson.find(filter).sort({ order: 1, createdAt: -1 });
   res.json(lessons);
+}
+
+export async function mySavedLessonIds(req, res) {
+  const saved = await SavedLesson.find({ user: req.user.id }).select("lesson");
+  res.json(saved.map((item) => item.lesson));
+}
+
+export async function saveLesson(req, res) {
+  const lesson = await MicroLesson.findOne({ _id: req.params.id, active: true }).select("_id");
+  if (!lesson) {
+    return res.status(404).json({ message: "ไม่พบบทเรียนนี้" });
+  }
+  await SavedLesson.updateOne(
+    { user: req.user.id, lesson: lesson._id },
+    { $setOnInsert: { user: req.user.id, lesson: lesson._id } },
+    { upsert: true }
+  );
+  res.status(201).json({ saved: true });
+}
+
+export async function unsaveLesson(req, res) {
+  await SavedLesson.deleteOne({ user: req.user.id, lesson: req.params.id });
+  res.json({ saved: false });
 }
 
 export async function listAllLessons(req, res) {

@@ -1,15 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Heart, ShieldCheck, Zap } from "lucide-react";
+import AsyncState from "../../common/AsyncState.jsx";
 import * as gameService from "../../../services/gameService.js";
+import { GameResult } from "./GameShell.jsx";
+import { shuffle } from "./shuffle.js";
 import "./CopingMemoryGame.css";
-
-function shuffle(array) {
-  const copy = [...array];
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-}
 
 function buildDeck(pairs) {
   const cards = [];
@@ -20,92 +15,126 @@ function buildDeck(pairs) {
   return shuffle(cards);
 }
 
-function CopingMemoryGame({ status, onPlayed, embedded = false }) {
+// Match each trigger card with its healthy coping response.
+function CopingMemoryGame({ onPlayed, onClose }) {
   const [pairs, setPairs] = useState(null);
   const [deck, setDeck] = useState([]);
   const [flipped, setFlipped] = useState([]);
-  const [matched, setMatched] = useState(new Set());
+  const [matched, setMatched] = useState(() => new Set());
   const [moves, setMoves] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
-  const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const submittedRef = useRef(false);
 
   useEffect(() => {
-    gameService.getMemoryPairs().then((data) => {
-      setPairs(data.pairs);
-      setDeck(buildDeck(data.pairs));
-    });
+    gameService
+      .getMemoryPairs()
+      .then((data) => {
+        setPairs(data.pairs);
+        setDeck(buildDeck(data.pairs));
+      })
+      .catch((err) => setError(err.response?.data?.message || "โหลดเกมไม่สำเร็จ"));
   }, []);
 
-  const played = status.played || Boolean(result);
   const allMatched = pairs && matched.size === pairs.length;
 
   useEffect(() => {
-    if (!allMatched || played || submitting || submitAttempted) return;
-    setSubmitting(true);
-    setSubmitAttempted(true);
+    if (!allMatched || submittedRef.current) return;
+    submittedRef.current = true;
     gameService
       .submitMemoryResult(moves)
       .then((data) => {
-        setResult(data.play);
+        setResult(data);
         onPlayed?.();
       })
-      .catch((err) => setError(err.response?.data?.message || "บันทึกผลไม่สำเร็จ"))
-      .finally(() => setSubmitting(false));
-  }, [allMatched, played, submitting, submitAttempted, moves, onPlayed]);
+      .catch((err) => setError(err.response?.data?.message || "บันทึกผลไม่สำเร็จ"));
+  }, [allMatched, moves, onPlayed]);
+
+  const restart = useCallback(() => {
+    submittedRef.current = false;
+    setDeck(buildDeck(pairs));
+    setFlipped([]);
+    setMatched(new Set());
+    setMoves(0);
+    setResult(null);
+    setError("");
+  }, [pairs]);
 
   function handleFlip(card) {
-    if (played || flipped.length === 2 || flipped.includes(card.cardId) || matched.has(card.pairId)) return;
+    if (flipped.length === 2 || flipped.includes(card.cardId) || matched.has(card.pairId)) return;
     const nextFlipped = [...flipped, card.cardId];
     setFlipped(nextFlipped);
+    if (nextFlipped.length < 2) return;
 
-    if (nextFlipped.length === 2) {
-      setMoves((m) => m + 1);
-      const [firstId, secondId] = nextFlipped;
-      const first = deck.find((c) => c.cardId === firstId);
-      const second = deck.find((c) => c.cardId === secondId);
-      if (first.pairId === second.pairId) {
+    setMoves((m) => m + 1);
+    const [first, second] = nextFlipped.map((id) => deck.find((c) => c.cardId === id));
+    if (first.pairId === second.pairId) {
+      setTimeout(() => {
         setMatched((prev) => new Set(prev).add(first.pairId));
         setFlipped([]);
-      } else {
-        setTimeout(() => setFlipped([]), 800);
-      }
+      }, 350);
+    } else {
+      setTimeout(() => setFlipped([]), 900);
     }
   }
 
-  if (played) {
+  if (!pairs) return error ? <p className="game-error">{error}</p> : <AsyncState />;
+
+  if (result) {
     return (
-      <div className={`coping-memory-card${embedded ? " embedded" : ""}`}>
-        <p className="coping-memory-done">เล่นแล้ววันนี้ · {result?.resultLabel || status.resultLabel}</p>
-      </div>
+      <GameResult
+        headline="จับคู่ครบทุกคู่แล้ว!"
+        detail={`ใช้ไปทั้งหมด ${moves} ครั้ง${moves <= pairs.length + 2 ? " — ความจำเยี่ยมมาก" : ""}`}
+        pointsAwarded={result.pointsAwarded}
+        practice={result.practice}
+        onReplay={restart}
+        onClose={onClose}
+      >
+        <ul className="memory-recap">
+          {pairs.map((pair) => (
+            <li key={pair.id}><span>{pair.trigger}</span><span aria-hidden="true">→</span><strong>{pair.coping}</strong></li>
+          ))}
+        </ul>
+      </GameResult>
     );
   }
 
   return (
-    <div className={`coping-memory-card${embedded ? " embedded" : ""}`}>
-      <p className="coping-memory-hint">จับคู่ "สิ่งกระตุ้น" กับ "วิธีรับมือที่เหมาะสม" ให้ครบทุกคู่ ยิ่งใช้จำนวนครั้งน้อยยิ่งได้แต้มมาก</p>
-      <p className="coping-memory-moves">จำนวนครั้งที่เปิด: {moves}</p>
-      {!deck.length ? (
-        <p>กำลังโหลด...</p>
-      ) : (
-        <div className="coping-memory-grid">
-          {deck.map((card) => {
-            const isFlipped = flipped.includes(card.cardId) || matched.has(card.pairId);
-            return (
+    <div className="memory-game">
+      <div className="game-hud">
+        <span>จับคู่ <b>{matched.size}</b> / {pairs.length}</span>
+        <span>เปิดไปแล้ว <b>{moves}</b> ครั้ง</span>
+      </div>
+      <p className="memory-legend">
+        <span className="memory-legend-trigger"><Zap size={13} aria-hidden="true" />สิ่งกระตุ้น</span>
+        <span className="memory-legend-coping"><ShieldCheck size={13} aria-hidden="true" />วิธีรับมือ</span>
+      </p>
+      <ul className="memory-grid">
+        {deck.map((card) => {
+          const isMatched = matched.has(card.pairId);
+          const isOpen = isMatched || flipped.includes(card.cardId);
+          return (
+            <li key={card.cardId}>
               <button
-                key={card.cardId}
                 type="button"
-                className={`coping-memory-tile${isFlipped ? " flipped" : ""}${matched.has(card.pairId) ? " matched" : ""}`}
+                className={`memory-card memory-card-${card.kind}${isOpen ? " is-open" : ""}${isMatched ? " is-matched" : ""}`}
                 onClick={() => handleFlip(card)}
+                disabled={isMatched}
+                aria-label={isOpen ? card.text : "การ์ดคว่ำอยู่ แตะเพื่อเปิด"}
               >
-                {isFlipped ? card.text : "?"}
+                <span className="memory-card-inner">
+                  <span className="memory-card-back" aria-hidden="true"><Heart size={22} /></span>
+                  <span className="memory-card-front">
+                    {card.kind === "trigger" ? <Zap size={14} aria-hidden="true" /> : <ShieldCheck size={14} aria-hidden="true" />}
+                    {card.text}
+                  </span>
+                </span>
               </button>
-            );
-          })}
-        </div>
-      )}
-      {error && <p className="coping-memory-error">{error}</p>}
+            </li>
+          );
+        })}
+      </ul>
+      {error && <p className="game-error">{error}</p>}
     </div>
   );
 }

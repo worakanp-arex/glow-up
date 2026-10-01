@@ -73,9 +73,15 @@ function FamilyDashboard({ links }) {
               {summary.avatarUrl ? <img src={summary.avatarUrl} alt="" /> : initials(summary.name)}
             </span>
             <h2>{summary.name}</h2>
-            <p className="family-dashboard-stage">{summary.currentStageLabel}</p>
+            {summary.currentStageLabel && <p className="family-dashboard-stage">{summary.currentStageLabel}</p>}
           </div>
 
+          {summary.sharing?.progress === false ? (
+            <p className="family-dashboard-note">
+              <Users size={14} />
+              <span>{summary.name} เลือกยังไม่แบ่งปันระดับและความสำเร็จในตอนนี้ คุณยังส่งกำลังใจได้เสมอ</span>
+            </p>
+          ) : (
           <div className="family-dashboard-stats">
             <div className="family-dashboard-stat-card">
               <Flame size={20} />
@@ -98,6 +104,7 @@ function FamilyDashboard({ links }) {
               <span className="family-dashboard-stat-label">เลเวล</span>
             </div>
           </div>
+          )}
 
           {summary.rewardsEarned.length > 0 && (
             <div className="family-dashboard-rewards">

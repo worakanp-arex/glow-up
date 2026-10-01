@@ -9,6 +9,10 @@ import {
   updateJob,
   deleteJob,
   confirmJob,
+  mySavedJobs,
+  mySavedJobIds,
+  saveJob,
+  unsaveJob,
 } from "../controllers/jobController.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
@@ -56,6 +60,10 @@ router.get(
   validate,
   asyncHandler(listAllJobsForAdmin)
 );
+router.get("/saved", verifyToken, requireRole("user"), asyncHandler(mySavedJobs));
+router.get("/saved/ids", verifyToken, requireRole("user"), asyncHandler(mySavedJobIds));
+router.post("/:id/save", verifyToken, requireRole("user"), [objectIdParam("id")], validate, asyncHandler(saveJob));
+router.delete("/:id/save", verifyToken, requireRole("user"), [objectIdParam("id")], validate, asyncHandler(unsaveJob));
 router.get("/:id", [objectIdParam("id")], validate, asyncHandler(getJob));
 
 router.post("/", verifyToken, requireRole("employer"), JOB_BODY, validate, asyncHandler(createJob));

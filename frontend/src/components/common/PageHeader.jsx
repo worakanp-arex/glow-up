@@ -2,9 +2,9 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import "./PageHeader.css";
 
-export default function PageHeader({ children, icon: Icon = FileText, description, backTo, backLabel, onBack, actions, variant = "default" }) {
+export default function PageHeader({ children, icon: Icon = FileText, eyebrow, description, backTo, backLabel, onBack, actions, variant = "default" }) {
   return (
-    <header className={`page-header page-header-${variant}`}>
+    <header className={`page-header page-header-${variant}${eyebrow ? " has-eyebrow" : ""}`}>
       {(backTo || onBack) && (
         backTo ? <Link className="page-back" to={backTo} aria-label={backLabel ? `ย้อนกลับไป${backLabel}` : "ย้อนกลับ"}>
           <ArrowLeft size={16} aria-hidden="true" /><span>ย้อนกลับ</span>
@@ -14,7 +14,10 @@ export default function PageHeader({ children, icon: Icon = FileText, descriptio
       )}
       <div className="page-header-row">
         <div className="page-heading">
-          <span className="page-heading-icon" aria-hidden="true"><Icon size={22} /></span>
+          <p className="page-eyebrow">
+            <span className="page-heading-icon" aria-hidden="true"><Icon size={22} /></span>
+            {eyebrow && <span className="page-eyebrow-text">{eyebrow}</span>}
+          </p>
           <div className="page-heading-copy">
             <h1 className="page-title">{children}</h1>
             {description && <p className="page-description">{description}</p>}

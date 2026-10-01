@@ -39,3 +39,7 @@ export function updateSchedule(id, payload) {
 export function updateStatus(id, status) {
   return api.put(`/counselling/${id}/status`, { status }).then((res) => res.data);
 }
+
+export function recordOutcome(id, summary) {
+  return api.put(`/counselling/${id}/outcome`, { summary }).then((res) => res.data);
+}

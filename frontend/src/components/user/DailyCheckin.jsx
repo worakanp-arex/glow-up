@@ -1,10 +1,17 @@
 import { useState } from "react";
-import { CheckCircle2, Send, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BookOpen, CalendarHeart, CheckCircle2, Clock, Gamepad2, Heart, Lock, Check } from "lucide-react";
 import * as emotionService from "../../services/emotionService.js";
-import { HAPPINESS_LEVELS } from "../../constants/happiness.js";
+import MoodFacePicker from "./MoodFacePicker.jsx";
 import "./DailyCheckin.css";
 
 const INITIAL_FORM = { happinessLevel: null, cravingLevel: 5, note: "" };
+
+const NEXT_STEPS = [
+  { to: "/craving-tracker", icon: CalendarHeart, title: "ดูปฏิทินความรู้สึก", hint: "แก้ไขบันทึกวันนี้ได้ที่นี่" },
+  { to: "/games", icon: Gamepad2, title: "พักสักนิด มาเล่นกัน", hint: "เกมสั้น ๆ รับ XP" },
+  { to: "/courses", icon: BookOpen, title: "เรียนรู้ต่อ", hint: "เรื่องที่ใช้ได้ในวันพรุ่งนี้" },
+];
 
 function DailyCheckin({ loggedToday, onLogged }) {
   const [form, setForm] = useState(INITIAL_FORM);
@@ -34,80 +41,75 @@ function DailyCheckin({ loggedToday, onLogged }) {
   const showDone = loggedToday || justLogged;
 
   return (
-    <div className={`daily-checkin${showDone ? " daily-checkin-done" : ""}`}>
+    <section className={`ui-card checkin${showDone ? " checkin-done" : ""}`}>
       {showDone ? (
-        <div className="daily-checkin-complete">
-          <div className="daily-checkin-complete-icon">
-            <CheckCircle2 size={26} />
+        <>
+          <div className="checkin-top">
+            <span className="ui-chip"><Heart size={12} aria-hidden="true" />เช็คอินความรู้สึก</span>
+            <span className="checkin-private"><Lock size={12} aria-hidden="true" />พื้นที่ส่วนตัว</span>
           </div>
-          <div>
-            <h2>เช็คอินวันนี้เรียบร้อยแล้ว</h2>
-            <p>เก่งมาก! แก้ไขบันทึกวันนี้ได้ที่หน้าบันทึกอารมณ์ หรือกลับมาใหม่พรุ่งนี้เพื่อรักษาสถิติของคุณไว้</p>
+          <div className="checkin-complete">
+            <span className="checkin-complete-icon"><CheckCircle2 size={28} /></span>
+            <div>
+              <h2>เช็คอินวันนี้เรียบร้อยแล้ว</h2>
+              <p>เก่งมาก! กลับมาใหม่พรุ่งนี้เพื่อรักษาสถิติของคุณไว้</p>
+            </div>
           </div>
-        </div>
+          <p className="checkin-next-title">ต่อจากนี้ ลองทำอะไรดี?</p>
+          <div className="checkin-next">
+            {NEXT_STEPS.map(({ to, icon: Icon, title, hint }) => (
+              <Link key={to} to={to} className="checkin-next-item">
+                <span aria-hidden="true"><Icon size={18} /></span>
+                <strong>{title}</strong>
+                <small>{hint}</small>
+              </Link>
+            ))}
+          </div>
+        </>
       ) : (
         <>
-          <div className="daily-checkin-header">
-            <span className="daily-checkin-eyebrow">
-              <Sparkles size={14} />
-              เช็คอินประจำวัน
-            </span>
-            <h2>วันนี้คุณรู้สึกอย่างไรบ้าง?</h2>
-            <p>ใช้เวลาไม่ถึงนาที ช่วยให้เราดูแลคุณได้ดีขึ้น และรักษาสถิติต่อเนื่องของคุณไว้</p>
+          <div className="checkin-top">
+            <span className="ui-chip"><Heart size={12} aria-hidden="true" />เช็คอินความรู้สึก</span>
+            <span className="checkin-private"><Lock size={12} aria-hidden="true" />พื้นที่ส่วนตัว</span>
           </div>
+          <h2 className="checkin-title">วันนี้คุณรู้สึกอย่างไรบ้าง?</h2>
+          <p className="checkin-sub">ไม่มีคำตอบที่ถูกหรือผิด เลือกความรู้สึกที่ใกล้กับคุณที่สุด</p>
 
-          <form className="daily-checkin-form" onSubmit={handleSubmit}>
-            <div className="daily-checkin-happiness-picker" role="radiogroup" aria-label="ระดับความสุขวันนี้">
-              {HAPPINESS_LEVELS.map(({ level, label, icon: Icon, color }) => (
-                <button
-                  key={level}
-                  type="button"
-                  role="radio"
-                  aria-checked={form.happinessLevel === level}
-                  title={label}
-                  className={`daily-checkin-happiness-btn${form.happinessLevel === level ? " active" : ""}`}
-                  style={{ "--happiness-color": color }}
-                  onClick={() => setForm((prev) => ({ ...prev, happinessLevel: level }))}
-                >
-                  <Icon size={18} />
-                </button>
-              ))}
-            </div>
+          <form className="checkin-form" onSubmit={handleSubmit}>
+            <MoodFacePicker value={form.happinessLevel} onChange={(level) => setForm((prev) => ({ ...prev, happinessLevel: level }))} />
 
-            <div className="daily-checkin-form-row">
-              <label className="daily-checkin-range">
-                <span>ระดับความอยาก</span>
-                <input
-                  type="range"
-                  name="cravingLevel"
-                  min={1}
-                  max={10}
-                  value={form.cravingLevel}
-                  onChange={handleChange}
-                />
-                <span className="daily-checkin-range-value">{form.cravingLevel}/10</span>
-              </label>
-            </div>
+            <CravingRange value={form.cravingLevel} onChange={handleChange} />
 
-            <label className="daily-checkin-note">
-              <span>บันทึกประจำวัน (ไม่บังคับ)</span>
-              <textarea
-                name="note"
-                value={form.note}
-                onChange={handleChange}
-                rows={2}
-                placeholder="วันนี้เป็นอย่างไรบ้าง..."
-              />
+            <label className="checkin-note">
+              <span>อยากเล่าอะไรเพิ่มเติมไหม <small>(ไม่บังคับ)</small></span>
+              <textarea name="note" value={form.note} onChange={handleChange} rows={3} placeholder="วันนี้มีอะไรเกิดขึ้นกับคุณบ้าง..." />
             </label>
 
-            <button type="submit" className="daily-checkin-submit" disabled={submitting || !form.happinessLevel}>
-              <Send size={16} />
-              <span>{submitting ? "กำลังบันทึก..." : "บันทึกเช็คอิน"}</span>
-            </button>
+            <div className="checkin-foot">
+              <span className="ui-muted"><Clock size={14} aria-hidden="true" />ใช้เวลาเพียง 1 นาที</span>
+              <button type="submit" className="ui-btn ui-btn-primary" disabled={submitting || !form.happinessLevel}>
+                <Check size={16} aria-hidden="true" />
+                <span>{submitting ? "กำลังบันทึก..." : "บันทึกความรู้สึก"}</span>
+              </button>
+            </div>
           </form>
         </>
       )}
-    </div>
+    </section>
+  );
+}
+
+// Shared with the mood-tracker page so both forms look the same.
+export function CravingRange({ value, onChange }) {
+  return (
+    <label className="checkin-range">
+      <span className="checkin-range-head">
+        <span>ความอยากใช้สาร</span>
+        <span className="checkin-range-value"><b>{value}</b> / 10</span>
+      </span>
+      <input type="range" name="cravingLevel" min={1} max={10} value={value} onChange={onChange} style={{ "--fill": `${((value - 1) / 9) * 100}%` }} />
+      <span className="checkin-range-scale" aria-hidden="true"><span>ไม่อยากเลย</span><span>อยากมาก</span></span>
+    </label>
   );
 }
 

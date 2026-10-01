@@ -1,10 +1,13 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
-import { Award, Check, Heart, Pencil, Plus, Trash2, Trophy, X } from "lucide-react";
+import { Award, Check, Heart, Layers, Pencil, Plus, Sliders, Trash2, Trophy, X } from "lucide-react";
 import * as missionService from "../../services/missionService.js";
 import * as rewardService from "../../services/rewardService.js";
 import * as familyMissionService from "../../services/familyMissionService.js";
+import * as missionCategoryService from "../../services/missionCategoryService.js";
+import * as adminService from "../../services/adminService.js";
+import { ICON_NAMES } from "../../utils/lucideIcon.js";
 import "./MissionManagement.css";
 
 const MISSION_TYPE_LABELS = {
@@ -25,6 +28,7 @@ const INITIAL_MISSION_FORM = {
 };
 const INITIAL_REWARD_FORM = { name: "", description: "", icon: "", pointsRequired: 10 };
 const INITIAL_FAMILY_MISSION_FORM = { title: "", description: "", points: 10 };
+const INITIAL_CATEGORY_FORM = { key: "", label: "", icon: "", order: 0 };
 
 function MissionManagement() {
   const [missions, setMissions] = useState([]);
@@ -49,12 +53,31 @@ function MissionManagement() {
   const [savingFamilyMission, setSavingFamilyMission] = useState(false);
   const [familyMissionError, setFamilyMissionError] = useState("");
 
+  const [categories, setCategories] = useState([]);
+  const [categoryForm, setCategoryForm] = useState(INITIAL_CATEGORY_FORM);
+  const [savingCategory, setSavingCategory] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [categoryEditForm, setCategoryEditForm] = useState(null);
+
+  const [pointsPerLevel, setPointsPerLevel] = useState("");
+  const [savingLevelSetting, setSavingLevelSetting] = useState(false);
+  const [levelSettingSaved, setLevelSettingSaved] = useState(false);
+
   useEffect(() => {
-    Promise.all([missionService.getMissions(), rewardService.getRewards(), familyMissionService.getFamilyMissions()])
-      .then(([missionData, rewardData, familyMissionData]) => {
+    Promise.all([
+      missionService.getMissions(),
+      rewardService.getRewards(),
+      familyMissionService.getFamilyMissions(),
+      missionCategoryService.getMissionCategories(),
+      adminService.getPointsPerLevel(),
+    ])
+      .then(([missionData, rewardData, familyMissionData, categoryData, levelSetting]) => {
         setMissions(missionData);
         setRewards(rewardData);
         setFamilyMissions(familyMissionData);
+        setCategories(categoryData);
+        setPointsPerLevel(String(levelSetting.pointsPerLevel));
       })
       .catch((err) => setLoadError(err))
       .finally(() => setLoading(false));
@@ -162,6 +185,61 @@ function MissionManagement() {
     setFamilyMissions((prev) => prev.filter((m) => m._id !== mission._id));
   }
 
+  async function handleCreateCategory(e) {
+    e.preventDefault();
+    setCategoryError("");
+    setSavingCategory(true);
+    try {
+      const created = await missionCategoryService.createMissionCategory({
+        ...categoryForm,
+        order: Number(categoryForm.order),
+      });
+      setCategories((prev) => [...prev, created].sort((a, b) => a.order - b.order));
+      setCategoryForm(INITIAL_CATEGORY_FORM);
+    } catch (err) {
+      setCategoryError(err.response?.data?.message || "เพิ่มหมวดภารกิจไม่สำเร็จ");
+    } finally {
+      setSavingCategory(false);
+    }
+  }
+
+  function startEditCategory(category) {
+    setEditingCategoryId(category._id);
+    setCategoryEditForm({ ...category });
+  }
+
+  async function saveEditCategory() {
+    const updated = await missionCategoryService.updateMissionCategory(editingCategoryId, {
+      label: categoryEditForm.label,
+      icon: categoryEditForm.icon,
+      order: Number(categoryEditForm.order),
+    });
+    setCategories((prev) => prev.map((c) => (c._id === updated._id ? updated : c)).sort((a, b) => a.order - b.order));
+    setEditingCategoryId(null);
+  }
+
+  async function handleDeleteCategory(category) {
+    if (!window.confirm(`ลบหมวดภารกิจ "${category.label}"?`)) return;
+    try {
+      await missionCategoryService.deleteMissionCategory(category._id);
+      setCategories((prev) => prev.filter((c) => c._id !== category._id));
+    } catch (err) {
+      window.alert(err.response?.data?.message || "ลบหมวดภารกิจไม่สำเร็จ");
+    }
+  }
+
+  async function handleSaveLevelSetting(e) {
+    e.preventDefault();
+    setSavingLevelSetting(true);
+    setLevelSettingSaved(false);
+    try {
+      await adminService.updatePointsPerLevel(Number(pointsPerLevel));
+      setLevelSettingSaved(true);
+    } finally {
+      setSavingLevelSetting(false);
+    }
+  }
+
   if (loadError) {
     return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
   }
@@ -171,12 +249,148 @@ function MissionManagement() {
 
   return (
     <div className="mission-management-page">
+      <datalist id="lucide-icon-names">
+        {ICON_NAMES.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
       <PageHeader
         icon={Trophy}
         description="กำหนดภารกิจสะสมแต้ม เกณฑ์คะแนน และเหรียญตราที่ผู้ใช้งานจะได้รับเมื่อทำภารกิจสำเร็จ"
       >
         จัดการภารกิจ คะแนน และเหรียญตรา
       </PageHeader>
+
+      <section className="mission-management-section">
+        <h2>
+          <Sliders size={18} />
+          <span>ตั้งค่าระดับ (Level)</span>
+        </h2>
+        <form className="mission-management-level-form" onSubmit={handleSaveLevelSetting}>
+          <label>
+            คะแนนสะสมต่อ 1 เลเวล
+            <input
+              type="number"
+              min={1}
+              value={pointsPerLevel}
+              onChange={(e) => { setPointsPerLevel(e.target.value); setLevelSettingSaved(false); }}
+            />
+          </label>
+          {levelSettingSaved && <span className="mission-management-level-saved">บันทึกแล้ว</span>}
+          <button type="submit" className="btn btn-primary" disabled={savingLevelSetting || !pointsPerLevel}>
+            {savingLevelSetting ? "กำลังบันทึก..." : "บันทึก"}
+          </button>
+        </form>
+      </section>
+
+      <section className="mission-management-section">
+        <h2>
+          <Layers size={18} />
+          <span>หมวดภารกิจ</span>
+        </h2>
+
+        <form className="mission-management-form" onSubmit={handleCreateCategory}>
+          <div className="mission-management-form-grid">
+            <label>
+              รหัสหมวด (ภาษาอังกฤษ, ไม่เว้นวรรค)
+              <input
+                type="text"
+                placeholder="เช่น vocational"
+                value={categoryForm.key}
+                onChange={(e) => setCategoryForm((f) => ({ ...f, key: e.target.value }))}
+                pattern="[a-z0-9_]+"
+                required
+              />
+            </label>
+            <label>
+              ชื่อหมวด
+              <input
+                type="text"
+                value={categoryForm.label}
+                onChange={(e) => setCategoryForm((f) => ({ ...f, label: e.target.value }))}
+                required
+              />
+            </label>
+            <label>
+              ไอคอน (ชื่อไอคอนจาก lucide-react)
+              <input
+                type="text"
+                list="lucide-icon-names"
+                placeholder="เช่น Briefcase"
+                value={categoryForm.icon}
+                onChange={(e) => setCategoryForm((f) => ({ ...f, icon: e.target.value }))}
+              />
+            </label>
+            <label>
+              ลำดับการแสดงผล
+              <input
+                type="number"
+                value={categoryForm.order}
+                onChange={(e) => setCategoryForm((f) => ({ ...f, order: e.target.value }))}
+              />
+            </label>
+          </div>
+          {categoryError && <p className="mission-management-error">{categoryError}</p>}
+          <button type="submit" className="btn btn-primary" disabled={savingCategory}>
+            <Plus size={16} />
+            <span>{savingCategory ? "กำลังเพิ่ม..." : "เพิ่มหมวดภารกิจ"}</span>
+          </button>
+        </form>
+
+        {categories.length === 0 ? (
+          <p className="mission-management-empty">ยังไม่มีหมวดภารกิจในระบบ</p>
+        ) : (
+          <ul className="mission-management-list">
+            {categories.map((category) => (
+              <li key={category._id}>
+                {editingCategoryId === category._id ? (
+                  <div className="mission-management-edit-form">
+                    <span>{category.key}</span>
+                    <input
+                      value={categoryEditForm.label}
+                      onChange={(e) => setCategoryEditForm((f) => ({ ...f, label: e.target.value }))}
+                    />
+                    <input
+                      list="lucide-icon-names"
+                      value={categoryEditForm.icon || ""}
+                      onChange={(e) => setCategoryEditForm((f) => ({ ...f, icon: e.target.value }))}
+                    />
+                    <input
+                      type="number"
+                      value={categoryEditForm.order}
+                      onChange={(e) => setCategoryEditForm((f) => ({ ...f, order: e.target.value }))}
+                    />
+                    <button type="button" onClick={saveEditCategory} title="บันทึก">
+                      <Check size={16} />
+                    </button>
+                    <button type="button" onClick={() => setEditingCategoryId(null)} title="ยกเลิก">
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="mission-management-list-body">
+                      <p className="mission-management-list-title">{category.label}</p>
+                      <p className="mission-management-list-meta">
+                        <span>รหัส: {category.key}</span>
+                        {category.icon && <span>ไอคอน: {category.icon}</span>}
+                      </p>
+                    </div>
+                    <div className="mission-management-list-actions">
+                      <button type="button" onClick={() => startEditCategory(category)} title="แก้ไข">
+                        <Pencil size={16} />
+                      </button>
+                      <button type="button" className="mission-management-delete" onClick={() => handleDeleteCategory(category)} title="ลบ">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="mission-management-section">
         <h2>
@@ -228,6 +442,7 @@ function MissionManagement() {
               ไอคอนตรา (ชื่อไอคอนจาก lucide-react)
               <input
                 type="text"
+                list="lucide-icon-names"
                 placeholder="เช่น Flame, Award, Trophy"
                 value={missionForm.badgeIcon}
                 onChange={(e) => setMissionForm((f) => ({ ...f, badgeIcon: e.target.value }))}
@@ -355,6 +570,7 @@ function MissionManagement() {
               ไอคอน (ชื่อไอคอนจาก lucide-react)
               <input
                 type="text"
+                list="lucide-icon-names"
                 placeholder="เช่น Sprout, Award, Trophy"
                 value={rewardForm.icon}
                 onChange={(e) => setRewardForm((f) => ({ ...f, icon: e.target.value }))}

@@ -2,6 +2,8 @@ import User from "../models/User.js";
 import Job from "../models/Job.js";
 import Application from "../models/Application.js";
 import RiskAssessment from "../models/RiskAssessment.js";
+import { getSetting, setSetting } from "../services/settingsService.js";
+import { DEFAULT_POINTS_PER_LEVEL, POINTS_PER_LEVEL_SETTING_KEY } from "../utils/level.js";
 
 export async function getDashboard(req, res) {
   const [
@@ -46,4 +48,15 @@ export async function getDashboard(req, res) {
     applications: { total: totalApplications, byStatus },
     risk: { byLevel },
   });
+}
+
+export async function getPointsPerLevel(req, res) {
+  const pointsPerLevel = await getSetting(POINTS_PER_LEVEL_SETTING_KEY, DEFAULT_POINTS_PER_LEVEL);
+  res.json({ pointsPerLevel });
+}
+
+export async function updatePointsPerLevel(req, res) {
+  const { pointsPerLevel } = req.body;
+  await setSetting(POINTS_PER_LEVEL_SETTING_KEY, pointsPerLevel);
+  res.json({ pointsPerLevel });
 }

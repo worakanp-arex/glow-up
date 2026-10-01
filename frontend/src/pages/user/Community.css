@@ -67,16 +67,28 @@
 }
 
 .community-tabs span,
-.community-tabs a {
-  padding-bottom: 0.6rem;
+.community-tabs a,
+.community-tabs button {
+  padding: 0 0 0.6rem;
+  margin-bottom: -1px;
+  font: inherit;
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--color-text-muted);
   text-decoration: none;
+  background: none;
+  border: 0;
   border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-.community-tabs span.active {
+.community-tabs button:hover {
+  color: var(--color-primary-600);
+}
+
+.community-tabs span.active,
+.community-tabs button.active {
   color: var(--color-primary-600);
   border-bottom-color: var(--color-primary-600);
 }

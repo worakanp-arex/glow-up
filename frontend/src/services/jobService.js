@@ -47,3 +47,19 @@ export function deleteJob(id) {
 export function confirmJob(id, status) {
   return api.put(`/jobs/${id}/confirm`, { status }).then((res) => res.data);
 }
+
+export function getSavedJobs() {
+  return api.get("/jobs/saved").then((res) => res.data);
+}
+
+export function getSavedJobIds() {
+  return api.get("/jobs/saved/ids").then((res) => res.data);
+}
+
+export function saveJob(id) {
+  return api.post(`/jobs/${id}/save`).then((res) => res.data);
+}
+
+export function unsaveJob(id) {
+  return api.delete(`/jobs/${id}/save`).then((res) => res.data);
+}
