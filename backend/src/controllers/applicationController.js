@@ -32,6 +32,15 @@ async function assertEmployerVerified(req, res) {
 }
 
 export async function applyToJob(req, res) {
+  // Job seekers must be verified by an admin before their application (and
+  // attached documents) reaches an employer.
+  const applicant = await User.findById(req.user.id).select("verifiedStatus");
+  if (applicant?.verifiedStatus !== "verified") {
+    return res.status(403).json({
+      message: "บัญชีของคุณยังไม่ได้รับการยืนยันจากผู้ดูแลระบบ จึงยังสมัครงานไม่ได้ กรุณารอการตรวจสอบ",
+    });
+  }
+
   const job = await Job.findById(req.params.jobId);
   if (!job) {
     return res.status(404).json({ message: "Job not found" });

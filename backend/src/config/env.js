@@ -10,4 +10,7 @@ export function validateEnvironment(env = process.env) {
   if (env.NODE_ENV === "production" && ![env.SMTP_HOST, env.SMTP_USER, env.SMTP_PASS].every(Boolean)) {
     throw new Error("SMTP configuration is required in production for account verification");
   }
+  if (env.NODE_ENV !== "production" && env.NODE_ENV !== "test" && ![env.SMTP_HOST, env.SMTP_USER, env.SMTP_PASS].every(Boolean)) {
+    console.warn("[config] SMTP_HOST/SMTP_USER/SMTP_PASS are not set — OTP, password-reset and invite emails will fail until configured.");
+  }
 }

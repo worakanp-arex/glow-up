@@ -112,11 +112,20 @@ test("path traversal is rejected before reading files", async () => {
   const res = response(); await authorizeDownload({ params: { kind: "resumes", filename: "../.env" } }, res, () => assert.fail());
   assert.equal(res.code, 404);
 });
+const verifiedApplicant = () => mock.method(User, "findById", () => ({ select: async () => ({ verifiedStatus: "verified" }) }));
+test("unverified job seekers cannot apply", async () => {
+  mock.method(User, "findById", () => ({ select: async () => ({ verifiedStatus: "pending" }) }));
+  const findJob = mock.method(Job, "findById", async () => ({ _id: "job", status: "open", verifiedStatus: "verified" }));
+  const res = response(); await applyToJob({ params: { jobId: "job" }, user: { id: "user" } }, res);
+  assert.equal(res.code, 403); assert.equal(findJob.mock.callCount(), 0);
+});
 test("expired jobs cannot receive applications", async () => {
+  verifiedApplicant();
   mock.method(Job, "findById", async () => ({ status: "open", verifiedStatus: "verified", expiredAt: new Date(0) }));
-  const res = response(); await applyToJob({ params: { jobId: "job" } }, res); assert.equal(res.code, 400);
+  const res = response(); await applyToJob({ params: { jobId: "job" }, user: { id: "user" } }, res); assert.equal(res.code, 400);
 });
 test("duplicate applications return a conflict", async () => {
+  verifiedApplicant();
   mock.method(Job, "findById", async () => ({ _id: "job", status: "open", verifiedStatus: "verified" }));
   mock.method(Application, "findOne", async () => ({ _id: "existing" }));
   const res = response(); await applyToJob({ params: { jobId: "job" }, user: { id: "user" } }, res); assert.equal(res.code, 409);

@@ -1,5 +1,8 @@
 export function errorHandler(err, req, res, next) {
   console.error(err);
+  if (err.code === "EMAIL_DELIVERY_FAILED") {
+    return res.status(503).json({ message: "ส่งอีเมลไม่สำเร็จ กรุณาลองใหม่อีกครั้งภายหลัง หรือติดต่อผู้ดูแลระบบ" });
+  }
   if (err.code === 11000) return res.status(409).json({ message: "มีรายการนี้อยู่แล้ว กรุณาโหลดข้อมูลอีกครั้ง" });
   if (err.name === "ValidationError") {
     return res.status(400).json({ message: err.message });

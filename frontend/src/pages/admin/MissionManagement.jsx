@@ -8,6 +8,7 @@ import * as familyMissionService from "../../services/familyMissionService.js";
 import * as missionCategoryService from "../../services/missionCategoryService.js";
 import * as adminService from "../../services/adminService.js";
 import { ICON_NAMES } from "../../utils/lucideIcon.js";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import "./MissionManagement.css";
 
 const MISSION_TYPE_LABELS = {
@@ -117,10 +118,18 @@ function MissionManagement() {
     setEditingMissionId(null);
   }
 
-  async function handleDeleteMission(mission) {
-    if (!window.confirm(`ลบภารกิจ "${mission.title}"?`)) return;
-    await missionService.deleteMission(mission._id);
-    setMissions((prev) => prev.filter((m) => m._id !== mission._id));
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleDeleteMission(mission) {
+    confirm({
+      title: "ลบภารกิจ",
+      message: `ต้องการลบภารกิจ "${mission.title}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
+      confirmLabel: "ลบภารกิจ",
+      onConfirm: async () => {
+        await missionService.deleteMission(mission._id);
+        setMissions((prev) => prev.filter((m) => m._id !== mission._id));
+      },
+    });
   }
 
   async function handleCreateReward(e) {
@@ -155,10 +164,16 @@ function MissionManagement() {
     setEditingRewardId(null);
   }
 
-  async function handleDeleteReward(reward) {
-    if (!window.confirm(`ลบเหรียญตรา "${reward.name}"?`)) return;
-    await rewardService.deleteReward(reward._id);
-    setRewards((prev) => prev.filter((r) => r._id !== reward._id));
+  function handleDeleteReward(reward) {
+    confirm({
+      title: "ลบเหรียญตรา",
+      message: `ต้องการลบเหรียญตรา "${reward.name}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
+      confirmLabel: "ลบเหรียญตรา",
+      onConfirm: async () => {
+        await rewardService.deleteReward(reward._id);
+        setRewards((prev) => prev.filter((r) => r._id !== reward._id));
+      },
+    });
   }
 
   async function handleCreateFamilyMission(e) {
@@ -179,10 +194,16 @@ function MissionManagement() {
     }
   }
 
-  async function handleDeleteFamilyMission(mission) {
-    if (!window.confirm(`ลบภารกิจครอบครัว "${mission.title}"?`)) return;
-    await familyMissionService.deleteFamilyMission(mission._id);
-    setFamilyMissions((prev) => prev.filter((m) => m._id !== mission._id));
+  function handleDeleteFamilyMission(mission) {
+    confirm({
+      title: "ลบภารกิจครอบครัว",
+      message: `ต้องการลบภารกิจครอบครัว "${mission.title}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
+      confirmLabel: "ลบภารกิจ",
+      onConfirm: async () => {
+        await familyMissionService.deleteFamilyMission(mission._id);
+        setFamilyMissions((prev) => prev.filter((m) => m._id !== mission._id));
+      },
+    });
   }
 
   async function handleCreateCategory(e) {
@@ -218,14 +239,17 @@ function MissionManagement() {
     setEditingCategoryId(null);
   }
 
-  async function handleDeleteCategory(category) {
-    if (!window.confirm(`ลบหมวดภารกิจ "${category.label}"?`)) return;
-    try {
-      await missionCategoryService.deleteMissionCategory(category._id);
-      setCategories((prev) => prev.filter((c) => c._id !== category._id));
-    } catch (err) {
-      window.alert(err.response?.data?.message || "ลบหมวดภารกิจไม่สำเร็จ");
-    }
+  function handleDeleteCategory(category) {
+    confirm({
+      title: "ลบหมวดภารกิจ",
+      message: `ต้องการลบหมวดภารกิจ "${category.label}" ใช่ไหม?`,
+      confirmLabel: "ลบหมวด",
+      errorMessage: "ลบหมวดภารกิจไม่สำเร็จ",
+      onConfirm: async () => {
+        await missionCategoryService.deleteMissionCategory(category._id);
+        setCategories((prev) => prev.filter((c) => c._id !== category._id));
+      },
+    });
   }
 
   async function handleSaveLevelSetting(e) {
@@ -249,6 +273,7 @@ function MissionManagement() {
 
   return (
     <div className="mission-management-page">
+      {confirmDialog}
       <datalist id="lucide-icon-names">
         {ICON_NAMES.map((name) => (
           <option key={name} value={name} />

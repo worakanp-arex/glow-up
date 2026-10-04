@@ -10,18 +10,15 @@ function ForgotPassword() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [devResetUrl, setDevResetUrl] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setMessage("");
-    setDevResetUrl("");
     setSubmitting(true);
     try {
       const result = await authService.forgotPassword(email);
       setMessage(result.message);
-      if (result.devResetUrl) setDevResetUrl(result.devResetUrl);
     } catch (err) {
       setError(err.response?.data?.message || "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่");
     } finally {
@@ -46,14 +43,6 @@ function ForgotPassword() {
 
         {error && <p className="login-error">{error}</p>}
         {message && <p className="login-success">{message}</p>}
-        {devResetUrl && (
-          <p className="login-dev-note">
-            โหมดทดสอบ:{" "}
-            <a href={devResetUrl} target="_blank" rel="noreferrer">
-              เปิดลิงก์รีเซ็ตรหัสผ่าน
-            </a>
-          </p>
-        )}
 
         <label>
           อีเมล

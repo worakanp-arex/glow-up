@@ -49,7 +49,7 @@ async function fireConcurrent(base, { method, path, token, body }, count) {
 }
 
 test("concurrent job applications: exactly one succeeds, the rest see a conflict", { timeout: 10000 }, async (t) => {
-  t.mock.method(User, "findById", () => ({ select: async () => ({ role: "user" }) }));
+  t.mock.method(User, "findById", () => ({ select: async () => ({ role: "user", verifiedStatus: "verified" }) }));
   t.mock.method(Job, "findById", async () => ({
     _id: "507f1f77bcf86cd799439011",
     status: "open",

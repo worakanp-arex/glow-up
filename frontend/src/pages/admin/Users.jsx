@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Ban, CalendarHeart, Check, Filter, Pencil, Plus, RotateCcw, Trash2, UserPlus, Users as UsersIcon, X } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as userService from "../../services/userService.js";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import "./Users.css";
 
 const ROLE_LABELS = {
@@ -66,10 +67,18 @@ function Users() {
     setUsers((prev) => prev.map((u) => (u._id === user._id ? updated : u)));
   }
 
-  async function handleDelete(user) {
-    if (!window.confirm(`ลบผู้ใช้ "${user.name}"?`)) return;
-    await userService.deleteUser(user._id);
-    setUsers((prev) => prev.filter((u) => u._id !== user._id));
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleDelete(user) {
+    confirm({
+      title: "ลบผู้ใช้",
+      message: `ต้องการลบผู้ใช้ "${user.name}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
+      confirmLabel: "ลบผู้ใช้",
+      onConfirm: async () => {
+        await userService.deleteUser(user._id);
+        setUsers((prev) => prev.filter((u) => u._id !== user._id));
+      },
+    });
   }
 
   function startEdit(user) {
@@ -107,6 +116,7 @@ function Users() {
 
   return (
     <div className="users-page">
+      {confirmDialog}
       <PageHeader icon={UsersIcon} description={<>
         ตรวจสอบ ยืนยันตัวตน และจัดการบัญชีผู้หางาน นายจ้าง บุคลากรทางการแพทย์ และผู้ดูแลระบบทั้งหมด
       </>}>จัดการผู้ใช้งาน</PageHeader>

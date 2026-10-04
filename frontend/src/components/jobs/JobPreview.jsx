@@ -59,7 +59,8 @@ function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match 
   const applicationStatus = existingApplication?.status || "pending";
   const statusMessages = { pending: "ส่งใบสมัครแล้ว · รอนายจ้างพิจารณา", interview: "ได้รับนัดสัมภาษณ์ · ดูรายละเอียดในใบสมัคร", passed: "ผ่านการคัดเลือกแล้ว", rejected: "ใบสมัครไม่ได้รับการคัดเลือก", cancelled: "คุณยกเลิกใบสมัครนี้แล้ว" };
   const { about, duties } = splitDescription(job.description);
-  const canApply = isSeeker && !alreadyApplied && accepting;
+  const seekerVerified = user?.verifiedStatus === "verified";
+  const canApply = isSeeker && seekerVerified && !alreadyApplied && accepting;
 
   function handleAttachmentChange(name, file) {
     setAttachmentFiles((prev) => ({ ...prev, [name]: file }));
@@ -196,6 +197,9 @@ function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match 
       )}
 
       {!accepting && <p className="job-availability-note"><Clock size={16} />{expired ? "หมดเขตรับสมัครแล้ว" : job.status === "closed" ? "ตำแหน่งนี้ปิดรับสมัครแล้ว" : "ประกาศนี้ยังไม่เปิดรับสมัคร"}</p>}
+      {isSeeker && !seekerVerified && accepting && !alreadyApplied && (
+        <p className="job-availability-note"><ShieldCheck size={16} />บัญชีของคุณอยู่ระหว่างรอผู้ดูแลระบบยืนยัน จึงยังสมัครงานไม่ได้ (ดูและบันทึกงานได้ตามปกติ)</p>
+      )}
       {applicationsError && <p className="job-preview-error" role="alert">ตรวจสอบใบสมัครไม่สำเร็จ กรุณาโหลดหน้าใหม่ก่อนสมัคร</p>}
 
       {canApply && attachmentRequests.length > 0 && (

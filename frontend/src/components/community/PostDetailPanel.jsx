@@ -3,6 +3,7 @@ import { Lock, Pencil, Send, Trash2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as postService from "../../services/postService.js";
 import PostCard from "./PostCard.jsx";
+import useConfirmDialog from "../common/useConfirmDialog.jsx";
 import "./PostDetailPanel.css";
 
 function initials(name) {
@@ -133,13 +134,21 @@ function PostDetailPanel({ postId, onChange, onDeleted, reaction }) {
     }));
   }
 
-  async function handleDeleteComment(commentId) {
-    if (!window.confirm("ลบความคิดเห็นนี้?")) return;
-    await postService.deleteComment(postId, commentId);
-    setPost((prev) => {
-      const comments = prev.comments.filter((c) => c._id !== commentId);
-      onChange?.({ commentCount: comments.length });
-      return { ...prev, comments };
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleDeleteComment(commentId) {
+    confirm({
+      title: "ลบความคิดเห็น",
+      message: "ต้องการลบความคิดเห็นนี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้",
+      confirmLabel: "ลบความคิดเห็น",
+      onConfirm: async () => {
+        await postService.deleteComment(postId, commentId);
+        setPost((prev) => {
+          const comments = prev.comments.filter((c) => c._id !== commentId);
+          onChange?.({ commentCount: comments.length });
+          return { ...prev, comments };
+        });
+      },
     });
   }
 
@@ -154,6 +163,7 @@ function PostDetailPanel({ postId, onChange, onDeleted, reaction }) {
 
   return (
     <div className="post-detail-panel">
+      {confirmDialog}
       <ul className="post-detail-panel-post-wrapper">
         <PostCard
           post={{ ...post, ...(reaction ? { likes: reaction.likes, likedByMe: reaction.likedByMe } : {}), commentCount: post.comments.length }}

@@ -66,7 +66,15 @@ export async function inviteFamilyMember(req, res) {
 
   const inviter = await User.findById(req.user.id).select("name");
   const acceptUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/family/accept?token=${rawToken}&email=${encodeURIComponent(email)}`;
-  await sendFamilyInviteEmail(email, inviter.name, acceptUrl);
+
+  try {
+    await sendFamilyInviteEmail(email, inviter.name, acceptUrl);
+  } catch (err) {
+    // Roll back the pending invite so a failed send doesn't permanently block
+    // retries under the "only 1 invite at a time" rule above.
+    await FamilyLink.deleteOne({ _id: invite._id });
+    throw err;
+  }
 
   res.status(201).json({ _id: invite._id, inviteEmail: invite.inviteEmail, status: invite.status });
 }

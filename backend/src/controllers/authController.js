@@ -33,7 +33,6 @@ const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
 const PENDING_HARD_TTL_MS = 30 * 60 * 1000;
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
-const IS_DEV = process.env.NODE_ENV !== "production";
 
 const googleClient = process.env.GOOGLE_CLIENT_ID ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID) : null;
 
@@ -111,13 +110,9 @@ export async function requestRegistrationOtp(req, res) {
     { upsert: true, new: true }
   );
 
-  const emailResult = await sendOtpEmail(email, otp);
+  await sendOtpEmail(email, otp);
 
-  const response = { message: "ส่งรหัส OTP ไปยังอีเมลแล้ว กรุณาตรวจสอบกล่องข้อความ" };
-  if (emailResult.devMode && IS_DEV) {
-    response.devOtp = otp;
-  }
-  res.status(200).json(response);
+  res.status(200).json({ message: "ส่งรหัส OTP ไปยังอีเมลแล้ว กรุณาตรวจสอบกล่องข้อความ" });
 }
 
 export async function verifyRegistrationOtp(req, res) {
@@ -264,13 +259,14 @@ export async function forgotPassword(req, res) {
   const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${rawToken}&email=${encodeURIComponent(
     email
   )}`;
-  const emailResult = await sendPasswordResetEmail(email, resetUrl);
-
-  const response = { ...genericResponse };
-  if (emailResult.devMode && IS_DEV) {
-    response.devResetUrl = resetUrl;
+  try {
+    await sendPasswordResetEmail(email, resetUrl);
+  } catch (err) {
+    // Keep the response identical so delivery failures don't reveal which
+    // emails are registered; the failure is still logged for operators.
+    console.error("Password reset email failed:", err.message);
   }
-  res.status(200).json(response);
+  res.status(200).json(genericResponse);
 }
 
 export async function resetPassword(req, res) {

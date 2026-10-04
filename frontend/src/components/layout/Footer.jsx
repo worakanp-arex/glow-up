@@ -62,7 +62,7 @@ function Footer() {
           <ul className="footer-contact">
             <li>
               <Mail size={16} />
-              <a href="mailto:contact@glowup.kku.ac.th">contact@glowup.kku.ac.th</a>
+              <a href="mailto:worakan.p@kkumail.com">worakan.p@kkumail.com</a>
             </li>
             <li>
               <MapPin size={16} />

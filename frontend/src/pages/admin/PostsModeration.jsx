@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ShieldAlert, Trash2 } from "lucide-react";
 import * as postService from "../../services/postService.js";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import "./PostsModeration.css";
 
 const PAGE_SIZE = 10;
@@ -39,10 +40,18 @@ function PostsModeration() {
     setPosts((prev) => prev.filter((p) => p._id !== post._id));
   }
 
-  async function handleDelete(post) {
-    if (!window.confirm("ลบโพสต์นี้?")) return;
-    await postService.deletePost(post._id);
-    setPosts((prev) => prev.filter((p) => p._id !== post._id));
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleDelete(post) {
+    confirm({
+      title: "ลบโพสต์",
+      message: "ต้องการลบโพสต์นี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้",
+      confirmLabel: "ลบโพสต์",
+      onConfirm: async () => {
+        await postService.deletePost(post._id);
+        setPosts((prev) => prev.filter((p) => p._id !== post._id));
+      },
+    });
   }
 
   if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
@@ -53,6 +62,7 @@ function PostsModeration() {
 
   return (
     <div className="posts-moderation-page">
+      {confirmDialog}
       <PageHeader icon={ShieldAlert} description={<>
         โพสต์ที่ผู้ใช้กดรายงานเนื้อหา รอการตรวจสอบความถูกต้อง โดยเฉพาะข้อมูลด้านสุขภาพ
       </>}>ตรวจสอบโพสต์ที่ถูกรายงาน</PageHeader>

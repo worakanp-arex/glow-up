@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { BookOpen, Play, Plus, Trash2 } from "lucide-react";
 import * as microLessonService from "../../services/microLessonService.js";
 import * as scenarioService from "../../services/scenarioService.js";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import "./LessonManagement.css";
 
 const INITIAL_LESSON_FORM = { title: "", body: "", category: "", audience: "user" };
@@ -50,10 +51,18 @@ function LessonManagement() {
     }
   }
 
-  async function handleDeleteLesson(id) {
-    if (!window.confirm("ลบบทเรียนนี้?")) return;
-    await microLessonService.deleteLesson(id);
-    setLessons((prev) => prev.filter((l) => l._id !== id));
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleDeleteLesson(id) {
+    confirm({
+      title: "ลบบทเรียน",
+      message: "ต้องการลบบทเรียนนี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้",
+      confirmLabel: "ลบบทเรียน",
+      onConfirm: async () => {
+        await microLessonService.deleteLesson(id);
+        setLessons((prev) => prev.filter((l) => l._id !== id));
+      },
+    });
   }
 
   function updateOption(index, patch) {
@@ -93,16 +102,23 @@ function LessonManagement() {
     }
   }
 
-  async function handleDeleteScenario(id) {
-    if (!window.confirm("ลบสถานการณ์นี้?")) return;
-    await scenarioService.deleteScenario(id);
-    setScenarios((prev) => prev.filter((s) => s._id !== id));
+  function handleDeleteScenario(id) {
+    confirm({
+      title: "ลบสถานการณ์จำลอง",
+      message: "ต้องการลบสถานการณ์นี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้",
+      confirmLabel: "ลบสถานการณ์",
+      onConfirm: async () => {
+        await scenarioService.deleteScenario(id);
+        setScenarios((prev) => prev.filter((s) => s._id !== id));
+      },
+    });
   }
 
   if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
   return (
     <div className="lesson-management-page">
+      {confirmDialog}
       <PageHeader icon={BookOpen} description={<>
         เพิ่มบทเรียนสั้นและสถานการณ์จำลองเพื่อฝึกทักษะการปฏิเสธในสถานการณ์เสี่ยง
       </>}>จัดการทักษะการปฏิเสธ</PageHeader>

@@ -10,6 +10,7 @@ import * as emotionService from "../../services/emotionService.js";
 import * as goalService from "../../services/goalService.js";
 import CheckinCalendar from "../../components/user/CheckinCalendar.jsx";
 import PointsSummary from "../../components/user/PointsSummary.jsx";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import "./Streak.css";
 
 const TERM_LABELS = { short: "ระยะสั้น", long: "ระยะยาว" };
@@ -128,10 +129,18 @@ function Streak() {
     setGoals((prev) => prev.map((g) => (g._id === id ? updated : g)));
   }
 
-  async function handleDeleteGoal(id) {
-    if (!window.confirm("ลบเป้าหมายนี้?")) return;
-    await goalService.deleteGoal(id);
-    setGoals((prev) => prev.filter((g) => g._id !== id));
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleDeleteGoal(id) {
+    confirm({
+      title: "ลบเป้าหมาย",
+      message: "ต้องการลบเป้าหมายนี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้",
+      confirmLabel: "ลบเป้าหมาย",
+      onConfirm: async () => {
+        await goalService.deleteGoal(id);
+        setGoals((prev) => prev.filter((g) => g._id !== id));
+      },
+    });
   }
 
   const pageHeader = <PageHeader icon={Award} eyebrow="Keep growing" backTo={"/dashboard"} backLabel="หน้าหลัก" description="ดูต้นไม้ของคุณ ภารกิจวันนี้ และเป้าหมายที่กำลังไปให้ถึง">{"ความก้าวหน้าและรางวัล"}</PageHeader>;
@@ -160,6 +169,7 @@ function Streak() {
 
   return (
     <div className="streak-page">
+      {confirmDialog}
       {pageHeader}
 
       <section className="streak-hero">

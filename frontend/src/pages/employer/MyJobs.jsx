@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Briefcase, MapPin, Plus, Tag, Trash2, Users, Wallet } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as jobService from "../../services/jobService.js";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import "./MyJobs.css";
 
 const PAGE_SIZE = 10;
@@ -41,10 +42,18 @@ function MyJobs() {
     setJobs((prev) => prev.map((j) => (j._id === job._id ? updated : j)));
   }
 
-  async function handleDelete(job) {
-    if (!window.confirm(`ลบประกาศงาน "${job.title}"?`)) return;
-    await jobService.deleteJob(job._id);
-    setJobs((prev) => prev.filter((j) => j._id !== job._id));
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleDelete(job) {
+    confirm({
+      title: "ลบประกาศงาน",
+      message: `ต้องการลบประกาศงาน "${job.title}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
+      confirmLabel: "ลบประกาศ",
+      onConfirm: async () => {
+        await jobService.deleteJob(job._id);
+        setJobs((prev) => prev.filter((j) => j._id !== job._id));
+      },
+    });
   }
 
   if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
@@ -55,6 +64,7 @@ function MyJobs() {
 
   return (
     <div className="my-jobs-page">
+      {confirmDialog}
       <PageHeader icon={Briefcase} actions={<Link to="/employer/jobs/new" className="btn btn-primary">
           <Plus size={16} />
           <span>สร้างประกาศงานใหม่</span>

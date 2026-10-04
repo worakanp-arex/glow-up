@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Briefcase, Building2, CalendarDays } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as applicationService from "../../services/applicationService.js";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import "./MyApplications.css";
 
 const CANCELLABLE_STATUSES = ["pending", "interview"];
@@ -26,15 +27,23 @@ function MyApplications() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleCancel(id) {
-    if (!window.confirm("ยกเลิกใบสมัครนี้?")) return;
-    setCancellingId(id);
-    try {
-      const updated = await applicationService.cancelApplication(id);
-      setApplications((prev) => prev.map((app) => (app._id === id ? { ...app, status: updated.status } : app)));
-    } finally {
-      setCancellingId(null);
-    }
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleCancel(id) {
+    confirm({
+      title: "ยกเลิกใบสมัคร",
+      message: "ต้องการยกเลิกใบสมัครนี้ใช่ไหม? นายจ้างจะเห็นว่าคุณยกเลิกแล้ว",
+      confirmLabel: "ยกเลิกใบสมัคร",
+      onConfirm: async () => {
+        setCancellingId(id);
+        try {
+          const updated = await applicationService.cancelApplication(id);
+          setApplications((prev) => prev.map((app) => (app._id === id ? { ...app, status: updated.status } : app)));
+        } finally {
+          setCancellingId(null);
+        }
+      },
+    });
   }
 
   if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
@@ -47,6 +56,7 @@ function MyApplications() {
 
   return (
     <div className="my-applications-page">
+      {confirmDialog}
       <PageHeader icon={Briefcase}>ใบสมัครของฉัน</PageHeader>
 
       {visibleApplications.length === 0 && <p className="my-applications-empty">คุณยังไม่ได้สมัครงานใด</p>}

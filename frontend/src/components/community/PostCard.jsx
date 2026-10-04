@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Bookmark, Flag, Heart, Lock, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import * as postService from "../../services/postService.js";
 import { AUDIENCE_ROLES, AUDIENCE_LABEL_BY_VALUE } from "../../constants/postAudience.js";
+import useConfirmDialog from "../common/useConfirmDialog.jsx";
 import "./PostCard.css";
 
 function initials(name) {
@@ -66,9 +67,15 @@ function PostCard({
     }
   }
 
-  async function handleDelete() {
-    if (!window.confirm("ลบโพสต์นี้?")) return;
-    await onDeleted(post._id);
+  const { confirm, confirmDialog } = useConfirmDialog();
+
+  function handleDelete() {
+    confirm({
+      title: "ลบโพสต์",
+      message: "ต้องการลบโพสต์นี้ใช่ไหม? การลบไม่สามารถย้อนกลับได้",
+      confirmLabel: "ลบโพสต์",
+      onConfirm: () => onDeleted(post._id),
+    });
   }
 
   async function handleLike() {
@@ -269,6 +276,7 @@ function PostCard({
         )}
       </div>
       {flagged && <p className="post-report-status" role="status">รายงานแล้ว รอเจ้าหน้าที่ตรวจสอบ</p>}
+      {confirmDialog}
       {reportOpen && <ConfirmDialog title="รายงานเนื้อหา" confirmLabel="ส่งรายงาน" busy={reportBusy} error={reportError} onConfirm={handleFlag} onClose={() => setReportOpen(false)}><p>ต้องการส่งโพสต์นี้ให้เจ้าหน้าที่ตรวจสอบใช่ไหม?</p></ConfirmDialog>}
     </li>
   );

@@ -72,7 +72,7 @@ function Dashboard() {
         eyebrow="Your growth space"
         actions={<span className="dashboard-date"><CalendarDays size={16} aria-hidden="true" />{TODAY_LABEL.format(new Date())}</span>}
       >
-        วันนี้ เติบโตไปอีกนิด
+     
       </PageHeader>
 
       <section className="dashboard-hero">

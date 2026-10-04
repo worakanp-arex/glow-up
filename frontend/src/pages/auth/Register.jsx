@@ -50,7 +50,6 @@ function Register() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [otp, setOtp] = useState("");
-  const [devOtp, setDevOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const [consentExpanded, setConsentExpanded] = useState(false);
   const avatarInputRef = useRef(null);
@@ -96,13 +95,11 @@ function Register() {
 
   async function requestOtp() {
     setError("");
-    setDevOtp("");
     setSubmitting(true);
     try {
-      const result = await authService.requestRegistrationOtp(buildPayload(form, avatarFile));
+      await authService.requestRegistrationOtp(buildPayload(form, avatarFile));
       setStep("otp");
       setCooldown(RESEND_COOLDOWN_SECONDS);
-      if (result.devOtp) setDevOtp(result.devOtp);
     } catch (err) {
       setError(err.response?.data?.message || "ส่งรหัส OTP ไม่สำเร็จ");
     } finally {
@@ -155,10 +152,6 @@ function Register() {
           <PageHeader icon={ShieldCheck} onBack={() => setStep("details")} backLabel="ข้อมูลสมัครสมาชิก" description={<>
             กรอกรหัส 6 หลักที่ส่งไปยัง <strong>{form.email}</strong>
           </>}>ยืนยันอีเมล</PageHeader>
-
-          {devOtp && (
-            <p className="register-otp-dev">โหมดทดสอบ (ยังไม่ได้ตั้งค่าอีเมลจริง): รหัส OTP คือ {devOtp}</p>
-          )}
 
           {error && <p className="register-error">{error}</p>}
 

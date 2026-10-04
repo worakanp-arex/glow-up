@@ -108,6 +108,10 @@
 .profile-family-invite-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
 .profile-family-invite-form input { min-width: 0; padding: 10px 14px; font-size: .85rem; }
 .profile-family-hint { margin: 8px 0 0; font-size: .72rem; }
+.profile-family-dev-link { margin-top: 10px; padding: 10px 12px; border: 1px dashed var(--color-border); border-radius: 12px; background: var(--color-warning-bg); }
+.profile-family-dev-link > p { margin: 0 0 8px; font-size: .72rem; }
+.profile-family-dev-link-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.profile-family-dev-link-row input { min-width: 0; padding: 8px 10px; font-size: .78rem; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface); color: var(--color-text); }
 .profile-family-list { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .profile-family-list li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 12px; font-size: .82rem; }
 .profile-family-list li > span:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
