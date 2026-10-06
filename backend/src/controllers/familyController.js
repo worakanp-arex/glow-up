@@ -9,6 +9,7 @@ import { sendFamilyInviteEmail } from "../services/emailService.js";
 import { notifyUser } from "../services/notificationService.js";
 import EmotionLog from "../models/EmotionLog.js";
 import { computeLevel } from "../utils/level.js";
+import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -108,9 +109,10 @@ export async function acceptFamilyInvite(req, res) {
   res.json({ _id: accepted._id, status: accepted.status });
 }
 
-// As the recovering user: list who I've invited, so I can see status/revoke.
+// As the recovering user: list my current invites and connections. Revoked
+// ones are dropped from the list entirely.
 export async function myInvitedFamily(req, res) {
-  const links = await FamilyLink.find({ recoveringUser: req.user.id }).sort({ createdAt: -1 });
+  const links = await FamilyLink.find({ recoveringUser: req.user.id, status: { $ne: "revoked" } }).sort({ createdAt: -1 });
   res.json(links);
 }
 
@@ -122,9 +124,33 @@ export async function revokeFamilyLink(req, res) {
   if (link.recoveringUser.toString() !== req.user.id) {
     return res.status(403).json({ message: "Forbidden" });
   }
+  const wasActive = link.status === "active";
   link.status = "revoked";
   await link.save();
+
+  if (wasActive && link.familyUser) {
+    const recoveringUser = await User.findById(req.user.id).select("name");
+    await notifyUser(
+      link.familyUser,
+      `${recoveringUser.name} ได้ยกเลิกการเชื่อมต่อครอบครัวกับคุณแล้ว คุณจะไม่เห็นความคืบหน้าของเขาอีก`,
+      "familyLinkRemoved",
+      { link: "/family/dashboard" }
+    );
+  }
   res.json(link);
+}
+
+// Staff view: who a recovering user is currently connected to. Counsellors
+// only see patients assigned to them, same rule as clinical data.
+export async function listFamilyLinksForUser(req, res) {
+  const { userId } = req.params;
+  if (req.user.role === "counsellor" && !(await counsellorCanAccessPatient(req.user.id, userId))) {
+    return res.status(403).json({ message: "คุณไม่ได้รับมอบหมายให้ดูแลผู้ใช้งานนี้" });
+  }
+  const links = await FamilyLink.find({ recoveringUser: userId, status: { $ne: "revoked" } })
+    .populate("familyUser", "name email")
+    .sort({ createdAt: -1 });
+  res.json(links);
 }
 
 // As a family member: list the recovering users I'm actively linked to. The

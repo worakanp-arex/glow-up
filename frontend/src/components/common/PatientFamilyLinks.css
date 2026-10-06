@@ -1,0 +1,8 @@
+.patient-family-links-list { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.patient-family-links-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 12px; }
+.patient-family-links-list li > div { display: flex; flex-direction: column; min-width: 0; }
+.patient-family-links-list strong { font-size: .85rem; color: var(--color-text); }
+.patient-family-links-list small { font-size: .74rem; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.patient-family-links-status { flex-shrink: 0; padding: 2px 8px; border-radius: 8px; background: var(--color-surface-hover); font-size: .7rem; color: var(--color-text-secondary); }
+.patient-family-links-status-active { background: var(--color-success-bg); color: var(--color-success); }
+.patient-family-links-status-pending { background: var(--color-warning-bg); color: var(--color-warning); }

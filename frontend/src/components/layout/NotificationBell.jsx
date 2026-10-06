@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Activity, AlertTriangle, Award, Bell, Briefcase, Heart, MessageCircle, Newspaper, Sparkles } from "lucide-react";
+import { Activity, AlertTriangle, Award, Bell, Briefcase, Heart, MessageCircle, Newspaper, Sparkles, UserX } from "lucide-react";
 import * as notificationService from "../../services/notificationService.js";
 import { onNotification } from "../../services/socket.js";
 import ConfirmDialog from "../common/ConfirmDialog.jsx";
@@ -18,6 +18,7 @@ const TYPE_ICONS = {
   riskAlert: AlertTriangle,
   counselling: MessageCircle,
   familyMessage: Heart,
+  familyLinkRemoved: UserX,
 };
 
 function NotificationBell() {

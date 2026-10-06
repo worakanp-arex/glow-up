@@ -14,4 +14,6 @@ const riskSituationLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+riskSituationLogSchema.index({ user: 1, occurredAt: -1 });
+
 export default mongoose.model("RiskSituationLog", riskSituationLogSchema);

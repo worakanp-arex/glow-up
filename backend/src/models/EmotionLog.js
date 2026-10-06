@@ -17,4 +17,6 @@ const emotionLogSchema = new mongoose.Schema(
 
 emotionLogSchema.index({ user: 1, dateKey: 1 }, { unique: true });
 
+emotionLogSchema.index({ user: 1, date: -1 });
+
 export default mongoose.model("EmotionLog", emotionLogSchema);

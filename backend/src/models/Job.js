@@ -23,4 +23,6 @@ const jobSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+jobSchema.index({ status: 1, verifiedStatus: 1 });
+
 export default mongoose.model("Job", jobSchema);

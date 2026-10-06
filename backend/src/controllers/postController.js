@@ -81,10 +81,8 @@ export async function mySavedPosts(req, res) {
 }
 
 export async function getPost(req, res) {
-  const post = await Post.findOneAndUpdate(
-    { _id: req.params.id, ...visibilityFilter(req.user.role) },
-    { $inc: { views: 1 } },
-    { new: true }
+  const post = await Post.findOne(
+    { _id: req.params.id, ...visibilityFilter(req.user.role) }
   ).populate("user", USER_PUBLIC_FIELDS);
   if (!post) {
     return res.status(404).json({ message: "Not found" });

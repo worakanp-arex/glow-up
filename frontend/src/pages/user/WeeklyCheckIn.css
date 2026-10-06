@@ -56,7 +56,7 @@
 /* ---------- History + help ---------- */
 .weekly-checkin-history { display: flex; flex-direction: column; flex: 1; min-height: 220px; }
 .weekly-checkin-history .ui-card-head { margin-bottom: 8px; }
-.weekly-checkin-history ul { flex: 1; min-height: 0; margin: 0 -8px 0 0; padding: 0 8px 0 0; list-style: none; overflow-y: auto; scrollbar-width: thin; }
+.weekly-checkin-history ul { flex: 1; min-height: 0; margin: 0 -8px 0 0; padding: 0 8px 0 0; list-style: none; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .weekly-checkin-history li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
 .weekly-checkin-history li:last-child { border-bottom: 0; }
 .weekly-checkin-history li > div { display: flex; flex-direction: column; flex: 1; min-width: 0; }

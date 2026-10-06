@@ -16,6 +16,8 @@ const notificationSchema = new mongoose.Schema(
         "reward",
         "milestone",
         "riskAlert",
+        "familyMessage",
+        "familyLinkRemoved",
       ],
     },
     status: { type: String, enum: ["unread", "read"], default: "unread" },
@@ -26,5 +28,9 @@ const notificationSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+notificationSchema.index({ user: 1, status: 1, createdAt: -1 });
+// Notifications older than 90 days are purged automatically.
+notificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
 
 export default mongoose.model("Notification", notificationSchema);

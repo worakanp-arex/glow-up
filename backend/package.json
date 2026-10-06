@@ -9,6 +9,8 @@
     "start": "node src/server.js",
     "seed:admin": "node src/config/seedAdmin.js",
     "seed:missions": "node src/config/seedMissions.js",
+    "seed:demo": "node src/config/seedDemo.js",
+    "seed:demo:clean": "node src/config/seedDemo.js --clean",
     "test": "node --import ./test/setup.js --test test/*.test.js",
     "loadtest:seed": "node loadtest/seed.js",
     "loadtest:cleanup": "node loadtest/cleanup.js",

@@ -14,4 +14,6 @@ const goalSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+goalSchema.index({ user: 1, status: 1 });
+
 export default mongoose.model("Goal", goalSchema);

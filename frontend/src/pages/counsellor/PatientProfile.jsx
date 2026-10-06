@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { UserRound, AlertTriangle, Award, Building2, CalendarCheck, ClipboardList, Flame, ShieldAlert } from "lucide-react";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
+import PatientFamilyLinks from "../../components/common/PatientFamilyLinks.jsx";
 import * as counsellingService from "../../services/counsellingService.js";
 import * as weeklyCheckInService from "../../services/weeklyCheckInService.js";
 import * as riskSituationService from "../../services/riskSituationService.js";
@@ -137,6 +138,8 @@ function PatientProfile() {
           <span className="patient-profile-stat-label">วันที่บันทึกทั้งหมด</span>
         </div>
       </div>
+
+      <PatientFamilyLinks userId={userId} />
 
       <section className="patient-profile-card">
         <h2>

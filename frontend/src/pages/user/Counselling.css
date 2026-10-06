@@ -81,7 +81,7 @@
 /* ---------- Right column fills the form's height; long lists scroll ---------- */
 .counselling-layout { align-items: stretch; }
 .counselling-history { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.counselling-history-scroll { flex: 1; min-height: 0; overflow-y: auto; margin-right: -8px; padding-right: 8px; scrollbar-width: thin; }
+.counselling-history-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin-right: -8px; padding-right: 8px; scrollbar-width: thin; }
 .counselling-none { height: 100%; justify-content: center; }
 @media (min-width: 861px) {
   .counselling-side { contain: size; }

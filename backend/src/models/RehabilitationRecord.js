@@ -7,7 +7,6 @@ const rehabilitationRecordSchema = new mongoose.Schema(
     startDate: { type: Date },
     endDate: { type: Date },
     status: { type: String, enum: ["completed", "ongoing"] },
-    verifiedBy: { type: String },
   },
   { timestamps: true }
 );

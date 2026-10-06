@@ -136,6 +136,7 @@
     background-color: var(--color-surface);
     box-shadow: var(--shadow-lg);
     overflow-y: auto;
+    overscroll-behavior: contain;
     animation: navbar-mobile-panel-slide-in 0.2s ease;
   }
 

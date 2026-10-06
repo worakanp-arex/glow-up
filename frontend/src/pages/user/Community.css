@@ -122,14 +122,16 @@
   padding: 2rem 0;
 }
 
-.community-sidebar {
-  position: sticky;
-  top: 1.5rem;
-}
-
-.community-detail-sidebar {
-  max-height: calc(100vh - 3rem);
-  overflow-y: auto;
+@media (min-width: 901px) {
+  .community-list,
+  .community-sidebar {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100dvh - 124px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
 }
 
 .community-detail-empty {

@@ -43,6 +43,11 @@ function Community() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const textareaRef = useRef(null);
+  const detailRef = useRef(null);
+
+  useEffect(() => {
+    if (detailRef.current) detailRef.current.scrollTop = 0;
+  }, [selectedPostId]);
 
   useEffect(() => {
     postService
@@ -279,7 +284,7 @@ function Community() {
             </form>
           </aside>
         ) : !mobile && (
-          <aside className="community-sidebar community-detail-sidebar">
+          <aside className="community-sidebar" ref={detailRef}>
             {selectedPostId && visiblePosts.some(p => p._id === selectedPostId) ? (
               <PostDetailPanel
                 key={selectedPostId}

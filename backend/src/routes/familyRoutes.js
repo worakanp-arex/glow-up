@@ -5,6 +5,7 @@ import {
   acceptFamilyInvite,
   myInvitedFamily,
   revokeFamilyLink,
+  listFamilyLinksForUser,
   myFamilyLinksAsFamily,
   getLinkedUserSummary,
   sendEncouragementMessage,
@@ -32,6 +33,15 @@ router.put(
   [objectIdParam("id")],
   validate,
   asyncHandler(revokeFamilyLink)
+);
+
+router.get(
+  "/users/:userId/links",
+  verifyToken,
+  requireRole("admin", "counsellor"),
+  [objectIdParam("userId")],
+  validate,
+  asyncHandler(listFamilyLinksForUser)
 );
 
 router.post(

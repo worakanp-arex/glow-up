@@ -103,7 +103,7 @@
 /* ---------- Lower row balance ---------- */
 .craving-tracker-lower { align-items: stretch; }
 .craving-tracker-lower-col > .craving-tracker-summary { flex: 1; }
-.craving-tracker-risk-situation-list { max-height: 300px; overflow-y: auto; padding-right: 4px; scrollbar-width: thin; }
+.craving-tracker-risk-situation-list { max-height: 300px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; scrollbar-width: thin; }
 
 .craving-tracker-summary { display: flex; flex-direction: column; }
 .craving-tracker-summary-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }

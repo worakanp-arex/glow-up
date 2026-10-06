@@ -52,4 +52,6 @@ const counsellingSessionSchema = new mongoose.Schema(
 
 counsellingSessionSchema.index({ counsellor: 1, scheduledAt: 1 });
 
+counsellingSessionSchema.index({ user: 1, createdAt: -1 });
+
 export default mongoose.model("CounsellingSession", counsellingSessionSchema);

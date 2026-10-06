@@ -80,9 +80,15 @@
   min-width: 0;
 }
 
-.counselling-detail-sidebar {
-  position: sticky;
-  top: 100px;
+@media (min-width: 861px) {
+  .counselling-detail-sidebar {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100dvh - 124px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
 }
 
 .counselling-detail-card {
@@ -276,6 +282,7 @@
   gap: 1rem;
   max-height: 520px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .counselling-thread-item {

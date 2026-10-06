@@ -12,10 +12,11 @@ import * as familyService from "../services/familyService.js";
 import * as goalService from "../services/goalService.js";
 import StatusBadge from "../components/common/StatusBadge.jsx";
 import GrowthCard from "../components/user/GrowthCard.jsx";
+import useConfirmDialog from "../components/common/useConfirmDialog.jsx";
 import { THAI_PROVINCES } from "../constants/provinces.js";
 import "./Profile.css";
 
-const FAMILY_STATUS_LABELS = { pending: "รอการตอบรับ", active: "ติดตามอยู่", revoked: "ยกเลิกแล้ว" };
+const FAMILY_STATUS_LABELS = { pending: "รอการตอบรับ", active: "ติดตามอยู่" };
 
 const ROLE_LABELS = {
   user: "ผู้หางาน",
@@ -105,6 +106,7 @@ function Profile() {
   const [familyEmail, setFamilyEmail] = useState("");
   const [familyInviting, setFamilyInviting] = useState(false);
   const [familyError, setFamilyError] = useState("");
+  const { confirm: requestConfirm, confirmDialog } = useConfirmDialog();
   const [sharingSaving, setSharingSaving] = useState(null);
 
   useEffect(() => {
@@ -145,9 +147,20 @@ function Profile() {
     }
   }
 
-  async function handleRevokeFamily(id) {
-    const updated = await familyService.revokeFamilyLink(id);
-    setFamilyLinks((prev) => prev.map((link) => (link._id === id ? updated : link)));
+  function requestRevokeFamily(link) {
+    const isActive = link.status === "active";
+    requestConfirm({
+      title: isActive ? "ยกเลิกการติดตามของครอบครัวนี้?" : "ยกเลิกคำเชิญนี้?",
+      message: isActive
+        ? `${link.inviteEmail} จะได้รับแจ้งเตือนว่าถูกลบออกจากการเชื่อมต่อ และจะไม่เห็นความคืบหน้าของคุณอีก`
+        : `คำเชิญไปยัง ${link.inviteEmail} จะถูกยกเลิก ลิงก์เดิมจะใช้งานไม่ได้อีก`,
+      confirmLabel: "ยืนยันการลบ",
+      errorMessage: "ยกเลิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+      onConfirm: async () => {
+        await familyService.revokeFamilyLink(link._id);
+        setFamilyLinks((prev) => prev.filter((item) => item._id !== link._id));
+      },
+    });
   }
 
   async function handleToggleSharing(key) {
@@ -780,15 +793,14 @@ function Profile() {
                         <li key={link._id}>
                           <span>{link.inviteEmail}</span>
                           <span className={`profile-family-status profile-family-status-${link.status}`}>{FAMILY_STATUS_LABELS[link.status]}</span>
-                          {link.status !== "revoked" && (
-                            <button type="button" onClick={() => handleRevokeFamily(link._id)} aria-label="ยกเลิกการติดตาม">
-                              <X size={12} />
-                            </button>
-                          )}
+                          <button type="button" onClick={() => requestRevokeFamily(link)} aria-label="ยกเลิกการติดตาม">
+                            <X size={12} />
+                          </button>
                         </li>
                       ))}
                     </ul>
                   )}
+                  {confirmDialog}
 
                   <h3 className="profile-sharing-title">เลือกสิ่งที่แบ่งปัน</h3>
                   <ul className="profile-sharing">

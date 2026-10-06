@@ -32,7 +32,16 @@
 /* ---------- Two-column body ---------- */
 .streak-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
 .streak-main, .streak-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-.streak-side { position: sticky; top: 100px; }
+@media (min-width: 901px) {
+  .streak-side {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100dvh - 124px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+}
 .streak-side .points-summary, .streak-main .mission-board { margin: 0; }
 .streak-activities:empty { display: none; }
 .streak-activities .activity-mission-board { margin: 0; padding: 0; border: 0; box-shadow: none; background: none; }

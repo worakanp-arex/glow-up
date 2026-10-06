@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Award, CalendarCheck, ChevronDown, Flame, ShieldAlert } from "lucide-react";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
+import PatientFamilyLinks from "../../components/common/PatientFamilyLinks.jsx";
 import { happinessByLevel } from "../../constants/happiness.js";
 import { CONTEXT_OPTIONS } from "../../constants/emotionContext.js";
 import * as emotionService from "../../services/emotionService.js";
@@ -87,6 +88,8 @@ function UserEmotionHistory() {
           <span className="user-emotion-history-stat-label">วันที่บันทึกทั้งหมด</span>
         </div>
       </div>
+
+      <PatientFamilyLinks userId={userId} />
 
       <EmotionCalendar logs={logs} />
 

@@ -1,16 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Award, BookOpen, CalendarDays, ChevronDown, ClipboardList, LayoutDashboard, LogOut, User } from "lucide-react";
+import { Award, BookOpen, CalendarDays, ChevronDown, ClipboardList, LogOut, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./UserMenu.css";
-
-const DASHBOARD_BY_ROLE = {
-  user: "/dashboard",
-  family: "/family/dashboard",
-  employer: "/employer/dashboard",
-  admin: "/admin",
-  counsellor: "/counsellor",
-};
 
 const ROLE_LABELS = {
   user: "ผู้หางาน",
@@ -76,11 +68,6 @@ function UserMenu() {
             <p className="user-menu-header-name">{user.name}</p>
             <span className="user-menu-header-role">{ROLE_LABELS[user.role]}</span>
           </div>
-
-          <Link to={DASHBOARD_BY_ROLE[user.role] || "/"} className="user-menu-item" onClick={() => setOpen(false)}>
-            <LayoutDashboard size={16} />
-            <span>แผงควบคุม</span>
-          </Link>
 
           <Link to="/profile" className="user-menu-item" onClick={() => setOpen(false)}>
             <User size={16} />

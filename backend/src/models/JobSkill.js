@@ -8,4 +8,7 @@ const jobSkillSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+jobSkillSchema.index({ job: 1 });
+jobSkillSchema.index({ skill: 1 });
+
 export default mongoose.model("JobSkill", jobSkillSchema);

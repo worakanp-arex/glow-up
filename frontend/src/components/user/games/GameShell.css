@@ -3,7 +3,7 @@
 .game-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 22px 26px 16px; border-bottom: 1px solid var(--color-border); }
 .game-modal-head h2 { margin: 0; font-size: 1.2rem; font-weight: 600; }
 .game-modal-head p { margin: 2px 0 0; font-size: .8rem; color: var(--color-text-muted); }
-.game-modal-body { padding: 24px 26px 28px; overflow-y: auto; }
+.game-modal-body { padding: 24px 26px 28px; overflow-y: auto; overscroll-behavior: contain; }
 
 .game-hud { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: .8rem; color: var(--color-text-secondary); }
 .game-hud b { font-size: 1.1rem; color: var(--color-primary-600); }

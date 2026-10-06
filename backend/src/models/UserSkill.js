@@ -9,4 +9,7 @@ const userSkillSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSkillSchema.index({ user: 1 });
+userSkillSchema.index({ skill: 1 });
+
 export default mongoose.model("UserSkill", userSkillSchema);
