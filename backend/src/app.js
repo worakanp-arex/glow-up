@@ -42,6 +42,12 @@ import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
+// Behind a reverse proxy (e.g. Nginx on the same machine) set TRUST_PROXY=loopback
+// so rate limiting sees each visitor's real IP instead of the proxy's.
+if (process.env.TRUST_PROXY) {
+  app.set("trust proxy", process.env.TRUST_PROXY);
+}
+
 app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173", credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
