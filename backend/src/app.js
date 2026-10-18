@@ -53,6 +53,24 @@ app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(sanitizeMongoOperators);
+
+// Optional single-service hosting: set FRONTEND_DIST to the built frontend
+// (e.g. ../frontend/dist) and this server also serves the web app. The page
+// itself skips helmet's CSP because Google Sign-In and Google Fonts load
+// third-party scripts, frames and styles; API responses keep the full helmet set.
+if (process.env.FRONTEND_DIST) {
+  const distDir = path.resolve(process.cwd(), process.env.FRONTEND_DIST);
+  const isBackendPath = (p) => p.startsWith("/api") || p.startsWith("/uploads") || p.startsWith("/socket.io");
+  const pageHeaders = helmet({ contentSecurityPolicy: false, crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" } });
+  app.use((req, res, next) => (isBackendPath(req.path) ? next() : pageHeaders(req, res, next)));
+  const serveStatic = express.static(distDir, { index: false });
+  app.use((req, res, next) => (isBackendPath(req.path) ? next() : serveStatic(req, res, next)));
+  app.get(/^(?!\/(api|uploads|socket\.io)(\/|$)).*/, (req, res) => {
+    res.setHeader("Cache-Control", "no-cache");
+    res.sendFile(path.join(distDir, "index.html"));
+  });
+}
+
 app.use(helmet());
 app.use("/uploads/avatars", (req, res, next) => {
   if (!/\.(png|jpe?g|webp)$/i.test(req.path)) return res.sendStatus(404);

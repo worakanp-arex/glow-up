@@ -16,6 +16,9 @@
     "loadtest:cleanup": "node loadtest/cleanup.js",
     "loadtest": "node loadtest/run.js"
   },
+  "engines": {
+    "node": ">=22.12"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",

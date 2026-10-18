@@ -13,6 +13,9 @@ export function socketToken(handshake) {
 export function initSocket(httpServer, corsOrigin) {
   io = new Server(httpServer, {
     cors: { origin: corsOrigin, credentials: true },
+    // Behind proxies that only pass plain HTTP (e.g. Vercel rewrites) Socket.IO
+    // stays on long-polling; a shorter interval keeps each poll under proxy timeouts.
+    ...(process.env.SOCKET_PING_INTERVAL_MS && { pingInterval: Number(process.env.SOCKET_PING_INTERVAL_MS) }),
   });
 
   io.use(async (socket, next) => {

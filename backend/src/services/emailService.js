@@ -11,13 +11,37 @@ const transporter = smtpConfigured
     })
   : null;
 
+// Hosts that block outbound SMTP (e.g. Railway Free/Trial/Hobby) can send
+// through Brevo's HTTPS API instead: set BREVO_API_KEY and EMAIL_FROM (a sender
+// address verified in Brevo). When both are set, this takes priority over SMTP.
+const brevoConfigured = Boolean(process.env.BREVO_API_KEY && process.env.EMAIL_FROM);
+
 const APP_NAME = "Glow Up";
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "worakan.p@kkumail.com";
 const RESPONSIBLE_ORG = "วิทยาลัยการคอมพิวเตอร์ มหาวิทยาลัยขอนแก่น";
 const PARTNER_ORGS = "โรงพยาบาลธัญญารักษ์ขอนแก่น · คณะพยาบาลศาสตร์ มหาวิทยาลัยขอนแก่น";
 
 export function isEmailDeliveryConfigured() {
-  return smtpConfigured;
+  return brevoConfigured || smtpConfigured;
+}
+
+async function sendViaBrevo({ to, subject, html }) {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": process.env.BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify({
+      sender: { name: process.env.EMAIL_FROM_NAME || APP_NAME, email: process.env.EMAIL_FROM },
+      to: [{ email: to }],
+      replyTo: { email: SUPPORT_EMAIL },
+      subject,
+      htmlContent: html,
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Brevo responded ${res.status}: ${detail.slice(0, 200)}`);
+  }
 }
 
 function escapeHtml(value) {
@@ -51,8 +75,19 @@ export async function sendMail({ to, subject, html }) {
   // Unit tests exercise controllers without a mail server.
   if (process.env.NODE_ENV === "test") return;
 
+  if (brevoConfigured) {
+    try {
+      await sendViaBrevo({ to, subject, html });
+      return;
+    } catch (cause) {
+      const err = new Error(`Failed to send email: ${cause.message}`, { cause });
+      err.code = "EMAIL_DELIVERY_FAILED";
+      throw err;
+    }
+  }
+
   if (!transporter) {
-    const err = new Error("SMTP is not configured (SMTP_HOST / SMTP_USER / SMTP_PASS)");
+    const err = new Error("Email is not configured (SMTP_HOST / SMTP_USER / SMTP_PASS or BREVO_API_KEY / EMAIL_FROM)");
     err.code = "EMAIL_DELIVERY_FAILED";
     throw err;
   }
