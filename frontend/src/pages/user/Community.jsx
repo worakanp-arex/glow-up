@@ -284,7 +284,7 @@ function Community() {
             </form>
           </aside>
         ) : !mobile && (
-          <aside className="community-sidebar" ref={detailRef}>
+          <aside className="community-sidebar community-detail-sidebar" ref={detailRef}>
             {selectedPostId && visiblePosts.some(p => p._id === selectedPostId) ? (
               <PostDetailPanel
                 key={selectedPostId}
