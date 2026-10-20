@@ -5,7 +5,6 @@ import { useAuth } from "../context/AuthContext.jsx";
 import Reveal from "../components/common/Reveal.jsx";
 import PartnerBadge from "../components/common/PartnerBadge.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
-import PlantGrowth from "../components/user/PlantGrowth.jsx";
 import { PARTNERS } from "../constants/partners.js";
 import "./Home.css";
 
@@ -101,7 +100,7 @@ function Home() {
               <div className="home-hero-card-icon">
                 <HeartHandshake size={20} />
               </div>
-              <div className="home-growth-art"><PlantGrowth streak={14} size={170} /></div>
+              <img className="home-mascot" src="/images/illustrations/mascot.webp" alt="" width="190" height="180" />
               <p className="home-hero-card-title">ทุกคนควรมีโอกาสเริ่มต้นใหม่</p>
               <p className="home-hero-card-sub">
                 จับคู่งานอย่างเป็นธรรม ดูแลความเป็นส่วนตัวของคุณเป็นอันดับแรก
@@ -168,6 +167,7 @@ function Home() {
       </div>
 
       <Reveal as="section" className="home-cta-banner">
+        <img className="home-cta-art" src="/images/illustrations/family.webp" alt="" width="150" height="136" loading="lazy" />
         <h2>พร้อมเริ่มต้นบทใหม่หรือยัง?</h2>
         <p>สมัครสมาชิกวันนี้ เพื่อเริ่มค้นหางานที่ใช่ และรับการดูแลตลอดเส้นทางการกลับสู่สังคม</p>
         <div className="home-hero-actions">

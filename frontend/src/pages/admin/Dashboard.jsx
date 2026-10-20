@@ -28,7 +28,7 @@ function Dashboard() {
 
   return (
     <div className="dashboard-page">
-      <PageHeader icon={LayoutDashboard} description={<>ภาพรวมผู้ใช้งาน ประกาศงาน ใบสมัคร และความเสี่ยงในระบบทั้งหมด</>}>แผงควบคุมผู้ดูแลระบบ</PageHeader>
+      <PageHeader art="mascot" icon={LayoutDashboard} description={<>ภาพรวมผู้ใช้งาน ประกาศงาน ใบสมัคร และความเสี่ยงในระบบทั้งหมด</>}>แผงควบคุมผู้ดูแลระบบ</PageHeader>
 
       <div className="dashboard-links">
         <Link to="/admin/users">

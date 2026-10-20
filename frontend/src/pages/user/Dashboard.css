@@ -38,8 +38,6 @@
 .dashboard-hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 18px; font-size: .78rem; color: var(--color-text-secondary); }
 .dashboard-hero-meta > span:first-child { display: inline-flex; align-items: center; gap: 6px; }
 .dashboard-hero-meta svg { color: var(--color-primary-600); }
-.dashboard-hero-art { align-self: stretch; min-height: 180px; margin: -36px -40px -36px 0; background: transparent; }
-.dashboard-hero-art img { object-fit: contain; object-position: right bottom; }
 
 /* ---------- Main two-column area ---------- */
 .dashboard-main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: stretch; }
@@ -93,12 +91,10 @@
     padding: 2rem 1.25rem 3rem;
   }
   .dashboard-hero { padding: 28px; }
-  .dashboard-hero-art { margin: -28px -28px -28px 0; }
 }
 
 @media (max-width: 600px) {
   .dashboard-hero { grid-template-columns: minmax(0, 1fr); padding: 22px; min-height: 0; }
-  .dashboard-hero-art { order: -1; min-height: 0; height: 150px; margin: -22px -22px 0; }
   .dashboard-hero-art.is-missing { display: none; }
 }
 
@@ -112,3 +108,11 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Mascot illustration: fixed-size circle with a soft halo, scaled per breakpoint. */
+.image-slot.dashboard-hero-art { position: relative; justify-self: center; align-self: center; width: 200px; height: 200px; min-height: 0; margin: 0; border-radius: 50%; background: transparent; overflow: visible; }
+.image-slot.dashboard-hero-art::before { content: ""; position: absolute; inset: -22px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--color-primary-200) 55%, transparent), transparent 70%); }
+.image-slot.dashboard-hero-art img { position: relative; width: 100%; height: 100%; object-fit: contain; }
+.image-slot.dashboard-hero-art.is-missing { display: none; }
+@media (max-width: 860px) { .image-slot.dashboard-hero-art { width: 160px; height: 160px; } }
+@media (max-width: 600px) { .image-slot.dashboard-hero-art { order: -1; width: 120px; height: 120px; margin: 0 auto 6px; } .image-slot.dashboard-hero-art::before { inset: -14px; } }

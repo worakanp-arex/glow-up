@@ -555,3 +555,7 @@
 .home-page .home-news-wrap { padding-block: 64px; }
 @media (max-width: 860px) { .home-page .home-hero { padding: 44px 24px; } .home-page .home-hero-inner { gap: 28px; } .home-page .home-hero-visual { min-height: 360px; margin-top: 0; } .home-page .home-hero-copy h1 { margin-inline: auto; } .home-page .home-cta-banner { margin-inline: 20px; } }
 @media (max-width: 520px) { .home-page .home-hero { padding: 36px 20px; } .home-page .home-hero-visual { padding: 24px 12px; min-height: 330px; border-radius: 24px; } .home-page .home-hero-card-main { width: 100%; max-width: 290px; } .home-page .home-features { padding: 36px 20px; grid-template-columns: 1fr; } .home-page .home-hero-actions .btn { flex: 1; } }
+
+/* ---------- Illustrations ---------- */
+.home-mascot { display: block; width: 190px; height: auto; margin: -4px auto 12px; }
+.home-cta-art { position: relative; display: block; width: 130px; height: auto; margin: -8px auto 12px; padding: 8px 8px 0; border-radius: 50%; background: rgba(255, 255, 255, .92); }

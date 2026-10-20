@@ -72,7 +72,7 @@ function Dashboard() {
         eyebrow="Your growth space"
         actions={<span className="dashboard-date"><CalendarDays size={16} aria-hidden="true" />{TODAY_LABEL.format(new Date())}</span>}
       >
-        วันนี้ เติบโตไปอีกนิด
+     
       </PageHeader>
 
       <section className="dashboard-hero">
@@ -85,7 +85,7 @@ function Dashboard() {
             <StatusBadge status={user.verifiedStatus} />
           </div>
         </div>
-        <ImageSlot className="dashboard-hero-art" src="/images/illustrations/dashboard-hero.webp" alt="" />
+        <ImageSlot className="dashboard-hero-art" src="/images/illustrations/mascot.webp" alt="" />
       </section>
 
       <div className="dashboard-main">

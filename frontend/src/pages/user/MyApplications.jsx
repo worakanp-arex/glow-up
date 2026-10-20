@@ -69,6 +69,9 @@ function MyApplications() {
           return (
             <li key={app._id}>
               <div className="app-card-main">
+                <div className="app-card-logo" aria-hidden="true">
+                  {app.job.employer?.avatarUrl ? <img src={app.job.employer.avatarUrl} alt="" loading="lazy" /> : <span>{(employerName || app.job.title).trim().charAt(0).toUpperCase()}</span>}
+                </div>
                 <div className="app-card-info">
                   <Link to={`/jobs/${app.job._id}?from=my-applications`} className="app-card-title">
                     {app.job.title}

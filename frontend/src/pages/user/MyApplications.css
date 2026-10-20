@@ -173,3 +173,21 @@
     align-items: flex-start;
   }
 }
+
+/* ---- Minimal restyle (airy cards, company logo tile). Delete this block to revert. ---- */
+.my-applications-page .page-header { padding-bottom: 14px; position: relative; }
+.my-applications-page .page-header::after { content: ""; display: block; width: 36px; height: 3px; margin-top: 12px; border-radius: 2px; background: var(--color-primary-500); }
+.my-applications-list { gap: 14px; }
+.my-applications-list li { padding: 20px; box-shadow: none; border-radius: 18px; }
+.my-applications-list li:hover { box-shadow: none; transform: none; border-color: var(--color-primary-200); }
+.app-card-main { flex-wrap: nowrap; align-items: flex-start; gap: 16px; }
+.app-card-info { flex: 1 1 auto; }
+.app-card-logo { flex: 0 0 56px; width: 56px; height: 56px; border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--color-primary-50); border: 1px solid var(--color-primary-100); color: var(--color-primary-600); font-weight: 700; font-size: 1.35rem; }
+.app-card-logo img { width: 100%; height: 100%; object-fit: cover; }
+.app-card-side { flex: 0 0 auto; }
+@media (max-width: 760px) {
+  .app-card-main { flex-wrap: wrap; }
+  .app-card-info { flex: 1 1 calc(100% - 72px); }
+  .app-card-side { flex: 1 1 100%; }
+  .app-card-logo { flex-basis: 48px; width: 48px; height: 48px; font-size: 1.2rem; }
+}

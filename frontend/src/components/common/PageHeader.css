@@ -39,3 +39,10 @@
   .page-header-actions { width: 100%; }
   .layout .page-header-hero .page-title { font-size: clamp(1.5rem, 6.7vw, 1.875rem); line-height: 1.4; }
 }
+
+.page-header.has-art { position: relative; padding-right: 104px; min-height: 88px; }
+.page-header-art { position: absolute; top: 0; right: 0; width: 88px; height: auto; pointer-events: none; }
+@media (max-width: 520px) {
+  .page-header.has-art { padding-right: 68px; min-height: 60px; }
+  .page-header-art { width: 56px; }
+}

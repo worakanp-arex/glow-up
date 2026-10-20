@@ -104,11 +104,37 @@
   box-shadow: var(--shadow-sm);
 }
 
-.activity-mission-management-approval-toggle {
+.activity-mission-management-form-footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.activity-mission-management-form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  padding: 0;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.activity-mission-management-form input[type="checkbox"]:checked {
+  border-color: var(--color-primary-500);
+}
+
+.activity-mission-management-form input[type="checkbox"]:focus {
+  box-shadow: none;
+}
+
+.activity-mission-management-form label.activity-mission-management-approval-toggle {
+  flex-direction: row;
+  align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1.25rem;
+  margin-left: auto;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
 }

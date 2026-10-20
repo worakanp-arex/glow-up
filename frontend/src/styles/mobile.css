@@ -29,20 +29,20 @@
   .layout .pagination { margin-top: 12px; padding-top: 12px; gap: 8px; }
   .layout .pagination button { width: 44px; height: 44px; }
 
-  /* The welcome and primary actions fit before the first scroll. */
-  .layout .home-page .home-hero { padding: 24px 16px 20px; }
-  .layout .home-page .home-hero-inner { gap: 18px; }
-  .layout .home-page .home-eyebrow { padding: 4px 8px; font-size: .75rem; margin-bottom: 10px; }
-  .layout .home-page .home-hero-copy h1 { font-size: clamp(1.5rem, 6.7vw, 1.875rem); line-height: 1.4; letter-spacing: -.025em; margin-bottom: 10px; }
-  .layout .home-page .home-hero-copy > p { font-size: .875rem; line-height: 1.65; margin-bottom: 16px; }
-  .layout .home-page .home-hero-actions { gap: 8px; }
-  .layout .home-page .home-hero-visual { min-height: 0; padding: 0; border: 0; background: none; }
-  .layout .home-page .home-hero-card-main { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; column-gap: 12px; width: 100%; max-width: none; padding: 12px; border-radius: 14px; text-align: left; box-shadow: none; }
-  .layout .home-page .home-growth-art { grid-row: 1 / 3; margin: 0; }
-  .layout .home-page .home-growth-art svg { width: 64px; height: 64px; }
+  /* Welcome panel: left-aligned copy, mascot rising from the bottom edge. */
+  .layout .home-page .home-hero { margin: 12px 12px 0; padding: 28px 20px 0; border: 0; border-radius: 28px; background: linear-gradient(180deg, var(--color-primary-50), var(--color-primary-100)); }
+  .layout .home-page .home-hero-inner { display: flex; flex-direction: column; gap: 0; text-align: left; }
+  .layout .home-page .home-eyebrow { padding: 5px 10px; font-size: .75rem; margin-bottom: 14px; background: var(--color-surface); }
+  .layout .home-page .home-hero-copy h1 { max-width: none; margin: 0 0 12px; font-size: clamp(1.6rem, 7.4vw, 2rem); line-height: 1.35; letter-spacing: -.02em; }
+  .layout .home-page .home-hero-copy > p { margin: 0 0 20px; font-size: .9rem; line-height: 1.7; }
+  .layout .home-page .home-hero-copy .home-hero-actions { justify-content: flex-start; gap: 8px; flex-wrap: nowrap; }
+  .layout .home-page .home-hero-actions .btn { flex: 1 1 0; padding-inline: 10px; white-space: nowrap; }
+  .layout .home-page .home-hero-visual { min-height: 0; margin: 20px 0 0; padding: 0; border: 0; background: none; }
+  .layout .home-page .home-hero-card-main { display: block; width: auto; max-width: none; padding: 0; border: 0; background: none; box-shadow: none; }
+  .layout .home-page .home-mascot { width: 190px; margin: 0 0 -30px; }
+  .layout .home-page .home-hero-visual { justify-content: flex-end; padding-right: 4px; }
+  .layout .home-page .home-hero-card-title, .layout .home-page .home-hero-card-sub, .layout .home-page .page-header-hero .page-heading-icon { display: none; }
   .layout .home-page .home-hero-card-icon, .layout .home-page .home-hero-card-float { display: none; }
-  .layout .home-page .home-hero-card-title { font-size: .8125rem; margin: 0 0 4px; }
-  .layout .home-page .home-hero-card-sub { font-size: .75rem; line-height: 1.6; }
   .layout .home-page .home-partners { padding: 14px 16px; }
   .layout .home-page .home-partners-label { margin-bottom: 10px; font-size: .7rem; }
   .layout .home-page .home-partners-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -65,8 +65,10 @@
   .layout .home-page .home-news-wrap { padding: 24px 16px; }
   .layout .news-section-grid { gap: 12px; margin-bottom: 12px; grid-template-columns: minmax(0, 1fr); }
   .layout .news-section-card { flex-direction: row; }
-  .layout .news-section-image { width: 88px; min-height: 112px; height: auto; flex-shrink: 0; }
-  .layout .news-section-body { min-width: 0; padding: 12px; gap: 4px; }
+  .layout .news-section-image { flex: 0 0 50%; width: 50%; min-height: 140px; height: auto; }
+  .layout .news-section-body { flex: 1 1 50%; min-width: 0; padding: 12px; gap: 4px; }
+  .layout .news-section-body h3 { -webkit-line-clamp: 3; }
+  .layout .news-section-body p { -webkit-line-clamp: 2; }
   .layout .news-section-body h3 { font-size: .875rem; }
   .layout .news-section-body p { font-size: .8125rem; }
   .layout .home-page .home-cta-banner { margin: 0 12px 24px; padding: 24px 16px; border-radius: 16px; }

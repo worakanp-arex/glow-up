@@ -68,7 +68,7 @@ function Analytics() {
 
   return (
     <div className="counsellor-analytics-page">
-      <PageHeader icon={BarChart3} description={<>
+      <PageHeader art="nurse" icon={BarChart3} description={<>
         ข้อมูลสรุปการใช้งานของผู้ผ่านการบำบัด สำหรับบุคลากรทางการแพทย์
       </>}>ภาพรวมผู้ใช้งาน</PageHeader>
 

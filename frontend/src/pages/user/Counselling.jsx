@@ -97,7 +97,7 @@ function Counselling() {
 
   return (
     <div className="counselling-page">
-      <PageHeader icon={HeartHandshake} eyebrow="A space to be heard" description="เลือกช่องทางที่สบายใจ และบอกเรื่องที่อยากคุยสั้น ๆ บุคลากรจะตอบกลับและยืนยันนัดหมายให้คุณ">
+      <PageHeader art="nurse" icon={HeartHandshake} eyebrow="A space to be heard" description="เลือกช่องทางที่สบายใจ และบอกเรื่องที่อยากคุยสั้น ๆ บุคลากรจะตอบกลับและยืนยันนัดหมายให้คุณ">
         คุยได้ ในจังหวะของคุณ
       </PageHeader>
 

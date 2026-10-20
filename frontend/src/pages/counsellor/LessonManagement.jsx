@@ -119,7 +119,7 @@ function LessonManagement() {
   return (
     <div className="lesson-management-page">
       {confirmDialog}
-      <PageHeader icon={BookOpen} description={<>
+      <PageHeader art="nurse" icon={BookOpen} description={<>
         เพิ่มบทเรียนสั้นและสถานการณ์จำลองเพื่อฝึกทักษะการปฏิเสธในสถานการณ์เสี่ยง
       </>}>จัดการทักษะการปฏิเสธ</PageHeader>
 

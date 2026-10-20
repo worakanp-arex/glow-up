@@ -16,8 +16,6 @@
 .courses-hero h2 { margin: 0; font-size: 1.5rem; font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; }
 .courses-hero-copy > p:not(.courses-hero-eyebrow) { margin: 0 0 6px; font-size: .85rem; line-height: 1.7; color: var(--color-text-secondary); }
 .courses-hero .ui-btn { margin-top: 10px; }
-.courses-hero-art { align-self: stretch; min-height: 180px; margin: -32px -40px -32px 0; background: transparent; }
-.courses-hero-art img { object-fit: contain; object-position: right bottom; }
 
 /* ---------- Tabs + search ---------- */
 .courses-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -62,7 +60,6 @@
 @media (max-width: 600px) {
   .courses-page { gap: 18px; }
   .courses-hero { grid-template-columns: minmax(0, 1fr); padding: 22px; min-height: 0; }
-  .courses-hero-art { order: -1; min-height: 0; height: 150px; margin: -22px -22px 0; }
   .courses-hero-art.is-missing { display: none; }
   .courses-hero .ui-btn { width: 100%; }
   .courses-tabs { flex-wrap: nowrap; overflow-x: auto; width: 100%; scrollbar-width: none; }
@@ -71,3 +68,11 @@
   .courses-grid { grid-template-columns: minmax(0, 1fr); }
   .courses-learning-callout { padding: 16px; }
 }
+
+/* Mascot illustration: fixed-size circle with a soft halo, scaled per breakpoint. */
+.image-slot.courses-hero-art { position: relative; justify-self: center; align-self: center; width: 200px; height: 200px; min-height: 0; margin: 0; border-radius: 50%; background: transparent; overflow: visible; }
+.image-slot.courses-hero-art::before { content: ""; position: absolute; inset: -22px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--color-primary-200) 55%, transparent), transparent 70%); }
+.image-slot.courses-hero-art img { position: relative; width: 100%; height: 100%; object-fit: contain; border-radius: 50%; box-shadow: var(--shadow-md); }
+.image-slot.courses-hero-art.is-missing { display: none; }
+@media (max-width: 860px) { .image-slot.courses-hero-art { width: 160px; height: 160px; } }
+@media (max-width: 600px) { .image-slot.courses-hero-art { order: -1; width: 120px; height: 120px; margin: 0 auto 6px; } .image-slot.courses-hero-art::before { inset: -14px; } }

@@ -47,7 +47,7 @@ function FamilyDashboard({ links }) {
   return (
     <div className="family-dashboard-page">
       <div className="family-dashboard-header">
-        <PageHeader icon={Heart}>ติดตามความคืบหน้า</PageHeader>
+        <PageHeader art="family" icon={Heart}>ติดตามความคืบหน้า</PageHeader>
         {links.length > 1 && (
           <select value={selectedLinkId} onChange={(e) => setSelectedLinkId(e.target.value)}>
             {links.map((link) => (

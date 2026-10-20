@@ -75,7 +75,7 @@ function Queue() {
 
   return (
     <div className="counsellor-queue-page">
-      <PageHeader icon={HeartHandshake} description={<>ดูปฏิทินนัดหมายของคุณ และจัดการคำขอรับคำปรึกษาจากผู้ผ่านการบำบัด</>}>คำขอรับคำปรึกษา</PageHeader>
+      <PageHeader art="nurse" icon={HeartHandshake} description={<>ดูปฏิทินนัดหมายของคุณ และจัดการคำขอรับคำปรึกษาจากผู้ผ่านการบำบัด</>}>คำขอรับคำปรึกษา</PageHeader>
 
       <PatientOverviewWidget />
 

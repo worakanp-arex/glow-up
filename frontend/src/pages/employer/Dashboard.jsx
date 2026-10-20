@@ -58,7 +58,7 @@ function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="dashboard-greeting">
-        <PageHeader icon={Building2}>สวัสดี, {user.companyName || user.name}</PageHeader>
+        <PageHeader art="mascot" icon={Building2}>สวัสดี, {user.companyName || user.name}</PageHeader>
         <StatusBadge status={user.verifiedStatus} />
       </div>
       <p className="dashboard-subtitle">ภาพรวมประกาศงานและผู้สมัครของบริษัทคุณ</p>

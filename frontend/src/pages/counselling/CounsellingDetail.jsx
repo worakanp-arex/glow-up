@@ -140,7 +140,7 @@ function CounsellingDetail() {
 
   const HeaderIcon = SESSION_TYPE_ICONS[session?.sessionType] || MessageCircle;
   const pageHeader = (
-    <PageHeader
+    <PageHeader art="nurse"
       icon={HeaderIcon}
       backTo={isStaff ? "/counsellor" : "/counselling"}
       backLabel="รายการคำปรึกษา"

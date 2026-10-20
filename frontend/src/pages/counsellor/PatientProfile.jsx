@@ -80,7 +80,7 @@ function PatientProfile() {
     }
   }
 
-  const pageHeader = <PageHeader icon={UserRound} backTo={"/counsellor"} backLabel="คำขอรับคำปรึกษา">{"ข้อมูลผู้รับคำปรึกษา"}</PageHeader>;
+  const pageHeader = <PageHeader art="nurse" icon={UserRound} backTo={"/counsellor"} backLabel="คำขอรับคำปรึกษา">{"ข้อมูลผู้รับคำปรึกษา"}</PageHeader>;
 
   if (loadError) return <div className="patient-profile-page">{pageHeader}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 

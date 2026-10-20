@@ -24,7 +24,7 @@ function FamilyGuide() {
 
   return (
     <div className="family-guide-page">
-      <PageHeader icon={BookOpen} description="บทความและคำแนะนำสำหรับครอบครัวและผู้ดูแล เพื่อช่วยสนับสนุนเส้นทางฟื้นฟูของคนที่คุณรัก">
+      <PageHeader art="family" icon={BookOpen} description="บทความและคำแนะนำสำหรับครอบครัวและผู้ดูแล เพื่อช่วยสนับสนุนเส้นทางฟื้นฟูของคนที่คุณรัก">
         คู่มือสำหรับครอบครัว
       </PageHeader>
 

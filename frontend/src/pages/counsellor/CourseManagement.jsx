@@ -57,7 +57,7 @@ function CourseManagement() {
 
   return (
     <div className="course-management-page">
-      <PageHeader icon={BookOpen} description={<>
+      <PageHeader art="nurse" icon={BookOpen} description={<>
         เพิ่มคอร์สเรียนจากแหล่งภายนอก (เช่น Chula MOOC) พร้อมคำอธิบาย แท็ก และหมวดหมู่ ให้ผู้ผ่านการบำบัดค้นหาและเรียนรู้ได้
       </>}>จัดการคอร์สเรียน</PageHeader>
 

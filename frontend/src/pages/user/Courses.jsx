@@ -111,7 +111,7 @@ function Courses() {
             {continuing && <StatusBadge status="learning" />}
             <Link to={`/courses/${featured._id}`} className="ui-btn ui-btn-primary">{continuing ? "เรียนต่อ" : "เริ่มเรียน"}</Link>
           </div>
-          <ImageSlot className="courses-hero-art" src="/images/illustrations/dashboard-hero.webp" alt="" />
+          <ImageSlot className="courses-hero-art" src="/images/illustrations/mascot.webp" alt="" />
         </section>
       )}
 

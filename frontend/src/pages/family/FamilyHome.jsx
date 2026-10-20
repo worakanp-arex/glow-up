@@ -15,7 +15,7 @@ export default function FamilyHome() {
   useEffect(() => { getMyFamilyLinks().then(setLinks).catch(setError); }, []);
   if (links?.length) return <FamilyDashboard links={links} />;
   return <div className="family-dashboard-page">
-    <PageHeader icon={Heart} description="พื้นที่สำหรับครอบครัวและผู้ดูแล เพื่อติดตามความคืบหน้าและเป็นกำลังใจ">ติดตามครอบครัว</PageHeader>
+    <PageHeader art="family" icon={Heart} description="พื้นที่สำหรับครอบครัวและผู้ดูแล เพื่อติดตามความคืบหน้าและเป็นกำลังใจ">ติดตามครอบครัว</PageHeader>
     {error ? <AsyncState error onRetry={() => window.location.reload()} /> : !links ? <AsyncState /> : <section className="family-welcome-card">
       <Mail size={32} aria-hidden="true" />
       <h2>ยังไม่ได้เชื่อมกับสมาชิกในครอบครัว</h2>

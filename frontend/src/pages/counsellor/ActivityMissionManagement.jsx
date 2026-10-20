@@ -79,7 +79,7 @@ function ActivityMissionManagement() {
 
   return (
     <div className="activity-mission-management-page">
-      <PageHeader
+      <PageHeader art="nurse"
         icon={ListTodo}
         description="เพิ่มภารกิจประจำวันที่ผู้บำบัดเลือกทำเองได้ เช่น งานบ้าน ออกกำลังกาย และการเรียนรู้ พร้อมกำหนดแต้มรางวัลต่อครั้ง"
       >
@@ -115,16 +115,17 @@ function ActivityMissionManagement() {
           คำอธิบายภารกิจ
           <textarea name="description" value={form.description} onChange={handleChange} rows={2} />
         </label>
-        <label className="activity-mission-management-approval-toggle">
-          <input type="checkbox" name="requiresApproval" checked={form.requiresApproval} onChange={handleChange} />
-          <span>ต้องให้เจ้าหน้าที่อนุมัติก่อนจึงจะได้รับแต้ม</span>
-        </label>
-
         {error && <p className="activity-mission-management-error">{error}</p>}
 
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? "กำลังเพิ่ม..." : "เพิ่มภารกิจ"}
-        </button>
+        <div className="activity-mission-management-form-footer">
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? "กำลังเพิ่ม..." : "เพิ่มภารกิจ"}
+          </button>
+          <label className="activity-mission-management-approval-toggle">
+            <input type="checkbox" name="requiresApproval" checked={form.requiresApproval} onChange={handleChange} />
+            <span>ต้องให้เจ้าหน้าที่อนุมัติก่อนจึงจะได้รับแต้ม</span>
+          </label>
+        </div>
       </form>
 
       {pendingApprovals.length > 0 && (

@@ -491,7 +491,7 @@ function Profile() {
 
   return (
     <div className="profile-page">
-      <PageHeader icon={User} eyebrow="Your own story" description="จัดการข้อมูล เป้าหมาย และสิ่งที่คุณเลือกแบ่งปัน">โปรไฟล์ของฉัน</PageHeader>
+      <PageHeader art="mascot" icon={User} eyebrow="Your own story" description="จัดการข้อมูล เป้าหมาย และสิ่งที่คุณเลือกแบ่งปัน">โปรไฟล์ของฉัน</PageHeader>
 
       {profileCard}
 
