@@ -44,8 +44,16 @@ const app = express();
 
 // Behind a reverse proxy (e.g. Nginx on the same machine) set TRUST_PROXY=loopback
 // so rate limiting sees each visitor's real IP instead of the proxy's.
+// Accepts true/false, a hop count (e.g. 1) or names/IPs like "loopback".
+export function parseTrustProxy(value) {
+  const v = String(value).trim();
+  if (/^(true|yes)$/i.test(v)) return true;
+  if (/^(false|no)$/i.test(v)) return false;
+  if (/^\d+$/.test(v)) return Number(v);
+  return v;
+}
 if (process.env.TRUST_PROXY) {
-  app.set("trust proxy", process.env.TRUST_PROXY);
+  app.set("trust proxy", parseTrustProxy(process.env.TRUST_PROXY));
 }
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173", credentials: true }));

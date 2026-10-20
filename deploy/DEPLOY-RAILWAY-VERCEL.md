@@ -68,7 +68,7 @@ git push
 
    ```
    NODE_ENV=production
-   TRUST_PROXY=true
+   TRUST_PROXY=1
    SOCKET_PING_INTERVAL_MS=10000
    MONGODB_URI=mongodb+srv://...ของคุณ...
    JWT_SECRET=สุ่มอย่างน้อย32ตัวอักษร
