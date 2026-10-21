@@ -8,7 +8,7 @@
 | `illustrations/mascot.webp` | การ์ดต้อนรับหน้าแรก แดชบอร์ด การ์ดเด่นบทเรียน | 385×405 |
 | `illustrations/nurse.webp` | หัวหน้าปรึกษา/บุคลากร (`PageHeader art="nurse"` กรอบคงที่ 88px) | 365×402 |
 | `illustrations/family.webp` | หน้าครอบครัว/ผู้ดูแล | 470×425 |
-| `illustrations/banner.webp` | แบนเนอร์ GROW UP | 1053×449 |
+| `illustrations/banner.webp` | แบนเนอร์ภาพ (ไม่มีตัวอักษร ใส่ข้อความด้วย HTML ทางซ้าย) | 1053×449 |
 | `illustrations/mood-*.webp` | หน้าอารมณ์ 8 แบบ | 160×160 |
 | `avatars/user.webp` `staff.webp` `family.webp` | รูปโปรไฟล์ดีฟอลต์ตามบทบาท (`src/utils/defaultAvatar.js`) นายจ้าง/ผู้ดูแลระบบใช้อักษรย่อ | 256×256 |
 | `games/memory.png` `quiz.png` `wheel.png` | การ์ดเกม จับคู่ ดูแลใจ / เลือกทางของคุณ / วงล้อก้าวเล็ก ๆ | 800×500 |
