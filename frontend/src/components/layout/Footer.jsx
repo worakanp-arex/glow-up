@@ -28,7 +28,7 @@ function Footer() {
     <footer className="footer">
       <div className="footer-main">
         <div className="footer-col footer-brand">
-          <img className="footer-brand-logo" src={logoSrc} alt="glow-up" />
+          <img className="footer-brand-logo" src={logoSrc} alt="Grow Up" />
           <p>
             พื้นที่ที่เชื่อมผู้ผ่านการบำบัดเข้ากับโอกาสการทำงานจริง ด้วยการจับคู่ทักษะอย่างเป็นธรรม
             และดูแลความเป็นส่วนตัวของคุณเป็นอันดับแรก
@@ -85,8 +85,8 @@ function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <img className="footer-bottom-logo" src={logoSrc} alt="glow-up" />
-        <p>&copy; {year} glow-up — โครงการสนับสนุนโอกาสการทำงาน สำหรับผู้ผ่านการบำบัด</p>
+        <img className="footer-bottom-logo" src={logoSrc} alt="Grow Up" />
+        <p>&copy; {year} Grow Up — โครงการสนับสนุนโอกาสการทำงาน สำหรับผู้ผ่านการบำบัด</p>
       </div>
     </footer>
   );

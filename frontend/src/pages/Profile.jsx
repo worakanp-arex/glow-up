@@ -15,6 +15,7 @@ import GrowthCard from "../components/user/GrowthCard.jsx";
 import useConfirmDialog from "../components/common/useConfirmDialog.jsx";
 import { THAI_PROVINCES } from "../constants/provinces.js";
 import "./Profile.css";
+import { defaultAvatarSrc } from "../utils/defaultAvatar.js";
 
 const FAMILY_STATUS_LABELS = { pending: "รอการตอบรับ", active: "ติดตามอยู่" };
 
@@ -351,8 +352,8 @@ function Profile() {
         onClick={() => avatarInputRef.current?.click()}
         disabled={avatarUploading}
       >
-        {user.avatarUrl ? (
-          <img src={user.avatarUrl} alt="รูปโปรไฟล์" />
+        {user.avatarUrl || defaultAvatarSrc(user.role) ? (
+          <img src={user.avatarUrl || defaultAvatarSrc(user.role)} alt="รูปโปรไฟล์" />
         ) : (
           <span className="profile-avatar-fallback">{initials(user.nickname || user.name)}</span>
         )}

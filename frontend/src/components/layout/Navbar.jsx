@@ -63,7 +63,7 @@ function Navbar() {
         </button>
 
         <Link to="/" className="navbar-brand">
-          <img className="navbar-logo" src={theme === "dark" ? "/logoW.png" : "/logo.png"} alt="glow-up" />
+          <img className="navbar-logo" src={theme === "dark" ? "/logoW.png" : "/logo.png"} alt="Grow Up" />
           <small>เริ่มต้นใหม่ ไปด้วยกัน</small>
         </Link>
 

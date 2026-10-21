@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Award, BookOpen, CalendarDays, ChevronDown, ClipboardList, LogOut, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./UserMenu.css";
+import { defaultAvatarSrc } from "../../utils/defaultAvatar.js";
 
 const ROLE_LABELS = {
   user: "ผู้หางาน",
@@ -56,7 +57,7 @@ function UserMenu() {
     <div className="user-menu" ref={containerRef}>
       <button type="button" className="user-menu-trigger" aria-label="เมนูบัญชีของฉัน" aria-expanded={open} onClick={() => setOpen((prev) => !prev)}>
         <span className="user-menu-avatar">
-          {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}
+          {user.avatarUrl || defaultAvatarSrc(user.role) ? <img src={user.avatarUrl || defaultAvatarSrc(user.role)} alt="" /> : initials(user.name)}
         </span>
         <span className="user-menu-name">{user.name}</span>
         <ChevronDown size={16} className={`user-menu-chevron ${open ? "open" : ""}`} />

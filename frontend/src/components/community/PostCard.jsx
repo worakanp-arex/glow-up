@@ -6,6 +6,7 @@ import * as postService from "../../services/postService.js";
 import { AUDIENCE_ROLES, AUDIENCE_LABEL_BY_VALUE } from "../../constants/postAudience.js";
 import useConfirmDialog from "../common/useConfirmDialog.jsx";
 import "./PostCard.css";
+import { defaultAvatarSrc } from "../../utils/defaultAvatar.js";
 
 function initials(name) {
   return name?.trim()?.charAt(0)?.toUpperCase() || "?";
@@ -104,11 +105,11 @@ function PostCard({
       <div className="post-card-header">
         {isStaffAuthor ? (
           <Link to={`/community/staff/${post.user._id}`} className="post-card-avatar">
-            {post.user?.avatarUrl ? <img src={post.user.avatarUrl} alt="" /> : initials(post.user?.name)}
+            {post.user?.avatarUrl || defaultAvatarSrc(post.user?.role) ? <img src={post.user?.avatarUrl || defaultAvatarSrc(post.user?.role)} alt="" /> : initials(post.user?.name)}
           </Link>
         ) : (
           <span className="post-card-avatar">
-            {post.user?.avatarUrl ? <img src={post.user.avatarUrl} alt="" /> : initials(post.user?.name)}
+            {post.user?.avatarUrl || defaultAvatarSrc(post.user?.role) ? <img src={post.user?.avatarUrl || defaultAvatarSrc(post.user?.role)} alt="" /> : initials(post.user?.name)}
           </span>
         )}
         <div className="post-card-author-block">

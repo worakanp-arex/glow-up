@@ -43,7 +43,7 @@ function ResetPassword() {
           <div className="auth-visual-blob auth-visual-blob-1" />
           <div className="auth-visual-blob auth-visual-blob-2" />
           <div className="auth-visual-content">
-            <span className="auth-visual-brand">glow-up</span>
+            <span className="auth-visual-brand">Grow Up</span>
             <h2>เริ่มต้นบทใหม่ของชีวิตการทำงาน ไปด้วยกัน</h2>
             <p>พื้นที่ปลอดภัยสำหรับผู้ผ่านการบำบัด เชื่อมโอกาสการทำงานจริง ด้วยความเข้าใจและความเป็นส่วนตัว</p>
           </div>
@@ -67,7 +67,7 @@ function ResetPassword() {
         <div className="auth-visual-blob auth-visual-blob-1" />
         <div className="auth-visual-blob auth-visual-blob-2" />
         <div className="auth-visual-content">
-          <span className="auth-visual-brand">glow-up</span>
+          <span className="auth-visual-brand">Grow Up</span>
           <h2>เริ่มต้นบทใหม่ของชีวิตการทำงาน ไปด้วยกัน</h2>
           <p>พื้นที่ปลอดภัยสำหรับผู้ผ่านการบำบัด เชื่อมโอกาสการทำงานจริง ด้วยความเข้าใจและความเป็นส่วนตัว</p>
         </div>
