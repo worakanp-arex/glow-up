@@ -1,4 +1,4 @@
-.dashboard-page {
+.employer-dashboard-page {
   max-width: var(--content-width);
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
@@ -7,156 +7,28 @@
   gap: 1.5rem;
 }
 
-.dashboard-greeting {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: -0.75rem;
-}
+.layout .employer-dashboard-page > .page-header { margin-bottom: 0; }
 
-.dashboard-greeting h1 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  font-size: 1.6rem;
-  color: var(--color-text);
-}
+.employer-dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; }
 
-.dashboard-subtitle {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-}
+.employer-dashboard-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
 
-.dashboard-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
+.employer-dashboard-recent .ui-card-head h2 { display: flex; align-items: center; gap: 8px; }
+.employer-dashboard-empty { margin: 0; font-size: .9rem; color: var(--color-text-muted); }
 
-.dashboard-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
-}
+.employer-dashboard-job-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.employer-dashboard-job { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border: 1px solid var(--color-border); border-radius: 14px; color: var(--color-text); text-decoration: none; transition: border-color .15s, background-color .15s; }
+.employer-dashboard-job:hover { border-color: var(--color-primary-200); background: var(--color-primary-50); }
+.employer-dashboard-job-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.employer-dashboard-job-title { font-weight: 600; overflow-wrap: anywhere; }
+.employer-dashboard-job-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.employer-dashboard-job > svg { flex-shrink: 0; color: var(--color-text-muted); }
 
-.dashboard-links a:hover {
-  color: var(--color-primary-700);
-  border-color: var(--color-primary-200);
-  background-color: var(--color-primary-50);
-  transform: translateY(-2px);
-}
+.employer-dashboard-links { display: flex; flex-direction: column; gap: 6px; }
+.employer-dashboard-links a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border-radius: 12px; color: var(--color-text); font-size: .88rem; font-weight: 500; text-decoration: none; }
+.employer-dashboard-links a > span { flex: 1; }
+.employer-dashboard-links a > svg:last-child { color: var(--color-text-faint); }
+.employer-dashboard-links a:hover { background: var(--color-primary-50); color: var(--color-primary-700); }
 
-.dashboard-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.dashboard-recent h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  margin: 0 0 1rem;
-  font-size: 1.05rem;
-  color: var(--color-text);
-}
-
-.dashboard-recent h2 svg {
-  color: var(--color-primary-600);
-}
-
-.dashboard-empty {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-}
-
-.dashboard-job-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.dashboard-job-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  flex-wrap: wrap;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.dashboard-job-list li:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
-
-.dashboard-job-title {
-  margin: 0 0 0.35rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.dashboard-job-badges {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.dashboard-job-applicants {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-700);
-  font-size: 0.82rem;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: background-color 0.15s ease, transform 0.15s ease;
-}
-
-.dashboard-job-applicants:hover {
-  background-color: var(--color-primary-100);
-  transform: translateY(-2px);
-}
-
-.dashboard-view-all {
-  display: inline-flex;
-  margin-top: 0.9rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-primary-600);
-  text-decoration: none;
-}
-
-.dashboard-view-all:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 520px) {
-  .dashboard-job-list li {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
+@media (max-width: 960px) { .employer-dashboard-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 520px) { .employer-dashboard-page { padding: 1.5rem 1rem 2.5rem; } }

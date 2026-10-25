@@ -1,3 +1,23 @@
+import {
+  BarChart3,
+  BookOpen,
+  Briefcase,
+  Flag,
+  GraduationCap,
+  LayoutDashboard,
+  ListChecks,
+  MessageCircle,
+  MessagesSquare,
+  ShieldAlert,
+  Tags,
+  Target,
+  UserCircle,
+  Users,
+  FileSearch,
+} from "lucide-react";
+
+// `icon` and `group` are used by the left side navigation (admin and
+// counsellor only); every other role keeps the horizontal bar and ignores them.
 export const LINKS_BY_ROLE = {
   guest: [
     { to: "/", label: "หน้าหลัก", end: true },
@@ -32,26 +52,40 @@ export const LINKS_BY_ROLE = {
     { to: "/about", label: "เกี่ยวกับเรา" },
   ],
   counsellor: [
-    { to: "/counsellor", label: "คำขอรับคำปรึกษา", end: true },
-    { to: "/community", label: "ชุมชนฟื้นฟู" },
-    { to: "/counsellor/courses", label: "จัดการคอร์สเรียน" },
-    { to: "/counsellor/activity-missions", label: "จัดการภารกิจประจำวัน" },
-    { to: "/counsellor/lessons", label: "จัดการทักษะปฏิเสธ" },
-    { to: "/counsellor/analytics", label: "ภาพรวมผู้ใช้งาน" },
-    { to: "/admin/posts-moderation", label: "ตรวจสอบโพสต์ที่ถูกรายงาน" },
+    { to: "/counsellor", label: "คำขอรับคำปรึกษา", end: true, icon: MessageCircle, group: "การให้คำปรึกษา" },
+    { to: "/counsellor/analytics", label: "ภาพรวมผู้ใช้งาน", icon: BarChart3, group: "การให้คำปรึกษา" },
+    { to: "/counsellor/courses", label: "จัดการคอร์สเรียน", icon: GraduationCap, group: "เนื้อหาและภารกิจ" },
+    { to: "/counsellor/activity-missions", label: "จัดการภารกิจประจำวัน", icon: ListChecks, group: "เนื้อหาและภารกิจ" },
+    { to: "/counsellor/lessons", label: "จัดการทักษะปฏิเสธ", icon: BookOpen, group: "เนื้อหาและภารกิจ" },
+    { to: "/community", label: "ชุมชนฟื้นฟู", icon: MessagesSquare, group: "ชุมชน" },
+    { to: "/admin/posts-moderation", label: "ตรวจสอบโพสต์ที่ถูกรายงาน", icon: Flag, group: "ชุมชน" },
+    { to: "/profile", label: "โปรไฟล์ของฉัน", icon: UserCircle, group: "บัญชี" },
     { to: "/about", label: "เกี่ยวกับเรา" },
   ],
   admin: [
-    { to: "/admin", label: "หน้าหลัก", end: true },
-    { to: "/admin/users", label: "จัดการผู้ใช้งาน" },
-    { to: "/admin/jobs", label: "ตรวจสอบประกาศงาน" },
-    { to: "/admin/job-categories", label: "หมวดหมู่งาน" },
-    { to: "/admin/assessments", label: "ผลประเมินความเสี่ยง" },
-    { to: "/admin/missions", label: "จัดการภารกิจและรางวัล" },
-    { to: "/admin/posts-moderation", label: "ตรวจสอบโพสต์ที่ถูกรายงาน" },
+    { to: "/admin", label: "หน้าหลัก", end: true, icon: LayoutDashboard, group: "ภาพรวม" },
+    { to: "/counsellor/analytics", label: "ภาพรวมผู้ใช้งาน", icon: BarChart3, group: "ภาพรวม" },
+    { to: "/admin/assessments", label: "ผลประเมินความเสี่ยง", icon: ShieldAlert, group: "ภาพรวม" },
+    { to: "/admin/users", label: "จัดการผู้ใช้งาน", icon: Users, group: "ผู้ใช้และงาน" },
+    { to: "/admin/jobs", label: "ตรวจสอบประกาศงาน", icon: Briefcase, group: "ผู้ใช้และงาน" },
+    { to: "/admin/applications", label: "ใบสมัครงานทั้งหมด", icon: FileSearch, group: "ผู้ใช้และงาน" },
+    { to: "/admin/job-categories", label: "หมวดหมู่งาน", icon: Tags, group: "ผู้ใช้และงาน" },
+    { to: "/admin/missions", label: "จัดการภารกิจและรางวัล", icon: Target, group: "ภารกิจและเนื้อหา" },
+    { to: "/counsellor/activity-missions", label: "จัดการภารกิจประจำวัน", icon: ListChecks, group: "ภารกิจและเนื้อหา" },
+    { to: "/community", label: "ชุมชนฟื้นฟู", icon: MessagesSquare, group: "ชุมชน" },
+    { to: "/admin/posts-moderation", label: "ตรวจสอบโพสต์ที่ถูกรายงาน", icon: Flag, group: "ชุมชน" },
+    { to: "/profile", label: "โปรไฟล์ของฉัน", icon: UserCircle, group: "บัญชี" },
     { to: "/about", label: "เกี่ยวกับเรา" },
   ],
 };
+
+// Admin and counsellor have many menu items, so they get a left side
+// navigation (white, dark text) instead of the horizontal bar.
+const SIDEBAR_ROLES = ["admin", "counsellor"];
+
+export function usesSidebar(user, isAuthenticated) {
+  return Boolean(isAuthenticated && user && SIDEBAR_ROLES.includes(user.role));
+}
 
 export function getNavLinks(user, isAuthenticated) {
   return isAuthenticated ? LINKS_BY_ROLE[user.role] || LINKS_BY_ROLE.guest : LINKS_BY_ROLE.guest;

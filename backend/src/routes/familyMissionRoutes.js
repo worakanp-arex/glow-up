@@ -39,7 +39,20 @@ router.post(
   validate,
   asyncHandler(createFamilyMission)
 );
-router.put("/:id", verifyToken, requireRole("admin"), [objectIdParam("id")], validate, asyncHandler(updateFamilyMission));
+router.put(
+  "/:id",
+  verifyToken,
+  requireRole("admin"),
+  [
+    objectIdParam("id"),
+    body("title").optional().trim().notEmpty().isLength({ max: 200 }),
+    body("description").optional().trim().isLength({ max: 1000 }),
+    body("points").optional().isInt({ min: 0, max: 100000 }),
+    body("active").optional().isBoolean(),
+  ],
+  validate,
+  asyncHandler(updateFamilyMission)
+);
 router.delete("/:id", verifyToken, requireRole("admin"), [objectIdParam("id")], validate, asyncHandler(deleteFamilyMission));
 
 export default router;

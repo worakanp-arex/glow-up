@@ -29,3 +29,13 @@ export function uploadCourseCertificate(id, file) {
 export function createCourse(payload) {
   return api.post("/courses", payload).then((res) => res.data);
 }
+
+export function updateCourse(id, payload) {
+  return api.put(`/courses/${id}`, payload).then((res) => res.data);
+}
+
+export function uploadCourseCover(file) {
+  const formData = new FormData();
+  formData.append("cover", file);
+  return api.post("/courses/cover", formData).then((res) => res.data);
+}

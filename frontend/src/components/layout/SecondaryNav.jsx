@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { getNavLinks } from "./navLinks.js";
+import { getNavLinks, usesSidebar } from "./navLinks.js";
 import "./SecondaryNav.css";
 
 function SecondaryNav() {
   const { user, isAuthenticated } = useAuth();
+  if (usesSidebar(user, isAuthenticated)) return null;
   const mobileExtras = ["/my-applications", "/weekly-checkin", "/learning", "/streak"];
   const links = getNavLinks(user, isAuthenticated).filter(({ to }) => !mobileExtras.includes(to));
 

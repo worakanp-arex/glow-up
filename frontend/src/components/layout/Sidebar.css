@@ -1,0 +1,61 @@
+/* White (theme surface) side navigation with dark (theme text) labels. */
+.side-nav {
+  position: sticky;
+  top: var(--navbar-height, 81px);
+  flex: 0 0 264px;
+  align-self: flex-start;
+  box-sizing: border-box;
+  width: 264px;
+  height: calc(100dvh - var(--navbar-height, 81px));
+  padding: 20px 14px 28px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.side-nav-group + .side-nav-group { margin-top: 22px; }
+
+.side-nav-heading {
+  margin: 0 0 6px;
+  padding: 0 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.side-nav ul { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+
+.side-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.side-nav-link svg { flex-shrink: 0; color: var(--color-text-secondary); }
+.side-nav-link:hover { background: var(--color-surface-hover); }
+
+.side-nav-link.active {
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--color-primary-500);
+}
+
+.side-nav-link.active svg { color: var(--color-primary-600); }
+
+/* Handhelds use the slide-in drawer from the top bar instead. */
+@media (max-width: 860px) {
+  .side-nav { display: none; }
+}

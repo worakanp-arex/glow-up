@@ -82,3 +82,19 @@
   .games-missions-body { padding: 16px; }
   .games-wins-badges { width: 100%; justify-content: space-around; gap: 8px; }
 }
+
+/* ---------- Streak strip and cards without a photo ---------- */
+.games-streak { display: flex; align-items: center; gap: 14px; padding: 16px 24px; }
+.games-streak-icon { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; background: var(--color-surface-hover); color: var(--color-text-muted); }
+.games-streak.is-active .games-streak-icon { background: color-mix(in srgb, #f2a071 22%, var(--color-surface)); color: #d9731f; }
+.games-streak > div { display: flex; flex-direction: column; min-width: 0; }
+.games-streak strong { font-size: .95rem; }
+.games-streak span:not(.games-streak-icon) { font-size: .75rem; color: var(--color-text-muted); }
+.game-card-art { display: grid; place-items: center; width: 100%; aspect-ratio: 16 / 9; background: var(--color-primary-50); }
+.game-card-art img { width: 112px; height: 112px; object-fit: contain; }
+.game-card-art-lilac { background: color-mix(in srgb, #8b7fd6 14%, var(--color-surface)); }
+.game-card-art-peach { background: color-mix(in srgb, #f2a071 16%, var(--color-surface)); }
+.game-card-art-sky { background: color-mix(in srgb, var(--color-primary-400) 20%, var(--color-surface)); }
+.game-card-streak { display: inline-flex; align-items: center; gap: 3px; margin-left: auto; padding: 2px 8px; border-radius: 8px; background: color-mix(in srgb, #f2a071 22%, var(--color-surface)); color: #a4522a; font-size: .72rem; font-weight: 600; }
+@media (max-width: 960px) { .games-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .games-grid { grid-template-columns: minmax(0, 1fr); } .games-streak { padding: 14px 16px; } }

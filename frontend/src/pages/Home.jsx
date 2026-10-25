@@ -2,19 +2,12 @@ import PageHeader from "../components/common/PageHeader.jsx";
 import { Link } from "react-router-dom";
 import { ArrowRight, Briefcase, ClipboardCheck, HeartHandshake, Search, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { roleHome, canSearchJobs } from "../constants/roleHome.js";
 import Reveal from "../components/common/Reveal.jsx";
 import PartnerBadge from "../components/common/PartnerBadge.jsx";
 import NewsSection from "../components/common/NewsSection.jsx";
 import { PARTNERS } from "../constants/partners.js";
 import "./Home.css";
-
-const DASHBOARD_BY_ROLE = {
-  user: "/dashboard",
-  family: "/family/dashboard",
-  employer: "/employer/dashboard",
-  admin: "/admin",
-  counsellor: "/counsellor",
-};
 
 const FEATURES = [
   {
@@ -59,6 +52,7 @@ const STEPS = [
 
 function Home() {
   const { user, isAuthenticated } = useAuth();
+  const showJobSearch = canSearchJobs(user, isAuthenticated);
 
   return (
     <div className="home-page">
@@ -79,12 +73,14 @@ function Home() {
               และดูแลความเป็นส่วนตัวของคุณเป็นอันดับแรก
             </p>
             <div className="home-hero-actions">
-              <Link to="/jobs" className="btn btn-primary">
-                <Search size={18} />
-                <span>ค้นหางาน</span>
-              </Link>
+              {showJobSearch && (
+                <Link to="/jobs" className="btn btn-primary">
+                  <Search size={18} />
+                  <span>ค้นหางาน</span>
+                </Link>
+              )}
               {isAuthenticated ? (
-                <Link to={DASHBOARD_BY_ROLE[user.role] || "/"} className="btn btn-secondary">
+                <Link to={roleHome(user.role)} className={`btn ${showJobSearch ? "btn-secondary" : "btn-primary"}`}>
                   ไปที่แผงควบคุมของฉัน
                 </Link>
               ) : (
@@ -169,15 +165,26 @@ function Home() {
       <Reveal as="section" className="home-cta-banner">
         <img className="home-cta-art" src="/images/illustrations/family.webp" alt="" width="150" height="136" loading="lazy" />
         <h2>พร้อมเริ่มต้นบทใหม่หรือยัง?</h2>
-        <p>สมัครสมาชิกวันนี้ เพื่อเริ่มค้นหางานที่ใช่ และรับการดูแลตลอดเส้นทางการกลับสู่สังคม</p>
+        <p>
+          {showJobSearch
+            ? "สมัครสมาชิกวันนี้ เพื่อเริ่มค้นหางานที่ใช่ และรับการดูแลตลอดเส้นทางการกลับสู่สังคม"
+            : "ร่วมดูแลและส่งต่อกำลังใจให้ทุกคนที่กำลังเริ่มต้นใหม่ไปด้วยกัน"}
+        </p>
         <div className="home-hero-actions">
-          <Link to="/jobs" className="btn btn-primary">
-            <span>ค้นหางานตอนนี้</span>
-            <ArrowRight size={18} />
-          </Link>
+          {showJobSearch ? (
+            <Link to="/jobs" className="btn btn-primary">
+              <span>ค้นหางานตอนนี้</span>
+              <ArrowRight size={18} />
+            </Link>
+          ) : (
+            <Link to={roleHome(user.role)} className="btn btn-primary">
+              <span>ไปที่แผงควบคุมของฉัน</span>
+              <ArrowRight size={18} />
+            </Link>
+          )}
           {!isAuthenticated && (
             <Link to="/register" className="btn btn-ghost">
-              สมัครสมาชิกฟรี
+              สมัครสมาชิก
             </Link>
           )}
         </div>

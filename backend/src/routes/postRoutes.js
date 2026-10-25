@@ -7,6 +7,7 @@ import {
   getPost,
   createPost,
   updatePost,
+  moderatePost,
   deletePost,
   addComment,
   updateComment,
@@ -21,6 +22,7 @@ import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
 import { objectIdParam, paginationQuery } from "../middleware/validators.js";
+import { REPORT_REASON_VALUES } from "../constants/reportReasons.js";
 
 const router = Router();
 
@@ -66,6 +68,14 @@ router.put(
   validate,
   asyncHandler(updatePost)
 );
+router.put(
+  "/:id/moderate",
+  verifyToken,
+  requireRole(...STAFF_ROLES),
+  [objectIdParam("id"), ...POST_BODY_UPDATE, body("note").optional().trim().isLength({ max: 500 })],
+  validate,
+  asyncHandler(moderatePost)
+);
 router.delete("/:id", verifyToken, requireRole(...STAFF_ROLES), [objectIdParam("id")], validate, asyncHandler(deletePost));
 router.post(
   "/:id/comments",
@@ -96,12 +106,18 @@ router.put(
   asyncHandler(likePost)
 );
 router.put("/:id/save", verifyToken, [objectIdParam("id")], validate, asyncHandler(toggleSavePost));
-router.put("/:id/flag", verifyToken, [objectIdParam("id")], validate, asyncHandler(flagPostForReview));
+router.put(
+  "/:id/flag",
+  verifyToken,
+  [objectIdParam("id"), body("reason").optional().isIn(REPORT_REASON_VALUES), body("detail").optional().trim().isLength({ max: 500 })],
+  validate,
+  asyncHandler(flagPostForReview)
+);
 router.put(
   "/:id/unflag",
   verifyToken,
   requireRole(...STAFF_ROLES),
-  [objectIdParam("id")],
+  [objectIdParam("id"), body("note").optional().trim().isLength({ max: 500 })],
   validate,
   asyncHandler(clearPostFlag)
 );

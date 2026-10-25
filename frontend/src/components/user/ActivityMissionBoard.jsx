@@ -5,8 +5,9 @@ import * as missionCategoryService from "../../services/missionCategoryService.j
 import { resolveIcon } from "../../utils/lucideIcon.js";
 import "./ActivityMissionBoard.css";
 
-function ActivityItem({ item, onLog }) {
+function ActivityItem({ item, onLog, fallbackIcon }) {
   const { activity, loggedToday, approvalStatus } = item;
+  const ItemIcon = resolveIcon(activity.icon || fallbackIcon);
   const [expanded, setExpanded] = useState(false);
   const [form, setForm] = useState({ durationMinutes: "", distanceKm: "", fatigueLevel: 3, enjoymentLevel: 3, note: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -44,33 +45,36 @@ function ActivityItem({ item, onLog }) {
   return (
     <li className={`activity-mission-item${loggedToday ? " done" : ""}`}>
       <div className="activity-mission-item-main">
+        <span className="activity-mission-item-icon" aria-hidden="true"><ItemIcon size={20} /></span>
         <div className="activity-mission-item-info">
           <span className="activity-mission-item-title">{activity.title}</span>
           {activity.description && <span className="activity-mission-item-desc">{activity.description}</span>}
+          <span className="activity-mission-item-points">+{activity.points} แต้ม</span>
         </div>
-        <span className="activity-mission-item-points">+{activity.points} แต้ม</span>
-        {loggedToday ? (
-          approvalStatus === "pending" ? (
-            <span className="activity-mission-item-pending">
-              <Clock size={16} />
-              <span>รอการอนุมัติ</span>
-            </span>
-          ) : approvalStatus === "rejected" ? (
-            <span className="activity-mission-item-rejected">
-              <XCircle size={16} />
-              <span>ไม่ได้รับการอนุมัติ</span>
-            </span>
+        <div className="activity-mission-item-action">
+          {loggedToday ? (
+            approvalStatus === "pending" ? (
+              <span className="activity-mission-item-pending">
+                <Clock size={16} />
+                <span>รอการอนุมัติ</span>
+              </span>
+            ) : approvalStatus === "rejected" ? (
+              <span className="activity-mission-item-rejected">
+                <XCircle size={16} />
+                <span>ไม่ได้รับการอนุมัติ</span>
+              </span>
+            ) : (
+              <span className="activity-mission-item-done">
+                <CheckCircle2 size={16} />
+                <span>ทำแล้ววันนี้</span>
+              </span>
+            )
           ) : (
-            <span className="activity-mission-item-done">
-              <CheckCircle2 size={16} />
-              <span>ทำแล้ววันนี้</span>
-            </span>
-          )
-        ) : (
-          <button type="button" className="btn btn-secondary" onClick={() => setExpanded((v) => !v)}>
-            บันทึกว่าทำแล้ว
-          </button>
-        )}
+            <button type="button" className="ui-btn ui-btn-outline" aria-expanded={expanded} onClick={() => setExpanded((v) => !v)}>
+              บันทึกว่าทำแล้ว
+            </button>
+          )}
+        </div>
       </div>
 
       {expanded && !loggedToday && (
@@ -101,10 +105,10 @@ function ActivityItem({ item, onLog }) {
           </label>
           {error && <p className="activity-mission-log-error">{error}</p>}
           <div className="activity-mission-log-actions">
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
+            <button type="submit" className="ui-btn ui-btn-primary" disabled={submitting}>
               {submitting ? "กำลังบันทึก..." : "ยืนยัน"}
             </button>
-            <button type="button" className="btn btn-secondary" onClick={() => setExpanded(false)}>
+            <button type="button" className="ui-btn ui-btn-outline" onClick={() => setExpanded(false)}>
               ยกเลิก
             </button>
           </div>
@@ -171,7 +175,7 @@ function ActivityMissionBoard({ onLogged, embedded = false }) {
             </h3>
             <ul className="activity-mission-list">
               {groupItems.map((item) => (
-                <ActivityItem key={item.activity._id} item={item} onLog={handleLog} />
+                <ActivityItem key={item.activity._id} item={item} onLog={handleLog} fallbackIcon={category.icon} />
               ))}
             </ul>
           </div>

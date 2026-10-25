@@ -7,6 +7,7 @@ import {
   mySchedule,
   getSession,
   claimSession,
+  cancelMySession,
   addMessage,
   updateSchedule,
   updateStatus,
@@ -68,6 +69,14 @@ router.put(
   [objectIdParam("id")],
   validate,
   asyncHandler(claimSession)
+);
+router.put(
+  "/:id/cancel",
+  verifyToken,
+  requireRole("user"),
+  [objectIdParam("id")],
+  validate,
+  asyncHandler(cancelMySession)
 );
 router.post(
   "/:id/messages",

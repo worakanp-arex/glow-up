@@ -1,0 +1,8 @@
+.emotion-situation { margin: 0 0 6px; padding: 16px 18px; border-radius: 14px; background: var(--color-primary-50); font-size: 1.05rem; font-weight: 600; line-height: 1.6; color: var(--color-text); }
+.emotion-prompt { margin: 0 0 14px; font-size: .85rem; color: var(--color-text-secondary); }
+.emotion-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.emotion-option { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--color-border-strong); border-radius: 14px; background: var(--color-surface); color: var(--color-text); font: inherit; font-size: .9rem; text-align: left; cursor: pointer; transition: border-color .15s, background-color .15s; }
+.emotion-option img { flex-shrink: 0; width: 48px; height: 48px; object-fit: contain; }
+.emotion-option:hover { border-color: var(--color-primary-300); background: var(--color-primary-50); }
+.emotion-option.is-chosen { border-color: var(--color-primary-500); background: var(--color-primary-50); box-shadow: 0 0 0 3px var(--color-primary-100); }
+@media (max-width: 480px) { .emotion-options { grid-template-columns: minmax(0, 1fr); } }

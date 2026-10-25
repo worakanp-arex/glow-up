@@ -24,6 +24,10 @@ export function getSession(id) {
   return api.get(`/counselling/${id}`).then((res) => res.data);
 }
 
+export function cancelMySession(id) {
+  return api.put(`/counselling/${id}/cancel`).then((res) => res.data);
+}
+
 export function claimSession(id) {
   return api.put(`/counselling/${id}/claim`).then((res) => res.data);
 }

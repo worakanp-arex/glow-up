@@ -76,3 +76,8 @@
 .image-slot.courses-hero-art.is-missing { display: none; }
 @media (max-width: 860px) { .image-slot.courses-hero-art { width: 160px; height: 160px; } }
 @media (max-width: 600px) { .image-slot.courses-hero-art { order: -1; width: 120px; height: 120px; margin: 0 auto 6px; } .image-slot.courses-hero-art::before { inset: -14px; } }
+
+.course-card .course-card-dates { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0 0 8px; font-size: .72rem; color: var(--color-text-secondary); }
+.course-card-dates b { padding: 1px 8px; border-radius: 8px; background: var(--color-surface-hover); font-weight: 600; }
+.course-card-dates.is-expired b { background: var(--color-danger-bg); color: var(--color-danger); }
+.course-card-dates.is-expiring b { background: var(--color-warning-bg); color: var(--color-warning); }

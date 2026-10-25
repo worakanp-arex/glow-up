@@ -9,20 +9,59 @@ import { createCrudController } from "./crudFactory.js";
 import { insertOnce } from "../utils/insertOnce.js";
 import { computeLevel, getPointsPerLevel, pointsToNextLevel } from "../utils/level.js";
 import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
+import { bangkokStartOfDay, bangkokEndOfDay, isWithinWindow } from "../utils/dateKey.js";
 
-const { getAll, getOne, create, update, remove } = createCrudController(Mission);
+const { getAll, getOne } = createCrudController(Mission);
+
+const MISSION_FIELDS = ["title", "description", "targetValue", "rewardPoints", "badgeIcon", "active", "order"];
+
+function missionFields(body) {
+  const fields = {};
+  for (const key of MISSION_FIELDS) if (body[key] !== undefined) fields[key] = body[key];
+  if (body.startDate !== undefined) fields.startDate = body.startDate ? bangkokStartOfDay(String(body.startDate).slice(0, 10)) : null;
+  if (body.endDate !== undefined) fields.endDate = body.endDate ? bangkokEndOfDay(String(body.endDate).slice(0, 10)) : null;
+  return fields;
+}
+
+// The metric a mission tracks (`type`) is fixed at creation: changing it later
+// would make existing progress meaningless.
+export async function createMission(req, res) {
+  const mission = await Mission.create({ type: req.body.type, ...missionFields(req.body) });
+  res.status(201).json(mission);
+}
+
+export async function updateMission(req, res) {
+  const mission = await Mission.findByIdAndUpdate(req.params.id, missionFields(req.body), { new: true, runValidators: true });
+  if (!mission) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  res.json(mission);
+}
+
+// Deleting a mission that people have already completed would silently remove
+// the points they earned, so those are archived (hidden, `active: false`)
+// instead; a mission nobody finished is removed outright.
+export async function deleteMission(req, res) {
+  const mission = await Mission.findById(req.params.id);
+  if (!mission) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  const completedBy = await UserMission.countDocuments({ mission: mission._id, completed: true });
+  if (completedBy > 0) {
+    mission.active = false;
+    await mission.save();
+    return res.json({ archived: true, completedBy, mission });
+  }
+  await UserMission.deleteMany({ mission: mission._id });
+  await Mission.findByIdAndDelete(mission._id);
+  res.status(204).send();
+}
 
 // Recognized sobriety-streak milestones (in days) that get a specific family
 // notification instead of the generic "new progress" message.
 const MILESTONE_STREAK_DAYS = new Set([7, 30, 90, 180, 365]);
 
-export {
-  getAll as listMissions,
-  getOne as getMission,
-  create as createMission,
-  update as updateMission,
-  remove as deleteMission,
-};
+export { getAll as listMissions, getOne as getMission };
 
 async function currentValueForMission(userId, mission, streakStats) {
   if (mission.type === "streak") return streakStats.currentStreak;
@@ -43,10 +82,12 @@ export async function checkAndAwardMissions(userId) {
   const logs = await EmotionLog.find({ user: userId }).select("date happinessLevel");
   const streakStats = computeStreakStats(logs);
 
-  const missions = await Mission.find({
-    active: true,
-    type: { $in: ["streak", "totalCheckins", "scenarioCompleted"] },
-  });
+  const missions = (
+    await Mission.find({
+      active: true,
+      type: { $in: ["streak", "totalCheckins", "scenarioCompleted"] },
+    })
+  ).filter((mission) => isWithinWindow(mission));
   const newlyCompletedMissions = [];
 
   for (const mission of missions) {
@@ -98,9 +139,13 @@ export async function checkAndAwardMissions(userId) {
 export async function myMissionProgress(req, res) {
   await checkAndAwardMissions(req.user.id);
 
-  const missions = await Mission.find({ active: true }).sort({ targetValue: 1 });
+  const allMissions = await Mission.find({ active: true }).sort({ order: 1, targetValue: 1 });
   const userMissions = await UserMission.find({ user: req.user.id });
   const progressByMission = new Map(userMissions.map((um) => [um.mission.toString(), um]));
+  // A mission outside its open window is hidden unless the user already finished it.
+  const missions = allMissions.filter(
+    (mission) => isWithinWindow(mission) || progressByMission.get(mission._id.toString())?.completed
+  );
 
   const result = missions.map((mission) => {
     const um = progressByMission.get(mission._id.toString());

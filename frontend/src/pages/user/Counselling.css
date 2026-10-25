@@ -100,3 +100,20 @@
 .counselling-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--color-border); text-align: center; }
 .counselling-counts dt { font-size: .68rem; color: var(--color-text-muted); }
 .counselling-counts dd { margin: 2px 0 0; font-size: 1.2rem; font-weight: 600; color: var(--color-primary-600); }
+
+/* ---------- request in progress: status, chat while waiting, cancel ---------- */
+.counselling-active { display: flex; flex-direction: column; gap: 14px; }
+.counselling-active-topic { display: flex; align-items: flex-start; gap: 10px; margin: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.5; color: var(--color-text); overflow-wrap: anywhere; }
+.counselling-active-topic svg { flex-shrink: 0; margin-top: 3px; color: var(--color-primary-600); }
+.counselling-active-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.counselling-active-facts > div { padding: 10px 12px; border-radius: 12px; background: var(--color-surface-hover); min-width: 0; }
+.counselling-active-facts dt { font-size: .72rem; color: var(--color-text-muted); }
+.counselling-active-facts dd { margin: 2px 0 0; font-size: .85rem; font-weight: 500; color: var(--color-text); overflow-wrap: anywhere; }
+.counselling-waiting { display: inline-flex; align-items: center; gap: 4px; color: var(--color-text-secondary); }
+.counselling-active-chat h3 { margin: 4px 0 10px; font-size: .95rem; font-weight: 600; }
+.counselling-active-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+.counselling-cancel { color: var(--color-danger); border-color: var(--color-danger); }
+@media (max-width: 600px) {
+  .counselling-active-facts { grid-template-columns: minmax(0, 1fr); }
+  .counselling-active-actions .ui-btn { flex: 1 1 100%; }
+}

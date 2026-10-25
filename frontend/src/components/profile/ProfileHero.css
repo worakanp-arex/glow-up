@@ -1,0 +1,25 @@
+/* Cover on top, the picture overlaps its bottom-left corner. */
+.profile-hero { padding: 0; overflow: hidden; }
+.profile-hero-cover { height: 176px; background-color: var(--color-primary-100); }
+.profile-hero-main { position: relative; display: flex; align-items: flex-start; gap: 24px; padding: 0 28px 24px; }
+.profile-banner-avatar { position: relative; flex-shrink: 0; width: 132px; height: 132px; margin-top: -66px; padding: 0; border: 5px solid var(--color-surface); border-radius: 50%; background: var(--color-surface); box-shadow: 0 6px 18px rgb(31 66 100 / 14%); cursor: pointer; }
+.profile-banner-avatar .avatar { width: 100% !important; height: 100% !important; }
+.profile-avatar-overlay { position: absolute; right: 2px; bottom: 6px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--color-primary-500); color: #fff; border: 2px solid var(--color-surface); }
+.profile-banner-avatar:focus-visible { outline: 3px solid var(--color-primary-400); outline-offset: 3px; }
+.profile-hero-body { flex: 1; min-width: 0; padding-top: 16px; }
+.profile-banner-name { margin: 0; font-size: 1.5rem; font-weight: 600; line-height: 1.4; color: var(--color-text); overflow-wrap: anywhere; }
+.profile-hero-nickname { margin: 0; font-size: .85rem; color: var(--color-text-muted); }
+.profile-hero-bio { margin: 10px 0 0; font-size: .85rem; line-height: 1.7; color: var(--color-text-secondary); overflow-wrap: anywhere; }
+.profile-banner-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.profile-role-badge { padding: 3px 10px; border-radius: 8px; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .72rem; font-weight: 600; }
+.profile-hero-actions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; flex-shrink: 0; padding-top: 16px; }
+
+@media (max-width: 760px) {
+  .profile-hero-cover { height: 128px; }
+  .profile-hero-main { flex-wrap: wrap; gap: 12px 16px; padding: 0 18px 20px; }
+  .profile-banner-avatar { width: 104px; height: 104px; margin-top: -52px; }
+  .profile-hero-body { flex-basis: calc(100% - 140px); padding-top: 12px; }
+  .profile-hero-actions { flex-direction: row; flex-wrap: wrap; width: 100%; padding-top: 0; }
+  .profile-hero-actions .ui-btn { flex: 1 1 160px; }
+  .profile-banner-name { font-size: 1.25rem; }
+}

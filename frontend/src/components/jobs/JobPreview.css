@@ -62,3 +62,5 @@
   .job-preview-foot { position: sticky; bottom: 0; margin: 20px -18px -18px; padding: 14px 18px; background: var(--color-surface); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
   .job-preview-apply-button { min-width: 0; flex: 1; }
 }
+
+.job-preview-image { display: block; width: 100%; max-height: 240px; margin-bottom: 16px; border-radius: 14px; object-fit: cover; }

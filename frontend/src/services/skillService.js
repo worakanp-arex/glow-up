@@ -1,7 +1,7 @@
 import api from "./api.js";
 
-export function getSkills() {
-  return api.get("/skills").then((res) => res.data);
+export function getSkills(params) {
+  return api.get("/skills", { params }).then((res) => res.data);
 }
 
 export function createSkill(payload) {

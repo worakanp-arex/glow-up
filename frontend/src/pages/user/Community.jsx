@@ -12,12 +12,9 @@ import PostCard from "../../components/community/PostCard.jsx";
 import PostDetailPanel from "../../components/community/PostDetailPanel.jsx";
 import { AUDIENCE_ROLES } from "../../constants/postAudience.js";
 import "./Community.css";
+import Avatar from "../../components/common/Avatar.jsx";
 
 const STAFF_ROLES = ["counsellor", "admin"];
-
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
 
 function Community() {
   const mobile = useMobileLayout();
@@ -233,7 +230,7 @@ function Community() {
             <form className="community-composer" onSubmit={handleSubmit}>
               <div className="community-composer-header">
                 <span className="community-composer-avatar">
-                  {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}
+                  <Avatar user={user} size={36} fill />
                 </span>
                 <span>{user.name}</span>
               </div>

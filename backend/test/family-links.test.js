@@ -62,7 +62,7 @@ test("the invite list omits revoked links", async () => {
   let filter;
   mock.method(FamilyLink, "find", (f) => {
     filter = f;
-    return { sort: async () => [] };
+    return { populate: () => ({ sort: async () => [] }) };
   });
   await myInvitedFamily({ user: { id: "user1", role: "user" } }, response());
   assert.deepEqual(filter, { recoveringUser: "user1", status: { $ne: "revoked" } });

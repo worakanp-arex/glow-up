@@ -1,0 +1,3 @@
+.avatar { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border-radius: 50%; background: var(--color-primary-50); color: #fff; font-weight: 600; line-height: 1; user-select: none; }
+.avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.avatar-letter { text-transform: uppercase; }

@@ -1,8 +1,6 @@
 /* Shared page refinements: readable summaries and form-first handheld flows. */
 .layout .dashboard-greeting { background: radial-gradient(ellipse at 95% 0%, var(--color-primary-200), transparent 60%), linear-gradient(120deg, var(--color-surface), var(--color-primary-50)); border-color: var(--color-primary-200); position: relative; }
 .dashboard-greeting .page-heading-icon { background: var(--color-surface); box-shadow: var(--shadow-sm); }
-.mission-total { display: flex; flex-direction: column; gap: 6px; padding: 14px; margin-bottom: 18px; border-radius: 12px; background: var(--color-primary-50); font-size: .875rem; }
-.mission-total span { color: var(--color-text-secondary); }
 .mood-select select { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--color-border); color: var(--color-text); background: var(--color-surface); text-overflow: ellipsis; }
 .mood-select p { display: flex; align-items: flex-start; gap: 8px; font-size: .8125rem; line-height: 1.6; color: var(--color-text-secondary); margin: 8px 0 0; }
 .mood-select svg { flex-shrink: 0; color: var(--color-primary-600); }
@@ -57,8 +55,6 @@
   .layout .counselling-form .datetime-picker-cell { min-height: 36px; padding: 0; }
 }
 .register-family-note { padding: 12px 14px; margin: 0; border-radius: 12px; background: var(--color-primary-50); color: var(--color-text-secondary); font-size: .85rem; line-height: 1.7; }
-.layout .register-role-toggle { display: grid; grid-template-columns: 1fr 1fr 1.4fr; border-radius: 12px; }
-.layout .register-role-toggle button { min-width: 0; min-height: 44px; padding: 8px 6px; border-radius: 9px; font-size: .8125rem; }
 .family-welcome-card { padding: 24px; border-radius: 16px; border: 1px solid var(--color-border); background: var(--color-surface); }
 .family-welcome-card > svg { color: var(--color-primary-600); }
 .family-welcome-card h2 { font-size: 1.15rem; }

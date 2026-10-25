@@ -80,14 +80,16 @@ if (process.env.FRONTEND_DIST) {
 }
 
 app.use(helmet());
-app.use("/uploads/avatars", (req, res, next) => {
-  if (!/\.(png|jpe?g|webp)$/i.test(req.path)) return res.sendStatus(404);
-  // Avatars are intentionally public and rendered cross-origin by the
-  // frontend; helmet's default same-origin CORP would silently break that
-  // <img> loading, so relax it for this route only.
-  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-  next();
-}, express.static(path.join(UPLOAD_ROOT, "avatars")));
+// Avatars, course covers and job images are intentionally public and rendered
+// cross-origin by the frontend; helmet's default same-origin CORP would
+// silently break that <img> loading, so relax it for these routes only.
+for (const [route, folder] of [["avatars", "avatars"], ["course-covers", "course-covers"], ["job-images", "job-images"]]) {
+  app.use(`/uploads/${route}`, (req, res, next) => {
+    if (!/\.(png|jpe?g|webp)$/i.test(req.path)) return res.sendStatus(404);
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  }, express.static(path.join(UPLOAD_ROOT, folder)));
+}
 app.get("/uploads/:kind/:filename", verifyToken, asyncHandler(authorizeDownload), (req, res, next) => {
   res.setHeader("Cache-Control", "private, no-store");
   res.download(path.join(UPLOAD_ROOT, req.params.kind, req.params.filename), (err) => {

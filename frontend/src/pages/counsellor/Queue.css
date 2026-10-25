@@ -235,3 +235,6 @@
     margin-left: calc(40px + 0.85rem);
   }
 }
+
+.counsellor-queue-more { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
+.counsellor-queue-more .ui-btn { min-height: 42px; }

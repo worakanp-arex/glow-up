@@ -1,0 +1,38 @@
+.admin-applications-page {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.layout .admin-applications-page > .page-header { margin-bottom: 0; }
+.admin-applications-page > .ui-tabs { margin-bottom: 0; }
+.admin-applications-empty { margin: 0; padding: 32px 0; text-align: center; color: var(--color-text-muted); }
+.admin-applications-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+
+.admin-application { padding: 0; overflow: hidden; }
+.admin-application-head { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 20px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.admin-application-head:hover { background: var(--color-surface-hover); }
+.admin-application-text { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 2px; }
+.admin-application-text strong { font-size: .95rem; overflow-wrap: anywhere; }
+.admin-application-text small { display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.admin-application-head > svg:last-child { flex-shrink: 0; color: var(--color-text-muted); transition: transform .15s; }
+.admin-application-head > svg.is-open { transform: rotate(180deg); }
+
+.admin-application-body { padding: 4px 20px 18px; border-top: 1px solid var(--color-border); }
+.admin-application-body dl { display: flex; flex-direction: column; margin: 0; }
+.admin-application-body dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--color-border); }
+.admin-application-body dl > div:last-child { border-bottom: 0; }
+.admin-application-body dt { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-size: .78rem; color: var(--color-text-muted); }
+.admin-application-body dd { margin: 0; font-size: .85rem; text-align: right; overflow-wrap: anywhere; }
+.admin-application-files { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 12px 0 0; font-size: .85rem; }
+.admin-application-files a { color: var(--color-primary-700); overflow-wrap: anywhere; }
+.admin-application-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+@media (max-width: 520px) {
+  .admin-applications-page { padding: 1.5rem 1rem 2.5rem; }
+  .admin-application-head { flex-wrap: wrap; padding: 12px 14px; }
+  .admin-application-body { padding: 4px 14px 14px; }
+}

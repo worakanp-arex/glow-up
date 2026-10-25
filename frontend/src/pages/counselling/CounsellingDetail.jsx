@@ -2,10 +2,12 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Calendar, Check, ClipboardList, Clock, Lock, MessageCircle, MessagesSquare, Phone, Send, UserRound, Video, X } from "lucide-react";
+import { Calendar, Check, ClipboardList, Clock, Lock, MessageCircle, Phone, UserRound, Video, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as counsellingService from "../../services/counsellingService.js";
 import MeetingLinkBadge from "../../components/common/MeetingLinkBadge.jsx";
+import CounsellingThread from "../../components/counselling/CounsellingThread.jsx";
+import Avatar from "../../components/common/Avatar.jsx";
 import DateTimePicker from "../../components/common/DateTimePicker.jsx";
 import { moodByValue } from "../../constants/mood.js";
 import {
@@ -36,10 +38,6 @@ function progressSteps(session) {
   return steps.map((step, index) => ({ ...step, current: index === current }));
 }
 
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
-
 // datetime-local inputs need a *local*-time "YYYY-MM-DDTHH:mm" value — slicing
 // the ISO string directly would leave it in UTC and misalign by the tz offset.
 function toDatetimeLocalValue(iso) {
@@ -56,8 +54,6 @@ function CounsellingDetail() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [error, setError] = useState("");
-  const [replyText, setReplyText] = useState("");
-  const [sending, setSending] = useState(false);
   const [scheduleForm, setScheduleForm] = useState({ scheduledAt: "", meetingLink: "" });
   const [savingSchedule, setSavingSchedule] = useState(false);
   const [claiming, setClaiming] = useState(false);
@@ -91,19 +87,6 @@ function CounsellingDetail() {
       setError(err.response?.data?.message || "รับเคสไม่สำเร็จ");
     } finally {
       setClaiming(false);
-    }
-  }
-
-  async function handleReply(e) {
-    e.preventDefault();
-    if (!replyText.trim()) return;
-    setSending(true);
-    try {
-      const updated = await counsellingService.addMessage(id, replyText.trim());
-      setSession(updated);
-      setReplyText("");
-    } finally {
-      setSending(false);
     }
   }
 
@@ -253,50 +236,7 @@ function CounsellingDetail() {
               <h2>ข้อความ</h2>
               <span className="counselling-detail-private"><Lock size={13} aria-hidden="true" />เฉพาะคุณและผู้ให้คำปรึกษา</span>
             </div>
-            {session.messages.length === 0 ? (
-              <div className="counselling-thread-empty">
-                <span className="counselling-thread-empty-icon"><MessagesSquare size={22} aria-hidden="true" /></span>
-                <p>ยังไม่มีข้อความ</p>
-                {canReply && <small>เริ่มเล่าเท่าที่พร้อม ผู้ให้คำปรึกษาจะตอบกลับในพื้นที่นี้</small>}
-              </div>
-            ) : (
-              <ul className="counselling-thread">
-                {session.messages.map((msg) => (
-                  <li key={msg._id} className={`counselling-thread-item ${msg.senderRole}${(msg.sender?._id || msg.sender) === user._id ? " is-mine" : ""}`}>
-                    <span className="counselling-thread-avatar">
-                      {msg.sender?.avatarUrl ? (
-                        <img src={msg.sender.avatarUrl} alt="" />
-                      ) : (
-                        initials(msg.sender?.name)
-                      )}
-                    </span>
-                    <div className="counselling-thread-body">
-                      <p className="counselling-thread-author">
-                        {msg.sender?.name}
-                        <span className="counselling-thread-time">{formatDateTime(msg.createdAt)}</span>
-                      </p>
-                      <p className="counselling-thread-content">{msg.content}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {canReply && (
-              <form className="counselling-reply-form" onSubmit={handleReply}>
-                <textarea
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  rows={3}
-                  placeholder="พิมพ์ข้อความตอบกลับ..."
-                  aria-label="ข้อความตอบกลับ"
-                />
-                <button type="submit" className="btn btn-primary" disabled={sending || !replyText.trim()}>
-                  <Send size={15} />
-                  <span>{sending ? "กำลังส่ง..." : "ส่งข้อความ"}</span>
-                </button>
-              </form>
-            )}
+            <CounsellingThread session={session} onChange={setSession} canReply={canReply} />
           </section>
 
           {canManage && (
@@ -355,13 +295,7 @@ function CounsellingDetail() {
             <div className="counselling-detail-card">
               <h2>ผู้ขอรับคำปรึกษา</h2>
               <div className="counselling-person">
-                <span className="counselling-person-avatar">
-                  {session.user.avatarUrl ? (
-                    <img src={session.user.avatarUrl} alt="" />
-                  ) : (
-                    initials(session.user.name)
-                  )}
-                </span>
+                <Avatar user={session.user} size={48} className="counselling-person-avatar" />
                 <div>
                   <p className="counselling-person-name">{session.user.name}</p>
                   <p className="counselling-person-meta">{session.user.email}</p>
@@ -413,13 +347,7 @@ function CounsellingDetail() {
               <h2>บุคลากรผู้ดูแล</h2>
               {session.counsellor ? (
                 <div className="counselling-person">
-                  <span className="counselling-person-avatar">
-                    {session.counsellor.avatarUrl ? (
-                      <img src={session.counsellor.avatarUrl} alt="" />
-                    ) : (
-                      initials(session.counsellor.name)
-                    )}
-                  </span>
+                  <Avatar user={session.counsellor} size={48} className="counselling-person-avatar" />
                   <div>
                     <p className="counselling-person-name">{session.counsellor.name}</p>
                     {session.counsellor.specialization && (

@@ -7,7 +7,9 @@ import { computeStreakStats } from "../services/streakService.js";
 import { getTotalPoints } from "../services/rewardService.js";
 import { sendFamilyInviteEmail } from "../services/emailService.js";
 import { notifyUser } from "../services/notificationService.js";
+import FamilyMessage from "../models/FamilyMessage.js";
 import EmotionLog from "../models/EmotionLog.js";
+import { sanitizeText } from "../utils/sanitizeText.js";
 import { computeLevel } from "../utils/level.js";
 import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
@@ -112,8 +114,76 @@ export async function acceptFamilyInvite(req, res) {
 // As the recovering user: list my current invites and connections. Revoked
 // ones are dropped from the list entirely.
 export async function myInvitedFamily(req, res) {
-  const links = await FamilyLink.find({ recoveringUser: req.user.id, status: { $ne: "revoked" } }).sort({ createdAt: -1 });
+  const links = await FamilyLink.find({ recoveringUser: req.user.id, status: { $ne: "revoked" } })
+    .populate("familyUser", "name email avatarUrl avatarStyle avatarColor")
+    .sort({ createdAt: -1 });
   res.json(links);
+}
+
+// A family member asks to follow a patient by the patient's email. The answer
+// is always the same, so this can't be used to find out whether an address
+// belongs to a patient; the patient decides in their profile (or ignores it).
+export async function requestFamilyLink(req, res) {
+  const email = req.body.email?.toLowerCase();
+  const requester = await User.findById(req.user.id).select("name email role");
+  const generic = { sent: true };
+  if (!requester || !email || email === requester.email.toLowerCase()) return res.status(202).json(generic);
+
+  const patient = await User.findOne({ email, role: "user" }).select("_id name");
+  if (!patient) return res.status(202).json(generic);
+
+  const existing = await FamilyLink.findOne({
+    recoveringUser: patient._id,
+    familyUser: requester._id,
+    status: { $in: ["requested", "active"] },
+  });
+  if (existing) return res.status(202).json(generic);
+
+  await FamilyLink.create({
+    recoveringUser: patient._id,
+    familyUser: requester._id,
+    initiatedBy: "family",
+    inviteEmail: requester.email.toLowerCase(),
+    status: "requested",
+  });
+  await notifyUser(
+    patient._id,
+    `${requester.name} ขอเชื่อมต่อเพื่อติดตามความคืบหน้าและส่งกำลังใจให้คุณ โปรดตรวจสอบและอนุมัติในหน้าโปรไฟล์`,
+    "familyRequest",
+    { link: "/profile?tab=family" }
+  );
+  res.status(202).json(generic);
+}
+
+// The patient approves or declines a family member's request.
+export async function respondToFamilyRequest(req, res) {
+  const link = await FamilyLink.findOne({ _id: req.params.id, recoveringUser: req.user.id, status: "requested" });
+  if (!link) {
+    return res.status(404).json({ message: "ไม่พบคำขอนี้" });
+  }
+
+  const patient = await User.findById(req.user.id).select("name familyName");
+  if (req.body.approve === true) {
+    // Same rule as invitations: one family member at a time.
+    const other = await FamilyLink.exists({
+      recoveringUser: req.user.id,
+      _id: { $ne: link._id },
+      status: { $in: ["pending", "active"] },
+    });
+    if (other) {
+      return res.status(409).json({ message: "คุณเชื่อมต่อสมาชิกครอบครัวได้เพียง 1 คน กรุณายกเลิกสิทธิ์เดิมก่อน" });
+    }
+    link.status = "active";
+    await link.save();
+    await notifyUser(link.familyUser, `${patient.name} อนุมัติคำขอของคุณแล้ว คุณสามารถติดตามความคืบหน้าและส่งกำลังใจได้`, "familyMessage", {
+      link: "/family/dashboard",
+    });
+  } else {
+    link.status = "revoked";
+    await link.save();
+    await notifyUser(link.familyUser, `${patient.name} ยังไม่พร้อมเชื่อมต่อกับคุณในตอนนี้`, "familyLinkRemoved", { link: "/family/dashboard" });
+  }
+  res.json(link);
 }
 
 export async function revokeFamilyLink(req, res) {
@@ -159,7 +229,7 @@ export async function listFamilyLinksForUser(req, res) {
 export async function myFamilyLinksAsFamily(req, res) {
   const links = await FamilyLink.find({ familyUser: req.user.id, status: "active" }).populate(
     "recoveringUser",
-    "name avatarUrl"
+    "name avatarUrl avatarStyle avatarColor familyName"
   );
   res.json(links);
 }
@@ -174,7 +244,7 @@ export async function getLinkedUserSummary(req, res) {
     return res.status(403).json({ message: "Forbidden" });
   }
 
-  const recoveringUser = await User.findById(link.recoveringUser).select("name avatarUrl familySharing");
+  const recoveringUser = await User.findById(link.recoveringUser).select("name avatarUrl avatarStyle avatarColor familyName familySharing");
   if (!recoveringUser) {
     return res.status(404).json({ message: "ไม่พบข้อมูลผู้ใช้" });
   }
@@ -183,7 +253,15 @@ export async function getLinkedUserSummary(req, res) {
     missions: recoveringUser.familySharing?.missions !== false,
   };
   if (!sharing.progress) {
-    return res.json({ name: recoveringUser.name, avatarUrl: recoveringUser.avatarUrl, sharing, rewardsEarned: [] });
+    return res.json({
+      name: recoveringUser.name,
+      familyName: recoveringUser.familyName,
+      avatarUrl: recoveringUser.avatarUrl,
+      avatarStyle: recoveringUser.avatarStyle,
+      avatarColor: recoveringUser.avatarColor,
+      sharing,
+      rewardsEarned: [],
+    });
   }
 
   const logs = await EmotionLog.find({ user: link.recoveringUser }).select("date happinessLevel");
@@ -199,7 +277,10 @@ export async function getLinkedUserSummary(req, res) {
 
   res.json({
     name: recoveringUser.name,
+    familyName: recoveringUser.familyName,
     avatarUrl: recoveringUser.avatarUrl,
+    avatarStyle: recoveringUser.avatarStyle,
+    avatarColor: recoveringUser.avatarColor,
     sharing,
     currentStreak: streakStats.currentStreak,
     longestStreak: streakStats.longestStreak,
@@ -211,23 +292,97 @@ export async function getLinkedUserSummary(req, res) {
   });
 }
 
-// A family member sending a short encouragement message to the recovering
-// user they're actively linked to. Reuses the notification system rather
-// than a dedicated message thread/model — this is one-way, fire-and-forget
-// encouragement, not a conversation.
+// Messages between a recovering user and their linked family member. Either
+// side can write; a message is stored on the link (so history survives after
+// the notification is cleared) and announced with a notification.
+async function loadParticipantLink(linkId, userId) {
+  const link = await FamilyLink.findById(linkId);
+  if (!link || link.status !== "active") return null;
+  const isFamily = link.familyUser?.toString() === userId;
+  const isRecovering = link.recoveringUser?.toString() === userId;
+  if (!isFamily && !isRecovering) return null;
+  return { link, isFamily };
+}
+
 export async function sendEncouragementMessage(req, res) {
-  const link = await FamilyLink.findById(req.params.linkId);
-  if (!link || link.status !== "active" || link.familyUser?.toString() !== req.user.id) {
+  const participant = await loadParticipantLink(req.params.linkId, req.user.id);
+  if (!participant) {
     return res.status(403).json({ message: "Forbidden" });
   }
+  const { link, isFamily } = participant;
+
+  const content = sanitizeText(req.body.message).slice(0, 500);
+  if (!content) {
+    return res.status(400).json({ message: "กรุณากรอกข้อความ" });
+  }
+  let replyTo;
+  if (req.body.replyTo) {
+    const parent = await FamilyMessage.findOne({ _id: req.body.replyTo, familyLink: link._id }).select("_id");
+    replyTo = parent?._id;
+  }
+
+  const message = await FamilyMessage.create({
+    familyLink: link._id,
+    sender: req.user.id,
+    senderRole: isFamily ? "family" : "user",
+    content,
+    replyTo,
+  });
 
   const sender = await User.findById(req.user.id).select("name");
   await notifyUser(
-    link.recoveringUser,
-    `${sender.name} ส่งกำลังใจถึงคุณ: "${req.body.message}"`,
+    isFamily ? link.recoveringUser : link.familyUser,
+    isFamily ? `${sender.name} ส่งกำลังใจถึงคุณ: "${content}"` : `${sender.name} ตอบกลับข้อความของคุณ: "${content}"`,
     "familyMessage",
-    { link: "/profile" }
+    { link: isFamily ? "/dashboard" : "/family/dashboard" }
   );
 
-  res.status(201).json({ sent: true });
+  res.status(201).json({ sent: true, message });
+}
+
+export async function listFamilyMessages(req, res) {
+  const participant = await loadParticipantLink(req.params.linkId, req.user.id);
+  if (!participant) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+  const limit = Math.max(1, Math.min(100, Number.parseInt(req.query.limit, 10) || 50));
+  const messages = await FamilyMessage.find({ familyLink: participant.link._id }).sort({ createdAt: -1 }).limit(limit);
+  res.json(messages);
+}
+
+// For the recovering user's dashboard: the most recent message from their
+// family (unread first) so it can be shown prominently with read / reply.
+export async function latestFamilyMessage(req, res) {
+  const links = await FamilyLink.find({ recoveringUser: req.user.id, status: "active" }).select("_id familyUser");
+  if (links.length === 0) return res.json({ message: null, unreadCount: 0 });
+
+  const linkIds = links.map((link) => link._id);
+  const [unreadCount, latestUnread] = await Promise.all([
+    FamilyMessage.countDocuments({ familyLink: { $in: linkIds }, senderRole: "family", readAt: null }),
+    FamilyMessage.findOne({ familyLink: { $in: linkIds }, senderRole: "family", readAt: null }).sort({ createdAt: -1 }),
+  ]);
+  const message =
+    latestUnread || (await FamilyMessage.findOne({ familyLink: { $in: linkIds }, senderRole: "family" }).sort({ createdAt: -1 }));
+  if (!message) return res.json({ message: null, unreadCount: 0 });
+
+  const link = links.find((item) => item._id.toString() === message.familyLink.toString());
+  const family = link?.familyUser ? await User.findById(link.familyUser).select("name avatarUrl avatarStyle avatarColor") : null;
+  res.json({ message, unreadCount, linkId: message.familyLink, family });
+}
+
+// The recipient (never the sender) marks a message as read.
+export async function markFamilyMessageRead(req, res) {
+  const message = await FamilyMessage.findById(req.params.id);
+  if (!message) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  const participant = await loadParticipantLink(message.familyLink, req.user.id);
+  if (!participant || message.sender.toString() === req.user.id) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+  if (!message.readAt) {
+    message.readAt = new Date();
+    await message.save();
+  }
+  res.json(message);
 }

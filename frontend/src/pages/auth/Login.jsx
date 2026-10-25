@@ -4,15 +4,9 @@ import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { roleHome } from "../../constants/roleHome.js";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton.jsx";
 import "./Login.css";
-
-const DASHBOARD_BY_ROLE = {
-  user: "/dashboard",
-  family: "/family/dashboard",
-  employer: "/employer/dashboard",
-  admin: "/admin",
-};
 
 function Login() {
   const { login, loginWithGoogle } = useAuth();
@@ -34,7 +28,7 @@ function Login() {
     setSubmitting(true);
     try {
       const user = await login(form.email, form.password);
-      navigate((["family", "user"].includes(user.role) && returnTo) || DASHBOARD_BY_ROLE[user.role] || "/");
+      navigate((["family", "user"].includes(user.role) && returnTo) || roleHome(user.role));
     } catch (err) {
       setError(err.response?.data?.message || "เข้าสู่ระบบไม่สำเร็จ");
     } finally {
@@ -47,7 +41,7 @@ function Login() {
     setSubmitting(true);
     try {
       const user = await loginWithGoogle(credential);
-      navigate((["family", "user"].includes(user.role) && returnTo) || DASHBOARD_BY_ROLE[user.role] || "/");
+      navigate((["family", "user"].includes(user.role) && returnTo) || roleHome(user.role));
     } catch (err) {
       if (err.response?.status === 400 && err.response.data?.message?.includes("นโยบายความเป็นส่วนตัว")) {
         setError("บัญชี Google นี้ยังไม่เคยสมัครสมาชิก กรุณาไปที่หน้าสมัครสมาชิกเพื่อยอมรับนโยบายความเป็นส่วนตัวก่อน");

@@ -14,6 +14,9 @@ const activityMissionSchema = new mongoose.Schema(
     // points count toward the user's total (see ActivityMissionLog.approved).
     requiresApproval: { type: Boolean, default: false },
     active: { type: Boolean, default: true },
+    // Optional period in which people can log it (Bangkok day boundaries).
+    startDate: { type: Date },
+    endDate: { type: Date },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }

@@ -1,11 +1,13 @@
 import { lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Layout from "../components/layout/Layout.jsx";
 import AsyncState from "../components/common/AsyncState.jsx";
 import PageHeader from "../components/common/PageHeader.jsx";
 import { SearchX } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
+import { roleHome, canSearchJobs } from "../constants/roleHome.js";
 const Home = lazy(() => import("../pages/Home.jsx"));
 const About = lazy(() => import("../pages/About.jsx"));
 const Profile = lazy(() => import("../pages/Profile.jsx"));
@@ -39,13 +41,18 @@ const PatientProfile = lazy(() => import("../pages/counsellor/PatientProfile.jsx
 const CourseManagement = lazy(() => import("../pages/counsellor/CourseManagement.jsx"));
 const ActivityMissionManagement = lazy(() => import("../pages/counsellor/ActivityMissionManagement.jsx"));
 const Analytics = lazy(() => import("../pages/counsellor/Analytics.jsx"));
+const OverviewUsers = lazy(() => import("../pages/counsellor/OverviewUsers.jsx"));
 const EmployerDashboard = lazy(() => import("../pages/employer/Dashboard.jsx"));
 const PostJob = lazy(() => import("../pages/employer/PostJob.jsx"));
 const MyJobs = lazy(() => import("../pages/employer/MyJobs.jsx"));
+const EmployerJobDetail = lazy(() => import("../pages/employer/JobDetail.jsx"));
+const EmployerApplications = lazy(() => import("../pages/employer/Applications.jsx"));
 const Applicants = lazy(() => import("../pages/employer/Applicants.jsx"));
 const ApplicantDetail = lazy(() => import("../pages/employer/ApplicantDetail.jsx"));
 const AdminDashboard = lazy(() => import("../pages/admin/Dashboard.jsx"));
 const AdminUsers = lazy(() => import("../pages/admin/Users.jsx"));
+const AdminUserDetail = lazy(() => import("../pages/admin/UserDetail.jsx"));
+const AdminApplications = lazy(() => import("../pages/admin/Applications.jsx"));
 const JobsModeration = lazy(() => import("../pages/admin/JobsModeration.jsx"));
 const PostsModeration = lazy(() => import("../pages/admin/PostsModeration.jsx"));
 const JobCategories = lazy(() => import("../pages/admin/JobCategories.jsx"));
@@ -56,6 +63,13 @@ const FamilyHome = lazy(() => import("../pages/family/FamilyHome.jsx"));
 const FamilyAcceptInvite = lazy(() => import("../pages/family/FamilyAcceptInvite.jsx"));
 const FamilyGuide = lazy(() => import("../pages/family/FamilyGuide.jsx"));
 const FamilyGuideDetail = lazy(() => import("../pages/family/FamilyGuideDetail.jsx"));
+
+// The job board is open to visitors, job seekers and employers; staff and
+// family accounts are sent to their own home instead.
+function JobBoardGate() {
+  const { user, isAuthenticated } = useAuth();
+  return canSearchJobs(user, isAuthenticated) ? <Outlet /> : <Navigate to={roleHome(user.role)} replace />;
+}
 
 function AppRoutes() {
   return (
@@ -69,8 +83,10 @@ function AppRoutes() {
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="family/accept" element={<FamilyAcceptInvite />} />
 
-        <Route path="jobs" element={<JobSearch />} />
-        <Route path="jobs/:id" element={<JobDetail />} />
+        <Route element={<JobBoardGate />}>
+          <Route path="jobs" element={<JobSearch />} />
+          <Route path="jobs/:id" element={<JobDetail />} />
+        </Route>
 
         <Route element={<ProtectedRoute roles={["family", "user"]} />}>
           <Route path="family/dashboard" element={<FamilyHome />} />
@@ -117,6 +133,7 @@ function AppRoutes() {
           <Route path="counsellor/activity-missions" element={<ActivityMissionManagement />} />
           <Route path="counsellor/lessons" element={<LessonManagement />} />
           <Route path="counsellor/analytics" element={<Analytics />} />
+          <Route path="counsellor/overview/:kind" element={<OverviewUsers />} />
           <Route path="admin/posts-moderation" element={<PostsModeration />} />
         </Route>
 
@@ -124,6 +141,9 @@ function AppRoutes() {
           <Route path="employer/dashboard" element={<EmployerDashboard />} />
           <Route path="employer/jobs" element={<MyJobs />} />
           <Route path="employer/jobs/new" element={<PostJob />} />
+          <Route path="employer/jobs/:jobId" element={<EmployerJobDetail />} />
+          <Route path="employer/jobs/:jobId/edit" element={<PostJob />} />
+          <Route path="employer/applications" element={<EmployerApplications />} />
           <Route path="employer/jobs/:jobId/applicants" element={<Applicants />} />
           <Route path="employer/applications/:id" element={<ApplicantDetail />} />
         </Route>
@@ -131,7 +151,9 @@ function AppRoutes() {
         <Route element={<ProtectedRoute roles={["admin"]} />}>
           <Route path="admin" element={<AdminDashboard />} />
           <Route path="admin/users" element={<AdminUsers />} />
+          <Route path="admin/users/:userId" element={<AdminUserDetail />} />
           <Route path="admin/users/:userId/emotion" element={<UserEmotionHistory />} />
+          <Route path="admin/applications" element={<AdminApplications />} />
           <Route path="admin/jobs" element={<JobsModeration />} />
           <Route path="admin/job-categories" element={<JobCategories />} />
           <Route path="admin/assessments" element={<Assessments />} />

@@ -4,34 +4,18 @@
   padding: 2.5rem 1.5rem 4rem;
 }
 
-.profile-page > .ui-card, .profile-page > .ui-tabs, .profile-page > .profile-narrow { margin-bottom: 24px; }
+.profile-page > .ui-card, .profile-page > .ui-tabs { margin-bottom: 24px; }
 
 .profile-message, .profile-error { margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; font-size: .85rem; }
 .profile-message { background: var(--color-success-bg); color: var(--color-success); }
 .profile-error { background: var(--color-danger-bg); color: var(--color-danger); }
 .profile-empty-note { margin: 0; font-size: .82rem; color: var(--color-text-muted); }
 
-/* ---------- Header card ---------- */
-.profile-hero { display: flex; align-items: center; gap: 24px; }
-.profile-banner-avatar { position: relative; flex-shrink: 0; width: 88px; height: 88px; padding: 0; border: 0; border-radius: 22px; background: var(--color-primary-50); box-shadow: inset 0 0 0 6px var(--color-surface), 0 0 0 1px var(--color-primary-100); cursor: pointer; overflow: hidden; }
-.profile-banner-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.profile-avatar-fallback { display: grid; place-items: center; width: 100%; height: 100%; font-size: 1.9rem; font-weight: 600; color: var(--color-primary-600); }
-.profile-avatar-overlay { position: absolute; right: 6px; bottom: 6px; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-surface); color: var(--color-primary-600); box-shadow: var(--shadow-sm); opacity: 0; transition: opacity .15s; }
-.profile-banner-avatar:hover .profile-avatar-overlay, .profile-banner-avatar:focus-visible .profile-avatar-overlay { opacity: 1; }
-@media (hover: none) { .profile-avatar-overlay { opacity: 1; } }
-.profile-hero-body { flex: 1; min-width: 0; }
-.profile-banner-name { margin: 0; font-size: 1.45rem; font-weight: 600; line-height: 1.4; color: var(--color-text); overflow-wrap: anywhere; }
-.profile-hero-bio { margin: 4px 0 0; font-size: .82rem; line-height: 1.6; color: var(--color-text-muted); overflow-wrap: anywhere; }
-.profile-banner-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
-.profile-role-badge { padding: 3px 10px; border-radius: 8px; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .72rem; font-weight: 600; }
-.profile-edit-btn { flex-shrink: 0; }
-
 /* ---------- Layout helpers ---------- */
 .profile-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
 .profile-split-even { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
 .profile-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .profile-grid-2 { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; align-items: stretch; }
-.profile-narrow { max-width: 760px; margin-inline: auto; }
 
 /* ---------- Goals ---------- */
 .profile-goal-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 20px; }
@@ -133,22 +117,29 @@
 .profile-privacy h3 { margin: 0 0 6px; font-size: .9rem; font-weight: 600; }
 .profile-privacy p { margin: 0; font-size: .78rem; line-height: 1.7; color: var(--color-text-secondary); }
 
-/* ---------- Personal form ---------- */
-.profile-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 20px; }
-.profile-form-wide { grid-column: 1 / -1; }
-.layout-content .profile-form-grid :is(input, select):disabled { background: var(--color-surface-hover); color: var(--color-text-muted); cursor: not-allowed; }
+/* ---------- Personal form: two columns ---------- */
+.profile-form-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; align-items: start; }
+.profile-fieldset { display: flex; flex-direction: column; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.profile-fieldset legend { width: 100%; margin-bottom: 14px; padding: 0 0 10px; border-bottom: 1px solid var(--color-border); font-size: .9rem; font-weight: 600; color: var(--color-text); }
+.layout-content .profile-fieldset :is(input, select):disabled { background: var(--color-surface-hover); color: var(--color-text-muted); cursor: not-allowed; }
 .profile-form-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
 .profile-form-actions .ui-muted { display: inline-flex; align-items: center; gap: 6px; }
+.ui-card.profile-radar-card { padding: 0; border: 0; background: none; box-shadow: none; }
+.profile-radar-card .recovery-radar { margin-top: 0; }
+.profile-family-name-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; margin-bottom: 18px; }
+.profile-family-approve { display: inline-flex; align-items: center; gap: 4px; width: auto !important; padding: 0 10px; background: var(--color-success-bg) !important; color: var(--color-success) !important; font: inherit; font-size: .72rem; }
+.profile-courses-expiry { padding: 2px 8px; border-radius: 8px; font-size: .7rem; font-weight: 600; }
+.profile-courses-expiry.is-expired { background: var(--color-danger-bg); color: var(--color-danger); }
+.profile-courses-expiry.is-expiring { background: var(--color-warning-bg); color: var(--color-warning); }
+.profile-skill-level-field { margin: 16px 0; }
+.profile-status-row { display: flex; align-items: center; gap: 8px; }
 
 @media (max-width: 960px) {
   .profile-split, .profile-split-even, .profile-grid-2 { grid-template-columns: minmax(0, 1fr); }
+  .profile-form-cols { grid-template-columns: minmax(0, 1fr); gap: 22px; }
 }
 @media (max-width: 600px) {
-  .profile-hero { flex-wrap: wrap; gap: 16px; }
-  .profile-banner-avatar { width: 72px; height: 72px; border-radius: 18px; }
-  .profile-banner-name { font-size: 1.2rem; }
-  .profile-edit-btn { width: 100%; }
-  .profile-form-grid { grid-template-columns: minmax(0, 1fr); }
+  .profile-family-name-form { grid-template-columns: minmax(0, 1fr); }
   .profile-form-actions .ui-btn { width: 100%; }
   .profile-skill-add-form { grid-template-columns: minmax(0, 1fr) auto; }
   .profile-skill-add-form > input { grid-column: 1 / -1; }

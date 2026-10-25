@@ -48,12 +48,16 @@ export function likePost(postId, liked) {
   return api.put(`/posts/${postId}/like`, { liked }, { silent: true }).then((res) => res.data);
 }
 
-export function flagPost(postId) {
-  return api.put(`/posts/${postId}/flag`, {}, { silent: true }).then((res) => res.data);
+export function flagPost(postId, report = {}) {
+  return api.put(`/posts/${postId}/flag`, report, { silent: true }).then((res) => res.data);
 }
 
-export function unflagPost(postId) {
-  return api.put(`/posts/${postId}/unflag`).then((res) => res.data);
+export function unflagPost(postId, note) {
+  return api.put(`/posts/${postId}/unflag`, note ? { note } : {}).then((res) => res.data);
+}
+
+export function moderatePost(postId, payload) {
+  return api.put(`/posts/${postId}/moderate`, payload).then((res) => res.data);
 }
 
 export function getFlaggedPosts() {

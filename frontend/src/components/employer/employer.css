@@ -1,0 +1,24 @@
+/* Shared employer-area pieces: the verification banner and applicant rows. */
+.employer-banner { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; border: 1px solid var(--color-warning-border, var(--color-border)); border-radius: 16px; background: var(--color-warning-bg); color: var(--color-warning); }
+.employer-banner.is-danger { background: var(--color-danger-bg); color: var(--color-danger); border-color: var(--color-danger-border, var(--color-border)); }
+.employer-banner svg { flex-shrink: 0; margin-top: 2px; }
+.employer-banner strong { display: block; font-size: .9rem; }
+.employer-banner p { margin: 2px 0 0; font-size: .8rem; line-height: 1.6; }
+
+.employer-applicant-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; list-style: none; }
+.employer-applicant-main { display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0; color: inherit; text-decoration: none; }
+.employer-applicant-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.employer-applicant-name { font-size: .98rem; font-weight: 600; color: var(--color-text); overflow-wrap: anywhere; }
+.employer-applicant-name small { font-weight: 400; color: var(--color-text-muted); }
+.employer-applicant-job { display: inline-flex; align-items: center; gap: 4px; font-size: .76rem; color: var(--color-primary-700); }
+.employer-applicant-facts { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .78rem; color: var(--color-text-secondary); }
+.employer-applicant-facts > span { display: inline-flex; align-items: center; gap: 4px; }
+.employer-applicant-bio { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: .8rem; line-height: 1.6; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.employer-applicant-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.employer-applicant-match { font-size: .78rem; font-weight: 600; color: var(--color-primary-700); white-space: nowrap; }
+.employer-applicant-row:hover { border-color: var(--color-primary-200); }
+
+@media (max-width: 600px) {
+  .employer-applicant-row { flex-direction: column; align-items: stretch; padding: 14px; }
+  .employer-applicant-side { flex-direction: row; align-items: center; justify-content: space-between; }
+}

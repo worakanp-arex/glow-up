@@ -19,7 +19,8 @@ function CounsellingStatusWidget() {
       .finally(() => setLoading(false));
   }, []);
 
-  const latest = sessions[0];
+  // The request still in progress takes priority over older, finished ones.
+  const latest = sessions.find((s) => ["pending", "active", "scheduled"].includes(s.status)) || sessions[0];
   const TypeIcon = latest ? SESSION_TYPE_ICONS[latest.sessionType] || MessageCircle : HeartHandshake;
 
   return (

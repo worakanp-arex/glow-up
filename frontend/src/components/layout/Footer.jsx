@@ -1,26 +1,56 @@
 import { Link } from "react-router-dom";
 import { Mail, MapPin } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { roleHome, canSearchJobs } from "../../constants/roleHome.js";
 import PartnerBadge from "../common/PartnerBadge.jsx";
 import { PARTNERS } from "../../constants/partners.js";
 import "./Footer.css";
 
-const MAIN_LINKS = [
-  { to: "/", label: "หน้าหลัก" },
-  { to: "/jobs", label: "ค้นหางาน" },
-  { to: "/about", label: "เกี่ยวกับเรา" },
-  { to: "/register", label: "สมัครสมาชิก" },
-];
-
-const MORE_LINKS = [
-  { to: "/community", label: "ชุมชนฟื้นฟู" },
-  { to: "/courses", label: "ศูนย์การเรียนรู้" },
-  { to: "/counselling", label: "การให้คำปรึกษา" },
-  { to: "/employer/dashboard", label: "สำหรับนายจ้าง" },
-];
+// Footer links only point at pages the visitor's role can open.
+const MORE_LINKS_BY_ROLE = {
+  guest: [
+    { to: "/community", label: "ชุมชนฟื้นฟู" },
+    { to: "/courses", label: "ศูนย์การเรียนรู้" },
+    { to: "/employer/dashboard", label: "สำหรับนายจ้าง" },
+  ],
+  user: [
+    { to: "/community", label: "ชุมชนฟื้นฟู" },
+    { to: "/courses", label: "ศูนย์การเรียนรู้" },
+    { to: "/counselling", label: "การให้คำปรึกษา" },
+  ],
+  employer: [
+    { to: "/employer/jobs", label: "ประกาศงานของฉัน" },
+    { to: "/community", label: "ชุมชนฟื้นฟู" },
+    { to: "/courses", label: "ศูนย์การเรียนรู้" },
+  ],
+  family: [
+    { to: "/community", label: "ชุมชนฟื้นฟู" },
+    { to: "/family/guide", label: "คู่มือสำหรับครอบครัว" },
+    { to: "/courses", label: "ศูนย์การเรียนรู้" },
+  ],
+  counsellor: [
+    { to: "/counsellor/courses", label: "จัดการคอร์สเรียน" },
+    { to: "/counsellor/analytics", label: "ภาพรวมผู้ใช้งาน" },
+    { to: "/community", label: "ชุมชนฟื้นฟู" },
+  ],
+  admin: [
+    { to: "/admin/users", label: "จัดการผู้ใช้งาน" },
+    { to: "/admin/posts-moderation", label: "ตรวจสอบโพสต์" },
+    { to: "/community", label: "ชุมชนฟื้นฟู" },
+  ],
+};
 
 function Footer() {
   const { theme } = useTheme();
+  const { user, isAuthenticated } = useAuth();
+  const mainLinks = [
+    { to: isAuthenticated ? roleHome(user.role) : "/", label: "หน้าหลัก" },
+    ...(canSearchJobs(user, isAuthenticated) ? [{ to: "/jobs", label: "ค้นหางาน" }] : []),
+    { to: "/about", label: "เกี่ยวกับเรา" },
+    isAuthenticated ? { to: "/profile", label: "โปรไฟล์ของฉัน" } : { to: "/register", label: "สมัครสมาชิก" },
+  ];
+  const moreLinks = MORE_LINKS_BY_ROLE[isAuthenticated ? user.role : "guest"] || MORE_LINKS_BY_ROLE.guest;
   const year = new Date().getFullYear();
   const logoSrc = theme === "dark" ? "/logoW.png" : "/logo.png";
 
@@ -38,7 +68,7 @@ function Footer() {
         <div className="footer-col">
           <h3>เมนูหลัก</h3>
           <ul>
-            {MAIN_LINKS.map((link) => (
+            {mainLinks.map((link) => (
               <li key={link.to}>
                 <Link to={link.to}>{link.label}</Link>
               </li>
@@ -49,7 +79,7 @@ function Footer() {
         <div className="footer-col">
           <h3>เมนูอื่นๆ</h3>
           <ul>
-            {MORE_LINKS.map((link) => (
+            {moreLinks.map((link) => (
               <li key={link.to}>
                 <Link to={link.to}>{link.label}</Link>
               </li>

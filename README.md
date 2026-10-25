@@ -42,10 +42,13 @@ Backend ใช้พอร์ต **5001**, frontend ใช้ **5173** หาก
 ```sh
 npm run seed:admin --prefix backend
 npm run seed:missions --prefix backend
+npm run seed:skills --prefix backend
 ```
 
 ตั้ง `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` และ `SEED_ADMIN_NAME` ก่อนสร้าง admin
 การ seed ภารกิจจะเพิ่มหรืออัปเดตรายการภารกิจและรางวัลในฐานข้อมูลที่ตั้งค่าไว้
+การ seed ทักษะอาชีพจะเพิ่มทักษะมาตรฐานที่จัดเป็นหมวด (ไม่แก้ไขหรือลบทักษะที่มีอยู่) และเซิร์ฟเวอร์จะเติมทักษะที่ขาดให้อัตโนมัติทุกครั้งที่เริ่มทำงาน
+เซิร์ฟเวอร์ยังส่งการแจ้งเตือนคอร์สที่ใกล้หมดอายุทุกชั่วโมง (รองรับการรันแบบ instance เดียวตามที่ระบุใน `deploy/ecosystem.config.cjs`)
 
 ## การตั้งค่าและข้อมูลส่วนตัว
 

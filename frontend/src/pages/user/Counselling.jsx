@@ -2,8 +2,10 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays, ChevronDown, Heart, HeartHandshake, Lock, MessageCircle, Phone, Send, Video } from "lucide-react";
+import { CalendarDays, ChevronDown, ExternalLink, Heart, HeartHandshake, Lock, MessageCircle, Phone, Send, UserRound, Video, XCircle } from "lucide-react";
 import * as counsellingService from "../../services/counsellingService.js";
+import CounsellingThread from "../../components/counselling/CounsellingThread.jsx";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import MoodSelect from "../../components/common/MoodSelect.jsx";
 import DateTimePicker from "../../components/common/DateTimePicker.jsx";
 import { MOOD_OPTIONS } from "../../constants/mood.js";
@@ -48,7 +50,9 @@ function Counselling() {
   const [sentSession, setSentSession] = useState(null);
   const [historyLimit, setHistoryLimit] = useState(HISTORY_PAGE_SIZE);
   const [historyTab, setHistoryTab] = useState("open");
-
+  // Full copy (with the populated chat) of the request that is still in progress.
+  const [detail, setDetail] = useState(null);
+  const { confirm: requestConfirm, confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
     counsellingService
@@ -57,6 +61,40 @@ function Counselling() {
       .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
+
+  // A person has one request in progress at a time: its chat and status replace
+  // the request form until the case is closed or cancelled.
+  const activeSession = sessions.find((s) => OPEN_STATUSES.includes(s.status));
+  const activeId = activeSession?._id;
+
+  useEffect(() => {
+    if (!activeId) {
+      setDetail(null);
+      return undefined;
+    }
+    let cancelled = false;
+    counsellingService.getSession(activeId).then((data) => { if (!cancelled) setDetail(data); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [activeId]);
+
+  function handleThreadChange(updated) {
+    setDetail(updated);
+    setSessions((prev) => prev.map((s) => (s._id === updated._id ? { ...s, status: updated.status, scheduledAt: updated.scheduledAt, counsellor: updated.counsellor } : s)));
+  }
+
+  function requestCancel() {
+    requestConfirm({
+      title: "ยกเลิกคำขอปรึกษานี้?",
+      message: "คำขอจะถูกยกเลิกและบุคลากรที่รับเรื่องจะได้รับแจ้ง หลังจากนั้นคุณสามารถขอนัดหมายใหม่ได้",
+      confirmLabel: "ยกเลิกคำขอ",
+      errorMessage: "ยกเลิกคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+      onConfirm: async () => {
+        const cancelled = await counsellingService.cancelMySession(activeId);
+        setSessions((prev) => prev.map((s) => (s._id === cancelled._id ? { ...s, status: cancelled.status } : s)));
+        setSentSession(null);
+      },
+    });
+  }
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -86,6 +124,8 @@ function Counselling() {
       setForm(INITIAL_FORM);
     } catch (err) {
       setError(err.response?.data?.message || "ส่งคำขอไม่สำเร็จ");
+      // Another request is already in progress (e.g. sent from another tab): show it.
+      if (err.response?.status === 409) counsellingService.getMySessions().then(setSessions).catch(() => {});
     } finally {
       setSubmitting(false);
     }
@@ -94,6 +134,8 @@ function Counselling() {
 
   const activeSessions = sessions.filter((s) => OPEN_STATUSES.includes(s.status));
   const shownSessions = historyTab === "open" ? activeSessions : sessions;
+  const shownDetail = detail && detail._id === activeId ? detail : null;
+  const ActiveTypeIcon = SESSION_TYPE_OPTIONS.find((t) => t.value === activeSession?.sessionType)?.icon || MessageCircle;
 
   return (
     <div className="counselling-page">
@@ -103,6 +145,39 @@ function Counselling() {
 
       <div className="counselling-layout">
         <div className="counselling-sidebar">
+          {activeSession ? (
+            <section className="ui-card counselling-active" aria-label="คำขอที่กำลังดำเนินการ">
+              <div className="counselling-form-head">
+                <h2 className="counselling-form-title">คำขอของฉัน</h2>
+                <span className={`counselling-status-badge ${COUNSELLING_STATUS_CLASS[activeSession.status] || ""}`}>
+                  {COUNSELLING_STATUS_LABELS[activeSession.status] || activeSession.status}
+                </span>
+              </div>
+              {sentSession && <p className="counselling-sent" role="status">ส่งคำขอแล้ว ระหว่างรอคุณพิมพ์ข้อความถึงผู้ให้คำปรึกษาได้ที่นี่</p>}
+              <p className="counselling-active-topic"><ActiveTypeIcon size={18} aria-hidden="true" />{activeSession.topic}</p>
+              <dl className="counselling-active-facts">
+                <div><dt>ช่องทาง</dt><dd>{SESSION_TYPE_LABELS[activeSession.sessionType]}</dd></div>
+                <div><dt>ผู้ดูแล</dt><dd>{activeSession.counsellor ? activeSession.counsellor.name : <span className="counselling-waiting"><UserRound size={14} aria-hidden="true" />รอบุคลากรรับเรื่อง</span>}</dd></div>
+                <div><dt>นัดหมาย</dt><dd>{activeSession.scheduledAt ? formatDateTime(activeSession.scheduledAt) : "ยังไม่ยืนยันเวลา"}</dd></div>
+              </dl>
+              <p className="counselling-note"><CalendarDays size={15} aria-hidden="true" />ขอคำปรึกษาได้ครั้งละ 1 คำขอ เมื่อปิดเคสแล้วจึงขอนัดหมายใหม่ได้</p>
+
+              <div className="counselling-active-chat">
+                <h3>ข้อความระหว่างรอ</h3>
+                {shownDetail ? (
+                  <CounsellingThread session={shownDetail} onChange={handleThreadChange} canReply emptyHint="พิมพ์เพิ่มเติมได้ เช่น เวลาที่สะดวกหรือสิ่งที่อยากให้ทราบ" />
+                ) : (
+                  <AsyncState />
+                )}
+              </div>
+
+              <div className="counselling-active-actions">
+                <Link to={`/counselling/${activeSession._id}`} className="ui-btn ui-btn-outline"><ExternalLink size={15} aria-hidden="true" />เปิดรายละเอียดเต็ม</Link>
+                <button type="button" className="ui-btn ui-btn-outline counselling-cancel" onClick={requestCancel}><XCircle size={15} aria-hidden="true" />ยกเลิกคำขอ</button>
+              </div>
+              {confirmDialog}
+            </section>
+          ) : (
           <form className="ui-card counselling-form" onSubmit={handleSubmit}>
             <div className="counselling-form-head">
               <h2 className="counselling-form-title">ขอคำปรึกษา</h2>
@@ -178,6 +253,7 @@ function Counselling() {
               <span>{submitting ? "กำลังส่งคำขอ..." : "ส่งคำขอปรึกษา"}</span>
             </button>
           </form>
+          )}
         </div>
 
         <div className="counselling-side">

@@ -1,0 +1,9 @@
+.account-card-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.account-card .profile-facts dd { display: flex; align-items: center; gap: 6px; }
+.account-card-link { margin-top: 14px; width: 100%; }
+.account-card-links { display: flex; flex-direction: column; gap: 10px; margin: 0 0 14px; padding: 0; list-style: none; }
+.account-card-links li { display: flex; align-items: center; gap: 10px; }
+.account-card-links li > span { display: flex; flex-direction: column; min-width: 0; }
+.account-card-links strong { font-size: .9rem; overflow-wrap: anywhere; }
+.account-card-links small { color: var(--color-text-muted); }
+.account-card-shortcuts { display: flex; flex-direction: column; gap: 8px; }

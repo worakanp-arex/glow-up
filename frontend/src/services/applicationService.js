@@ -34,3 +34,15 @@ export function getApplication(id) {
 export function updateApplicationStatus(id, payload) {
   return api.put(`/applications/${id}/status`, payload).then((res) => res.data);
 }
+
+export function getAllApplicationsPage(params, signal) {
+  return api
+    .get("/applications/admin/all", { params, signal })
+    .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+}
+
+export function getEmployerApplicationsPage(params, signal) {
+  return api
+    .get("/applications/employer/all", { params, signal })
+    .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+}

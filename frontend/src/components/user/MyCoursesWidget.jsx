@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import * as courseService from "../../services/courseService.js";
 import StatusBadge from "../common/StatusBadge.jsx";
+import { courseStatus } from "../../utils/courseDates.js";
 import "./MyCoursesWidget.css";
 
 function MyCoursesWidget() {
@@ -19,7 +20,10 @@ function MyCoursesWidget() {
 
   const completedCount = enrollments.filter((e) => e.certificateUrl).length;
   const stillLearning = enrollments.filter((e) => !e.certificateUrl);
-  const current = stillLearning[0] || enrollments[0];
+  // A saved course that is about to expire is shown first so it isn't missed.
+  const expiringSoon = stillLearning.find((e) => e.course && courseStatus(e.course).state === "expiring");
+  const current = expiringSoon || stillLearning[0] || enrollments[0];
+  const currentStatus = current?.course ? courseStatus(current.course) : null;
 
   return (
     <Link to="/courses" className="my-courses-widget">
@@ -36,6 +40,9 @@ function MyCoursesWidget() {
           <>
             <p className="my-courses-widget-title">{current.course?.title}</p>
             <StatusBadge status={current.certificateUrl ? "completed" : "learning"} />
+            {currentStatus && (currentStatus.state === "expiring" || currentStatus.state === "expired") && (
+              <span className={`my-courses-widget-expiry is-${currentStatus.state}`}>{currentStatus.label}</span>
+            )}
             <span className="my-courses-widget-summary">
               ลงทะเบียนแล้ว {enrollments.length} คอร์ส
               {completedCount > 0 ? ` · เรียนจบแล้ว ${completedCount} คอร์ส` : ""}

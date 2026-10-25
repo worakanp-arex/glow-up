@@ -1,0 +1,11 @@
+.bar-list { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.bar-list li { display: flex; align-items: flex-start; gap: 12px; }
+.bar-list-rank { display: grid; place-items: center; flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px; background: var(--color-primary-50); color: var(--color-primary-700); font-size: 0.75rem; font-weight: 700; }
+.bar-list-body { flex: 1; min-width: 0; }
+.bar-list-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 4px; font-size: 0.85rem; }
+.bar-list-label { font-weight: 600; overflow-wrap: anywhere; }
+.bar-list-value { flex-shrink: 0; color: var(--color-text-secondary); }
+.bar-list-track { height: 8px; border-radius: 999px; background: var(--color-primary-50); overflow: hidden; }
+.bar-list-track span { display: block; height: 100%; border-radius: inherit; background: var(--color-primary-500); }
+.bar-list small { display: block; margin-top: 4px; font-size: 0.74rem; color: var(--color-text-muted); }
+.bar-list-empty { margin: 0; font-size: 0.85rem; color: var(--color-text-muted); }

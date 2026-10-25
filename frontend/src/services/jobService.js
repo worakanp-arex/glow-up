@@ -22,6 +22,24 @@ export function getMyJobsPage(params, signal) {
     .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
 }
 
+export function getMyJob(id) {
+  return api.get(`/jobs/mine/${id}`).then((res) => res.data);
+}
+
+export function getMyJobsSummary() {
+  return api.get("/jobs/mine/summary").then((res) => res.data);
+}
+
+export function uploadJobImage(id, file) {
+  const formData = new FormData();
+  formData.append("image", file);
+  return api.post(`/jobs/${id}/image`, formData).then((res) => res.data);
+}
+
+export function removeJobImage(id) {
+  return api.delete(`/jobs/${id}/image`).then((res) => res.data);
+}
+
 export function getAllJobsForAdmin() {
   return api.get("/jobs/admin/all").then((res) => res.data);
 }
@@ -44,8 +62,8 @@ export function deleteJob(id) {
   return api.delete(`/jobs/${id}`).then((res) => res.data);
 }
 
-export function confirmJob(id, status) {
-  return api.put(`/jobs/${id}/confirm`, { status }).then((res) => res.data);
+export function confirmJob(id, status, reason) {
+  return api.put(`/jobs/${id}/confirm`, reason ? { status, reason } : { status }).then((res) => res.data);
 }
 
 export function getSavedJobs() {

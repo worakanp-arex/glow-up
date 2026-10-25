@@ -1,0 +1,18 @@
+.trend-chart { display: flex; flex-direction: column; gap: 8px; }
+.trend-chart-toolbar { display: flex; justify-content: flex-end; }
+.trend-chart-toolbar button { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border: 1px solid var(--color-border-strong); border-radius: 999px; background: var(--color-surface); color: var(--color-text-secondary); font: inherit; font-size: 0.75rem; cursor: pointer; }
+.trend-chart-plot { overflow-x: auto; }
+.trend-chart-plot > svg { display: block; width: 100%; min-width: 560px; height: auto; max-height: 340px; }
+.trend-chart-toolbar button { white-space: nowrap; }
+.trend-grid { stroke: var(--color-border); stroke-width: 1; }
+.trend-axis { stroke: var(--color-border-strong); stroke-width: 1.5; }
+.trend-tick { fill: var(--color-text-muted); font-size: 11px; }
+.trend-axis-title { fill: var(--color-text-secondary); font-size: 12px; font-weight: 600; }
+.trend-area { fill: color-mix(in srgb, var(--color-primary-500) 14%, transparent); }
+.trend-line { fill: none; stroke: var(--color-primary-500); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.trend-dot { fill: var(--color-surface); stroke: var(--color-primary-600); stroke-width: 2; cursor: pointer; }
+.trend-dot.is-hover { fill: var(--color-primary-500); }
+.trend-hover text { fill: var(--color-text); font-size: 12px; font-weight: 700; }
+.trend-chart-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.trend-chart-table th, .trend-chart-table td { padding: 8px 12px; border-bottom: 1px solid var(--color-border); text-align: left; }
+.trend-chart-table td:last-child, .trend-chart-table th:last-child { text-align: right; }

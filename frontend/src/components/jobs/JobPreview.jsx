@@ -23,7 +23,7 @@ function splitDescription(text) {
   return { about, duties };
 }
 
-function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match = null }) {
+function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match = null, showImage = true }) {
   const { user, isAuthenticated } = useAuth();
   const [applying, setApplying] = useState(false);
   const [justApplied, setJustApplied] = useState(null);
@@ -97,6 +97,7 @@ function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match 
 
   return (
     <article className="job-preview">
+      {showImage && job.imageUrl && <img className="job-preview-image" src={job.imageUrl} alt={`รูปประกาศงาน ${job.title}`} loading="lazy" />}
       <div className="job-preview-top">
         <span className="job-preview-logo" aria-hidden="true">
           {job.employer?.avatarUrl ? <img src={job.employer.avatarUrl} alt="" /> : initials(companyName)}

@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { roleHome } from "../constants/roleHome.js";
 
 function ProtectedRoute({ roles }) {
   const { user, isAuthenticated } = useAuth();
@@ -9,7 +10,7 @@ function ProtectedRoute({ roles }) {
   }
 
   if (roles && !roles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={roleHome(user.role)} replace />;
   }
 
   return <Outlet />;

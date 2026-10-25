@@ -42,7 +42,7 @@
 /* ---------- Main two-column area ---------- */
 .dashboard-main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: stretch; }
 .dashboard-main-col > .checkin { flex: 1; }
-.dashboard-side-col > .dashboard-talk { flex: 1; justify-content: flex-end; }
+.dashboard-side-col > .dashboard-talk { flex: 0 0 auto; }
 .dashboard-main-col, .dashboard-side-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
 .dashboard-talk, .dashboard-quest { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 24px; text-decoration: none; color: var(--color-text); transition: transform .15s ease, box-shadow .15s ease; }
@@ -116,3 +116,6 @@
 .image-slot.dashboard-hero-art.is-missing { display: none; }
 @media (max-width: 860px) { .image-slot.dashboard-hero-art { width: 160px; height: 160px; } }
 @media (max-width: 600px) { .image-slot.dashboard-hero-art { order: -1; width: 120px; height: 120px; margin: 0 auto 6px; } .image-slot.dashboard-hero-art::before { inset: -14px; } }
+
+/* The family message card sits inside the welcome card. */
+.dashboard-hero-copy > .family-message-card { margin-top: 4px; }

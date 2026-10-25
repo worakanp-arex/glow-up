@@ -1,22 +1,14 @@
 import { useEffect, useState } from "react";
-import {
-  Award,
-  CalendarCheck,
-  CheckCircle2,
-  Flame,
-  Gift,
-  Sprout,
-  Target,
-  Trophy,
-} from "lucide-react";
+import { CheckCircle2, Target } from "lucide-react";
 import * as missionService from "../../services/missionService.js";
 import * as rewardService from "../../services/rewardService.js";
+import { resolveIcon } from "../../utils/lucideIcon.js";
 import "./MissionBoard.css";
 
-const ICONS = { Flame, CalendarCheck, Award, Sprout, Trophy, Gift };
-
+// Icons are admin-chosen from the shared catalogue, so every icon an admin can
+// pick shows up here as picked (unknown names fall back to a plain circle).
 function MissionIcon({ name, ...props }) {
-  const Icon = ICONS[name] || Target;
+  const Icon = resolveIcon(name);
   return <Icon {...props} />;
 }
 
@@ -79,11 +71,11 @@ function MissionBoard() {
         ))}
       </ul>
 
-      {rewards.length > 0 && (
+      {rewards.some(({ reward }) => reward) && (
         <div className="mission-board-rewards">
           <h3>รางวัลที่ได้รับ</h3>
           <ul className="mission-board-rewards-list">
-            {rewards.map(({ _id, reward, earnedAt }) => (
+            {rewards.filter(({ reward }) => reward).map(({ _id, reward, earnedAt }) => (
               <li key={_id} title={new Date(earnedAt).toLocaleDateString("th-TH")}>
                 <MissionIcon name={reward.icon} size={16} />
                 <span>{reward.name}</span>

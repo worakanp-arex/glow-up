@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { body } from "express-validator";
+import { body, query } from "express-validator";
 import {
   applyToJob,
   myApplications,
   jobApplicants,
+  listAllApplications,
+  listEmployerApplications,
   getApplication,
   updateApplicationStatus,
   cancelApplication,
@@ -34,6 +36,22 @@ router.get(
   [objectIdParam("jobId"), ...paginationQuery()],
   validate,
   asyncHandler(jobApplicants)
+);
+router.get(
+  "/employer/all",
+  verifyToken,
+  requireRole("employer"),
+  [query("status").optional().isIn(["pending", "interview", "passed", "rejected", "cancelled"]), ...paginationQuery()],
+  validate,
+  asyncHandler(listEmployerApplications)
+);
+router.get(
+  "/admin/all",
+  verifyToken,
+  requireRole("admin"),
+  [query("status").optional().isIn(["pending", "interview", "passed", "rejected", "cancelled"]), ...paginationQuery()],
+  validate,
+  asyncHandler(listAllApplications)
 );
 router.get("/:id", verifyToken, requireRole("employer", "admin"), [objectIdParam("id")], validate, asyncHandler(getApplication));
 router.put(

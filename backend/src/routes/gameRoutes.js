@@ -6,6 +6,9 @@ import {
   submitMemoryResult,
   getDailyQuiz,
   submitQuiz,
+  getEmotionToday,
+  submitEmotion,
+  submitBreathing,
   getMyRadar,
 } from "../controllers/gameController.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
@@ -22,5 +25,8 @@ router.get("/memory/today", asyncHandler(getMemoryPairs));
 router.post("/memory/submit", asyncHandler(submitMemoryResult));
 router.get("/quiz/today", asyncHandler(getDailyQuiz));
 router.post("/quiz/submit", asyncHandler(submitQuiz));
+router.get("/emotion/today", asyncHandler(getEmotionToday));
+router.post("/emotion/submit", asyncHandler(submitEmotion));
+router.post("/breathing/submit", asyncHandler(submitBreathing));
 
 export default router;

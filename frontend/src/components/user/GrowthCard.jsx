@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Check, Sprout } from "lucide-react";
 import { getMyPointsSummary } from "../../services/missionService.js";
 import { stageLabel, streakToStage } from "./PlantGrowth.jsx";
+import { levelProgress } from "../../utils/levelProgress.js";
 import "./GrowthCard.css";
 
 const WEEKDAY = new Intl.DateTimeFormat("th-TH", { weekday: "short", timeZone: "UTC" });
@@ -19,11 +20,7 @@ export default function GrowthCard({ streak }) {
   }
   useEffect(() => { load(); }, []);
 
-  const perLevel = summary?.pointsPerLevel || 100;
-  const total = summary?.totalPoints ?? 0;
-  const level = summary?.level ?? 1 + Math.floor(total / perLevel);
-  const levelXp = total - (level - 1) * perLevel;
-  const toNext = summary?.pointsToNextLevel ?? level * perLevel - total;
+  const { perLevel, level, into: levelXp, remaining: toNext } = levelProgress(summary);
   const week = (streak?.history ?? []).slice(-7);
 
   return (

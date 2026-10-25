@@ -9,7 +9,13 @@ import {
   myFamilyLinksAsFamily,
   getLinkedUserSummary,
   sendEncouragementMessage,
+  requestFamilyLink,
+  respondToFamilyRequest,
+  listFamilyMessages,
+  latestFamilyMessage,
+  markFamilyMessageRead,
 } from "../controllers/familyController.js";
+import { familyRequestLimiter } from "../middleware/rateLimiters.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
@@ -26,6 +32,23 @@ router.post(
   asyncHandler(inviteFamilyMember)
 );
 router.get("/invited", verifyToken, requireRole("user"), asyncHandler(myInvitedFamily));
+router.post(
+  "/request",
+  verifyToken,
+  requireRole("family"),
+  familyRequestLimiter,
+  [body("email").isEmail().normalizeEmail()],
+  validate,
+  asyncHandler(requestFamilyLink)
+);
+router.put(
+  "/invited/:id/respond",
+  verifyToken,
+  requireRole("user"),
+  [objectIdParam("id"), body("approve").isBoolean({ strict: true })],
+  validate,
+  asyncHandler(respondToFamilyRequest)
+);
 router.put(
   "/invited/:id/revoke",
   verifyToken,
@@ -64,10 +87,27 @@ router.get(
 router.post(
   "/links/:linkId/messages",
   verifyToken,
-  requireRole("family"),
-  [objectIdParam("linkId"), body("message").trim().notEmpty().isLength({ max: 500 })],
+  requireRole("user", "family"),
+  [objectIdParam("linkId"), body("message").trim().notEmpty().isLength({ max: 500 }), body("replyTo").optional().isMongoId()],
   validate,
   asyncHandler(sendEncouragementMessage)
+);
+router.get(
+  "/links/:linkId/messages",
+  verifyToken,
+  requireRole("user", "family"),
+  [objectIdParam("linkId")],
+  validate,
+  asyncHandler(listFamilyMessages)
+);
+router.get("/messages/latest", verifyToken, requireRole("user"), asyncHandler(latestFamilyMessage));
+router.put(
+  "/messages/:id/read",
+  verifyToken,
+  requireRole("user", "family"),
+  [objectIdParam("id")],
+  validate,
+  asyncHandler(markFamilyMessageRead)
 );
 
 export default router;

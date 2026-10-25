@@ -10,6 +10,7 @@ import * as weeklyCheckInService from "../../services/weeklyCheckInService.js";
 import * as riskSituationService from "../../services/riskSituationService.js";
 import * as missionService from "../../services/missionService.js";
 import "./PatientProfile.css";
+import Avatar from "../../components/common/Avatar.jsx";
 
 const MOOD_TREND_LABELS = { improving: "ดีขึ้น", stable: "เหมือนเดิม", worsening: "แย่ลง" };
 const OUTCOME_LABELS = {
@@ -25,10 +26,6 @@ const RISK_CLASS = {
   high: "patient-profile-risk-high",
 };
 const REHAB_STATUS_LABELS = { completed: "เสร็จสิ้นการบำบัด", ongoing: "กำลังบำบัดต่อเนื่อง" };
-
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
 
 function formatDate(iso) {
   if (!iso) return "-";
@@ -106,7 +103,7 @@ function PatientProfile() {
 
       <div className="patient-profile-header">
         <span className="patient-profile-avatar">
-          {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : initials(user.name)}
+          <Avatar user={user} size={64} fill />
         </span>
         <div>
           <h2 className="page-context-title">{user.name}</h2>

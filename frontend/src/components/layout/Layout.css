@@ -1,4 +1,6 @@
-.layout { min-height: 100dvh; display: flex; flex-direction: column; }
+.layout { --navbar-height: 81px; min-height: 100dvh; display: flex; flex-direction: column; }
+.layout-body { flex: 1; display: flex; min-width: 0; }
 .layout-content { flex: 1; min-width: 0; outline: none; }
 .skip-link { position: fixed; top: -100px; left: 20px; z-index: 200; padding: 12px 20px; background: var(--color-surface); color: var(--color-primary-700); border-radius: 10px; }
 .skip-link:focus { top: 10px; }
+@media (max-width: 860px) { .layout { --navbar-height: 60px; } }

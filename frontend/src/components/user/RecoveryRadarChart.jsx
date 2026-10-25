@@ -7,6 +7,8 @@ const CENTER = SIZE / 2;
 const MAX_RADIUS = 105;
 const GRID_STEPS = [0.25, 0.5, 0.75, 1];
 const LABEL_OFFSET = 26;
+// Extra room either side so long Thai axis labels are not clipped at the edge.
+const LABEL_PAD = 60;
 
 function pointAt(index, count, fraction) {
   const angle = -90 + (360 / count) * index;
@@ -61,7 +63,7 @@ function RecoveryRadarChart({ data }) {
           </tbody>
         </table>
       ) : (
-        <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="recovery-radar-svg" role="img" aria-label={`กราฟใยแมงมุมแสดงพัฒนาการ ${count} ด้าน`}>
+        <svg viewBox={`${-LABEL_PAD} 0 ${SIZE + LABEL_PAD * 2} ${SIZE}`} className="recovery-radar-svg" role="img" aria-label={`กราฟใยแมงมุมแสดงพัฒนาการ ${count} ด้าน`}>
           {GRID_STEPS.map((fraction) => (
             <polygon key={fraction} points={polygonPoints(count, fraction)} className="recovery-radar-grid-ring" />
           ))}

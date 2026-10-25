@@ -19,6 +19,8 @@ const activityMissionLogSchema = new mongoose.Schema(
     approved: { type: Boolean, default: null },
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     approvedAt: { type: Date },
+    // Why a log was rejected (shown to the user in their notification).
+    reviewNote: { type: String },
   },
   { timestamps: true }
 );

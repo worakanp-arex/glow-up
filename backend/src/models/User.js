@@ -35,6 +35,23 @@ const userSchema = new mongoose.Schema(
     // clinical profile (see utils/patientAccess.js).
     assignedCounsellor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     avatarUrl: { type: String },
+    // "initial" shows a coloured letter instead of avatarUrl / the role artwork.
+    avatarStyle: { type: String, enum: ["image", "initial"], default: "image" },
+    avatarColor: { type: String },
+    // Key into constants/profileArt.js COVER_PRESETS (background behind the profile card).
+    coverPreset: { type: String },
+    // Employer details
+    website: { type: String },
+    companySize: { type: String },
+    companyDescription: { type: String },
+    contactPosition: { type: String },
+    // Admin details
+    position: { type: String },
+    department: { type: String },
+    // Name the patient gives their family circle (role "user" only).
+    familyName: { type: String },
+    // Why an admin rejected or suspended the account (shown to the owner).
+    verificationNote: { type: String },
     // What an active family follower may see (role "user" only). Both default
     // on so links created before this setting existed keep behaving the same.
     familySharing: {

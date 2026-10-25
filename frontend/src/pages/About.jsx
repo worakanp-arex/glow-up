@@ -2,6 +2,8 @@ import PageHeader from "../components/common/PageHeader.jsx";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, HeartHandshake, ShieldCheck, Sparkles } from "lucide-react";
+import { useAuth } from "../context/AuthContext.jsx";
+import { roleHome, canSearchJobs } from "../constants/roleHome.js";
 import Reveal from "../components/common/Reveal.jsx";
 import PartnerBadge from "../components/common/PartnerBadge.jsx";
 import { PARTNERS } from "../constants/partners.js";
@@ -27,6 +29,8 @@ const VALUES = [
 
 function About() {
   const { hash } = useLocation();
+  const { user, isAuthenticated } = useAuth();
+  const showJobSearch = canSearchJobs(user, isAuthenticated);
 
   useEffect(() => {
     if (!hash) return;
@@ -94,13 +98,21 @@ function About() {
         <h2>อยากเป็นส่วนหนึ่งของโอกาสนี้ไหม?</h2>
         <p>ไม่ว่าคุณจะกำลังมองหางาน หรือเป็นนายจ้างที่อยากร่วมสร้างโอกาส เราพร้อมต้อนรับคุณ</p>
         <div className="about-cta-actions">
-          <Link to="/jobs" className="btn btn-primary">
-            <span>ค้นหางาน</span>
-            <ArrowRight size={18} />
-          </Link>
-          <Link to="/register" className="btn btn-secondary">
-            สมัครสมาชิก
-          </Link>
+          {showJobSearch && (
+            <Link to="/jobs" className="btn btn-primary">
+              <span>ค้นหางาน</span>
+              <ArrowRight size={18} />
+            </Link>
+          )}
+          {isAuthenticated ? (
+            <Link to={roleHome(user.role)} className={`btn ${showJobSearch ? "btn-secondary" : "btn-primary"}`}>
+              ไปที่แผงควบคุมของฉัน
+            </Link>
+          ) : (
+            <Link to="/register" className="btn btn-secondary">
+              สมัครสมาชิก
+            </Link>
+          )}
         </div>
       </Reveal>
     </div>

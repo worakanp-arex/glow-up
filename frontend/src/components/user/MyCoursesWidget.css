@@ -62,3 +62,7 @@
   font-size: 0.78rem;
   color: var(--color-text-secondary);
 }
+
+.my-courses-widget-expiry { align-self: flex-start; padding: 2px 8px; border-radius: 8px; font-size: .72rem; font-weight: 600; }
+.my-courses-widget-expiry.is-expiring { background: var(--color-warning-bg); color: var(--color-warning); }
+.my-courses-widget-expiry.is-expired { background: var(--color-danger-bg); color: var(--color-danger); }

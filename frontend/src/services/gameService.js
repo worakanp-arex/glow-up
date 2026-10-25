@@ -27,3 +27,15 @@ export function getDailyQuiz() {
 export function submitQuiz(answers) {
   return api.post("/games/quiz/submit", { answers }).then((res) => res.data);
 }
+
+export function getEmotionToday() {
+  return api.get("/games/emotion/today").then((res) => res.data);
+}
+
+export function submitEmotion(answers) {
+  return api.post("/games/emotion/submit", { answers }).then((res) => res.data);
+}
+
+export function submitBreathing(rounds) {
+  return api.post("/games/breathing/submit", { rounds }).then((res) => res.data);
+}

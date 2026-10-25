@@ -2,17 +2,18 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Briefcase, Building2, ClipboardList, Plus, Users } from "lucide-react";
+import { Briefcase, Building2, ChevronRight, ClipboardList, Plus, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import StatTile from "../../components/common/StatTile.jsx";
+import VerifyBanner from "../../components/employer/VerifyBanner.jsx";
 import * as jobService from "../../services/jobService.js";
-import * as applicationService from "../../services/applicationService.js";
 import "./Dashboard.css";
 
 const QUICK_LINKS = [
   { to: "/employer/jobs/new", label: "สร้างประกาศงาน", icon: Plus },
   { to: "/employer/jobs", label: "ประกาศงานของฉัน", icon: Briefcase },
+  { to: "/employer/applications", label: "ผู้สมัครทั้งหมด", icon: Users },
   { to: "/profile", label: "โปรไฟล์บริษัท", icon: Building2 },
 ];
 
@@ -20,106 +21,88 @@ const RECENT_JOBS_LIMIT = 5;
 
 function Dashboard() {
   const { user } = useAuth();
-  const [jobs, setJobs] = useState([]);
-  const [applicantCounts, setApplicantCounts] = useState({});
+  const [summary, setSummary] = useState(null);
+  const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
-    jobService
-      .getMyJobs()
-      .then(async (data) => {
-        setJobs(data);
-        const entries = await Promise.all(
-          data.map((job) =>
-            applicationService
-              .getJobApplicants(job._id)
-              .then((list) => [job._id, list.length])
-              .catch(() => [job._id, 0])
-          )
-        );
-        setApplicantCounts(Object.fromEntries(entries));
+    Promise.all([
+      jobService.getMyJobsSummary(),
+      jobService.getMyJobsPage({ page: 1, limit: RECENT_JOBS_LIMIT }),
+    ])
+      .then(([summaryData, jobsPage]) => {
+        setSummary(summaryData && !Array.isArray(summaryData) ? summaryData : null);
+        setRecent(jobsPage.items);
       })
-      .catch(() => setJobs([]))
       .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  const header = (
+    <PageHeader icon={Building2} eyebrow="Employer space" description="ภาพรวมประกาศงานและผู้สมัครของบริษัทคุณ กดที่การ์ดเพื่อดูรายละเอียด" actions={<StatusBadge status={user.verifiedStatus} />}>
+      สวัสดี, {user.companyName || user.name}
+    </PageHeader>
+  );
 
-  if (loading) {
-    return <div className="dashboard-page"><AsyncState /></div>;
-  }
+  if (loadError) return <div className="employer-dashboard-page">{header}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
+  if (loading) return <div className="employer-dashboard-page">{header}<AsyncState /></div>;
 
-  const openJobsCount = jobs.filter((job) => job.status === "open").length;
-  const totalApplicants = Object.values(applicantCounts).reduce((sum, n) => sum + n, 0);
-  const recentJobs = jobs.slice(0, RECENT_JOBS_LIMIT);
+  const jobs = summary?.jobs || {};
+  const applicants = summary?.applicants || {};
 
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-greeting">
-        <PageHeader art="mascot" icon={Building2}>สวัสดี, {user.companyName || user.name}</PageHeader>
-        <StatusBadge status={user.verifiedStatus} />
-      </div>
-      <p className="dashboard-subtitle">ภาพรวมประกาศงานและผู้สมัครของบริษัทคุณ</p>
+    <div className="employer-dashboard-page">
+      {header}
+      <VerifyBanner />
 
-      <div className="dashboard-links">
-        {QUICK_LINKS.map(({ to, label, icon: Icon }) => (
-          <Link key={to} to={to}>
-            <Icon size={16} />
-            <span>{label}</span>
-          </Link>
-        ))}
+      <div className="employer-dashboard-stats">
+        <StatTile label="ประกาศงานที่เปิดรับ" value={jobs.open ?? 0} tone={jobs.open > 0 ? "good" : "neutral"} to="/employer/jobs?filter=open" />
+        <StatTile label="ประกาศงานทั้งหมด" value={jobs.total ?? recent.length} to="/employer/jobs" />
+        <StatTile label="รอผู้ดูแลระบบตรวจสอบ" value={jobs.pending ?? 0} tone={jobs.pending > 0 ? "warning" : "neutral"} to="/employer/jobs?filter=pending" />
+        <StatTile label="ผู้สมัครทั้งหมด" value={applicants.total ?? 0} tone={applicants.total > 0 ? "good" : "neutral"} to="/employer/applications" />
+        <StatTile label="ผู้สมัครที่รอพิจารณา" value={applicants.pending ?? 0} tone={applicants.pending > 0 ? "warning" : "neutral"} to="/employer/applications?status=pending" />
       </div>
 
-      <div className="dashboard-stat-grid">
-        <StatTile
-          label="ประกาศงานที่เปิดรับ"
-          value={openJobsCount}
-          tone={openJobsCount > 0 ? "good" : "neutral"}
-        />
-        <StatTile label="ประกาศงานทั้งหมด" value={jobs.length} />
-        <StatTile
-          label="ผู้สมัครทั้งหมด"
-          value={totalApplicants}
-          tone={totalApplicants > 0 ? "good" : "neutral"}
-        />
-      </div>
+      <div className="employer-dashboard-grid">
+        <section className="ui-card employer-dashboard-recent">
+          <div className="ui-card-head">
+            <h2><ClipboardList size={18} aria-hidden="true" /> ประกาศงานล่าสุด</h2>
+            <Link to="/employer/jobs" className="ui-card-link">ดูทั้งหมด</Link>
+          </div>
 
-      <div className="dashboard-recent">
-        <h2>
-          <ClipboardList size={18} />
-          <span>ประกาศงานล่าสุด</span>
-        </h2>
-
-        {jobs.length === 0 ? (
-          <p className="dashboard-empty">ยังไม่มีประกาศงาน ลองสร้างประกาศแรกของคุณจากปุ่ม &quot;สร้างประกาศงาน&quot; ด้านบน</p>
-        ) : (
-          <>
-            <ul className="dashboard-job-list">
-              {recentJobs.map((job) => (
+          {recent.length === 0 ? (
+            <p className="employer-dashboard-empty">ยังไม่มีประกาศงาน ลองสร้างประกาศแรกของคุณจากปุ่ม &quot;สร้างประกาศงาน&quot;</p>
+          ) : (
+            <ul className="employer-dashboard-job-list">
+              {recent.map((job) => (
                 <li key={job._id}>
-                  <div className="dashboard-job-info">
-                    <p className="dashboard-job-title">{job.title}</p>
-                    <div className="dashboard-job-badges">
-                      <StatusBadge status={job.status} />
-                      <StatusBadge status={job.verifiedStatus} />
-                    </div>
-                  </div>
-                  <Link to={`/employer/jobs/${job._id}/applicants`} className="dashboard-job-applicants">
-                    <Users size={14} />
-                    <span>{applicantCounts[job._id] ?? 0} ผู้สมัคร</span>
+                  <Link to={`/employer/jobs/${job._id}`} className="employer-dashboard-job">
+                    <span className="employer-dashboard-job-info">
+                      <span className="employer-dashboard-job-title">{job.title}</span>
+                      <span className="employer-dashboard-job-badges">
+                        <StatusBadge status={job.status} />
+                        <StatusBadge status={job.verifiedStatus} />
+                      </span>
+                    </span>
+                    <ChevronRight size={16} aria-hidden="true" />
                   </Link>
                 </li>
               ))}
             </ul>
-            {jobs.length > recentJobs.length && (
-              <Link to="/employer/jobs" className="dashboard-view-all">
-                ดูประกาศงานทั้งหมด &rarr;
-              </Link>
-            )}
-          </>
-        )}
+          )}
+        </section>
+
+        <aside className="ui-card employer-dashboard-links">
+          <div className="ui-card-head"><h2>ทางลัด</h2></div>
+          {QUICK_LINKS.map(({ to, label, icon: Icon }) => (
+            <Link key={to} to={to}>
+              <Icon size={16} aria-hidden="true" />
+              <span>{label}</span>
+              <ChevronRight size={14} aria-hidden="true" />
+            </Link>
+          ))}
+        </aside>
       </div>
     </div>
   );

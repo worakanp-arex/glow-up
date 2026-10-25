@@ -15,6 +15,12 @@ const missionSchema = new mongoose.Schema(
     rewardPoints: { type: Number, default: 0 },
     badgeIcon: { type: String },
     active: { type: Boolean, default: true },
+    // Display order on the user's board (lower first) and an optional window
+    // in which the mission can still be progressed. Completed missions keep
+    // their points after the window closes.
+    order: { type: Number, default: 0 },
+    startDate: { type: Date },
+    endDate: { type: Date },
   },
   { timestamps: true }
 );

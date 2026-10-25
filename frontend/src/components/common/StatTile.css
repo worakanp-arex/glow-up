@@ -43,3 +43,38 @@
   font-weight: 600;
   color: var(--color-text);
 }
+
+.stat-tile-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Drill-down tiles: the whole tile is a link/button. */
+.stat-tile-interactive {
+  display: block;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.stat-tile-interactive:hover {
+  border-color: var(--color-primary-200);
+  box-shadow: var(--card-shadow);
+  transform: translateY(-1px);
+}
+
+.stat-tile-interactive:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+.stat-tile-chevron {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: var(--color-text-muted);
+}

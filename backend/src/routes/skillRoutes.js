@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { body } from "express-validator";
+import { body, query } from "express-validator";
 import { getSkills, createSkill } from "../controllers/skillController.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
@@ -8,7 +8,12 @@ import { paginationQuery } from "../middleware/validators.js";
 
 const router = Router();
 
-router.get("/", [...paginationQuery()], validate, asyncHandler(getSkills));
+router.get(
+  "/",
+  [query("q").optional().isString().isLength({ max: 100 }), query("category").optional().isString().isLength({ max: 100 }), ...paginationQuery()],
+  validate,
+  asyncHandler(getSkills)
+);
 router.post(
   "/",
   verifyToken,

@@ -5,15 +5,16 @@ import AsyncState from "../../components/common/AsyncState.jsx";
 import ImageSlot from "../../components/common/ImageSlot.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Bookmark, BookOpen, ExternalLink, MessageCircleWarning, Search } from "lucide-react";
+import { ArrowRight, Bookmark, BookOpen, CalendarDays, ExternalLink, MessageCircleWarning, Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as courseService from "../../services/courseService.js";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
+import { courseRange, courseStatus } from "../../utils/courseDates.js";
+import { courseCover } from "../../utils/courseCover.js";
 import "./Courses.css";
 
 const ALL = "";
 const SAVED = "__saved";
-const COVER_TONES = ["primary", "lilac", "peach", "sky"];
 
 function excerpt(text, max = 80) {
   const plain = (text || "").replace(/\s+/g, " ").trim();
@@ -23,6 +24,7 @@ function excerpt(text, max = 80) {
 function Courses() {
   const { user } = useAuth();
   const isUser = user.role === "user";
+  const isStaff = user.role === "counsellor" || user.role === "admin";
   const [courses, setCourses] = useState([]);
   const [myCourses, setMyCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +34,8 @@ function Courses() {
 
   useEffect(() => {
     Promise.all([
-      courseService.getCourses(),
+      // Learners only see courses that are open now; staff also see upcoming and expired ones.
+      courseService.getCourses({ status: isStaff ? "all" : "active" }),
       isUser ? courseService.getMyCourses() : Promise.resolve([]),
     ])
       .then(([allCourses, enrolled]) => {
@@ -41,7 +44,7 @@ function Courses() {
       })
       .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
-  }, [isUser]);
+  }, [isUser, isStaff]);
 
   const categories = useMemo(
     () => [...new Set(courses.map((c) => c.category).filter(Boolean))],
@@ -137,12 +140,14 @@ function Courses() {
         <ul className="courses-grid">
           {pagination.items.map((course) => {
             const enrollment = enrollmentById.get(course._id);
-            const cover = (courses.indexOf(course) % 4) + 1;
+            const cover = courseCover(course, courses.indexOf(course));
+            const status = courseStatus(course);
+            const range = courseRange(course);
             return (
               <li key={course._id} className="ui-card course-card">
                 <div className="course-card-media">
                   <Link to={`/courses/${course._id}`} tabIndex={-1} aria-hidden="true">
-                    <ImageSlot src={`/images/lessons/cover-${cover}.png`} alt="" tone={COVER_TONES[cover - 1]} />
+                    <ImageSlot src={cover.src} alt="" tone={cover.tone} />
                   </Link>
                   {isUser && (
                     <button
@@ -160,6 +165,13 @@ function Courses() {
                   <span className="course-card-category">{course.category || "คอร์สเรียน"}{course.tags?.length > 0 && ` · ${course.tags.slice(0, 2).map((t) => `#${t}`).join(" ")}`}</span>
                   <h2><Link to={`/courses/${course._id}`}>{course.title}</Link></h2>
                   <p>{excerpt(course.description) || "เรียนรู้ไปทีละขั้น ในจังหวะของคุณ"}</p>
+                  {range && (
+                    <p className={`course-card-dates is-${status.state}`}>
+                      <CalendarDays size={13} aria-hidden="true" />
+                      <span>{range}</span>
+                      {(status.state === "expired" || status.state === "expiring" || status.state === "upcoming") && <b>{status.label}</b>}
+                    </p>
+                  )}
                   {isUser && enrollment && <StatusBadge status={enrollment.certificateUrl ? "completed" : "learning"} />}
                   <div className="course-card-actions">
                     <Link to={`/courses/${course._id}`} className={`ui-btn ${enrollment ? "ui-btn-primary" : "ui-btn-outline"}`}>

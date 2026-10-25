@@ -6,13 +6,14 @@ import { Camera, ChevronDown, ShieldCheck, UserPlus } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as authService from "../../services/authService.js";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton.jsx";
+import { roleHome } from "../../constants/roleHome.js";
 import "./Register.css";
 
-const DASHBOARD_BY_ROLE = {
-  user: "/dashboard",
-  family: "/family/dashboard",
-  employer: "/employer/dashboard",
-};
+const ROLE_OPTIONS = [
+  { value: "user", label: "ผู้ใช้งานปกติ" },
+  { value: "employer", label: "นายจ้าง" },
+  { value: "family", label: "ครอบครัว/ผู้ดูแล" },
+];
 
 const INITIAL_FORM = {
   role: "user",
@@ -85,7 +86,7 @@ function Register() {
     setSubmitting(true);
     try {
       const user = await loginWithGoogle(credential, form.role, form.pdpaConsent);
-      navigate((["family", "user"].includes(user.role) && returnTo) || DASHBOARD_BY_ROLE[user.role] || "/");
+      navigate((["family", "user"].includes(user.role) && returnTo) || roleHome(user.role));
     } catch (err) {
       setError(err.response?.data?.message || "เข้าสู่ระบบด้วย Google ไม่สำเร็จ");
     } finally {
@@ -127,7 +128,7 @@ function Register() {
     setSubmitting(true);
     try {
       const user = await completeRegistration({ email: form.email, otp });
-      navigate((["family", "user"].includes(user.role) && returnTo) || DASHBOARD_BY_ROLE[user.role] || "/");
+      navigate((["family", "user"].includes(user.role) && returnTo) || roleHome(user.role));
     } catch (err) {
       setError(err.response?.data?.message || "ยืนยัน OTP ไม่สำเร็จ");
     } finally {
@@ -226,28 +227,21 @@ function Register() {
         </div>
 
         <div className="register-role-toggle" role="radiogroup" aria-label="ประเภทผู้ใช้งาน">
-          <button
-            type="button"
-            role="radio"
-            aria-checked={form.role === "user"}
-            className={form.role === "user" ? "active" : ""}
-            onClick={() => handleRoleChange("user")}
-          >
-            ผู้หางาน
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={form.role === "employer"}
-            className={form.role === "employer" ? "active" : ""}
-            onClick={() => handleRoleChange("employer")}
-          >
-            นายจ้าง
-          </button>
-          <button type="button" role="radio" aria-checked={form.role === "family"} className={form.role === "family" ? "active" : ""} onClick={() => handleRoleChange("family")}>ครอบครัว/ผู้ดูแล</button>
+          {ROLE_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={form.role === option.value}
+              className={form.role === option.value ? "active" : ""}
+              onClick={() => handleRoleChange(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
 
-        {form.role === "family" && <p className="register-family-note">สมัครเพื่อติดตามและให้กำลังใจคนในครอบครัว หลังสมัครให้เปิดลิงก์คำเชิญที่ส่งมาทางอีเมล คุณจะเห็นความคืบหน้าเมื่อเจ้าของข้อมูลเชิญและคุณยืนยันแล้ว</p>}
+        {form.role === "family" && <p className="register-family-note">สมัครสมาชิกได้ทันที เมื่อเข้าสู่ระบบแล้วกรอกอีเมลของคนที่คุณห่วงใยเพื่อขอเชื่อมต่อ เจ้าของข้อมูลจะเป็นผู้อนุมัติก่อนที่คุณจะเห็นความคืบหน้า หรือจะเปิดลิงก์คำเชิญที่ส่งมาทางอีเมลก็ได้</p>}
         <div className="register-field-row">
           <label>
             {form.role === "employer" ? "ชื่อผู้ติดต่อ" : "ชื่อ-นามสกุล"}
@@ -277,11 +271,11 @@ function Register() {
         {form.role === "user" && (
           <div className="register-field-row">
             <label>
-              ระดับการศึกษา
+              ระดับการศึกษา (ไม่บังคับ)
               <input type="text" name="education" value={form.education} onChange={handleChange} />
             </label>
             <label>
-              ประสบการณ์ทำงาน
+              ประสบการณ์ทำงาน (ไม่บังคับ)
               <input type="text" name="experience" value={form.experience} onChange={handleChange} />
             </label>
           </div>

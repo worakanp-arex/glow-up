@@ -32,6 +32,7 @@ async function fixture(page, role = "user", options = {}) {
     else if (p === "/counselling/patients/1") data = { user, rehabRecords: [], riskAssessments: [], emotionStreak: streak, emotionLogs: [] };
     else if (p === "/counselling/1") data = { _id: "1", user, topic: "ขอคำปรึกษาเพื่อเตรียมความพร้อมในการทำงาน", message: "ต้องการพูดคุย", messages: [], sessionType: "chat", status: "pending", createdAt: "2026-09-01T00:00:00Z" };
     else if (p === "/emotion/1/streak") data = { ...streak, user };
+    else if (p === "/users/1") data = { ...user, _id: "1", name: "สมาชิก 1" };
     else if (p === "/overview") data = summary;
     else if (p === "/risk/all") data = summary.risk;
     else if (p === "/admin/dashboard") data = { users: { total: 12, employers: 3, pendingVerifications: 2 }, jobs: { total: 23, pending: 2, open: 21 }, applications: { total: 0, byStatus: {} }, risk: summary.risk };
@@ -45,7 +46,7 @@ async function fixture(page, role = "user", options = {}) {
       if (options.failJobs) return route.fulfill({ status: 500, json: { message: "โหลดรายการไม่สำเร็จ" } });
       const start = ((Number(url.searchParams.get("page")) || 1) - 1) * (Number(url.searchParams.get("limit")) || 10);
       data = url.searchParams.has("page") ? jobs.slice(start, start + (Number(url.searchParams.get("limit")) || 10)) : jobs;
-    } else if (/^\/jobs\/\d+$/.test(p)) data = jobs[0];
+    } else if (/^\/jobs\/\d+$/.test(p) || p === "/jobs/mine/1") data = jobs[0];
     else if (p === "/family/links" && options.family) data = [{ _id: "link1", recoveringUser: user }];
     else if (p === "/family/links/link1/summary") data = { name: user.name, currentStreak: 3, longestStreak: 7, currentStageLabel: "ต้นอ่อนกำลังโต", completedMissions: 2, rewardsEarned: [] };
     await route.fulfill({ json: data, headers: { "X-Total-Count": String(jobs.length) } });
@@ -54,10 +55,10 @@ async function fixture(page, role = "user", options = {}) {
 
 const pages = {
   guest: ["/", "/about", "/login", "/register", "/forgot-password", "/reset-password", "/jobs", "/family/accept", "/not-a-page"],
-  user: ["/dashboard", "/profile", "/my-applications", "/craving-tracker", "/streak", "/weekly-checkin", "/learning", "/community", "/community/saved", "/courses", "/counselling", "/jobs"],
-  employer: ["/employer/dashboard", "/employer/jobs", "/employer/jobs/new", "/employer/jobs/1/applicants", "/profile"],
-  counsellor: ["/counsellor", "/counsellor/courses", "/counsellor/lessons", "/counsellor/analytics", "/community/mine", "/admin/posts-moderation"],
-  admin: ["/admin", "/admin/users", "/admin/jobs", "/admin/job-categories", "/admin/assessments", "/admin/posts-moderation"],
+  user: ["/dashboard", "/profile", "/my-applications", "/craving-tracker", "/streak", "/games", "/weekly-checkin", "/learning", "/community", "/community/saved", "/courses", "/counselling", "/jobs"],
+  employer: ["/employer/dashboard", "/employer/jobs", "/employer/jobs/new", "/employer/jobs/1/applicants", "/employer/applications", "/profile"],
+  counsellor: ["/counsellor", "/counsellor/courses", "/counsellor/lessons", "/counsellor/analytics", "/counsellor/activity-missions", "/community/mine", "/admin/posts-moderation", "/profile"],
+  admin: ["/admin", "/admin/users", "/admin/jobs", "/admin/job-categories", "/admin/assessments", "/admin/missions", "/admin/applications", "/admin/posts-moderation", "/profile"],
 };
 for (const [role, routes] of Object.entries(pages)) {
   for (const url of routes) test(`${role} ${url}`, async ({ page }, testInfo) => {
@@ -71,11 +72,18 @@ for (const [role, routes] of Object.entries(pages)) {
     await expect(page.locator("#main-content h1")).toHaveCount(1);
     await expect(page.locator("#main-content .page-heading-icon > svg")).toHaveCount(1);
     await expect(page.locator(".workspace-sidebar")).toHaveCount(0);
+    const hasSideNav = role === "admin" || role === "counsellor";
     if (testInfo.project.name === "mobile") {
       await expect(page.locator(".secondary-nav")).toBeHidden();
+      await expect(page.locator(".side-nav")).toBeHidden();
       await expect(page.getByRole("button", { name: "เปิดเมนู", exact: true })).toBeVisible();
+    } else if (hasSideNav) {
+      await expect(page.locator(".side-nav")).toBeVisible();
+      await expect(page.locator(".secondary-nav")).toHaveCount(0);
+      await expect(page.locator(".navbar-menu-toggle")).toBeHidden();
     } else {
       await expect(page.locator(".secondary-nav")).toBeVisible();
+      await expect(page.locator(".side-nav")).toHaveCount(0);
       await expect(page.locator(".navbar-menu-toggle")).toBeHidden();
     }
     await expect(page.getByText("หน้านี้ยังเปิดไม่ได้", { exact: true })).toHaveCount(0);
@@ -162,9 +170,15 @@ const details = [
   ["user", "/counselling/1", "/counselling"],
   ["counsellor", "/counsellor/requests/1", "/counsellor"],
   ["counsellor", "/counsellor/patients/1", "/counsellor"],
+  ["counsellor", "/counsellor/overview/active", "/counsellor/analytics"],
   ["admin", "/admin/users/1/emotion", "/admin/users"],
+  ["admin", "/admin/users/1", "/admin/users"],
+  ["admin", "/admin/applications", "/admin"],
   ["employer", "/employer/applications/1", "/employer/jobs/1/applicants"],
-  ["employer", "/employer/jobs/1/applicants", "/employer/jobs"],
+  ["employer", "/employer/jobs/1/applicants", "/employer/jobs/1"],
+  ["employer", "/employer/jobs/1", "/employer/jobs"],
+  ["employer", "/employer/jobs/1/edit", "/employer/jobs/1"],
+  ["employer", "/employer/applications", "/employer/dashboard"],
   ["employer", "/employer/jobs/new", "/employer/jobs"],
 ];
 for (const [role, url, parent] of details) test(`detail header and back ${role} ${url}`, async ({ page }, testInfo) => {
@@ -183,6 +197,33 @@ for (const [role, url, parent] of details) test(`detail header and back ${role} 
   if (["/courses/1", "/employer/applications/1", "/employer/jobs/new", "/counselling/1"].includes(url)) await page.screenshot({ path: testInfo.outputPath("preview.png"), animations: "disabled" });
   await page.locator(".page-back").click();
   await expect(page).toHaveURL(new URL(parent, "http://127.0.0.1:5173").href);
+});
+
+test("the profile back button returns to the page the visitor came from", async ({ page }) => {
+  await fixture(page, "user"); await page.goto("/courses");
+  await page.getByRole("button", { name: "เมนูบัญชีของฉัน" }).click();
+  await page.locator('.user-menu-panel a[href="/profile"]').click();
+  await expect(page.locator(".page-back")).toHaveAttribute("href", "/courses");
+  await page.locator(".page-back").click();
+  await expect(page).toHaveURL(/\/courses$/);
+  await page.goto("/profile");
+  await expect(page.locator(".page-back")).toHaveAttribute("href", /\/courses$/);
+});
+
+test("profile has a large cover avatar and a picker with characters, letters and covers", async ({ page }) => {
+  await fixture(page, "employer"); await page.goto("/profile");
+  const avatar = await page.locator(".profile-banner-avatar").boundingBox();
+  expect(avatar.width).toBeGreaterThanOrEqual(96);
+  await page.getByRole("button", { name: "เปลี่ยนรูปโปรไฟล์" }).first().click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("tab", { name: "ตัวละคร" })).toBeVisible();
+  await expect(dialog.getByRole("tab", { name: "ตัวอักษร" })).toBeVisible();
+  await expect(dialog.getByRole("tab", { name: "พื้นหลัง" })).toBeVisible();
+  await expect(dialog.getByRole("tab", { name: "จากแกลเลอรี" })).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "บันทึก", exact: true })).toBeDisabled();
+  await dialog.getByRole("tab", { name: "ตัวอักษร" }).click();
+  await dialog.getByRole("button", { name: /^สี #/ }).nth(2).click();
+  await expect(dialog.getByRole("button", { name: "บันทึก", exact: true })).toBeEnabled();
 });
 
 test("missing details retain a heading and a safe way back", async ({ page }) => {

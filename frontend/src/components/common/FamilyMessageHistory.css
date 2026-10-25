@@ -1,0 +1,5 @@
+.family-history-list { display: flex; flex-direction: column; gap: 10px; max-height: 360px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.family-history-list li { max-width: 88%; padding: 10px 14px; border-radius: 14px 14px 14px 4px; background: var(--color-surface-hover); }
+.family-history-list li.is-mine { align-self: flex-end; border-radius: 14px 14px 4px 14px; background: var(--color-primary-50); }
+.family-history-list p { margin: 0 0 4px; font-size: .88rem; line-height: 1.6; color: var(--color-text); overflow-wrap: anywhere; white-space: pre-line; }
+.family-history-list small { display: inline-flex; align-items: center; gap: 4px; font-size: .7rem; color: var(--color-text-muted); }

@@ -234,3 +234,36 @@
     height: 110px;
   }
 }
+
+/* ---------- tabs, ranges, tables and attempts ---------- */
+.counsellor-analytics-page > .ui-tabs { margin-bottom: 0; }
+.counsellor-analytics-range { display: inline-flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--color-surface-hover); align-self: flex-start; }
+.counsellor-analytics-range button { padding: 6px 14px; border: 0; border-radius: 999px; background: transparent; color: var(--color-text-secondary); font: inherit; font-size: .8rem; cursor: pointer; }
+.counsellor-analytics-range button[aria-pressed="true"] { background: var(--color-surface); color: var(--color-primary-700); font-weight: 600; box-shadow: var(--shadow-sm); }
+.counsellor-analytics-filter { margin: 0; font-size: .85rem; color: var(--color-text-secondary); }
+
+.counsellor-analytics-table { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.counsellor-analytics-table li { display: grid; grid-template-columns: minmax(0, 2fr) repeat(auto-fit, minmax(90px, auto)); align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 14px; font-size: .85rem; }
+.counsellor-analytics-table-main { display: flex; flex-direction: column; min-width: 0; }
+.counsellor-analytics-table-main strong { overflow-wrap: anywhere; }
+.counsellor-analytics-table-main small { color: var(--color-text-muted); overflow-wrap: anywhere; }
+.counsellor-analytics-table a { color: var(--color-primary-700); white-space: nowrap; }
+.counsellor-analytics-pass { font-weight: 600; color: var(--color-primary-700); }
+
+.counsellor-analytics-attempts { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.counsellor-analytics-attempts li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 14px; }
+.counsellor-analytics-attempt-body { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 2px; font-size: .85rem; }
+.counsellor-analytics-attempt-body strong { overflow-wrap: anywhere; }
+.counsellor-analytics-attempt-scenario { color: var(--color-primary-700); font-weight: 500; overflow-wrap: anywhere; }
+.counsellor-analytics-attempt-body span { overflow-wrap: anywhere; }
+.counsellor-analytics-attempt-body small { color: var(--color-text-muted); }
+.counsellor-analytics-attempt-date { flex-shrink: 0; color: var(--color-text-muted); font-size: .72rem; }
+.counsellor-analytics-result { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; padding: 3px 10px; border-radius: 8px; font-size: .75rem; font-weight: 600; }
+.counsellor-analytics-result.is-pass { background: var(--color-success-bg); color: var(--color-success); }
+.counsellor-analytics-result.is-fail { background: var(--color-danger-bg); color: var(--color-danger); }
+.counsellor-analytics-leaderboard-name { display: inline-flex; align-items: center; gap: 8px; }
+
+@media (max-width: 640px) {
+  .counsellor-analytics-table li { grid-template-columns: minmax(0, 1fr); }
+  .counsellor-analytics-attempts li { flex-wrap: wrap; }
+}

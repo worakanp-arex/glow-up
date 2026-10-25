@@ -1,0 +1,12 @@
+.family-message-card { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border: 1px solid var(--color-primary-200); border-radius: 16px; background: var(--color-surface); box-shadow: var(--shadow-sm); }
+.family-message-card.is-unread { border-color: var(--color-primary-400); box-shadow: 0 0 0 3px var(--color-primary-100); }
+.family-message-label { display: flex; align-items: center; gap: 6px; margin: 0; font-size: .75rem; font-weight: 600; color: var(--color-primary-700); }
+.family-message-label svg { color: #d0457b; }
+.family-message-card blockquote { margin: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.7; color: var(--color-text); overflow-wrap: anywhere; white-space: pre-line; }
+.family-message-from { margin: 0; font-size: .75rem; color: var(--color-text-muted); }
+.family-message-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.family-message-actions .ui-btn { min-height: 40px; padding: 8px 16px; }
+.family-message-reply { display: flex; flex-direction: column; gap: 8px; }
+.family-message-reply textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: .875rem; }
+.family-message-sent { margin: 0; font-size: .78rem; color: var(--color-success); }
+.family-message-error { margin: 0; font-size: .78rem; color: var(--color-danger); }

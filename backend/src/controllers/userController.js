@@ -6,6 +6,8 @@ import UserSkill from "../models/UserSkill.js";
 import { notifyUser } from "../services/notificationService.js";
 import { UPLOAD_ROOT, publicUrl } from "../middleware/upload.js";
 import { paginationOptions } from "../utils/pagination.js";
+import { sanitizeText } from "../utils/sanitizeText.js";
+import { AVATAR_PRESETS, AVATAR_COLORS, COVER_PRESET_KEYS } from "../constants/profileArt.js";
 
 function removeUploadedFile(fileUrl) {
   if (!fileUrl || !fileUrl.startsWith("/uploads/")) return;
@@ -29,6 +31,13 @@ const OWN_PROFILE_FIELDS = [
   "taxId",
   "specialization",
   "hospital",
+  "website",
+  "companySize",
+  "companyDescription",
+  "contactPosition",
+  "position",
+  "department",
+  "familyName",
 ];
 
 const ADMIN_EDITABLE_FIELDS = [...OWN_PROFILE_FIELDS, "email", "role", "specialization", "hospital"];
@@ -43,6 +52,21 @@ function pick(source, fields) {
 
 export async function updateMe(req, res) {
   const updates = pick(req.body, OWN_PROFILE_FIELDS);
+  // Profile art is chosen from a fixed list of keys; the server maps a key to
+  // its URL so a client can never store an arbitrary image address.
+  let replacedAvatarUrl;
+  const preset = AVATAR_PRESETS.find((item) => item.key === req.body.avatarPreset);
+  if (preset) {
+    replacedAvatarUrl = (await User.findById(req.user.id).select("avatarUrl"))?.avatarUrl;
+    updates.avatarUrl = preset.url;
+    updates.avatarStyle = "image";
+  } else if (req.body.avatarStyle === "initial") {
+    updates.avatarStyle = "initial";
+    if (AVATAR_COLORS.includes(req.body.avatarColor)) updates.avatarColor = req.body.avatarColor;
+  } else if (req.body.avatarStyle === "image") {
+    updates.avatarStyle = "image";
+  }
+  if (COVER_PRESET_KEYS.includes(req.body.coverPreset)) updates.coverPreset = req.body.coverPreset;
   // Dotted paths so toggling one sharing option doesn't reset the other.
   for (const key of ["progress", "missions"]) {
     if (typeof req.body.familySharing?.[key] === "boolean") {
@@ -53,11 +77,12 @@ export async function updateMe(req, res) {
     new: true,
     runValidators: true,
   });
+  if (replacedAvatarUrl && replacedAvatarUrl !== updates.avatarUrl) removeUploadedFile(replacedAvatarUrl);
   res.json(user);
 }
 
 export async function getPublicProfile(req, res) {
-  const target = await User.findById(req.params.id).select("name role avatarUrl specialization hospital");
+  const target = await User.findById(req.params.id).select("name role avatarUrl avatarStyle avatarColor specialization hospital");
   if (!target || !["counsellor", "admin"].includes(target.role)) {
     return res.status(404).json({ message: "ไม่พบข้อมูล" });
   }
@@ -71,7 +96,7 @@ export async function uploadMyAvatar(req, res) {
 
   const url = publicUrl("avatar", req.file.filename);
   const previous = await User.findById(req.user.id);
-  const user = await User.findByIdAndUpdate(req.user.id, { avatarUrl: url }, { new: true });
+  const user = await User.findByIdAndUpdate(req.user.id, { avatarUrl: url, avatarStyle: "image" }, { new: true });
   if (previous?.avatarUrl) removeUploadedFile(previous.avatarUrl);
 
   res.json(user);
@@ -180,6 +205,9 @@ export async function createUserByAdmin(req, res) {
   if (!["user", "family", "employer", "admin", "counsellor"].includes(role)) {
     return res.status(400).json({ message: "Invalid role" });
   }
+  if (String(password).length < 8) {
+    return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
+  }
 
   const existing = await User.findOne({ email: email.toLowerCase() });
   if (existing) {
@@ -226,28 +254,68 @@ const VERIFY_STATUS_MESSAGES = {
   suspended: "บัญชีของคุณถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ",
 };
 
+// Admins must always keep at least one active admin account, and nobody can
+// lock themselves out of the system from the admin screens.
+async function isLastActiveAdmin(user) {
+  if (user.role !== "admin") return false;
+  const others = await User.countDocuments({ role: "admin", _id: { $ne: user._id }, verifiedStatus: { $nin: ["rejected", "suspended"] } });
+  return others === 0;
+}
+
+export async function getUser(req, res) {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  res.json(user);
+}
+
 export async function verifyUser(req, res) {
   const { status } = req.body;
   if (!["verified", "rejected", "suspended"].includes(status)) {
     return res.status(400).json({ message: "status must be 'verified', 'rejected' or 'suspended'" });
   }
 
+  const reason = typeof req.body.reason === "string" ? sanitizeText(req.body.reason).slice(0, 500) : "";
+  if (status !== "verified") {
+    const target = await User.findById(req.params.id).select("role");
+    if (!target) return res.status(404).json({ message: "Not found" });
+    if (String(target._id) === String(req.user.id)) {
+      return res.status(400).json({ message: "ไม่สามารถระงับหรือปฏิเสธบัญชีของตัวเองได้" });
+    }
+    if (await isLastActiveAdmin(target)) {
+      return res.status(400).json({ message: "ต้องมีผู้ดูแลระบบที่ใช้งานได้อย่างน้อยหนึ่งคน" });
+    }
+  }
+
   const user = await User.findByIdAndUpdate(
     req.params.id,
-    { verifiedStatus: status },
+    { verifiedStatus: status, verificationNote: status === "verified" ? "" : reason },
     { new: true }
   );
   if (!user) {
     return res.status(404).json({ message: "Not found" });
   }
 
-  await notifyUser(user._id, VERIFY_STATUS_MESSAGES[status], "system", { link: "/profile" });
+  const message = reason && status !== "verified" ? `${VERIFY_STATUS_MESSAGES[status]} เหตุผล: ${reason}` : VERIFY_STATUS_MESSAGES[status];
+  await notifyUser(user._id, message, "system", { link: "/profile" });
 
   res.json(user);
 }
 
 export async function updateUser(req, res) {
   const updates = pick(req.body, ADMIN_EDITABLE_FIELDS);
+  if (updates.role) {
+    const target = await User.findById(req.params.id).select("role");
+    if (target && target.role === "admin" && updates.role !== "admin") {
+      if (String(target._id) === String(req.user.id)) {
+        return res.status(400).json({ message: "ไม่สามารถเปลี่ยนบทบาทของตัวเองได้" });
+      }
+      if (await isLastActiveAdmin(target)) {
+        return res.status(400).json({ message: "ต้องมีผู้ดูแลระบบที่ใช้งานได้อย่างน้อยหนึ่งคน" });
+      }
+    }
+  }
   const user = await User.findByIdAndUpdate(req.params.id, updates, {
     new: true,
     runValidators: true,
@@ -259,6 +327,13 @@ export async function updateUser(req, res) {
 }
 
 export async function deleteUser(req, res) {
+  if (String(req.params.id) === String(req.user.id)) {
+    return res.status(400).json({ message: "ไม่สามารถลบบัญชีของตัวเองได้" });
+  }
+  const target = await User.findById(req.params.id).select("role");
+  if (target && await isLastActiveAdmin(target)) {
+    return res.status(400).json({ message: "ต้องมีผู้ดูแลระบบที่ใช้งานได้อย่างน้อยหนึ่งคน" });
+  }
   const user = await User.findByIdAndDelete(req.params.id);
   if (!user) {
     return res.status(404).json({ message: "Not found" });

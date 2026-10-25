@@ -10,7 +10,7 @@ async function setup(page, options = {}) {
   await page.route("https://fonts.gstatic.com/**", route => route.abort());
   await page.route("**/socket.io/**", route => route.abort());
   const state = {
-    liked: false, likeCalls: 0, flags: 0,
+    liked: false, likeCalls: 0, flags: 0, flagBody: null, cancels: 0, sessionStatus: "pending",
     notifications: options.notifications || [],
     post: { _id: "1", user: author, content: "วันนี้เรามาให้กำลังใจกัน", tags: ["กำลังใจ"], likes: 0, likedByMe: false, comments: [], commentCount: 0, createdAt: today },
   };
@@ -26,7 +26,9 @@ async function setup(page, options = {}) {
     else if (p === "/missions/me/summary") data = { totalPoints: 75, completedMissions: 2 };
     else if (p === "/missions/me") data = [{ mission: { _id: "m1", title: "เช็คอินครั้งแรก", targetValue: 1, rewardPoints: 25 }, progress: 1, completed: true }, { mission: { _id: "m2", title: "เช็คอินต่อเนื่อง", targetValue: 7, rewardPoints: 50 }, progress: 3, completed: false }];
     else if (p === "/emotion/streak") data = { currentStreak: 3, longestStreak: 7, totalCheckIns: 10, loggedToday: true, history: [{ date: today, done: true, happinessLevel: 4 }] };
-    else if (p === "/counselling/me") data = [{ _id: "s1", user, topic: "คำขอเดิม", createdAt: today, status: "pending", sessionType: "chat" }];
+    else if (p === "/counselling/me") data = options.noOpenSession ? [{ _id: "s0", user, topic: "คำขอที่ปิดแล้ว", createdAt: today, status: "closed", sessionType: "chat" }] : [{ _id: "s1", user, topic: "คำขอเดิม", createdAt: today, status: state.sessionStatus, sessionType: "chat" }];
+    else if (p === "/counselling/s1/cancel") { state.cancels++; state.sessionStatus = "cancelled"; data = { _id: "s1", status: "cancelled" }; }
+    else if (p === "/counselling/s1") data = { _id: "s1", user, topic: "คำขอเดิม", createdAt: today, status: state.sessionStatus, sessionType: "chat", messages: [{ _id: "m1", sender: user, senderRole: "user", content: "สวัสดีค่ะ", createdAt: today }] };
     else if (p === "/notifications/me/read") { state.notifications = state.notifications.map(n => ({ ...n, status: "read" })); data = { success: true }; }
     else if (p === "/notifications/me") { if (method === "DELETE") state.notifications = []; data = state.notifications; }
     else if (/^\/notifications\/.+\/read$/.test(p)) { data = { ...state.notifications.find(n => p.includes(n._id)), status: "read" }; state.notifications = state.notifications.map(n => n._id === data._id ? data : n); }
@@ -38,7 +40,7 @@ async function setup(page, options = {}) {
       state.liked = route.request().postDataJSON().liked;
       state.post = { ...state.post, likes: state.liked ? 1 : 0, likedByMe: state.liked };
       data = { likes: state.post.likes, likedByMe: state.liked };
-    } else if (p === "/posts/1/flag") { state.flags++; data = { needsReview: true }; }
+    } else if (p === "/posts/1/flag") { state.flags++; state.flagBody = route.request().postDataJSON(); data = { needsReview: true, reportedByMe: true }; }
     else if (p === "/posts") data = [state.post];
     else if (p === "/posts/1") data = state.post;
     await route.fulfill({ json: data, headers: { "X-Total-Count": "1" } });
@@ -93,10 +95,15 @@ test("community comments open a mobile detail and reporting uses a dialog", asyn
   await page.getByRole("button", { name: "รายงานเนื้อหา", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(state.flags).toBe(0);
+  // A reason is required before the report can be sent.
+  await expect(page.getByRole("button", { name: "ส่งรายงาน", exact: true })).toBeDisabled();
+  await page.getByRole("combobox", { name: "รายงานเรื่องอะไร" }).selectOption("harassment");
+  await page.getByRole("textbox", { name: "รายละเอียดเพิ่มเติม (ไม่บังคับ)" }).fill("ถ้อยคำรุนแรง");
   await page.getByRole("button", { name: "ส่งรายงาน", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "รายงานแล้ว", exact: true })).toBeDisabled();
   expect(state.flags).toBe(1);
+  expect(state.flagBody).toEqual({ reason: "harassment", detail: "ถ้อยคำรุนแรง" });
 });
 
 test("failed encouragement can be retried without losing the author", async ({ page }) => {
@@ -161,12 +168,29 @@ test("profile shows the avatar, actual recovery date and growth points", async (
   await expect(page.locator(".profile-recovery")).toContainText("1/1/2568");
   await expect(page.locator(".growth-card")).toContainText("75 / 100 XP");
   const avatar = await page.locator(".profile-banner-avatar").boundingBox();
-  expect(avatar.width).toBeGreaterThanOrEqual(72);
+  expect(avatar.width).toBeGreaterThanOrEqual(96);
+  await expect(page.locator(".profile-hero-cover")).toBeVisible();
+  await expect(page.getByRole("button", { name: "เปลี่ยนรูปโปรไฟล์" }).first()).toBeVisible();
   await page.screenshot({ path: info.outputPath("profile.png"), fullPage: true });
 });
 
+test("a request in progress replaces the form with its status, chat and a cancel button", async ({ page }) => {
+  const state = await setup(page); await page.goto("/counselling");
+  const card = page.getByRole("region", { name: "คำขอที่กำลังดำเนินการ" });
+  await expect(card).toBeVisible();
+  await expect(page.locator(".counselling-form")).toHaveCount(0);
+  await expect(card).toContainText("คำขอเดิม");
+  await expect(card).toContainText("รอบุคลากรรับเรื่อง");
+  await expect(card.getByText("สวัสดีค่ะ")).toBeVisible();
+  await expect(card.getByRole("link", { name: "เปิดรายละเอียดเต็ม" })).toHaveAttribute("href", "/counselling/s1");
+  await card.getByRole("button", { name: "ยกเลิกคำขอ", exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "ยกเลิกคำขอ", exact: true }).click();
+  await expect(page.locator(".counselling-form")).toBeVisible();
+  expect(state.cancels).toBe(1);
+});
+
 test("counselling starts with a request and a descriptive mood dropdown", async ({ page }, info) => {
-  await setup(page); await page.goto("/counselling");
+  await setup(page, { noOpenSession: true }); await page.goto("/counselling");
   await expect(page.locator(".counselling-layout > :first-child .counselling-form")).toBeVisible();
   const select = page.getByRole("combobox", { name: "ตอนนี้คุณรู้สึกอย่างไร" });
   await select.selectOption("anxious");
@@ -228,7 +252,7 @@ test("new counselling request works when history fails and the mobile date picke
   await page.getByRole("button", { name: "ตกลง", exact: true }).click();
   await page.getByRole("button", { name: "ส่งคำขอปรึกษา", exact: true }).click();
   await expect(page.locator(".counselling-sent")).toContainText("ส่งคำขอแล้ว");
-  await expect(page.getByRole("link", { name: "ติดตามคำขอนี้" })).toHaveAttribute("href", "/counselling/new-session");
+  await expect(page.getByRole("link", { name: "เปิดรายละเอียดเต็ม" })).toHaveAttribute("href", "/counselling/new-session");
   expect(sent.mood).toBe("stressed");
   expect(new Date(sent.preferredAt).getTime()).toBeGreaterThan(Date.now());
 });

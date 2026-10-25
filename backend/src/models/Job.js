@@ -16,6 +16,12 @@ const jobSchema = new mongoose.Schema(
     // admin moderation gate, separate from the operational `status` lifecycle above
     verifiedStatus: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
     expiredAt: { type: Date },
+    // Company / job picture shown on the listing (public upload, /uploads/job-images/...).
+    imageUrl: { type: String },
+    // Set by the admin when a posting is rejected, so the employer knows why.
+    rejectionReason: { type: String },
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    reviewedAt: { type: Date },
     category: { type: mongoose.Schema.Types.ObjectId, ref: "JobCategory" },
     // documents the employer wants applicants to attach on top of the profile resume/certificates
     attachmentRequests: { type: [String], enum: ATTACHMENT_TYPES, default: [] },

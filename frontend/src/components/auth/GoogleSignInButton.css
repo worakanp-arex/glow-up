@@ -1,6 +1,9 @@
 .google-signin-button {
   display: flex;
   justify-content: center;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .google-signin-unavailable {

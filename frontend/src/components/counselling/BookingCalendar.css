@@ -105,10 +105,21 @@
   border-color: var(--color-primary-300);
 }
 
-.booking-calendar-cell.has-bookings {
+/* Blue: something on this day is still in progress. Grey: all of it is finished. */
+.booking-calendar-cell.has-open {
   background-color: var(--color-primary-100);
   color: var(--color-primary-800);
   font-weight: 700;
+}
+
+.booking-calendar-cell.all-done {
+  background-color: var(--color-ink-200);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.booking-calendar-cell.all-done .booking-calendar-count {
+  background-color: var(--color-ink-500, #6b7a8c);
 }
 
 .booking-calendar-cell.selected {
@@ -167,3 +178,12 @@
     gap: 3px;
   }
 }
+
+.booking-calendar-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 0.75rem; color: var(--color-text-secondary); }
+.booking-calendar-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 4px; }
+.legend-dot.is-open { background: var(--color-primary-200); border: 1px solid var(--color-primary-400); }
+.legend-dot.is-done { background: var(--color-ink-200); border: 1px solid var(--color-ink-300); }
+.booking-calendar-scope { display: inline-flex; gap: 4px; margin: 0 0 12px; padding: 3px; border-radius: 999px; background: var(--color-surface-hover); }
+.booking-calendar-scope button { padding: 4px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--color-text-secondary); font: inherit; font-size: 0.75rem; cursor: pointer; }
+.booking-calendar-scope button[aria-pressed="true"] { background: var(--color-surface); color: var(--color-primary-700); font-weight: 600; box-shadow: var(--shadow-sm); }

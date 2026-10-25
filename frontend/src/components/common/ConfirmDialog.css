@@ -4,3 +4,11 @@
 .confirm-dialog p { line-height: 1.7; }
 .confirm-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .dialog-error { color: var(--color-danger); }
+.confirm-dialog-wide { width: min(720px, calc(100% - 32px)); }
+.reason-dialog-field { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-size: .85rem; font-weight: 600; }
+.reason-dialog-field textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; font-weight: 400; }
+.reason-dialog-field small { align-self: flex-end; font-weight: 400; color: var(--color-text-muted); }
+.editor-dialog-form { display: flex; flex-direction: column; gap: 14px; }
+.editor-dialog-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.editor-dialog-form .ui-field :is(input, select, textarea) { width: 100%; box-sizing: border-box; }
+@media (max-width: 520px) { .editor-dialog-row { grid-template-columns: minmax(0, 1fr); } }

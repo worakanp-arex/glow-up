@@ -334,3 +334,6 @@ a.post-card-comments-link:hover {
   color: var(--color-warning);
   cursor: default;
 }
+
+.post-report-field { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; font-size: 0.85rem; font-weight: 600; }
+.post-report-field select, .post-report-field textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; font-weight: 400; }

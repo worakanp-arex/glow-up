@@ -1,0 +1,25 @@
+.overview-users-page {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.layout .overview-users-page > .page-header { margin-bottom: 0; }
+.overview-users-count { margin: 0; font-size: 0.88rem; color: var(--color-text-secondary); }
+.overview-users-empty { margin: 0; padding: 32px 0; text-align: center; color: var(--color-text-muted); }
+.overview-users-list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.overview-users-list li { display: flex; align-items: center; gap: 14px; padding: 14px 18px; }
+.overview-users-text { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 2px; }
+.overview-users-text strong { font-size: 0.95rem; overflow-wrap: anywhere; }
+.overview-users-text small { font-size: 0.78rem; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.overview-users-risk { flex-shrink: 0; padding: 3px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; }
+.overview-users-risk.is-medium { background: var(--color-warning-bg); color: var(--color-warning); }
+.overview-users-risk.is-high { background: var(--color-danger-bg); color: var(--color-danger); }
+
+@media (max-width: 600px) {
+  .overview-users-page { padding: 1.5rem 1rem 2.5rem; }
+  .overview-users-list li { flex-wrap: wrap; }
+}

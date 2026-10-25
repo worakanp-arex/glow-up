@@ -13,6 +13,8 @@ const SUBFOLDERS = {
   resume: "resumes",
   certificate: "certificates",
   applicationAttachment: "application-attachments",
+  courseCover: "course-covers",
+  jobImage: "job-images",
 };
 
 for (const folder of Object.values(SUBFOLDERS)) {
@@ -21,6 +23,8 @@ for (const folder of Object.values(SUBFOLDERS)) {
 
 const FILE_FILTERS = {
   avatar: ["image/jpeg", "image/png", "image/webp"],
+  courseCover: ["image/jpeg", "image/png", "image/webp"],
+  jobImage: ["image/jpeg", "image/png", "image/webp"],
   resume: [
     "application/pdf",
     "application/msword",
@@ -39,6 +43,8 @@ const FILE_FILTERS = {
 
 const SIZE_LIMITS = {
   avatar: 2 * 1024 * 1024,
+  courseCover: 3 * 1024 * 1024,
+  jobImage: 3 * 1024 * 1024,
   resume: 5 * 1024 * 1024,
   certificate: 5 * 1024 * 1024,
   applicationAttachment: 5 * 1024 * 1024,
@@ -70,6 +76,8 @@ function makeUploader(kind) {
 }
 
 export const uploadAvatar = makeUploader("avatar");
+export const uploadCourseCover = makeUploader("courseCover");
+export const uploadJobImage = makeUploader("jobImage");
 export const uploadResume = makeUploader("resume");
 export const uploadCertificate = makeUploader("certificate");
 export const uploadApplicationAttachment = makeUploader("applicationAttachment");

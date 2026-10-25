@@ -1,8 +1,12 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { trackRoute } from "../../utils/routeHistory.js";
 
 function ScrollToTop() {
-  const { pathname, hash, key } = useLocation();
+  const { pathname, search, hash, key } = useLocation();
+
+  // Remember where the visitor came from (used by the profile's back button).
+  useEffect(() => { trackRoute(pathname, search); }, [pathname, search]);
 
   useEffect(() => {
     if (hash) {

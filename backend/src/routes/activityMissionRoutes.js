@@ -30,6 +30,14 @@ async function assertCategoryExists(key) {
 
 const CATEGORY_VALIDATOR = body("category").trim().notEmpty().custom(assertCategoryExists);
 const CATEGORY_VALIDATOR_OPTIONAL = body("category").optional().trim().notEmpty().custom(assertCategoryExists);
+const ACTIVITY_BODY = [
+  body("description").optional().trim().isLength({ max: 1000 }),
+  body("icon").optional().trim().isLength({ max: 50 }),
+  body("points").optional().isInt({ min: 0, max: 1000 }),
+  body("active").optional().isBoolean(),
+  body("startDate").optional({ values: "falsy" }).isISO8601(),
+  body("endDate").optional({ values: "falsy" }).isISO8601(),
+];
 
 router.get("/me/today", verifyToken, requireRole("user"), asyncHandler(myTodayActivities));
 router.get("/me/history", verifyToken, requireRole("user"), asyncHandler(myActivityHistory));
@@ -43,7 +51,7 @@ router.put(
   "/logs/:id/review",
   verifyToken,
   requireRole("admin", "counsellor"),
-  [objectIdParam("id"), body("approved").isBoolean()],
+  [objectIdParam("id"), body("approved").isBoolean(), body("note").optional().trim().isLength({ max: 500 })],
   validate,
   asyncHandler(reviewActivityLog)
 );
@@ -63,13 +71,13 @@ router.post(
   asyncHandler(logActivity)
 );
 
-router.get("/", [...paginationQuery()], validate, asyncHandler(listActivityMissions));
-router.get("/:id", [objectIdParam("id")], validate, asyncHandler(getActivityMission));
+router.get("/", verifyToken, [...paginationQuery()], validate, asyncHandler(listActivityMissions));
+router.get("/:id", verifyToken, [objectIdParam("id")], validate, asyncHandler(getActivityMission));
 router.post(
   "/",
   verifyToken,
   requireRole("admin", "counsellor"),
-  [CATEGORY_VALIDATOR, body("requiresApproval").optional().isBoolean()],
+  [body("title").trim().notEmpty().isLength({ max: 200 }), CATEGORY_VALIDATOR, body("requiresApproval").optional().isBoolean(), ...ACTIVITY_BODY],
   validate,
   asyncHandler(createActivityMission)
 );
@@ -77,7 +85,13 @@ router.put(
   "/:id",
   verifyToken,
   requireRole("admin", "counsellor"),
-  [objectIdParam("id"), CATEGORY_VALIDATOR_OPTIONAL, body("requiresApproval").optional().isBoolean()],
+  [
+    objectIdParam("id"),
+    body("title").optional().trim().notEmpty().isLength({ max: 200 }),
+    CATEGORY_VALIDATOR_OPTIONAL,
+    body("requiresApproval").optional().isBoolean(),
+    ...ACTIVITY_BODY,
+  ],
   validate,
   asyncHandler(updateActivityMission)
 );

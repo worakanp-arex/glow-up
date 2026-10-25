@@ -5,11 +5,7 @@ import { useParams } from "react-router-dom";
 import { Building2, Stethoscope } from "lucide-react";
 import * as userService from "../../services/userService.js";
 import "./StaffProfile.css";
-import { defaultAvatarSrc } from "../../utils/defaultAvatar.js";
-
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
+import Avatar from "../../components/common/Avatar.jsx";
 
 function StaffProfile() {
   const { id } = useParams();
@@ -39,7 +35,7 @@ function StaffProfile() {
       {pageHeader}
       <div className="staff-profile-header">
         <span className="staff-profile-avatar">
-          {profile.avatarUrl || defaultAvatarSrc(profile.role) ? <img src={profile.avatarUrl || defaultAvatarSrc(profile.role)} alt="" /> : initials(profile.name)}
+          <Avatar user={profile} size={72} fill />
         </span>
         <div>
           <h2 className="page-context-title">{profile.name}</h2>

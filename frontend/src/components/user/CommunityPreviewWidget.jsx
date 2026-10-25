@@ -3,10 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, MessageSquare, Users } from "lucide-react";
 import * as postService from "../../services/postService.js";
 import "./CommunityPreviewWidget.css";
-
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
+import Avatar from "../../components/common/Avatar.jsx";
 
 function CommunityPreviewWidget() {
   const [post, setPost] = useState(null);
@@ -35,7 +32,7 @@ function CommunityPreviewWidget() {
           <>
             <div className="community-widget-author">
               <span className="community-widget-avatar">
-                {post.user?.avatarUrl ? <img src={post.user.avatarUrl} alt="" /> : initials(post.user?.name)}
+                <Avatar user={post.user} size={28} fill />
               </span>
               <span className="community-widget-name">{post.user?.name}</span>
             </div>

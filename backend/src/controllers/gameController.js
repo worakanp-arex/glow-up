@@ -5,9 +5,9 @@ import UserCourse from "../models/UserCourse.js";
 import { computeStreakStats } from "../services/streakService.js";
 import { checkAndAwardRewards } from "../services/rewardService.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
-import { RECOVERY_DOMAINS, WHEEL_SEGMENTS, COPING_PAIRS, QUIZ_BANK } from "../constants/gameContent.js";
+import { RECOVERY_DOMAINS, WHEEL_SEGMENTS, COPING_PAIRS, QUIZ_BANK, EMOTION_CHOICES, EMOTION_SCENARIOS, BREATHING_ROUNDS } from "../constants/gameContent.js";
 
-const GAME_TYPES = ["wheel", "memory", "quiz"];
+const GAME_TYPES = ["wheel", "memory", "quiz", "breathing", "emotion"];
 
 // Games are open to play any time and as often as the user likes. Only the
 // first play of each game per Bangkok day is recorded and earns points (the
@@ -26,20 +26,110 @@ function pickTodaysQuiz(dateKey) {
   return picked;
 }
 
+// A streak counts consecutive Bangkok days with at least one recorded play.
+function streakFromPlays(plays) {
+  const stats = computeStreakStats(plays.map((play) => ({ date: new Date(`${play.dateKey}T12:00:00+07:00`) })));
+  return { current: stats.currentStreak, longest: stats.longestStreak, playedToday: stats.loggedToday };
+}
+
 export async function getGameHubStatus(req, res) {
   const dateKey = toBangkokDateKey(new Date());
-  const todaysPlays = await GamePlay.find({ user: req.user.id, dateKey });
+  const allPlays = await GamePlay.find({ user: req.user.id }).select("gameType dateKey pointsAwarded resultLabel");
+  const todaysPlays = allPlays.filter((play) => play.dateKey === dateKey);
 
   const playedByType = new Map(todaysPlays.map((p) => [p.gameType, p]));
   const games = {};
   for (const type of GAME_TYPES) {
     const play = playedByType.get(type);
+    const streak = streakFromPlays(allPlays.filter((p) => p.gameType === type));
     games[type] = play
-      ? { played: true, pointsAwarded: play.pointsAwarded, resultLabel: play.resultLabel }
-      : { played: false };
+      ? { played: true, pointsAwarded: play.pointsAwarded, resultLabel: play.resultLabel, streak }
+      : { played: false, streak };
   }
 
-  res.json({ unlocked: true, games, wheelSegments: WHEEL_SEGMENTS.map((segment) => segment.label) });
+  res.json({
+    unlocked: true,
+    games,
+    streak: streakFromPlays(allPlays),
+    wheelSegments: WHEEL_SEGMENTS.map((segment) => segment.label),
+  });
+}
+
+function pickTodaysEmotions(dateKey) {
+  const seed = dateKey.split("-").reduce((sum, part) => sum + Number(part), 0);
+  const start = seed % EMOTION_SCENARIOS.length;
+  return Array.from({ length: 5 }, (_, i) => EMOTION_SCENARIOS[(start + i * 2) % EMOTION_SCENARIOS.length]);
+}
+
+export async function getEmotionToday(req, res) {
+  const dateKey = toBangkokDateKey(new Date());
+  const play = await GamePlay.findOne({ user: req.user.id, gameType: "emotion", dateKey });
+  const labelByKey = new Map(EMOTION_CHOICES.map((choice) => [choice.key, choice.label]));
+  res.json({
+    played: Boolean(play),
+    result: play || null,
+    questions: pickTodaysEmotions(dateKey).map(({ id, situation, options }) => ({
+      id,
+      situation,
+      options: options.map((key) => ({ key, label: labelByKey.get(key) })),
+    })),
+  });
+}
+
+export async function submitEmotion(req, res) {
+  const dateKey = toBangkokDateKey(new Date());
+  const questions = pickTodaysEmotions(dateKey);
+  const answers = req.body.answers || {};
+  let correctCount = 0;
+  for (const question of questions) {
+    if (answers[question.id] === question.correct) correctCount += 1;
+  }
+  const answerKey = questions.map(({ id, correct }) => ({ id, correct }));
+
+  let play;
+  try {
+    play = await GamePlay.create({
+      user: req.user.id,
+      gameType: "emotion",
+      dateKey,
+      domain: "self_awareness",
+      pointsAwarded: correctCount,
+      resultLabel: `${correctCount}/${questions.length} ข้อ`,
+    });
+  } catch (err) {
+    if (isDuplicate(err)) return res.json({ correctCount, total: questions.length, answerKey, practice: true, pointsAwarded: 0 });
+    throw err;
+  }
+
+  await checkAndAwardRewards(req.user.id);
+  res.status(201).json({ correctCount, total: questions.length, answerKey, practice: false, pointsAwarded: correctCount, play });
+}
+
+// The 4-7-8 timer runs in the browser; the server just records a finished
+// session. Finishing every round earns the full 5 points, fewer earns 3.
+export async function submitBreathing(req, res) {
+  const dateKey = toBangkokDateKey(new Date());
+  const rounds = Math.max(0, Math.min(20, Number.parseInt(req.body.rounds, 10) || 0));
+  if (rounds < 1) return res.status(400).json({ message: "ต้องหายใจอย่างน้อย 1 รอบ" });
+  const points = rounds >= BREATHING_ROUNDS ? 5 : 3;
+
+  let play;
+  try {
+    play = await GamePlay.create({
+      user: req.user.id,
+      gameType: "breathing",
+      dateKey,
+      domain: "mindfulness",
+      pointsAwarded: points,
+      resultLabel: `${rounds} รอบ`,
+    });
+  } catch (err) {
+    if (isDuplicate(err)) return res.json({ rounds, practice: true, pointsAwarded: 0 });
+    throw err;
+  }
+
+  await checkAndAwardRewards(req.user.id);
+  res.status(201).json({ rounds, practice: false, pointsAwarded: points, play });
 }
 
 export async function spinWheel(req, res) {

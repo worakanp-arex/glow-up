@@ -28,6 +28,26 @@ export function getFamilyLinksForUser(userId) {
   return api.get(`/family/users/${userId}/links`).then((res) => res.data);
 }
 
-export function sendEncouragementMessage(linkId, message) {
-  return api.post(`/family/links/${linkId}/messages`, { message }).then((res) => res.data);
+export function sendEncouragementMessage(linkId, message, replyTo) {
+  return api.post(`/family/links/${linkId}/messages`, { message, replyTo }).then((res) => res.data);
+}
+
+export function getFamilyMessages(linkId) {
+  return api.get(`/family/links/${linkId}/messages`).then((res) => res.data);
+}
+
+export function getLatestFamilyMessage() {
+  return api.get("/family/messages/latest").then((res) => res.data);
+}
+
+export function markFamilyMessageRead(id) {
+  return api.put(`/family/messages/${id}/read`, {}, { silent: true }).then((res) => res.data);
+}
+
+export function requestFamilyLink(email) {
+  return api.post("/family/request", { email }).then((res) => res.data);
+}
+
+export function respondToFamilyRequest(id, approve) {
+  return api.put(`/family/invited/${id}/respond`, { approve }).then((res) => res.data);
 }

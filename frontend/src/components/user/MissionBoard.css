@@ -21,9 +21,22 @@
   color: var(--color-text);
 }
 
-.mission-board h2 svg {
-  color: var(--color-primary-600);
+.mission-board h2 svg { color: var(--color-primary-600); }
+
+/* Summary of how many missions are done. */
+.mission-total {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: var(--color-primary-50);
+  font-size: 0.875rem;
 }
+
+.mission-total strong { color: var(--color-text); }
+.mission-total span { color: var(--color-text-secondary); line-height: 1.6; overflow-wrap: anywhere; }
 
 .mission-board-list {
   list-style: none;
@@ -37,10 +50,11 @@
 .mission-board-list li {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.75rem 0.9rem;
-  border-radius: var(--radius-md);
-  background-color: var(--color-ink-50);
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background-color: var(--color-surface);
 }
 
 .mission-board-list li.completed {
@@ -52,15 +66,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-100);
-  color: var(--color-primary-700);
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-600);
 }
 
 .mission-board-list li.completed .mission-board-icon {
-  background-color: var(--color-success-bg);
+  background-color: var(--color-surface);
   color: var(--color-success);
 }
 
@@ -69,18 +83,20 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.35rem;
 }
 
 .mission-board-title {
-  font-size: 0.88rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
   color: var(--color-text);
+  overflow-wrap: anywhere;
 }
 
 .mission-board-progress-bar {
   display: block;
-  height: 6px;
+  height: 8px;
   border-radius: var(--radius-full);
   background-color: var(--color-ink-200);
   overflow: hidden;
@@ -94,13 +110,13 @@
   transition: width 0.3s ease;
 }
 
-.mission-board-list li.completed .mission-board-progress-fill {
-  background-color: var(--color-success);
-}
+.mission-board-list li.completed .mission-board-progress-fill { background-color: var(--color-success); }
 
 .mission-board-progress-label {
   font-size: 0.75rem;
+  line-height: 1.5;
   color: var(--color-text-muted);
+  overflow-wrap: anywhere;
 }
 
 .mission-board-rewards {
@@ -137,7 +153,6 @@
 }
 
 @media (max-width: 520px) {
-  .mission-board {
-    padding: 1.1rem;
-  }
+  .mission-board { padding: 1.1rem; }
+  .mission-board-list li { gap: 12px; padding: 12px; }
 }

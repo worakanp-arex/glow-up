@@ -45,8 +45,12 @@ export function createUser(payload) {
   return api.post("/users", payload).then((res) => res.data);
 }
 
-export function verifyUser(id, status) {
-  return api.put(`/users/${id}/verify`, { status }).then((res) => res.data);
+export function getUser(id) {
+  return api.get(`/users/${id}`).then((res) => res.data);
+}
+
+export function verifyUser(id, status, reason) {
+  return api.put(`/users/${id}/verify`, reason ? { status, reason } : { status }).then((res) => res.data);
 }
 
 export function updateUser(id, payload) {

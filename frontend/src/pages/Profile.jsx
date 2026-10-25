@@ -2,7 +2,7 @@ import PageHeader from "../components/common/PageHeader.jsx";
 import AsyncState from "../components/common/AsyncState.jsx";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Award, BookOpen, Briefcase, Camera, Check, ChevronRight, FileText, Heart, Leaf, Lock, Mail, MapPin, Pencil, Plus, Sparkles, Trash2, User, Users, X } from "lucide-react";
+import { Award, BookOpen, Briefcase, Check, ChevronRight, FileText, Heart, Leaf, Lock, Mail, Plus, Sparkles, Trash2, User, Users, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import * as userService from "../services/userService.js";
 import * as skillService from "../services/skillService.js";
@@ -10,23 +10,33 @@ import * as emotionService from "../services/emotionService.js";
 import * as courseService from "../services/courseService.js";
 import * as familyService from "../services/familyService.js";
 import * as goalService from "../services/goalService.js";
+import * as gameService from "../services/gameService.js";
 import StatusBadge from "../components/common/StatusBadge.jsx";
+import FamilyMessageHistory from "../components/common/FamilyMessageHistory.jsx";
 import GrowthCard from "../components/user/GrowthCard.jsx";
+import RecoveryRadarChart from "../components/user/RecoveryRadarChart.jsx";
+import ProfileHero from "../components/profile/ProfileHero.jsx";
+import AvatarPickerDialog from "../components/profile/AvatarPickerDialog.jsx";
+import AccountCard from "../components/profile/AccountCard.jsx";
+import FamilyConnectionsCard from "../components/profile/FamilyConnectionsCard.jsx";
+import SkillPicker from "../components/profile/SkillPicker.jsx";
 import useConfirmDialog from "../components/common/useConfirmDialog.jsx";
 import { THAI_PROVINCES } from "../constants/provinces.js";
+import { SKILL_LEVELS } from "../constants/skillLevels.js";
+import { roleHome } from "../constants/roleHome.js";
+import { courseRange, courseStatus } from "../utils/courseDates.js";
+import { getPreviousRoute } from "../utils/routeHistory.js";
 import "./Profile.css";
-import { defaultAvatarSrc } from "../utils/defaultAvatar.js";
 
-const FAMILY_STATUS_LABELS = { pending: "รอการตอบรับ", active: "ติดตามอยู่" };
+const FAMILY_STATUS_LABELS = { pending: "รอการตอบรับ", requested: "ขอเชื่อมต่อ", active: "ติดตามอยู่" };
 
 const ROLE_LABELS = {
-  user: "ผู้หางาน",
+  user: "ผู้ใช้งานปกติ",
   family: "ครอบครัว/ผู้ดูแล",
   employer: "นายจ้าง",
   admin: "ผู้ดูแลระบบ",
   counsellor: "บุคลากรทางการแพทย์",
 };
-const LEVELS = [1, 2, 3, 4, 5];
 
 const TABS = [
   { key: "overview", label: "ภาพรวมและเป้าหมาย" },
@@ -42,9 +52,11 @@ const SHARING_OPTIONS = [
 
 const EMPTY_GOAL = { title: "", description: "", progress: 0 };
 
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
+const FORM_FIELDS = [
+  "name", "nickname", "phone", "province", "bio", "age", "gender", "address", "education", "experience",
+  "companyName", "businessType", "taxId", "website", "companySize", "companyDescription", "contactPosition",
+  "specialization", "hospital", "position", "department",
+];
 
 function Profile() {
   const { user, updateUser } = useAuth();
@@ -56,29 +68,12 @@ function Profile() {
     if (!isUser) return "personal";
     return TABS.some((t) => t.key === requested) ? requested : "overview";
   });
-  const [form, setForm] = useState({
-    name: user.name || "",
-    nickname: user.nickname || "",
-    phone: user.phone || "",
-    province: user.province || "",
-    bio: user.bio || "",
-    age: user.age || "",
-    gender: user.gender || "",
-    address: user.address || "",
-    education: user.education || "",
-    experience: user.experience || "",
-    companyName: user.companyName || "",
-    businessType: user.businessType || "",
-    taxId: user.taxId || "",
-    specialization: user.specialization || "",
-    hospital: user.hospital || "",
-  });
+  const [form, setForm] = useState(() => Object.fromEntries(FORM_FIELDS.map((field) => [field, user[field] ?? ""])));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const [avatarUploading, setAvatarUploading] = useState(false);
-  const avatarInputRef = useRef(null);
+  const [pickerTab, setPickerTab] = useState(null);
 
   const [resumeUploading, setResumeUploading] = useState(false);
   const resumeInputRef = useRef(null);
@@ -89,13 +84,13 @@ function Profile() {
 
   const [allSkills, setAllSkills] = useState([]);
   const [mySkills, setMySkills] = useState([]);
-  const [skillInput, setSkillInput] = useState("");
   const [skillLevel, setSkillLevel] = useState(3);
   const [skillsLoading, setSkillsLoading] = useState(isUser);
 
   const [recovery, setRecovery] = useState(null);
   const [recoveryError, setRecoveryError] = useState(false);
   const [streak, setStreak] = useState(null);
+  const [radar, setRadar] = useState(null);
   const [myCourses, setMyCourses] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
 
@@ -107,6 +102,8 @@ function Profile() {
   const [familyEmail, setFamilyEmail] = useState("");
   const [familyInviting, setFamilyInviting] = useState(false);
   const [familyError, setFamilyError] = useState("");
+  const [familyName, setFamilyName] = useState(user.familyName || "");
+  const [familyNameSaving, setFamilyNameSaving] = useState(false);
   const { confirm: requestConfirm, confirmDialog } = useConfirmDialog();
   const [sharingSaving, setSharingSaving] = useState(null);
 
@@ -124,8 +121,9 @@ function Profile() {
     if (!isUser) return;
     userService.getMyRecoverySummary().then(setRecovery).catch(() => setRecoveryError(true));
     emotionService.getMyStreak().then(setStreak).catch(() => setStreak(null));
+    gameService.getMyRadar().then(setRadar).catch(() => setRadar(null));
     courseService.getMyCourses().then(setMyCourses).catch(() => setMyCourses([]));
-    courseService.getCourses().then(setAllCourses).catch(() => setAllCourses([]));
+    courseService.getCourses({ status: "active" }).then(setAllCourses).catch(() => setAllCourses([]));
     familyService.getMyInvitedFamily().then(setFamilyLinks).catch(() => setFamilyLinks([]));
     goalService.getMyGoals().then(setGoals).catch(() => setGoals([]));
   }, [isUser]);
@@ -148,15 +146,47 @@ function Profile() {
     }
   }
 
+  async function handleSaveFamilyName(e) {
+    e.preventDefault();
+    setFamilyNameSaving(true);
+    setFamilyError("");
+    try {
+      const updated = await userService.updateMyProfile({ familyName: familyName.trim() });
+      updateUser(updated);
+      setFamilyName(updated.familyName || "");
+    } catch (err) {
+      setFamilyError(err.response?.data?.message || "บันทึกชื่อครอบครัวไม่สำเร็จ");
+    } finally {
+      setFamilyNameSaving(false);
+    }
+  }
+
+  async function handleRespondFamily(link, approve) {
+    setFamilyError("");
+    try {
+      await familyService.respondToFamilyRequest(link._id, approve);
+      setFamilyLinks(await familyService.getMyInvitedFamily());
+    } catch (err) {
+      setFamilyError(err.response?.data?.message || "ดำเนินการไม่สำเร็จ");
+    }
+  }
+
+  function linkLabel(link) {
+    return link.familyUser?.name ? `${link.familyUser.name} (${link.inviteEmail})` : link.inviteEmail;
+  }
+
   function requestRevokeFamily(link) {
     const isActive = link.status === "active";
+    const isRequest = link.status === "requested";
     requestConfirm({
-      title: isActive ? "ยกเลิกการติดตามของครอบครัวนี้?" : "ยกเลิกคำเชิญนี้?",
+      title: isActive ? "ยกเลิกการติดตามของครอบครัวนี้?" : isRequest ? "ปฏิเสธคำขอนี้?" : "ยกเลิกคำเชิญนี้?",
       message: isActive
-        ? `${link.inviteEmail} จะได้รับแจ้งเตือนว่าถูกลบออกจากการเชื่อมต่อ และจะไม่เห็นความคืบหน้าของคุณอีก`
-        : `คำเชิญไปยัง ${link.inviteEmail} จะถูกยกเลิก ลิงก์เดิมจะใช้งานไม่ได้อีก`,
-      confirmLabel: "ยืนยันการลบ",
-      errorMessage: "ยกเลิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+        ? `${linkLabel(link)} จะได้รับแจ้งเตือนว่าถูกลบออกจากการเชื่อมต่อ และจะไม่เห็นความคืบหน้าของคุณอีก`
+        : isRequest
+          ? `คำขอเชื่อมต่อจาก ${linkLabel(link)} จะถูกปฏิเสธ`
+          : `คำเชิญไปยัง ${link.inviteEmail} จะถูกยกเลิก ลิงก์เดิมจะใช้งานไม่ได้อีก`,
+      confirmLabel: "ยืนยัน",
+      errorMessage: "ดำเนินการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
       onConfirm: async () => {
         await familyService.revokeFamilyLink(link._id);
         setFamilyLinks((prev) => prev.filter((item) => item._id !== link._id));
@@ -197,22 +227,6 @@ function Profile() {
       setError(err.response?.data?.message || "บันทึกไม่สำเร็จ");
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleAvatarSelect(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    setAvatarUploading(true);
-    setError("");
-    try {
-      const updated = await userService.uploadMyAvatar(file);
-      updateUser(updated);
-    } catch (err) {
-      setError(err.response?.data?.message || "อัปโหลดรูปไม่สำเร็จ");
-    } finally {
-      setAvatarUploading(false);
-      e.target.value = "";
     }
   }
 
@@ -262,27 +276,23 @@ function Profile() {
     updateUser(updated);
   }
 
-  const availableSkills = allSkills.filter(
-    (skill) => !mySkills.some((mine) => mine.skill._id === skill._id)
-  );
+  const ownedSkills = mySkills.filter((item) => item.skill);
+  const ownedSkillIds = ownedSkills.map((item) => item.skill._id);
 
-  async function handleAddSkill(e) {
-    e.preventDefault();
-    const name = skillInput.trim();
-    if (!name) return;
-    const match = availableSkills.find((skill) => skill.skillName.toLowerCase() === name.toLowerCase());
-    if (!match) {
-      setError("ไม่พบทักษะนี้ในระบบ กรุณาเลือกจากรายการที่แนะนำ");
-      return;
-    }
+  // Picking a skill in the list adds it at the chosen level; picking it again removes it.
+  async function handleToggleSkill(skill) {
+    const existing = ownedSkills.find((item) => item.skill._id === skill._id);
     try {
-      const created = await skillService.addMySkill({ skill: match._id, level: Number(skillLevel) });
-      setMySkills((prev) => [...prev, created]);
-      setSkillInput("");
-      setSkillLevel(3);
+      if (existing) {
+        await skillService.removeMySkill(existing._id);
+        setMySkills((prev) => prev.filter((item) => item._id !== existing._id));
+      } else {
+        const created = await skillService.addMySkill({ skill: skill._id, level: Number(skillLevel) });
+        setMySkills((prev) => [...prev, created]);
+      }
       setError("");
     } catch (err) {
-      setError(err.response?.data?.message || "เพิ่มทักษะไม่สำเร็จ");
+      setError(err.response?.data?.message || "บันทึกทักษะไม่สำเร็จ");
     }
   }
 
@@ -342,43 +352,11 @@ function Profile() {
   const suggestedCourses = allCourses.filter((c) => !enrolledIds.has(c._id)).slice(0, Math.max(0, 3 - myCourses.length));
   const doneGoals = (goals || []).filter((g) => g.status === "completed");
 
-  const profileCard = (
-    <section className="ui-card profile-hero">
-      <button
-        type="button"
-        className="profile-banner-avatar"
-        aria-label="เปลี่ยนรูปโปรไฟล์"
-        title={avatarUploading ? "กำลังอัปโหลดรูป..." : "คลิกเพื่อเปลี่ยนรูปโปรไฟล์"}
-        onClick={() => avatarInputRef.current?.click()}
-        disabled={avatarUploading}
-      >
-        {user.avatarUrl || defaultAvatarSrc(user.role) ? (
-          <img src={user.avatarUrl || defaultAvatarSrc(user.role)} alt="รูปโปรไฟล์" />
-        ) : (
-          <span className="profile-avatar-fallback">{initials(user.nickname || user.name)}</span>
-        )}
-        <span className="profile-avatar-overlay">
-          <Camera size={14} />
-        </span>
-      </button>
-      <input ref={avatarInputRef} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={handleAvatarSelect} />
-
-      <div className="profile-hero-body">
-        <h2 className="profile-banner-name">{user.name || "-"}</h2>
-        {user.bio && <p className="profile-hero-bio">{user.bio}</p>}
-        <div className="profile-banner-badges">
-          <span className="profile-role-badge">{ROLE_LABELS[user.role]}</span>
-          <StatusBadge status={user.verifiedStatus} />
-          {user.province && <span className="ui-chip ui-chip-neutral"><MapPin size={12} aria-hidden="true" />{user.province}</span>}
-        </div>
-      </div>
-
-      {tab !== "personal" && (
-        <button type="button" className="ui-btn ui-btn-outline profile-edit-btn" onClick={() => setTab("personal")}>
-          <Pencil size={15} aria-hidden="true" />แก้ไขข้อมูล
-        </button>
-      )}
-    </section>
+  const text = (name, label, props = {}) => (
+    <label className="ui-field">
+      {label}
+      <input type="text" name={name} value={form[name]} onChange={handleChange} {...props} />
+    </label>
   );
 
   const personalForm = (
@@ -391,98 +369,95 @@ function Profile() {
         <User size={18} aria-hidden="true" />
       </div>
 
-      <div className="profile-form-grid">
-        <label className="ui-field">
-          {user.role === "employer" ? "ชื่อผู้ติดต่อ" : "ชื่อ-นามสกุล"}
-          <input type="text" name="name" value={form.name} onChange={handleChange} required />
-        </label>
-        <label className="ui-field">
-          ชื่อที่อยากให้เรียก
-          <input type="text" name="nickname" value={form.nickname} onChange={handleChange} placeholder="เช่น ชื่อเล่น" />
-        </label>
-        <label className="ui-field">
-          อีเมล
-          <input type="email" value={user.email} readOnly disabled title="ใช้สำหรับเข้าสู่ระบบ เปลี่ยนไม่ได้" />
-        </label>
-        <label className="ui-field">
-          เบอร์โทรศัพท์
-          <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="ยังไม่ระบุ" />
-        </label>
-        <label className="ui-field">
-          จังหวัด
-          <select name="province" value={form.province} onChange={handleChange}>
-            <option value="">ยังไม่ระบุ</option>
-            {THAI_PROVINCES.map((province) => <option key={province} value={province}>{province}</option>)}
-          </select>
-        </label>
-        {isUser && (
-          <>
-            <label className="ui-field">
-              ระดับการศึกษา
-              <input type="text" name="education" value={form.education} onChange={handleChange} placeholder="ยังไม่ระบุ" />
-            </label>
-            <label className="ui-field">
-              อายุ
-              <input type="number" name="age" min={0} value={form.age} onChange={handleChange} placeholder="ยังไม่ระบุ" />
-            </label>
-            <label className="ui-field">
-              เพศ
-              <input type="text" name="gender" value={form.gender} onChange={handleChange} placeholder="ยังไม่ระบุ" />
-            </label>
-            <label className="ui-field profile-form-wide">
-              ที่อยู่
-              <input type="text" name="address" value={form.address} onChange={handleChange} placeholder="ยังไม่ระบุ" />
-            </label>
-          </>
-        )}
-        <label className="ui-field profile-form-wide">
-          แนะนำตัวสั้น ๆ
-          <textarea name="bio" value={form.bio} onChange={handleChange} rows={2} maxLength={1000} placeholder="เช่น กำลังเรียนรู้ทักษะใหม่ และสร้างกิจวัตรที่เหมาะกับตัวเอง" />
-        </label>
-        {isUser && (
-          <label className="ui-field profile-form-wide">
-            ประสบการณ์ทำงาน
-            <textarea name="experience" value={form.experience} onChange={handleChange} rows={2} maxLength={1000} placeholder="ยังไม่ระบุ" />
+      <div className="profile-form-cols">
+        <fieldset className="profile-fieldset">
+          <legend>ข้อมูลทั่วไป</legend>
+          {text("name", user.role === "employer" ? "ชื่อผู้ติดต่อ" : "ชื่อ-นามสกุล", { required: true })}
+          {text("nickname", "ชื่อที่อยากให้เรียก", { placeholder: "เช่น ชื่อเล่น" })}
+          <label className="ui-field">
+            อีเมล
+            <input type="email" value={user.email} readOnly disabled title="ใช้สำหรับเข้าสู่ระบบ เปลี่ยนไม่ได้" />
           </label>
-        )}
+          <label className="ui-field">
+            เบอร์โทรศัพท์
+            <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="ยังไม่ระบุ" />
+          </label>
+          <label className="ui-field">
+            จังหวัด
+            <select name="province" value={form.province} onChange={handleChange}>
+              <option value="">ยังไม่ระบุ</option>
+              {THAI_PROVINCES.map((province) => <option key={province} value={province}>{province}</option>)}
+            </select>
+          </label>
+          <label className="ui-field">
+            แนะนำตัวสั้น ๆ
+            <textarea name="bio" value={form.bio} onChange={handleChange} rows={3} maxLength={1000} placeholder="เช่น กำลังเรียนรู้ทักษะใหม่ และสร้างกิจวัตรที่เหมาะกับตัวเอง" />
+          </label>
+        </fieldset>
 
-        {user.role === "employer" && (
-          <>
-            <label className="ui-field">
-              ชื่อบริษัท
-              <input type="text" name="companyName" value={form.companyName} onChange={handleChange} required />
-            </label>
-            <label className="ui-field">
-              ประเภทธุรกิจ
-              <input type="text" name="businessType" value={form.businessType} onChange={handleChange} />
-            </label>
-            <label className="ui-field">
-              เลขประจำตัวผู้เสียภาษี
-              <input type="text" name="taxId" value={form.taxId} onChange={handleChange} />
-            </label>
-            <label className="ui-field">
-              ที่อยู่บริษัท
-              <input type="text" name="address" value={form.address} onChange={handleChange} />
-            </label>
-          </>
-        )}
+        <fieldset className="profile-fieldset">
+          <legend>
+            {user.role === "employer" ? "ข้อมูลบริษัท" : user.role === "counsellor" ? "ข้อมูลวิชาชีพ" : user.role === "admin" ? "ข้อมูลการทำงาน" : "ข้อมูลเพิ่มเติม"}
+          </legend>
+          {(isUser || user.role === "family") && (
+            <>
+              <label className="ui-field">
+                อายุ
+                <input type="number" name="age" min={0} max={120} value={form.age} onChange={handleChange} placeholder="ยังไม่ระบุ" />
+              </label>
+              {text("gender", "เพศ", { placeholder: "ยังไม่ระบุ" })}
+              {text("address", "ที่อยู่", { placeholder: "ยังไม่ระบุ" })}
+            </>
+          )}
+          {isUser && (
+            <>
+              {text("education", "ระดับการศึกษา", { placeholder: "ยังไม่ระบุ" })}
+              <label className="ui-field">
+                ประสบการณ์ทำงาน
+                <textarea name="experience" value={form.experience} onChange={handleChange} rows={3} maxLength={1000} placeholder="ยังไม่ระบุ" />
+              </label>
+            </>
+          )}
 
-        {user.role === "counsellor" && (
-          <>
-            <label className="ui-field">
-              ความเชี่ยวชาญ
-              <input type="text" name="specialization" value={form.specialization} onChange={handleChange} placeholder="เช่น จิตแพทย์, นักจิตวิทยา" />
-            </label>
-            <label className="ui-field">
-              สังกัดโรงพยาบาล
-              <input type="text" name="hospital" value={form.hospital} onChange={handleChange} placeholder="เช่น โรงพยาบาลธัญญารักษ์ขอนแก่น" />
-            </label>
-          </>
-        )}
+          {user.role === "employer" && (
+            <>
+              {text("companyName", "ชื่อบริษัท", { required: true })}
+              {text("businessType", "ประเภทธุรกิจ")}
+              {text("taxId", "เลขประจำตัวผู้เสียภาษี")}
+              {text("contactPosition", "ตำแหน่งของผู้ติดต่อ", { placeholder: "เช่น ผู้จัดการฝ่ายบุคคล" })}
+              {text("companySize", "ขนาดบริษัท", { placeholder: "เช่น 11-50 คน" })}
+              {text("website", "เว็บไซต์หรือช่องทางติดตามบริษัท", { placeholder: "https://" })}
+              {text("address", "ที่อยู่บริษัท")}
+              <label className="ui-field">
+                แนะนำบริษัท
+                <textarea name="companyDescription" value={form.companyDescription} onChange={handleChange} rows={3} maxLength={1000} placeholder="เล่าสั้น ๆ ว่าบริษัททำอะไร และบรรยากาศการทำงานเป็นอย่างไร" />
+              </label>
+            </>
+          )}
+
+          {user.role === "counsellor" && (
+            <>
+              {text("specialization", "ความเชี่ยวชาญ", { placeholder: "เช่น จิตแพทย์, นักจิตวิทยา" })}
+              {text("hospital", "สังกัดโรงพยาบาล/หน่วยงาน", { placeholder: "เช่น โรงพยาบาลธัญญารักษ์ขอนแก่น" })}
+              {text("education", "วุฒิการศึกษา", { placeholder: "ยังไม่ระบุ" })}
+              <label className="ui-field">
+                ประสบการณ์การทำงาน
+                <textarea name="experience" value={form.experience} onChange={handleChange} rows={3} maxLength={1000} placeholder="ยังไม่ระบุ" />
+              </label>
+            </>
+          )}
+
+          {user.role === "admin" && (
+            <>
+              {text("position", "ตำแหน่ง", { placeholder: "เช่น ผู้ดูแลระบบหลัก" })}
+              {text("department", "หน่วยงาน/ฝ่าย", { placeholder: "ยังไม่ระบุ" })}
+            </>
+          )}
+        </fieldset>
       </div>
 
       <div className="profile-form-actions">
-        <span className="ui-muted"><Lock size={14} aria-hidden="true" />คุณเลือกข้อมูลที่จะส่งตอนสมัครงานได้</span>
+        <span className="ui-muted"><Lock size={14} aria-hidden="true" />ข้อมูลของคุณถูกเก็บเป็นความลับตามนโยบายความเป็นส่วนตัว</span>
         <button type="submit" className="ui-btn ui-btn-primary" disabled={saving}>
           {saving ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
         </button>
@@ -490,17 +465,37 @@ function Profile() {
     </form>
   );
 
+  const backTo = getPreviousRoute("/profile") || roleHome(user.role);
+
   return (
     <div className="profile-page">
-      <PageHeader art="mascot" icon={User} eyebrow="Your own story" description="จัดการข้อมูล เป้าหมาย และสิ่งที่คุณเลือกแบ่งปัน">โปรไฟล์ของฉัน</PageHeader>
+      <PageHeader art="mascot" icon={User} eyebrow="Your own story" description="จัดการข้อมูล เป้าหมาย และสิ่งที่คุณเลือกแบ่งปัน" backTo={backTo} backLabel="หน้าที่คุณเข้ามา">โปรไฟล์ของฉัน</PageHeader>
 
-      {profileCard}
+      <ProfileHero
+        user={user}
+        roleLabel={ROLE_LABELS[user.role]}
+        onChangePicture={() => setPickerTab("characters")}
+        onEditInfo={tab !== "personal" ? () => setTab("personal") : undefined}
+      />
+      {pickerTab && (
+        <AvatarPickerDialog
+          user={user}
+          initialTab={pickerTab}
+          onSaved={(updated) => { updateUser(updated); setPickerTab(null); }}
+          onClose={() => setPickerTab(null)}
+        />
+      )}
 
       {message && <p className="profile-message" role="status">{message}</p>}
       {error && <p className="profile-error" role="alert">{error}</p>}
 
       {!isUser ? (
-        <div className="profile-narrow">{personalForm}</div>
+        <div className="profile-split">
+          <div className="profile-col">{personalForm}</div>
+          <AccountCard user={user} roleLabel={ROLE_LABELS[user.role]}>
+            {user.role === "family" && <FamilyConnectionsCard />}
+          </AccountCard>
+        </div>
       ) : (
         <>
           <div className="ui-tabs" role="tablist" aria-label="ส่วนของโปรไฟล์">
@@ -578,6 +573,12 @@ function Profile() {
                     {doneGoals.length > 0 && !goalForm && <p className="ui-muted profile-goal-done">สำเร็จแล้ว {doneGoals.length} เป้าหมาย 🎉</p>}
                   </section>
 
+                  {Array.isArray(radar) && radar.length >= 3 && (
+                    <section className="ui-card profile-radar-card" aria-label="พัฒนาการโดยรวม">
+                      <RecoveryRadarChart data={radar} />
+                    </section>
+                  )}
+
                   <section className="ui-card profile-courses-card">
                     <div className="ui-card-head">
                       <h2>การเรียนรู้ของฉัน</h2>
@@ -589,21 +590,29 @@ function Profile() {
                       </p>
                     ) : (
                       <ul className="profile-courses-list">
-                        {myCourses.map((enrollment) => (
-                          <li key={enrollment._id}>
-                            <span className="profile-courses-icon" aria-hidden="true"><BookOpen size={18} /></span>
-                            <div className="profile-courses-body">
-                              <Link to={`/courses/${enrollment.course._id}`} className="profile-courses-title">{enrollment.course.title}</Link>
-                              <div className="profile-courses-status-row">
-                                <StatusBadge status={enrollment.certificateUrl ? "completed" : "learning"} />
-                                {enrollment.certificateUrl && (
-                                  <a href={enrollment.certificateUrl} target="_blank" rel="noreferrer" className="profile-courses-cert-link">ดูเกียรติบัตร</a>
-                                )}
+                        {myCourses.map((enrollment) => {
+                          const status = courseStatus(enrollment.course);
+                          const range = courseRange(enrollment.course);
+                          return (
+                            <li key={enrollment._id}>
+                              <span className="profile-courses-icon" aria-hidden="true"><BookOpen size={18} /></span>
+                              <div className="profile-courses-body">
+                                <Link to={`/courses/${enrollment.course._id}`} className="profile-courses-title">{enrollment.course.title}</Link>
+                                {range && <small className="ui-muted">{range}</small>}
+                                <div className="profile-courses-status-row">
+                                  <StatusBadge status={enrollment.certificateUrl ? "completed" : "learning"} />
+                                  {(status.state === "expired" || status.state === "expiring") && (
+                                    <span className={`profile-courses-expiry is-${status.state}`}>{status.label}</span>
+                                  )}
+                                  {enrollment.certificateUrl && (
+                                    <a href={enrollment.certificateUrl} target="_blank" rel="noreferrer" className="profile-courses-cert-link">ดูเกียรติบัตร</a>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                            <ChevronRight size={16} aria-hidden="true" />
-                          </li>
-                        ))}
+                              <ChevronRight size={16} aria-hidden="true" />
+                            </li>
+                          );
+                        })}
                       </ul>
                     )}
                     {suggestedCourses.length > 0 && (
@@ -656,113 +665,98 @@ function Profile() {
                     <Sparkles size={18} aria-hidden="true" />
                   </div>
 
-                  <form className="profile-skill-add-form" onSubmit={handleAddSkill}>
-                    <input
-                      type="text"
-                      list="profile-skill-options"
-                      placeholder="เช่น Excel การจัดการเอกสาร"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      aria-label="ชื่อทักษะ"
-                    />
-                    <datalist id="profile-skill-options">
-                      {availableSkills.map((skill) => (
-                        <option key={skill._id} value={skill.skillName} />
-                      ))}
-                    </datalist>
-                    <select value={skillLevel} onChange={(e) => setSkillLevel(e.target.value)} aria-label="ระดับความชำนาญ" className="profile-skill-level-select">
-                      {LEVELS.map((n) => (
-                        <option key={n} value={n}>ระดับ {n}</option>
+                  <div className="profile-skill-chips">
+                    {ownedSkills.map((item) => (
+                      <span className="profile-skill-chip" key={item._id}>
+                        <span className="profile-skill-chip-name">{item.skill.skillName}</span>
+                        <select
+                          value={item.level ?? 3}
+                          onChange={(e) => handleSkillLevelChange(item._id, e.target.value)}
+                          className="profile-skill-chip-level"
+                          aria-label={`ระดับความชำนาญของ ${item.skill.skillName}`}
+                        >
+                          {SKILL_LEVELS.map((level) => (
+                            <option key={level.value} value={level.value}>{level.label}</option>
+                          ))}
+                        </select>
+                        <button type="button" onClick={() => handleRemoveSkill(item._id)} aria-label={`ลบทักษะ ${item.skill.skillName}`}>
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                    {ownedSkills.length === 0 && !skillsLoading && <p className="profile-empty-note">ยังไม่มีทักษะ เลือกจากรายการด้านล่างได้เลย</p>}
+                  </div>
+
+                  <label className="ui-field profile-skill-level-field">
+                    ระดับความชำนาญที่จะใช้เมื่อเพิ่มทักษะ
+                    <select value={skillLevel} onChange={(e) => setSkillLevel(e.target.value)}>
+                      {SKILL_LEVELS.map((level) => (
+                        <option key={level.value} value={level.value}>{level.value} · {level.label}</option>
                       ))}
                     </select>
-                    <button type="submit" className="ui-btn ui-btn-primary">
-                      <Plus size={15} />
-                      <span>เพิ่มทักษะ</span>
-                    </button>
-                  </form>
+                    <small>{SKILL_LEVELS.find((level) => level.value === Number(skillLevel))?.description}</small>
+                  </label>
 
-                  {skillsLoading ? (
-                    <AsyncState />
-                  ) : (
-                    <div className="profile-skill-chips">
-                      {mySkills.map((item) => (
-                        <span className="profile-skill-chip" key={item._id}>
-                          <span className="profile-skill-chip-name">{item.skill.skillName}</span>
-                          <select
-                            value={item.level}
-                            onChange={(e) => handleSkillLevelChange(item._id, e.target.value)}
-                            className="profile-skill-chip-level"
-                            aria-label={`ระดับความชำนาญของ ${item.skill.skillName}`}
-                          >
-                            {LEVELS.map((n) => (
-                              <option key={n} value={n}>Lv.{n}</option>
-                            ))}
-                          </select>
-                          <button type="button" onClick={() => handleRemoveSkill(item._id)} aria-label={`ลบทักษะ ${item.skill.skillName}`}>
-                            <X size={12} />
-                          </button>
-                        </span>
-                      ))}
-                      {mySkills.length === 0 && <p className="profile-empty-note">ยังไม่มีทักษะ ลองเพิ่มดูสิ</p>}
-                    </div>
-                  )}
+                  <SkillPicker skills={allSkills} selectedIds={ownedSkillIds} onToggle={handleToggleSkill} loading={skillsLoading} />
                   <p className="profile-tip"><Briefcase size={14} aria-hidden="true" />เพิ่มทักษะที่คุณมีจริง เพื่อให้การเทียบกับงานตรงขึ้น</p>
                 </section>
 
-                <section className="ui-card profile-resume">
-                  <span className="profile-resume-icon" aria-hidden="true"><FileText size={20} /></span>
-                  <h2>เรซูเม่ของฉัน</h2>
-                  <p className="ui-muted">เก็บข้อมูลประสบการณ์และทักษะไว้พร้อมสมัครงาน</p>
-                  {user.resumeUrl && (
-                    <a href={user.resumeUrl} target="_blank" rel="noreferrer" className="profile-file-link">ดูเรซูเม่ปัจจุบัน</a>
-                  )}
-                  <button type="button" className="ui-btn ui-btn-outline" onClick={() => resumeInputRef.current?.click()} disabled={resumeUploading}>
-                    <Plus size={15} aria-hidden="true" />
-                    {resumeUploading ? "กำลังอัปโหลด..." : user.resumeUrl ? "เปลี่ยนไฟล์เรซูเม่" : "เลือกไฟล์เรซูเม่"}
-                  </button>
-                  <small className="ui-muted">PDF หรือ Word</small>
-                  <input ref={resumeInputRef} type="file" accept="application/pdf,.doc,.docx" hidden onChange={handleResumeSelect} />
-                </section>
-
-                <section className="ui-card profile-edu">
-                  <div className="ui-card-head">
-                    <h2>การศึกษาและประสบการณ์</h2>
-                    <button type="button" className="ui-card-link" onClick={() => setTab("personal")}>แก้ไขข้อมูล</button>
-                  </div>
-                  <dl className="profile-facts">
-                    <div><dt>การศึกษา</dt><dd>{user.education || "ยังไม่ระบุ"}</dd></div>
-                    <div><dt>ประสบการณ์</dt><dd>{user.experience || "ยังไม่ระบุ"}</dd></div>
-                  </dl>
-                </section>
-
-                <section className="ui-card profile-certs">
-                  <div className="ui-card-head">
-                    <div>
-                      <h2>ใบรับรองและใบเซอร์</h2>
-                      <p>เพิ่มหลักฐานการเรียนรู้หรือการฝึกทักษะของคุณ</p>
-                    </div>
-                    <Award size={18} aria-hidden="true" />
-                  </div>
-                  {user.certificates?.length > 0 && (
-                    <ul className="profile-cert-list">
-                      {user.certificates.map((cert) => (
-                        <li key={cert._id}>
-                          <a href={cert.url} target="_blank" rel="noreferrer">{cert.name}</a>
-                          <button type="button" onClick={() => handleRemoveCertificate(cert._id)} aria-label={`ลบใบเซอร์ ${cert.name}`}>
-                            <Trash2 size={14} />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <div className="profile-cert-add">
-                    <input type="text" placeholder="ชื่อใบรับรอง" aria-label="ชื่อใบรับรอง" value={certName} onChange={(e) => setCertName(e.target.value)} />
-                    <button type="button" className="ui-btn ui-btn-outline" onClick={handleCertFilePick} disabled={certUploading}>
-                      {certUploading ? "กำลังอัปโหลด..." : "เพิ่ม"}
+                <div className="profile-col">
+                  <section className="ui-card profile-resume">
+                    <span className="profile-resume-icon" aria-hidden="true"><FileText size={20} /></span>
+                    <h2>เรซูเม่ของฉัน</h2>
+                    <p className="ui-muted">เก็บข้อมูลประสบการณ์และทักษะไว้พร้อมสมัครงาน</p>
+                    {user.resumeUrl && (
+                      <a href={user.resumeUrl} target="_blank" rel="noreferrer" className="profile-file-link">ดูเรซูเม่ปัจจุบัน</a>
+                    )}
+                    <button type="button" className="ui-btn ui-btn-outline" onClick={() => resumeInputRef.current?.click()} disabled={resumeUploading}>
+                      <Plus size={15} aria-hidden="true" />
+                      {resumeUploading ? "กำลังอัปโหลด..." : user.resumeUrl ? "เปลี่ยนไฟล์เรซูเม่" : "เลือกไฟล์เรซูเม่"}
                     </button>
-                    <input ref={certInputRef} type="file" accept="application/pdf,image/png,image/jpeg,image/webp" hidden onChange={handleCertSelect} />
-                  </div>
-                </section>
+                    <small className="ui-muted">PDF หรือ Word</small>
+                    <input ref={resumeInputRef} type="file" accept="application/pdf,.doc,.docx" hidden onChange={handleResumeSelect} />
+                  </section>
+
+                  <section className="ui-card profile-edu">
+                    <div className="ui-card-head">
+                      <h2>การศึกษาและประสบการณ์</h2>
+                      <button type="button" className="ui-card-link" onClick={() => setTab("personal")}>แก้ไขข้อมูล</button>
+                    </div>
+                    <dl className="profile-facts">
+                      <div><dt>การศึกษา</dt><dd>{user.education || "ยังไม่ระบุ"}</dd></div>
+                      <div><dt>ประสบการณ์</dt><dd>{user.experience || "ยังไม่ระบุ"}</dd></div>
+                    </dl>
+                  </section>
+
+                  <section className="ui-card profile-certs">
+                    <div className="ui-card-head">
+                      <div>
+                        <h2>ใบรับรองและใบเซอร์</h2>
+                        <p>เพิ่มหลักฐานการเรียนรู้หรือการฝึกทักษะของคุณ</p>
+                      </div>
+                      <Award size={18} aria-hidden="true" />
+                    </div>
+                    {user.certificates?.length > 0 && (
+                      <ul className="profile-cert-list">
+                        {user.certificates.map((cert) => (
+                          <li key={cert._id}>
+                            <a href={cert.url} target="_blank" rel="noreferrer">{cert.name}</a>
+                            <button type="button" onClick={() => handleRemoveCertificate(cert._id)} aria-label={`ลบใบเซอร์ ${cert.name}`}>
+                              <Trash2 size={14} />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="profile-cert-add">
+                      <input type="text" placeholder="ชื่อใบรับรอง" aria-label="ชื่อใบรับรอง" value={certName} onChange={(e) => setCertName(e.target.value)} />
+                      <button type="button" className="ui-btn ui-btn-outline" onClick={handleCertFilePick} disabled={certUploading}>
+                        {certUploading ? "กำลังอัปโหลด..." : "เพิ่ม"}
+                      </button>
+                      <input ref={certInputRef} type="file" accept="application/pdf,image/png,image/jpeg,image/webp" hidden onChange={handleCertSelect} />
+                    </div>
+                  </section>
+                </div>
               </div>
             )}
 
@@ -779,6 +773,16 @@ function Profile() {
 
                   {familyError && <p className="profile-error">{familyError}</p>}
 
+                  <form className="profile-family-name-form" onSubmit={handleSaveFamilyName}>
+                    <label className="ui-field">
+                      ชื่อครอบครัวของคุณ
+                      <input type="text" value={familyName} maxLength={100} onChange={(e) => setFamilyName(e.target.value)} placeholder="เช่น บ้านสุขใจ" />
+                    </label>
+                    <button type="submit" className="ui-btn ui-btn-outline" disabled={familyNameSaving || familyName.trim() === (user.familyName || "")}>
+                      {familyNameSaving ? "กำลังบันทึก..." : "บันทึกชื่อ"}
+                    </button>
+                  </form>
+
                   <form className="profile-family-invite-form" onSubmit={handleInviteFamily}>
                     <input type="email" placeholder="อีเมลของคนที่คุณต้องการเชิญ" aria-label="อีเมลของคนที่คุณต้องการเชิญ" value={familyEmail} onChange={(e) => setFamilyEmail(e.target.value)} required />
                     <button type="submit" className="ui-btn ui-btn-primary" disabled={familyInviting}>
@@ -786,15 +790,20 @@ function Profile() {
                       <span>{familyInviting ? "กำลังส่ง..." : "ส่งคำเชิญ"}</span>
                     </button>
                   </form>
-                  <p className="ui-muted profile-family-hint">ระบบจะส่งลิงก์คำเชิญไปทางอีเมล ลิงก์มีอายุ 7 วัน</p>
+                  <p className="ui-muted profile-family-hint">ระบบจะส่งลิงก์คำเชิญไปทางอีเมล ลิงก์มีอายุ 7 วัน หรือรอให้สมาชิกครอบครัวขอเชื่อมต่อมาแล้วกดอนุมัติด้านล่าง</p>
 
                   {familyLinks.length > 0 && (
                     <ul className="profile-family-list">
                       {familyLinks.map((link) => (
                         <li key={link._id}>
-                          <span>{link.inviteEmail}</span>
+                          <span>{linkLabel(link)}</span>
                           <span className={`profile-family-status profile-family-status-${link.status}`}>{FAMILY_STATUS_LABELS[link.status]}</span>
-                          <button type="button" onClick={() => requestRevokeFamily(link)} aria-label="ยกเลิกการติดตาม">
+                          {link.status === "requested" && (
+                            <button type="button" className="profile-family-approve" onClick={() => handleRespondFamily(link, true)}>
+                              <Check size={13} aria-hidden="true" />อนุมัติ
+                            </button>
+                          )}
+                          <button type="button" onClick={() => link.status === "requested" ? handleRespondFamily(link, false) : requestRevokeFamily(link)} aria-label={link.status === "requested" ? "ปฏิเสธคำขอ" : "ยกเลิกการติดตาม"}>
                             <X size={12} />
                           </button>
                         </li>
@@ -828,6 +837,10 @@ function Profile() {
                   </ul>
                 </section>
 
+                <div className="profile-col">
+                {familyLinks.some((link) => link.status === "active") && (
+                  <FamilyMessageHistory linkId={familyLinks.find((link) => link.status === "active")._id} viewerRole="user" title="ข้อความจากครอบครัว" />
+                )}
                 <aside className="ui-card ui-card-soft profile-privacy">
                   <span className="profile-privacy-icon" aria-hidden="true"><Lock size={18} /></span>
                   <h2>พื้นที่ส่วนตัวของคุณ</h2>
@@ -844,10 +857,11 @@ function Profile() {
                     <li><X size={14} aria-hidden="true" />ผลประเมินความเสี่ยงและการให้คำปรึกษา</li>
                   </ul>
                 </aside>
+                </div>
               </div>
             )}
 
-            {tab === "personal" && <div className="profile-narrow">{personalForm}</div>}
+            {tab === "personal" && personalForm}
           </div>
         </>
       )}

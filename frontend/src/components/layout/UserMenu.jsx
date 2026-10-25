@@ -3,10 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Award, BookOpen, CalendarDays, ChevronDown, ClipboardList, LogOut, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./UserMenu.css";
-import { defaultAvatarSrc } from "../../utils/defaultAvatar.js";
+import Avatar from "../../components/common/Avatar.jsx";
 
 const ROLE_LABELS = {
-  user: "ผู้หางาน",
+  user: "ผู้ใช้งานปกติ",
   family: "ครอบครัว/ผู้ดูแล",
   employer: "นายจ้าง",
   admin: "ผู้ดูแลระบบ",
@@ -24,10 +24,6 @@ const ROLE_LINKS = {
   admin: [],
   counsellor: [],
 };
-
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
 
 function UserMenu() {
   const { user, logout } = useAuth();
@@ -57,7 +53,7 @@ function UserMenu() {
     <div className="user-menu" ref={containerRef}>
       <button type="button" className="user-menu-trigger" aria-label="เมนูบัญชีของฉัน" aria-expanded={open} onClick={() => setOpen((prev) => !prev)}>
         <span className="user-menu-avatar">
-          {user.avatarUrl || defaultAvatarSrc(user.role) ? <img src={user.avatarUrl || defaultAvatarSrc(user.role)} alt="" /> : initials(user.name)}
+          <Avatar user={user} size={30} fill />
         </span>
         <span className="user-menu-name">{user.name}</span>
         <ChevronDown size={16} className={`user-menu-chevron ${open ? "open" : ""}`} />

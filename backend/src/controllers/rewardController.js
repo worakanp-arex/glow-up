@@ -2,19 +2,45 @@ import Reward from "../models/Reward.js";
 import UserReward from "../models/UserReward.js";
 import { createCrudController } from "./crudFactory.js";
 
-const { getAll, getOne, create, update, remove } = createCrudController(Reward);
+const { getAll, getOne } = createCrudController(Reward);
 
-export {
-  getAll as listRewards,
-  getOne as getReward,
-  create as createReward,
-  update as updateReward,
-  remove as deleteReward,
-};
+export { getAll as listRewards, getOne as getReward };
+
+const REWARD_FIELDS = ["name", "description", "icon", "pointsRequired"];
+
+function rewardFields(body) {
+  const fields = {};
+  for (const key of REWARD_FIELDS) if (body[key] !== undefined) fields[key] = body[key];
+  return fields;
+}
+
+export async function createReward(req, res) {
+  const reward = await Reward.create(rewardFields(req.body));
+  res.status(201).json(reward);
+}
+
+export async function updateReward(req, res) {
+  const reward = await Reward.findByIdAndUpdate(req.params.id, rewardFields(req.body), { new: true, runValidators: true });
+  if (!reward) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  res.json(reward);
+}
+
+// Rewards are derived from total points, so removing one also removes the
+// copies people already hold (otherwise their lists would contain empty rewards).
+export async function deleteReward(req, res) {
+  const reward = await Reward.findByIdAndDelete(req.params.id);
+  if (!reward) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  await UserReward.deleteMany({ reward: reward._id });
+  res.status(204).send();
+}
 
 export async function myRewards(req, res) {
   const userRewards = await UserReward.find({ user: req.user.id })
     .populate("reward")
     .sort({ earnedAt: -1 });
-  res.json(userRewards);
+  res.json(userRewards.filter((userReward) => userReward.reward));
 }

@@ -4,13 +4,10 @@ import { Link } from "react-router-dom";
 import { Bookmark, Flag, Heart, Lock, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import * as postService from "../../services/postService.js";
 import { AUDIENCE_ROLES, AUDIENCE_LABEL_BY_VALUE } from "../../constants/postAudience.js";
+import { REPORT_REASONS } from "../../constants/reportReasons.js";
 import useConfirmDialog from "../common/useConfirmDialog.jsx";
+import Avatar from "../common/Avatar.jsx";
 import "./PostCard.css";
-import { defaultAvatarSrc } from "../../utils/defaultAvatar.js";
-
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
 
 function PostCard({
   post,
@@ -29,13 +26,16 @@ function PostCard({
   const [reportOpen, setReportOpen] = useState(false);
   const [reportBusy, setReportBusy] = useState(false);
   const [reportError, setReportError] = useState("");
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetail, setReportDetail] = useState("");
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(post.content || "");
   const [tagsInput, setTagsInput] = useState((post.tags || []).join(", "));
   const [commentsEnabled, setCommentsEnabled] = useState(post.commentsEnabled !== false);
   const [visibleToRoles, setVisibleToRoles] = useState(post.visibleToRoles || []);
   const [saving, setSaving] = useState(false);
-  const [flagged, setFlagged] = useState(Boolean(post.needsReview));
+  // "Reported" is per person: only the people who reported it see it as reported.
+  const [flagged, setFlagged] = useState(Boolean(post.reportedByMe));
 
   const isOwner = post.user?._id === currentUserId;
   const isStaffAuthor = post.user?.role === "counsellor" || post.user?.role === "admin";
@@ -93,24 +93,29 @@ function PostCard({
     setReportBusy(true);
     setReportError("");
     try {
-      await postService.flagPost(post._id);
+      await postService.flagPost(post._id, { reason: reportReason, detail: reportDetail.trim() || undefined });
       setFlagged(true);
       setReportOpen(false);
-    } catch { setReportError("รายงานไม่สำเร็จ กรุณาลองอีกครั้ง"); }
+    } catch (err) { setReportError(err.response?.data?.message || "รายงานไม่สำเร็จ กรุณาลองอีกครั้ง"); }
     finally { setReportBusy(false); }
+  }
+
+  function openReport() {
+    setReportReason("");
+    setReportDetail("");
+    setReportError("");
+    setReportOpen(true);
   }
 
   return (
     <li className={`post-card${selected ? " post-card-selected" : ""}`}>
       <div className="post-card-header">
         {isStaffAuthor ? (
-          <Link to={`/community/staff/${post.user._id}`} className="post-card-avatar">
-            {post.user?.avatarUrl || defaultAvatarSrc(post.user?.role) ? <img src={post.user?.avatarUrl || defaultAvatarSrc(post.user?.role)} alt="" /> : initials(post.user?.name)}
+          <Link to={`/community/staff/${post.user._id}`} className="post-card-avatar" aria-label={post.user?.name}>
+            <Avatar user={post.user} size={44} />
           </Link>
         ) : (
-          <span className="post-card-avatar">
-            {post.user?.avatarUrl || defaultAvatarSrc(post.user?.role) ? <img src={post.user?.avatarUrl || defaultAvatarSrc(post.user?.role)} alt="" /> : initials(post.user?.name)}
-          </span>
+          <span className="post-card-avatar"><Avatar user={post.user} size={44} /></span>
         )}
         <div className="post-card-author-block">
           <p className="post-card-author">
@@ -267,7 +272,7 @@ function PostCard({
           <button
             type="button"
             className={`post-card-flag-button${flagged ? " flagged" : ""}`}
-            onClick={() => { setReportError(""); setReportOpen(true); }}
+            onClick={openReport}
             disabled={flagged}
             aria-label={flagged ? "รายงานแล้ว" : "รายงานเนื้อหา"}
             title={flagged ? "รายงานแล้ว รอเจ้าหน้าที่ตรวจสอบ" : "รายงานเนื้อหา"}
@@ -278,7 +283,23 @@ function PostCard({
       </div>
       {flagged && <p className="post-report-status" role="status">รายงานแล้ว รอเจ้าหน้าที่ตรวจสอบ</p>}
       {confirmDialog}
-      {reportOpen && <ConfirmDialog title="รายงานเนื้อหา" confirmLabel="ส่งรายงาน" busy={reportBusy} error={reportError} onConfirm={handleFlag} onClose={() => setReportOpen(false)}><p>ต้องการส่งโพสต์นี้ให้เจ้าหน้าที่ตรวจสอบใช่ไหม?</p></ConfirmDialog>}
+      {post.needsReview && !flagged && <p className="post-report-status" role="status">โพสต์นี้ถูกรายงานและรอการตรวจสอบ ซ่อนจากผู้ใช้ทั่วไปไว้ชั่วคราว</p>}
+      {reportOpen && (
+        <ConfirmDialog title="รายงานเนื้อหา" confirmLabel="ส่งรายงาน" busy={reportBusy} error={reportError} confirmDisabled={!reportReason} onConfirm={handleFlag} onClose={() => setReportOpen(false)}>
+          <p>โพสต์จะถูกซ่อนไว้ชั่วคราวระหว่างที่เจ้าหน้าที่ตรวจสอบ และคุณจะได้รับแจ้งผลเมื่อตรวจสอบเสร็จ</p>
+          <label className="post-report-field">
+            <span>รายงานเรื่องอะไร</span>
+            <select value={reportReason} onChange={(e) => setReportReason(e.target.value)} required>
+              <option value="">เลือกหัวข้อ</option>
+              {REPORT_REASONS.map((reason) => <option key={reason.value} value={reason.value}>{reason.label}</option>)}
+            </select>
+          </label>
+          <label className="post-report-field">
+            <span>รายละเอียดเพิ่มเติม (ไม่บังคับ)</span>
+            <textarea value={reportDetail} onChange={(e) => setReportDetail(e.target.value)} rows={3} maxLength={500} placeholder="บอกเจ้าหน้าที่ว่าเนื้อหาส่วนไหนที่เป็นปัญหา" />
+          </label>
+        </ConfirmDialog>
+      )}
     </li>
   );
 }

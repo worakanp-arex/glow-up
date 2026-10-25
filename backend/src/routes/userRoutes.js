@@ -18,12 +18,14 @@ import {
   verifyUser,
   updateUser,
   deleteUser,
+  getUser,
 } from "../controllers/userController.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
 import { objectIdParam, paginationQuery } from "../middleware/validators.js";
 import { uploadAvatar, uploadResume, uploadCertificate, verifyUploadedFile } from "../middleware/upload.js";
+import { AVATAR_PRESET_KEYS, AVATAR_COLORS, COVER_PRESET_KEYS } from "../constants/profileArt.js";
 
 const router = Router();
 
@@ -52,6 +54,17 @@ router.put(
     PROFILE_TEXT_FIELD("taxId"),
     PROFILE_TEXT_FIELD("specialization"),
     PROFILE_TEXT_FIELD("hospital"),
+    body("website").optional().trim().isLength({ max: 300 }),
+    PROFILE_TEXT_FIELD("companySize"),
+    body("companyDescription").optional().trim().isLength({ max: 1000 }),
+    PROFILE_TEXT_FIELD("contactPosition"),
+    PROFILE_TEXT_FIELD("position"),
+    PROFILE_TEXT_FIELD("department"),
+    PROFILE_TEXT_FIELD("familyName"),
+    body("avatarPreset").optional().isIn(AVATAR_PRESET_KEYS),
+    body("avatarStyle").optional().isIn(["image", "initial"]),
+    body("avatarColor").optional().isIn(AVATAR_COLORS),
+    body("coverPreset").optional().isIn(COVER_PRESET_KEYS),
   ],
   validate,
   asyncHandler(updateMe)
@@ -151,7 +164,7 @@ router.post(
   [
     body("name").trim().notEmpty().isLength({ max: 200 }),
     body("email").isEmail().normalizeEmail(),
-    body("password").isLength({ min: 6 }),
+    body("password").isLength({ min: 8 }),
     body("role").isIn(["user", "family", "employer", "admin", "counsellor"]),
     body("phone").optional().trim().isLength({ max: 50 }),
     body("specialization").optional().trim().isLength({ max: 200 }),
@@ -160,11 +173,12 @@ router.post(
   validate,
   asyncHandler(createUserByAdmin)
 );
+router.get("/:id", verifyToken, requireRole("admin"), [objectIdParam("id")], validate, asyncHandler(getUser));
 router.put(
   "/:id/verify",
   verifyToken,
   requireRole("admin"),
-  [objectIdParam("id"), body("status").isIn(["verified", "rejected", "suspended"])],
+  [objectIdParam("id"), body("status").isIn(["verified", "rejected", "suspended"]), body("reason").optional().trim().isLength({ max: 500 })],
   validate,
   asyncHandler(verifyUser)
 );

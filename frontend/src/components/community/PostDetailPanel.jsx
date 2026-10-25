@@ -5,10 +5,7 @@ import * as postService from "../../services/postService.js";
 import PostCard from "./PostCard.jsx";
 import useConfirmDialog from "../common/useConfirmDialog.jsx";
 import "./PostDetailPanel.css";
-
-function initials(name) {
-  return name?.trim()?.charAt(0)?.toUpperCase() || "?";
-}
+import Avatar from "../../components/common/Avatar.jsx";
 
 function CommentItem({ comment, canEdit, canDelete, onSave, onDelete }) {
   const [editing, setEditing] = useState(false);
@@ -30,7 +27,7 @@ function CommentItem({ comment, canEdit, canDelete, onSave, onDelete }) {
     <li>
       <div className="post-detail-panel-comment-header">
         <span className="post-detail-panel-comment-avatar">
-          {comment.user?.avatarUrl ? <img src={comment.user.avatarUrl} alt="" /> : initials(comment.user?.name)}
+          <Avatar user={comment.user} size={30} fill />
         </span>
         <p className="post-detail-panel-comment-author">{comment.user?.name}</p>
         {!editing && (canEdit || canDelete) && (

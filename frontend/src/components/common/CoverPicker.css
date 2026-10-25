@@ -1,0 +1,9 @@
+.cover-picker { display: flex; flex-direction: column; gap: 16px; }
+.cover-picker-heading { margin: 0 0 8px; font-size: .78rem; font-weight: 600; color: var(--color-text-muted); }
+.cover-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.cover-picker-option { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 6px; border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-surface); color: var(--color-text); font: inherit; text-align: left; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.cover-picker-option:hover { border-color: var(--color-primary-300); }
+.cover-picker-option.is-selected { border-color: var(--color-primary-500); box-shadow: 0 0 0 1px var(--color-primary-500) inset; }
+.cover-picker-thumb { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 10px; background-color: var(--color-primary-50); overflow: hidden; }
+.cover-picker-check { position: absolute; top: 6px; right: 6px; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-primary-500); color: #fff; }
+.cover-picker-label { padding: 0 2px 2px; font-size: .78rem; line-height: 1.4; overflow-wrap: anywhere; }

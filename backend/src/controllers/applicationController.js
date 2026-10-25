@@ -14,8 +14,10 @@ const STATUS_LABELS = {
   cancelled: "ยกเลิกแล้ว",
 };
 
+// Basic personal details an employer sees alongside the application. Address
+// and other contact-sensitive fields are deliberately left out.
 const APPLICANT_PROFILE_FIELDS =
-  "name email phone verifiedStatus education experience resumeUrl certificates avatarUrl";
+  "name nickname email phone age gender province bio verifiedStatus education experience resumeUrl certificates avatarUrl avatarStyle avatarColor";
 
 // Employers must be identity-verified before they can view or act on applicant
 // data; admins bypass this check.
@@ -75,7 +77,7 @@ export async function myApplications(req, res) {
   const filter = { user: req.user.id };
   const pagination = paginationOptions(req.query);
   const query = Application.find(filter)
-    .populate({ path: "job", populate: { path: "employer", select: "name companyName avatarUrl" } })
+    .populate({ path: "job", populate: { path: "employer", select: "name companyName avatarUrl avatarStyle avatarColor" } })
     .sort({ createdAt: -1 });
   if (pagination) {
     res.setHeader("X-Total-Count", await Application.countDocuments(filter));
@@ -104,6 +106,42 @@ export async function jobApplicants(req, res) {
   }
   const applications = await query;
   res.json(await jobApplicantMatches(job._id, applications));
+}
+
+// Every application to any of the employer's postings (the dashboard's
+// "all applicants" drill-down), optionally narrowed by status.
+export async function listEmployerApplications(req, res) {
+  if (!(await assertEmployerVerified(req, res))) return;
+  const jobs = await Job.find({ employer: req.user.id }).select("_id");
+  const filter = { job: { $in: jobs.map((job) => job._id) } };
+  if (req.query.status) filter.status = req.query.status;
+  const pagination = paginationOptions(req.query);
+  const query = Application.find(filter)
+    .populate("job", "title location")
+    .populate("user", APPLICANT_PROFILE_FIELDS)
+    .sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Application.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  res.json(await query);
+}
+
+// Admin overview of every application, optionally narrowed by status, for the
+// dashboard drill-down.
+export async function listAllApplications(req, res) {
+  const filter = {};
+  if (req.query.status) filter.status = req.query.status;
+  const pagination = paginationOptions(req.query);
+  const query = Application.find(filter)
+    .populate({ path: "job", select: "title location salary status verifiedStatus", populate: { path: "employer", select: "name companyName" } })
+    .populate("user", APPLICANT_PROFILE_FIELDS)
+    .sort({ createdAt: -1 });
+  if (pagination) {
+    res.setHeader("X-Total-Count", await Application.countDocuments(filter));
+    query.skip(pagination.skip).limit(pagination.limit);
+  }
+  res.json(await query);
 }
 
 export async function getApplication(req, res) {

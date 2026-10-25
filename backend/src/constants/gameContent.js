@@ -115,3 +115,34 @@ export const QUIZ_BANK = [
     domain: "coping",
   },
 ];
+
+// Moods used by the emotion-recognition game; the frontend shows
+// /images/illustrations/mood-<key>.webp for each (see RecoveryGame content).
+export const EMOTION_CHOICES = [
+  { key: "happy", label: "ดีใจ" },
+  { key: "calm", label: "สงบ" },
+  { key: "confident", label: "มั่นใจ" },
+  { key: "relaxed", label: "ผ่อนคลาย" },
+  { key: "surprised", label: "ประหลาดใจ" },
+  { key: "sad", label: "เสียใจ" },
+  { key: "anxious", label: "กังวล" },
+  { key: "angry", label: "โกรธ" },
+];
+
+// Situation -> the feeling it most likely brings. Each day 5 are picked
+// deterministically from the date, and each question offers 4 feelings.
+export const EMOTION_SCENARIOS = [
+  { id: "e1", situation: "เพื่อนชวนไปงานเลี้ยงที่เคยใช้สาร แต่คุณปฏิเสธได้สำเร็จ", correct: "confident", options: ["confident", "sad", "angry", "surprised"] },
+  { id: "e2", situation: "วันนี้ครบ 30 วันที่คุณเช็คอินต่อเนื่อง", correct: "happy", options: ["anxious", "happy", "angry", "calm"] },
+  { id: "e3", situation: "นอนไม่หลับเพราะคิดเรื่องอนาคตวนไปมา", correct: "anxious", options: ["relaxed", "happy", "anxious", "confident"] },
+  { id: "e4", situation: "มีคนพูดจาดูถูกอดีตของคุณต่อหน้าคนอื่น", correct: "angry", options: ["calm", "angry", "happy", "surprised"] },
+  { id: "e5", situation: "หลังเดินเล่นในสวนตอนเช้าและหายใจลึกๆ", correct: "relaxed", options: ["relaxed", "angry", "sad", "anxious"] },
+  { id: "e6", situation: "ได้รับข้อความให้กำลังใจจากครอบครัวโดยไม่คาดคิด", correct: "surprised", options: ["angry", "sad", "surprised", "anxious"] },
+  { id: "e7", situation: "นึกถึงเพื่อนเก่าที่ไม่ได้เจอกันอีกแล้ว", correct: "sad", options: ["confident", "sad", "happy", "relaxed"] },
+  { id: "e8", situation: "นั่งสมาธิเสร็จ ใจนิ่ง ไม่รีบร้อนกับสิ่งใด", correct: "calm", options: ["anxious", "angry", "calm", "surprised"] },
+  { id: "e9", situation: "สัปดาห์หน้าต้องไปสัมภาษณ์งานครั้งแรกหลังบำบัด", correct: "anxious", options: ["anxious", "relaxed", "happy", "calm"] },
+  { id: "e10", situation: "ตัดสินใจได้เองว่าจะไม่ใช้สารในวันที่รู้สึกยากที่สุด", correct: "confident", options: ["sad", "angry", "confident", "anxious"] },
+];
+
+// 4-7-8 breathing: inhale 4s, hold 7s, exhale 8s. One round is 19 seconds.
+export const BREATHING_ROUNDS = 4;

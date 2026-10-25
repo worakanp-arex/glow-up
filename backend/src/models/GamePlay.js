@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const gamePlaySchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    gameType: { type: String, enum: ["wheel", "memory", "quiz"], required: true },
+    gameType: { type: String, enum: ["wheel", "memory", "quiz", "breathing", "emotion"], required: true },
     dateKey: { type: String, required: true },
     domain: {
       type: String,

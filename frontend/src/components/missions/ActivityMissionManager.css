@@ -1,0 +1,38 @@
+.activity-manager { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.activity-manager-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.activity-manager-toolbar .ui-tabs { margin: 0; padding-bottom: 0; border-bottom: 0; }
+
+.activity-manager-notice { margin: 0; padding: 12px 14px; border-radius: 12px; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .85rem; }
+.activity-manager-empty { margin: 0; padding: 28px 0; text-align: center; color: var(--color-text-muted); }
+
+.activity-manager-list, .activity-manager-pending ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.activity-manager-item { display: flex; align-items: center; gap: 16px; padding: 16px 18px; }
+.activity-manager-item.is-inactive, .activity-manager-item.is-ended { opacity: .8; }
+.activity-manager-icon { display: grid; place-items: center; flex-shrink: 0; width: 48px; height: 48px; border-radius: 14px; background: var(--color-primary-50); color: var(--color-primary-600); }
+.activity-manager-body { flex: 1; min-width: 0; }
+.activity-manager-title { margin: 0; font-size: .98rem; font-weight: 600; overflow-wrap: anywhere; }
+.activity-manager-desc { margin: 2px 0 0; font-size: .8rem; line-height: 1.6; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.activity-manager-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 0; }
+.activity-manager-state { padding: 2px 10px; border-radius: 8px; background: var(--color-success-bg); color: var(--color-success); font-size: .72rem; font-weight: 600; }
+.activity-manager-state.is-inactive, .activity-manager-state.is-ended { background: var(--color-surface-hover); color: var(--color-text-secondary); }
+.activity-manager-state.is-upcoming { background: var(--color-warning-bg); color: var(--color-warning); }
+
+.activity-manager-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.activity-manager-actions button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text-secondary); cursor: pointer; }
+.activity-manager-actions button:hover { background: var(--color-primary-50); color: var(--color-primary-700); }
+.activity-manager-actions .activity-manager-danger:hover, .activity-manager-danger:hover { background: var(--color-danger-bg); color: var(--color-danger); }
+.activity-manager-danger { color: var(--color-danger); }
+
+.activity-manager-pending ul li { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 14px; }
+.activity-manager-pending li > div:first-child { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.activity-manager-pending strong { font-size: .9rem; overflow-wrap: anywhere; }
+.activity-manager-pending small { font-size: .76rem; color: var(--color-text-muted); overflow-wrap: anywhere; }
+.activity-manager-review { display: flex; flex-wrap: wrap; gap: 8px; }
+.activity-manager-review .ui-btn { min-height: 40px; padding: 8px 14px; }
+
+@media (max-width: 640px) {
+  .activity-manager-item { flex-wrap: wrap; }
+  .activity-manager-actions { width: 100%; justify-content: flex-end; }
+  .activity-manager-pending ul li { flex-direction: column; align-items: stretch; }
+}

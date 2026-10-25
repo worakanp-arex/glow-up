@@ -9,8 +9,13 @@ import { detectMeetingPlatform } from "../utils/meetingLink.js";
 import { paginationOptions } from "../utils/pagination.js";
 import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
-const USER_SUMMARY_FIELDS = "name email phone avatarUrl verifiedStatus";
-const COUNSELLOR_SUMMARY_FIELDS = "name specialization hospital avatarUrl";
+const USER_SUMMARY_FIELDS = "name email phone avatarUrl avatarStyle avatarColor verifiedStatus";
+const COUNSELLOR_SUMMARY_FIELDS = "name specialization hospital avatarUrl avatarStyle avatarColor";
+
+// A user may only have one request in progress at a time; a new one can be
+// made after the current case is closed or cancelled.
+const OPEN_STATUSES = ["pending", "active", "scheduled"];
+const FINISHED_STATUSES = ["closed", "cancelled"];
 
 const STATUS_MESSAGE = {
   active: (topic) => `บุคลากรทางการแพทย์รับคำขอปรึกษาเรื่อง "${topic}" ของคุณแล้ว`,
@@ -33,6 +38,14 @@ export async function createSession(req, res) {
   const { sessionType, topic, message, mood, preferredAt } = req.body;
   if (!sessionType || !topic || !message || !mood || !preferredAt) {
     return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+  }
+
+  const open = await CounsellingSession.findOne({ user: req.user.id, status: { $in: OPEN_STATUSES } }).select("_id");
+  if (open) {
+    return res.status(409).json({
+      message: "คุณมีคำขอปรึกษาที่ยังดำเนินการอยู่ กรุณารอปิดเคสหรือยกเลิกก่อนขอนัดหมายใหม่",
+      sessionId: open._id,
+    });
   }
 
   const session = await CounsellingSession.create({
@@ -92,7 +105,7 @@ export async function getSession(req, res) {
   const session = await CounsellingSession.findById(req.params.id)
     .populate("user", USER_SUMMARY_FIELDS)
     .populate("counsellor", COUNSELLOR_SUMMARY_FIELDS)
-    .populate("messages.sender", "name avatarUrl role");
+    .populate("messages.sender", "name avatarUrl avatarStyle avatarColor role");
   if (!session) {
     return res.status(404).json({ message: "Not found" });
   }
@@ -104,7 +117,7 @@ export async function getSession(req, res) {
 
 export async function claimSession(req, res) {
   const session = await CounsellingSession.findOneAndUpdate(
-    { _id: req.params.id, counsellor: null },
+    { _id: req.params.id, counsellor: null, status: "pending" },
     { counsellor: req.user.id, status: "active" },
     { new: true }
   )
@@ -114,7 +127,7 @@ export async function claimSession(req, res) {
   if (!session) {
     const exists = await CounsellingSession.exists({ _id: req.params.id });
     return res.status(exists ? 409 : 404).json({
-      message: exists ? "เคสนี้มีบุคลากรรับไปแล้ว" : "Not found",
+      message: exists ? "เคสนี้มีบุคลากรรับไปแล้วหรือถูกยกเลิกแล้ว" : "Not found",
     });
   }
 
@@ -146,13 +159,16 @@ export async function addMessage(req, res) {
   if (!isOwner && !isAssignedCounsellor && !isAdmin) {
     return res.status(403).json({ message: "Forbidden" });
   }
+  if (FINISHED_STATUSES.includes(session.status)) {
+    return res.status(409).json({ message: "เคสนี้ปิดแล้ว ไม่สามารถส่งข้อความเพิ่มได้" });
+  }
 
   const senderRole = req.user.role === "user" ? "user" : "counsellor";
   session.messages.push({ sender: req.user.id, senderRole, content: content.trim() });
   await session.save();
   await session.populate("user", USER_SUMMARY_FIELDS);
   await session.populate("counsellor", COUNSELLOR_SUMMARY_FIELDS);
-  await session.populate("messages.sender", "name avatarUrl role");
+  await session.populate("messages.sender", "name avatarUrl avatarStyle avatarColor role");
 
   const notifyTarget = senderRole === "user" ? session.counsellor : session.user;
   if (notifyTarget) {
@@ -175,6 +191,9 @@ export async function updateSchedule(req, res) {
   }
   if (req.user.role === "counsellor" && session.counsellor?.toString() !== req.user.id) {
     return res.status(403).json({ message: "Forbidden" });
+  }
+  if (FINISHED_STATUSES.includes(session.status)) {
+    return res.status(409).json({ message: "เคสนี้ปิดแล้ว ไม่สามารถเปลี่ยนนัดหมายได้" });
   }
 
   if (scheduledAt !== undefined) session.scheduledAt = scheduledAt;
@@ -215,6 +234,28 @@ export async function recordOutcome(req, res) {
   res.json(session);
 }
 
+// The person who made a request can withdraw it while it is still open.
+export async function cancelMySession(req, res) {
+  const session = await CounsellingSession.findOneAndUpdate(
+    { _id: req.params.id, user: req.user.id, status: { $in: OPEN_STATUSES } },
+    { status: "cancelled" },
+    { new: true }
+  )
+    .populate("user", USER_SUMMARY_FIELDS)
+    .populate("counsellor", COUNSELLOR_SUMMARY_FIELDS);
+  if (!session) {
+    const exists = await CounsellingSession.exists({ _id: req.params.id, user: req.user.id });
+    return res.status(exists ? 409 : 404).json({ message: exists ? "คำขอนี้ปิดหรือยกเลิกไปแล้ว" : "Not found" });
+  }
+
+  if (session.counsellor) {
+    await notifyUser(session.counsellor._id, `${session.user.name} ยกเลิกคำขอปรึกษาเรื่อง "${session.topic}"`, "counselling", {
+      link: `/counsellor/requests/${session._id}`,
+    });
+  }
+  res.json(session);
+}
+
 export async function updateStatus(req, res) {
   const { status } = req.body;
   if (!["active", "closed", "cancelled"].includes(status)) {
@@ -246,7 +287,7 @@ export async function updateStatus(req, res) {
 // admin emotion-history read model but bundling rehab + risk data alongside it.
 export async function getPatientProfile(req, res) {
   const targetUser = await User.findById(req.params.userId).select(
-    "name email phone age gender address role verifiedStatus avatarUrl createdAt"
+    "name nickname email phone age gender address province bio role verifiedStatus avatarUrl avatarStyle avatarColor createdAt"
   );
   if (!targetUser || targetUser.role !== "user") {
     return res.status(404).json({ message: "ไม่พบผู้ใช้งานนี้" });

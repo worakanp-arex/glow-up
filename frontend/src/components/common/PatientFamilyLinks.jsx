@@ -3,7 +3,7 @@ import { Users } from "lucide-react";
 import * as familyService from "../../services/familyService.js";
 import "./PatientFamilyLinks.css";
 
-const STATUS_LABELS = { pending: "รอการตอบรับ", active: "ติดตามอยู่" };
+const STATUS_LABELS = { pending: "รอการตอบรับ", requested: "ขอเชื่อมต่อ (รออนุมัติ)", active: "ติดตามอยู่" };
 
 export default function PatientFamilyLinks({ userId }) {
   const [links, setLinks] = useState(null);
@@ -29,7 +29,7 @@ export default function PatientFamilyLinks({ userId }) {
       <div className="ui-card-head">
         <div>
           <h2>ครอบครัวที่เชื่อมต่อ</h2>
-          <p>สมาชิกครอบครัวที่ผู้ใช้เชิญและเชื่อมต่ออยู่ในขณะนี้</p>
+          <p>สมาชิกครอบครัวที่ผู้ใช้เชิญ หรือขอเชื่อมต่อ และเชื่อมต่ออยู่ในขณะนี้</p>
         </div>
         <Users size={18} aria-hidden="true" />
       </div>

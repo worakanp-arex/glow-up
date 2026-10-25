@@ -13,6 +13,7 @@ import MyCoursesWidget from "../../components/user/MyCoursesWidget.jsx";
 import CounsellingStatusWidget from "../../components/user/CounsellingStatusWidget.jsx";
 import CommunityPreviewWidget from "../../components/user/CommunityPreviewWidget.jsx";
 import FamilyMissionsWidget from "../../components/common/FamilyMissionsWidget.jsx";
+import FamilyMessageCard from "../../components/user/FamilyMessageCard.jsx";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import NewsSection from "../../components/common/NewsSection.jsx";
 import ImageSlot from "../../components/common/ImageSlot.jsx";
@@ -28,6 +29,7 @@ function greetingName(user) {
 }
 
 const TODAY_LABEL = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "long", year: "numeric" });
+const RECENT_MESSAGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function Dashboard() {
   const { user } = useAuth();
@@ -35,6 +37,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [familyLinks, setFamilyLinks] = useState(null);
+  const [familyMessage, setFamilyMessage] = useState(null);
 
   useEffect(() => {
     emotionService
@@ -51,6 +54,15 @@ function Dashboard() {
       .catch(() => setFamilyLinks([]));
   }, []);
 
+  // The newest encouragement from family replaces the generic welcome text so it
+  // isn't only a line in the notification list.
+  useEffect(() => {
+    familyService
+      .getLatestFamilyMessage()
+      .then((data) => setFamilyMessage(data && data.message ? data : null))
+      .catch(() => setFamilyMessage(null));
+  }, []);
+
   // A family member accepts an invite through their own regular account, so
   // the same "user" role can view either dashboard depending on whether
   // they're actively linked as someone's family follower. Wait for the check
@@ -65,6 +77,8 @@ function Dashboard() {
 
   if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
+  const showFamilyMessage = Boolean(familyMessage) && (!familyMessage.message.readAt || Date.now() - new Date(familyMessage.message.createdAt).getTime() < RECENT_MESSAGE_MS);
+
   return (
     <div className="dashboard-page">
       <PageHeader
@@ -77,13 +91,19 @@ function Dashboard() {
 
       <section className="dashboard-hero">
         <div className="dashboard-hero-copy">
-          <p className="dashboard-hero-eyebrow">ยินดีที่ได้เจอกันอีกครั้ง</p>
+          <p className="dashboard-hero-eyebrow">{showFamilyMessage ? "มีกำลังใจจากครอบครัวถึงคุณ" : "ยินดีที่ได้เจอกันอีกครั้ง"}</p>
           <h2>สวัสดี คุณ{greetingName(user)}</h2>
-          <p>ทุกก้าวมีความหมาย<br />ค่อย ๆ ไปในจังหวะที่เหมาะกับคุณ</p>
-          <div className="dashboard-hero-meta">
-            <span><Sparkles size={14} aria-hidden="true" />เริ่มจากสิ่งเล็ก ๆ ที่ทำได้วันนี้</span>
-            <StatusBadge status={user.verifiedStatus} />
-          </div>
+          {showFamilyMessage ? (
+            <FamilyMessageCard data={familyMessage} onChange={setFamilyMessage} />
+          ) : (
+            <>
+              <p>ทุกก้าวมีความหมาย<br />ค่อย ๆ ไปในจังหวะที่เหมาะกับคุณ</p>
+              <div className="dashboard-hero-meta">
+                <span><Sparkles size={14} aria-hidden="true" />เริ่มจากสิ่งเล็ก ๆ ที่ทำได้วันนี้</span>
+                <StatusBadge status={user.verifiedStatus} />
+              </div>
+            </>
+          )}
         </div>
         <ImageSlot className="dashboard-hero-art" src="/images/illustrations/mascot.webp" alt="" />
       </section>

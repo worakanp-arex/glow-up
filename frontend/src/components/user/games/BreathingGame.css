@@ -1,0 +1,11 @@
+.breathing-game { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 8px 0 4px; text-align: center; }
+.breathing-orb { display: grid; place-items: center; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, var(--color-primary-200), var(--color-primary-500)); color: #fff; font-size: 2.4rem; font-weight: 600; box-shadow: 0 12px 36px rgb(40 127 194 / 28%); transform: scale(.7); transition: transform var(--phase-seconds, 1s) ease-in-out; }
+.breathing-orb.is-idle { transform: scale(.85); font-size: 1.3rem; }
+.breathing-orb.is-inhale { transform: scale(1.12); }
+.breathing-orb.is-hold { transform: scale(1.12); box-shadow: 0 12px 44px rgb(40 127 194 / 42%); }
+.breathing-orb.is-exhale { transform: scale(.7); }
+.breathing-label { margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--color-text); }
+.breathing-intro { max-width: 420px; margin: 0; font-size: .9rem; line-height: 1.7; color: var(--color-text-secondary); }
+.breathing-steps { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: .85rem; color: var(--color-text-secondary); }
+.breathing-steps b { color: var(--color-primary-700); }
+@media (prefers-reduced-motion: reduce) { .breathing-orb { transition: none; } }

@@ -1,14 +1,19 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
+import EditorDialog from "../../components/common/EditorDialog.jsx";
+import IconPicker from "../../components/common/IconPicker.jsx";
+import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
+import ActivityMissionManager from "../../components/missions/ActivityMissionManager.jsx";
 import { useEffect, useState } from "react";
-import { Award, Check, Heart, Layers, Pencil, Plus, Sliders, Trash2, Trophy, X } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { CalendarDays, CheckCircle2, Pencil, Plus, Power, Trash2, Trophy } from "lucide-react";
 import * as missionService from "../../services/missionService.js";
 import * as rewardService from "../../services/rewardService.js";
 import * as familyMissionService from "../../services/familyMissionService.js";
 import * as missionCategoryService from "../../services/missionCategoryService.js";
 import * as adminService from "../../services/adminService.js";
-import { ICON_NAMES } from "../../utils/lucideIcon.js";
-import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
+import { resolveIcon } from "../../utils/lucideIcon.js";
+import { formatCourseDate, toDateInputValue } from "../../utils/courseDates.js";
 import "./MissionManagement.css";
 
 const MISSION_TYPE_LABELS = {
@@ -18,52 +23,443 @@ const MISSION_TYPE_LABELS = {
   custom: "กำหนดเอง (เจ้าหน้าที่ทำเครื่องหมายสำเร็จเอง)",
 };
 
-const INITIAL_MISSION_FORM = {
-  title: "",
-  description: "",
-  type: "streak",
-  targetValue: 7,
-  rewardPoints: 10,
-  badgeIcon: "",
-  active: true,
-};
-const INITIAL_REWARD_FORM = { name: "", description: "", icon: "", pointsRequired: 10 };
-const INITIAL_FAMILY_MISSION_FORM = { title: "", description: "", points: 10 };
-const INITIAL_CATEGORY_FORM = { key: "", label: "", icon: "", order: 0 };
+const TABS = [
+  { key: "missions", label: "ภารกิจสะสมแต้ม" },
+  { key: "rewards", label: "เหรียญตรา / รางวัล" },
+  { key: "daily", label: "ภารกิจประจำวัน" },
+  { key: "family", label: "ภารกิจครอบครัว" },
+  { key: "categories", label: "หมวดภารกิจ" },
+  { key: "levels", label: "ตั้งค่าระดับ" },
+];
+
+const EMPTY_MISSION = { title: "", description: "", type: "streak", targetValue: 7, rewardPoints: 10, badgeIcon: "", order: 0, startDate: "", endDate: "", active: true };
+const EMPTY_REWARD = { name: "", description: "", icon: "", pointsRequired: 10 };
+const EMPTY_FAMILY = { title: "", description: "", points: 10, active: true };
+const EMPTY_CATEGORY = { key: "", label: "", icon: "", order: 0 };
+
+// One row of any catalogue: the real icon, a title, chips and edit / delete actions.
+function Row({ icon, title, description, chips, muted, actions }) {
+  const Icon = resolveIcon(icon);
+  return (
+    <li className={`ui-card mission-row${muted ? " is-muted" : ""}`}>
+      <span className="mission-row-icon" aria-hidden="true"><Icon size={22} /></span>
+      <div className="mission-row-body">
+        <p className="mission-row-title">{title}</p>
+        {description && <p className="mission-row-desc">{description}</p>}
+        <p className="mission-row-chips">{chips}</p>
+      </div>
+      <div className="mission-row-actions">{actions}</div>
+    </li>
+  );
+}
+
+function Toolbar({ label, onAdd }) {
+  return (
+    <div className="mission-toolbar">
+      <button type="button" className="ui-btn ui-btn-primary" onClick={onAdd}><Plus size={16} aria-hidden="true" />{label}</button>
+    </div>
+  );
+}
+
+function ActionButton({ icon: Icon, label, onClick, danger = false }) {
+  return <button type="button" className={danger ? "is-danger" : ""} title={label} aria-label={label} onClick={onClick}><Icon size={16} /></button>;
+}
+
+function Check({ checked, onChange, children }) {
+  return (
+    <label className="ui-choice">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <span className="ui-choice-mark" aria-hidden="true"><CheckCircle2 size={13} /></span>
+      <span className="ui-choice-text">{children}</span>
+    </label>
+  );
+}
+
+function Field({ label, children }) {
+  return <label className="ui-field">{label}{children}</label>;
+}
+
+function periodChip(item) {
+  if (!item.startDate && !item.endDate) return null;
+  const text = [item.startDate && `เริ่ม ${formatCourseDate(item.startDate)}`, item.endDate && `สิ้นสุด ${formatCourseDate(item.endDate)}`].filter(Boolean).join(" · ");
+  return <span className="ui-chip ui-chip-neutral"><CalendarDays size={12} aria-hidden="true" />{text}</span>;
+}
+
+function MissionsTab({ items, setItems, notify }) {
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState(EMPTY_MISSION);
+  const { confirm, confirmDialog } = useConfirmDialog();
+  const set = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
+  const invalidPeriod = form.startDate && form.endDate && form.endDate < form.startDate;
+
+  function open(mission) {
+    setForm(mission ? {
+      title: mission.title,
+      description: mission.description || "",
+      type: mission.type,
+      targetValue: mission.targetValue,
+      rewardPoints: mission.rewardPoints ?? 0,
+      badgeIcon: mission.badgeIcon || "",
+      order: mission.order ?? 0,
+      startDate: toDateInputValue(mission.startDate),
+      endDate: toDateInputValue(mission.endDate),
+      active: mission.active !== false,
+    } : EMPTY_MISSION);
+    setEditing(mission || "new");
+  }
+
+  async function save() {
+    const payload = { ...form, targetValue: Number(form.targetValue), rewardPoints: Number(form.rewardPoints), order: Number(form.order) || 0 };
+    if (editing === "new") {
+      const created = await missionService.createMission(payload);
+      setItems((prev) => [created, ...prev]);
+    } else {
+      const updated = await missionService.updateMission(editing._id, payload);
+      setItems((prev) => prev.map((item) => (item._id === updated._id ? updated : item)));
+    }
+  }
+
+  async function toggle(mission) {
+    const updated = await missionService.updateMission(mission._id, { active: !mission.active });
+    setItems((prev) => prev.map((item) => (item._id === updated._id ? updated : item)));
+  }
+
+  function remove(mission) {
+    confirm({
+      title: "ลบภารกิจ",
+      message: `ต้องการลบภารกิจ "${mission.title}" ใช่ไหม? ถ้ามีผู้ใช้งานทำสำเร็จไปแล้ว ระบบจะซ่อนภารกิจแทนการลบ เพื่อไม่ให้แต้มที่เคยได้รับหายไป`,
+      confirmLabel: "ลบภารกิจ",
+      onConfirm: async () => {
+        const result = await missionService.deleteMission(mission._id);
+        if (result?.archived) {
+          setItems((prev) => prev.map((item) => (item._id === mission._id ? result.mission : item)));
+          notify(`ภารกิจ "${mission.title}" มีผู้ทำสำเร็จแล้ว ${result.completedBy} คน จึงถูกปิดใช้งานแทนการลบ`);
+        } else {
+          setItems((prev) => prev.filter((item) => item._id !== mission._id));
+          notify(`ลบภารกิจ "${mission.title}" แล้ว`);
+        }
+      },
+    });
+  }
+
+  return (
+    <>
+      {confirmDialog}
+      <Toolbar label="เพิ่มภารกิจ" onAdd={() => open(null)} />
+      {items.length === 0 ? <p className="mission-empty">ยังไม่มีภารกิจในระบบ</p> : (
+        <ul className="mission-list">
+          {items.map((mission) => (
+            <Row
+              key={mission._id}
+              icon={mission.badgeIcon}
+              muted={!mission.active}
+              title={mission.title}
+              description={mission.description}
+              chips={<>
+                <span className="ui-chip">{MISSION_TYPE_LABELS[mission.type]}</span>
+                <span className="ui-chip ui-chip-neutral">เป้าหมาย {mission.targetValue}</span>
+                <span className="ui-chip ui-chip-peach">+{mission.rewardPoints} แต้ม</span>
+                {periodChip(mission)}
+                {!mission.active && <span className="mission-off-tag">ปิดใช้งาน</span>}
+              </>}
+              actions={<>
+                <ActionButton icon={Pencil} label={`แก้ไข ${mission.title}`} onClick={() => open(mission)} />
+                <ActionButton icon={Power} label={mission.active ? `ปิดใช้งาน ${mission.title}` : `เปิดใช้งาน ${mission.title}`} onClick={() => toggle(mission)} />
+                <ActionButton icon={Trash2} danger label={`ลบ ${mission.title}`} onClick={() => remove(mission)} />
+              </>}
+            />
+          ))}
+        </ul>
+      )}
+
+      {editing && (
+        <EditorDialog title={editing === "new" ? "เพิ่มภารกิจสะสมแต้ม" : "แก้ไขภารกิจ"} onSave={save} onClose={() => setEditing(null)} saveDisabled={!form.title.trim() || invalidPeriod}>
+          <Field label="ชื่อภารกิจ"><input type="text" value={form.title} onChange={(e) => set("title", e.target.value)} required maxLength={200} /></Field>
+          <Field label="คำอธิบายภารกิจ"><textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} maxLength={1000} /></Field>
+          <div className="editor-dialog-row">
+            <Field label="ประเภท (เปลี่ยนไม่ได้หลังสร้าง)">
+              <select value={form.type} onChange={(e) => set("type", e.target.value)} disabled={editing !== "new"}>
+                {Object.entries(MISSION_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </Field>
+            <Field label="เป้าหมาย (จำนวนวัน/ครั้ง)"><input type="number" min={1} value={form.targetValue} onChange={(e) => set("targetValue", e.target.value)} /></Field>
+          </div>
+          <div className="editor-dialog-row">
+            <Field label="แต้มรางวัล"><input type="number" min={0} value={form.rewardPoints} onChange={(e) => set("rewardPoints", e.target.value)} /></Field>
+            <Field label="ลำดับการแสดงผล (น้อยขึ้นก่อน)"><input type="number" min={0} value={form.order} onChange={(e) => set("order", e.target.value)} /></Field>
+          </div>
+          <IconPicker label="ไอคอนตรา" value={form.badgeIcon} onChange={(value) => set("badgeIcon", value)} />
+          <div className="editor-dialog-row">
+            <Field label="เริ่มรับความคืบหน้า (ถ้ามี)"><input type="date" value={form.startDate} onChange={(e) => set("startDate", e.target.value)} /></Field>
+            <Field label="สิ้นสุดวันที่ (ถ้ามี)"><input type="date" value={form.endDate} min={form.startDate || undefined} onChange={(e) => set("endDate", e.target.value)} /></Field>
+          </div>
+          {invalidPeriod && <p className="dialog-error" role="alert">วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่ม</p>}
+          <Check checked={form.active} onChange={(value) => set("active", value)}>เปิดใช้งาน (แสดงบนบอร์ดภารกิจของผู้ใช้งาน)</Check>
+        </EditorDialog>
+      )}
+    </>
+  );
+}
+
+function RewardsTab({ items, setItems }) {
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState(EMPTY_REWARD);
+  const { confirm, confirmDialog } = useConfirmDialog();
+  const set = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
+
+  function open(reward) {
+    setForm(reward ? { name: reward.name, description: reward.description || "", icon: reward.icon || "", pointsRequired: reward.pointsRequired } : EMPTY_REWARD);
+    setEditing(reward || "new");
+  }
+
+  async function save() {
+    const payload = { ...form, pointsRequired: Number(form.pointsRequired) };
+    if (editing === "new") {
+      const created = await rewardService.createReward(payload);
+      setItems((prev) => [created, ...prev]);
+    } else {
+      const updated = await rewardService.updateReward(editing._id, payload);
+      setItems((prev) => prev.map((item) => (item._id === updated._id ? updated : item)));
+    }
+  }
+
+  function remove(reward) {
+    confirm({
+      title: "ลบเหรียญตรา",
+      message: `ต้องการลบเหรียญตรา "${reward.name}" ใช่ไหม? ผู้ใช้งานที่ได้รับเหรียญนี้ไปแล้วจะไม่เห็นเหรียญนี้อีก`,
+      confirmLabel: "ลบเหรียญตรา",
+      onConfirm: async () => {
+        await rewardService.deleteReward(reward._id);
+        setItems((prev) => prev.filter((item) => item._id !== reward._id));
+      },
+    });
+  }
+
+  return (
+    <>
+      {confirmDialog}
+      <Toolbar label="เพิ่มเหรียญตรา" onAdd={() => open(null)} />
+      {items.length === 0 ? <p className="mission-empty">ยังไม่มีเหรียญตราในระบบ</p> : (
+        <ul className="mission-list">
+          {items.map((reward) => (
+            <Row
+              key={reward._id}
+              icon={reward.icon}
+              title={reward.name}
+              description={reward.description}
+              chips={<span className="ui-chip ui-chip-peach">ต้องการ {reward.pointsRequired} แต้ม</span>}
+              actions={<>
+                <ActionButton icon={Pencil} label={`แก้ไข ${reward.name}`} onClick={() => open(reward)} />
+                <ActionButton icon={Trash2} danger label={`ลบ ${reward.name}`} onClick={() => remove(reward)} />
+              </>}
+            />
+          ))}
+        </ul>
+      )}
+      {editing && (
+        <EditorDialog title={editing === "new" ? "เพิ่มเหรียญตรา" : "แก้ไขเหรียญตรา"} onSave={save} onClose={() => setEditing(null)} saveDisabled={!form.name.trim()}>
+          <Field label="ชื่อเหรียญตรา"><input type="text" value={form.name} onChange={(e) => set("name", e.target.value)} required maxLength={200} /></Field>
+          <Field label="คำอธิบาย"><textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} maxLength={1000} /></Field>
+          <Field label="คะแนนสะสมที่ต้องการ"><input type="number" min={0} value={form.pointsRequired} onChange={(e) => set("pointsRequired", e.target.value)} /></Field>
+          <IconPicker label="ไอคอน" value={form.icon} onChange={(value) => set("icon", value)} />
+        </EditorDialog>
+      )}
+    </>
+  );
+}
+
+function FamilyTab({ items, setItems }) {
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState(EMPTY_FAMILY);
+  const { confirm, confirmDialog } = useConfirmDialog();
+  const set = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
+
+  function open(mission) {
+    setForm(mission ? { title: mission.title, description: mission.description || "", points: mission.points ?? 0, active: mission.active !== false } : EMPTY_FAMILY);
+    setEditing(mission || "new");
+  }
+
+  async function save() {
+    const payload = { ...form, points: Number(form.points) };
+    if (editing === "new") {
+      const created = await familyMissionService.createFamilyMission(payload);
+      setItems((prev) => [created, ...prev]);
+    } else {
+      const updated = await familyMissionService.updateFamilyMission(editing._id, payload);
+      setItems((prev) => prev.map((item) => (item._id === updated._id ? updated : item)));
+    }
+  }
+
+  async function toggle(mission) {
+    const updated = await familyMissionService.updateFamilyMission(mission._id, { active: !mission.active });
+    setItems((prev) => prev.map((item) => (item._id === updated._id ? updated : item)));
+  }
+
+  function remove(mission) {
+    confirm({
+      title: "ลบภารกิจครอบครัว",
+      message: `ต้องการลบภารกิจครอบครัว "${mission.title}" ใช่ไหม? ถ้าต้องการเก็บประวัติแต้มไว้ ให้ปิดใช้งานแทนการลบ`,
+      confirmLabel: "ลบภารกิจ",
+      onConfirm: async () => {
+        await familyMissionService.deleteFamilyMission(mission._id);
+        setItems((prev) => prev.filter((item) => item._id !== mission._id));
+      },
+    });
+  }
+
+  return (
+    <>
+      {confirmDialog}
+      <Toolbar label="เพิ่มภารกิจครอบครัว" onAdd={() => open(null)} />
+      {items.length === 0 ? <p className="mission-empty">ยังไม่มีภารกิจครอบครัวในระบบ</p> : (
+        <ul className="mission-list">
+          {items.map((mission) => (
+            <Row
+              key={mission._id}
+              icon="HeartHandshake"
+              muted={mission.active === false}
+              title={mission.title}
+              description={mission.description}
+              chips={<>
+                <span className="ui-chip ui-chip-peach">+{mission.points} แต้ม เมื่อยืนยันครบทั้งสองฝ่าย</span>
+                {mission.active === false && <span className="mission-off-tag">ปิดใช้งาน</span>}
+              </>}
+              actions={<>
+                <ActionButton icon={Pencil} label={`แก้ไข ${mission.title}`} onClick={() => open(mission)} />
+                <ActionButton icon={Power} label={mission.active === false ? `เปิดใช้งาน ${mission.title}` : `ปิดใช้งาน ${mission.title}`} onClick={() => toggle(mission)} />
+                <ActionButton icon={Trash2} danger label={`ลบ ${mission.title}`} onClick={() => remove(mission)} />
+              </>}
+            />
+          ))}
+        </ul>
+      )}
+      {editing && (
+        <EditorDialog title={editing === "new" ? "เพิ่มภารกิจครอบครัว" : "แก้ไขภารกิจครอบครัว"} onSave={save} onClose={() => setEditing(null)} saveDisabled={!form.title.trim()}>
+          <Field label="ชื่อภารกิจ"><input type="text" value={form.title} onChange={(e) => set("title", e.target.value)} required maxLength={200} /></Field>
+          <Field label="คำอธิบายภารกิจ"><textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} maxLength={1000} /></Field>
+          <Field label="แต้มรางวัล (ให้ผู้ใช้งานเมื่อยืนยันครบทั้งสองฝ่าย)"><input type="number" min={0} value={form.points} onChange={(e) => set("points", e.target.value)} /></Field>
+          <Check checked={form.active} onChange={(value) => set("active", value)}>เปิดใช้งาน</Check>
+        </EditorDialog>
+      )}
+    </>
+  );
+}
+
+function CategoriesTab({ items, setItems }) {
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState(EMPTY_CATEGORY);
+  const { confirm, confirmDialog } = useConfirmDialog();
+  const set = (name, value) => setForm((prev) => ({ ...prev, [name]: value }));
+  const sortByOrder = (list) => [...list].sort((a, b) => a.order - b.order);
+
+  function open(category) {
+    setForm(category ? { key: category.key, label: category.label, icon: category.icon || "", order: category.order ?? 0 } : EMPTY_CATEGORY);
+    setEditing(category || "new");
+  }
+
+  async function save() {
+    if (editing === "new") {
+      const created = await missionCategoryService.createMissionCategory({ ...form, order: Number(form.order) });
+      setItems((prev) => sortByOrder([...prev, created]));
+    } else {
+      const updated = await missionCategoryService.updateMissionCategory(editing._id, { label: form.label, icon: form.icon, order: Number(form.order) });
+      setItems((prev) => sortByOrder(prev.map((item) => (item._id === updated._id ? updated : item))));
+    }
+  }
+
+  function remove(category) {
+    confirm({
+      title: "ลบหมวดภารกิจ",
+      message: `ต้องการลบหมวดภารกิจ "${category.label}" ใช่ไหม? ถ้ายังมีภารกิจใช้หมวดนี้อยู่ ระบบจะไม่อนุญาตให้ลบ`,
+      confirmLabel: "ลบหมวด",
+      errorMessage: "ลบหมวดภารกิจไม่สำเร็จ",
+      onConfirm: async () => {
+        await missionCategoryService.deleteMissionCategory(category._id);
+        setItems((prev) => prev.filter((item) => item._id !== category._id));
+      },
+    });
+  }
+
+  return (
+    <>
+      {confirmDialog}
+      <Toolbar label="เพิ่มหมวดภารกิจ" onAdd={() => open(null)} />
+      {items.length === 0 ? <p className="mission-empty">ยังไม่มีหมวดภารกิจในระบบ</p> : (
+        <ul className="mission-list">
+          {items.map((category) => (
+            <Row
+              key={category._id}
+              icon={category.icon}
+              title={category.label}
+              chips={<><span className="ui-chip ui-chip-neutral">รหัส: {category.key}</span><span className="ui-chip">ลำดับ {category.order}</span></>}
+              actions={<>
+                <ActionButton icon={Pencil} label={`แก้ไข ${category.label}`} onClick={() => open(category)} />
+                <ActionButton icon={Trash2} danger label={`ลบ ${category.label}`} onClick={() => remove(category)} />
+              </>}
+            />
+          ))}
+        </ul>
+      )}
+      {editing && (
+        <EditorDialog title={editing === "new" ? "เพิ่มหมวดภารกิจ" : "แก้ไขหมวดภารกิจ"} onSave={save} onClose={() => setEditing(null)} saveDisabled={!form.label.trim() || !/^[a-z0-9_]+$/.test(form.key)}>
+          <Field label="รหัสหมวด (ภาษาอังกฤษพิมพ์เล็ก ไม่เว้นวรรค — เปลี่ยนไม่ได้หลังสร้าง)">
+            <input type="text" value={form.key} onChange={(e) => set("key", e.target.value)} pattern="[a-z0-9_]+" placeholder="เช่น vocational" disabled={editing !== "new"} required />
+          </Field>
+          <Field label="ชื่อหมวด"><input type="text" value={form.label} onChange={(e) => set("label", e.target.value)} required /></Field>
+          <Field label="ลำดับการแสดงผล"><input type="number" value={form.order} onChange={(e) => set("order", e.target.value)} /></Field>
+          <IconPicker label="ไอคอนของหมวด" value={form.icon} onChange={(value) => set("icon", value)} />
+        </EditorDialog>
+      )}
+    </>
+  );
+}
+
+function LevelsTab({ pointsPerLevel, setPointsPerLevel }) {
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  async function save(event) {
+    event.preventDefault();
+    setSaving(true);
+    setSaved(false);
+    setError("");
+    try {
+      await adminService.updatePointsPerLevel(Number(pointsPerLevel));
+      setSaved(true);
+    } catch (err) {
+      setError(err.response?.data?.message || "บันทึกไม่สำเร็จ");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form className="ui-card mission-level-form" onSubmit={save}>
+      <div className="ui-card-head"><div><h2>คะแนนสะสมต่อ 1 เลเวล</h2><p>ผู้ใช้งานทุกคนจะเลื่อนเลเวลทุกครั้งที่ได้แต้มครบจำนวนนี้ การเปลี่ยนค่ามีผลกับทุกคนทันที</p></div></div>
+      <label className="ui-field">
+        แต้มต่อเลเวล
+        <input type="number" min={1} value={pointsPerLevel} onChange={(e) => { setPointsPerLevel(e.target.value); setSaved(false); }} />
+      </label>
+      {saved && <p className="mission-level-saved" role="status">บันทึกแล้ว</p>}
+      {error && <p className="dialog-error" role="alert">{error}</p>}
+      <button type="submit" className="ui-btn ui-btn-primary" disabled={saving || !pointsPerLevel}>{saving ? "กำลังบันทึก..." : "บันทึก"}</button>
+    </form>
+  );
+}
 
 function MissionManagement() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requested = searchParams.get("tab");
+  const tab = TABS.some((item) => item.key === requested) ? requested : "missions";
   const [missions, setMissions] = useState([]);
   const [rewards, setRewards] = useState([]);
+  const [familyMissions, setFamilyMissions] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [pointsPerLevel, setPointsPerLevel] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
-
-  const [missionForm, setMissionForm] = useState(INITIAL_MISSION_FORM);
-  const [savingMission, setSavingMission] = useState(false);
-  const [missionError, setMissionError] = useState("");
-  const [editingMissionId, setEditingMissionId] = useState(null);
-  const [missionEditForm, setMissionEditForm] = useState(null);
-
-  const [rewardForm, setRewardForm] = useState(INITIAL_REWARD_FORM);
-  const [savingReward, setSavingReward] = useState(false);
-  const [rewardError, setRewardError] = useState("");
-  const [editingRewardId, setEditingRewardId] = useState(null);
-  const [rewardEditForm, setRewardEditForm] = useState(null);
-
-  const [familyMissions, setFamilyMissions] = useState([]);
-  const [familyMissionForm, setFamilyMissionForm] = useState(INITIAL_FAMILY_MISSION_FORM);
-  const [savingFamilyMission, setSavingFamilyMission] = useState(false);
-  const [familyMissionError, setFamilyMissionError] = useState("");
-
-  const [categories, setCategories] = useState([]);
-  const [categoryForm, setCategoryForm] = useState(INITIAL_CATEGORY_FORM);
-  const [savingCategory, setSavingCategory] = useState(false);
-  const [categoryError, setCategoryError] = useState("");
-  const [editingCategoryId, setEditingCategoryId] = useState(null);
-  const [categoryEditForm, setCategoryEditForm] = useState(null);
-
-  const [pointsPerLevel, setPointsPerLevel] = useState("");
-  const [savingLevelSetting, setSavingLevelSetting] = useState(false);
-  const [levelSettingSaved, setLevelSettingSaved] = useState(false);
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -78,663 +474,39 @@ function MissionManagement() {
         setRewards(rewardData);
         setFamilyMissions(familyMissionData);
         setCategories(categoryData);
-        setPointsPerLevel(String(levelSetting.pointsPerLevel));
+        setPointsPerLevel(String(levelSetting.pointsPerLevel ?? ""));
       })
       .catch((err) => setLoadError(err))
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleCreateMission(e) {
-    e.preventDefault();
-    setMissionError("");
-    setSavingMission(true);
-    try {
-      const created = await missionService.createMission({
-        ...missionForm,
-        targetValue: Number(missionForm.targetValue),
-        rewardPoints: Number(missionForm.rewardPoints),
-      });
-      setMissions((prev) => [created, ...prev]);
-      setMissionForm(INITIAL_MISSION_FORM);
-    } catch (err) {
-      setMissionError(err.response?.data?.message || "เพิ่มภารกิจไม่สำเร็จ");
-    } finally {
-      setSavingMission(false);
-    }
-  }
+  const header = (
+    <PageHeader icon={Trophy} eyebrow="Admin" description="กำหนดภารกิจ คะแนน และเหรียญตราที่ผู้ใช้งานจะได้รับ แก้ไข ปิดใช้งาน หรือลบได้อิสระ ไอคอนเลือกจากภาพตัวอย่างได้เลย">
+      จัดการภารกิจ คะแนน และเหรียญตรา
+    </PageHeader>
+  );
 
-  function startEditMission(mission) {
-    setEditingMissionId(mission._id);
-    setMissionEditForm({ ...mission });
-  }
-
-  async function saveEditMission() {
-    const updated = await missionService.updateMission(editingMissionId, {
-      ...missionEditForm,
-      targetValue: Number(missionEditForm.targetValue),
-      rewardPoints: Number(missionEditForm.rewardPoints),
-    });
-    setMissions((prev) => prev.map((m) => (m._id === updated._id ? updated : m)));
-    setEditingMissionId(null);
-  }
-
-  const { confirm, confirmDialog } = useConfirmDialog();
-
-  function handleDeleteMission(mission) {
-    confirm({
-      title: "ลบภารกิจ",
-      message: `ต้องการลบภารกิจ "${mission.title}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
-      confirmLabel: "ลบภารกิจ",
-      onConfirm: async () => {
-        await missionService.deleteMission(mission._id);
-        setMissions((prev) => prev.filter((m) => m._id !== mission._id));
-      },
-    });
-  }
-
-  async function handleCreateReward(e) {
-    e.preventDefault();
-    setRewardError("");
-    setSavingReward(true);
-    try {
-      const created = await rewardService.createReward({
-        ...rewardForm,
-        pointsRequired: Number(rewardForm.pointsRequired),
-      });
-      setRewards((prev) => [created, ...prev]);
-      setRewardForm(INITIAL_REWARD_FORM);
-    } catch (err) {
-      setRewardError(err.response?.data?.message || "เพิ่มเหรียญตราไม่สำเร็จ");
-    } finally {
-      setSavingReward(false);
-    }
-  }
-
-  function startEditReward(reward) {
-    setEditingRewardId(reward._id);
-    setRewardEditForm({ ...reward });
-  }
-
-  async function saveEditReward() {
-    const updated = await rewardService.updateReward(editingRewardId, {
-      ...rewardEditForm,
-      pointsRequired: Number(rewardEditForm.pointsRequired),
-    });
-    setRewards((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
-    setEditingRewardId(null);
-  }
-
-  function handleDeleteReward(reward) {
-    confirm({
-      title: "ลบเหรียญตรา",
-      message: `ต้องการลบเหรียญตรา "${reward.name}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
-      confirmLabel: "ลบเหรียญตรา",
-      onConfirm: async () => {
-        await rewardService.deleteReward(reward._id);
-        setRewards((prev) => prev.filter((r) => r._id !== reward._id));
-      },
-    });
-  }
-
-  async function handleCreateFamilyMission(e) {
-    e.preventDefault();
-    setFamilyMissionError("");
-    setSavingFamilyMission(true);
-    try {
-      const created = await familyMissionService.createFamilyMission({
-        ...familyMissionForm,
-        points: Number(familyMissionForm.points),
-      });
-      setFamilyMissions((prev) => [created, ...prev]);
-      setFamilyMissionForm(INITIAL_FAMILY_MISSION_FORM);
-    } catch (err) {
-      setFamilyMissionError(err.response?.data?.message || "เพิ่มภารกิจครอบครัวไม่สำเร็จ");
-    } finally {
-      setSavingFamilyMission(false);
-    }
-  }
-
-  function handleDeleteFamilyMission(mission) {
-    confirm({
-      title: "ลบภารกิจครอบครัว",
-      message: `ต้องการลบภารกิจครอบครัว "${mission.title}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
-      confirmLabel: "ลบภารกิจ",
-      onConfirm: async () => {
-        await familyMissionService.deleteFamilyMission(mission._id);
-        setFamilyMissions((prev) => prev.filter((m) => m._id !== mission._id));
-      },
-    });
-  }
-
-  async function handleCreateCategory(e) {
-    e.preventDefault();
-    setCategoryError("");
-    setSavingCategory(true);
-    try {
-      const created = await missionCategoryService.createMissionCategory({
-        ...categoryForm,
-        order: Number(categoryForm.order),
-      });
-      setCategories((prev) => [...prev, created].sort((a, b) => a.order - b.order));
-      setCategoryForm(INITIAL_CATEGORY_FORM);
-    } catch (err) {
-      setCategoryError(err.response?.data?.message || "เพิ่มหมวดภารกิจไม่สำเร็จ");
-    } finally {
-      setSavingCategory(false);
-    }
-  }
-
-  function startEditCategory(category) {
-    setEditingCategoryId(category._id);
-    setCategoryEditForm({ ...category });
-  }
-
-  async function saveEditCategory() {
-    const updated = await missionCategoryService.updateMissionCategory(editingCategoryId, {
-      label: categoryEditForm.label,
-      icon: categoryEditForm.icon,
-      order: Number(categoryEditForm.order),
-    });
-    setCategories((prev) => prev.map((c) => (c._id === updated._id ? updated : c)).sort((a, b) => a.order - b.order));
-    setEditingCategoryId(null);
-  }
-
-  function handleDeleteCategory(category) {
-    confirm({
-      title: "ลบหมวดภารกิจ",
-      message: `ต้องการลบหมวดภารกิจ "${category.label}" ใช่ไหม?`,
-      confirmLabel: "ลบหมวด",
-      errorMessage: "ลบหมวดภารกิจไม่สำเร็จ",
-      onConfirm: async () => {
-        await missionCategoryService.deleteMissionCategory(category._id);
-        setCategories((prev) => prev.filter((c) => c._id !== category._id));
-      },
-    });
-  }
-
-  async function handleSaveLevelSetting(e) {
-    e.preventDefault();
-    setSavingLevelSetting(true);
-    setLevelSettingSaved(false);
-    try {
-      await adminService.updatePointsPerLevel(Number(pointsPerLevel));
-      setLevelSettingSaved(true);
-    } finally {
-      setSavingLevelSetting(false);
-    }
-  }
-
-  if (loadError) {
-    return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
-  }
-  if (loading) {
-    return <div className="mission-management-page"><AsyncState /></div>;
-  }
+  if (loadError) return <div className="mission-management-page">{header}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
+  if (loading) return <div className="mission-management-page">{header}<AsyncState /></div>;
 
   return (
     <div className="mission-management-page">
-      {confirmDialog}
-      <datalist id="lucide-icon-names">
-        {ICON_NAMES.map((name) => (
-          <option key={name} value={name} />
+      {header}
+      <div className="ui-tabs" role="tablist" aria-label="หมวดการจัดการ">
+        {TABS.map((item) => (
+          <button key={item.key} type="button" role="tab" aria-selected={tab === item.key} className="ui-tab" onClick={() => { setNotice(""); setSearchParams(item.key === "missions" ? {} : { tab: item.key }); }}>
+            {item.label}
+          </button>
         ))}
-      </datalist>
-      <PageHeader
-        icon={Trophy}
-        description="กำหนดภารกิจสะสมแต้ม เกณฑ์คะแนน และเหรียญตราที่ผู้ใช้งานจะได้รับเมื่อทำภารกิจสำเร็จ"
-      >
-        จัดการภารกิจ คะแนน และเหรียญตรา
-      </PageHeader>
+      </div>
+      {notice && <p className="mission-notice" role="status">{notice}</p>}
 
-      <section className="mission-management-section">
-        <h2>
-          <Sliders size={18} />
-          <span>ตั้งค่าระดับ (Level)</span>
-        </h2>
-        <form className="mission-management-level-form" onSubmit={handleSaveLevelSetting}>
-          <label>
-            คะแนนสะสมต่อ 1 เลเวล
-            <input
-              type="number"
-              min={1}
-              value={pointsPerLevel}
-              onChange={(e) => { setPointsPerLevel(e.target.value); setLevelSettingSaved(false); }}
-            />
-          </label>
-          {levelSettingSaved && <span className="mission-management-level-saved">บันทึกแล้ว</span>}
-          <button type="submit" className="btn btn-primary" disabled={savingLevelSetting || !pointsPerLevel}>
-            {savingLevelSetting ? "กำลังบันทึก..." : "บันทึก"}
-          </button>
-        </form>
-      </section>
-
-      <section className="mission-management-section">
-        <h2>
-          <Layers size={18} />
-          <span>หมวดภารกิจ</span>
-        </h2>
-
-        <form className="mission-management-form" onSubmit={handleCreateCategory}>
-          <div className="mission-management-form-grid">
-            <label>
-              รหัสหมวด (ภาษาอังกฤษ, ไม่เว้นวรรค)
-              <input
-                type="text"
-                placeholder="เช่น vocational"
-                value={categoryForm.key}
-                onChange={(e) => setCategoryForm((f) => ({ ...f, key: e.target.value }))}
-                pattern="[a-z0-9_]+"
-                required
-              />
-            </label>
-            <label>
-              ชื่อหมวด
-              <input
-                type="text"
-                value={categoryForm.label}
-                onChange={(e) => setCategoryForm((f) => ({ ...f, label: e.target.value }))}
-                required
-              />
-            </label>
-            <label>
-              ไอคอน (ชื่อไอคอนจาก lucide-react)
-              <input
-                type="text"
-                list="lucide-icon-names"
-                placeholder="เช่น Briefcase"
-                value={categoryForm.icon}
-                onChange={(e) => setCategoryForm((f) => ({ ...f, icon: e.target.value }))}
-              />
-            </label>
-            <label>
-              ลำดับการแสดงผล
-              <input
-                type="number"
-                value={categoryForm.order}
-                onChange={(e) => setCategoryForm((f) => ({ ...f, order: e.target.value }))}
-              />
-            </label>
-          </div>
-          {categoryError && <p className="mission-management-error">{categoryError}</p>}
-          <button type="submit" className="btn btn-primary" disabled={savingCategory}>
-            <Plus size={16} />
-            <span>{savingCategory ? "กำลังเพิ่ม..." : "เพิ่มหมวดภารกิจ"}</span>
-          </button>
-        </form>
-
-        {categories.length === 0 ? (
-          <p className="mission-management-empty">ยังไม่มีหมวดภารกิจในระบบ</p>
-        ) : (
-          <ul className="mission-management-list">
-            {categories.map((category) => (
-              <li key={category._id}>
-                {editingCategoryId === category._id ? (
-                  <div className="mission-management-edit-form">
-                    <span>{category.key}</span>
-                    <input
-                      value={categoryEditForm.label}
-                      onChange={(e) => setCategoryEditForm((f) => ({ ...f, label: e.target.value }))}
-                    />
-                    <input
-                      list="lucide-icon-names"
-                      value={categoryEditForm.icon || ""}
-                      onChange={(e) => setCategoryEditForm((f) => ({ ...f, icon: e.target.value }))}
-                    />
-                    <input
-                      type="number"
-                      value={categoryEditForm.order}
-                      onChange={(e) => setCategoryEditForm((f) => ({ ...f, order: e.target.value }))}
-                    />
-                    <button type="button" onClick={saveEditCategory} title="บันทึก">
-                      <Check size={16} />
-                    </button>
-                    <button type="button" onClick={() => setEditingCategoryId(null)} title="ยกเลิก">
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="mission-management-list-body">
-                      <p className="mission-management-list-title">{category.label}</p>
-                      <p className="mission-management-list-meta">
-                        <span>รหัส: {category.key}</span>
-                        {category.icon && <span>ไอคอน: {category.icon}</span>}
-                      </p>
-                    </div>
-                    <div className="mission-management-list-actions">
-                      <button type="button" onClick={() => startEditCategory(category)} title="แก้ไข">
-                        <Pencil size={16} />
-                      </button>
-                      <button type="button" className="mission-management-delete" onClick={() => handleDeleteCategory(category)} title="ลบ">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="mission-management-section">
-        <h2>
-          <Trophy size={18} />
-          <span>ภารกิจสะสมแต้ม</span>
-        </h2>
-
-        <form className="mission-management-form" onSubmit={handleCreateMission}>
-          <div className="mission-management-form-grid">
-            <label>
-              ชื่อภารกิจ
-              <input
-                type="text"
-                value={missionForm.title}
-                onChange={(e) => setMissionForm((f) => ({ ...f, title: e.target.value }))}
-                required
-              />
-            </label>
-            <label>
-              ประเภท
-              <select
-                value={missionForm.type}
-                onChange={(e) => setMissionForm((f) => ({ ...f, type: e.target.value }))}
-              >
-                {Object.entries(MISSION_TYPE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              เป้าหมาย (เช่น จำนวนวัน/ครั้ง)
-              <input
-                type="number"
-                min={1}
-                value={missionForm.targetValue}
-                onChange={(e) => setMissionForm((f) => ({ ...f, targetValue: e.target.value }))}
-              />
-            </label>
-            <label>
-              แต้มรางวัล
-              <input
-                type="number"
-                min={0}
-                value={missionForm.rewardPoints}
-                onChange={(e) => setMissionForm((f) => ({ ...f, rewardPoints: e.target.value }))}
-              />
-            </label>
-            <label>
-              ไอคอนตรา (ชื่อไอคอนจาก lucide-react)
-              <input
-                type="text"
-                list="lucide-icon-names"
-                placeholder="เช่น Flame, Award, Trophy"
-                value={missionForm.badgeIcon}
-                onChange={(e) => setMissionForm((f) => ({ ...f, badgeIcon: e.target.value }))}
-              />
-            </label>
-          </div>
-          <label className="mission-management-description-field">
-            คำอธิบายภารกิจ
-            <textarea
-              value={missionForm.description}
-              onChange={(e) => setMissionForm((f) => ({ ...f, description: e.target.value }))}
-              rows={2}
-            />
-          </label>
-          {missionError && <p className="mission-management-error">{missionError}</p>}
-          <button type="submit" className="btn btn-primary" disabled={savingMission}>
-            <Plus size={16} />
-            <span>{savingMission ? "กำลังเพิ่ม..." : "เพิ่มภารกิจ"}</span>
-          </button>
-        </form>
-
-        {missions.length === 0 ? (
-          <p className="mission-management-empty">ยังไม่มีภารกิจในระบบ</p>
-        ) : (
-          <ul className="mission-management-list">
-            {missions.map((mission) => (
-              <li key={mission._id}>
-                {editingMissionId === mission._id ? (
-                  <div className="mission-management-edit-form">
-                    <input
-                      value={missionEditForm.title}
-                      onChange={(e) => setMissionEditForm((f) => ({ ...f, title: e.target.value }))}
-                    />
-                    <select
-                      value={missionEditForm.type}
-                      onChange={(e) => setMissionEditForm((f) => ({ ...f, type: e.target.value }))}
-                    >
-                      {Object.entries(MISSION_TYPE_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      min={1}
-                      value={missionEditForm.targetValue}
-                      onChange={(e) => setMissionEditForm((f) => ({ ...f, targetValue: e.target.value }))}
-                    />
-                    <input
-                      type="number"
-                      min={0}
-                      value={missionEditForm.rewardPoints}
-                      onChange={(e) => setMissionEditForm((f) => ({ ...f, rewardPoints: e.target.value }))}
-                    />
-                    <label className="mission-management-active-toggle">
-                      <input
-                        type="checkbox"
-                        checked={missionEditForm.active}
-                        onChange={(e) => setMissionEditForm((f) => ({ ...f, active: e.target.checked }))}
-                      />
-                      <span>เปิดใช้งาน</span>
-                    </label>
-                    <button type="button" onClick={saveEditMission} title="บันทึก">
-                      <Check size={16} />
-                    </button>
-                    <button type="button" onClick={() => setEditingMissionId(null)} title="ยกเลิก">
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="mission-management-list-body">
-                      <p className="mission-management-list-title">
-                        {mission.title}
-                        {!mission.active && <span className="mission-management-inactive-tag">ปิดใช้งาน</span>}
-                      </p>
-                      <p className="mission-management-list-meta">
-                        <span>{MISSION_TYPE_LABELS[mission.type]}</span>
-                        <span>เป้าหมาย {mission.targetValue}</span>
-                        <span>+{mission.rewardPoints} แต้ม</span>
-                      </p>
-                    </div>
-                    <div className="mission-management-list-actions">
-                      <button type="button" onClick={() => startEditMission(mission)} title="แก้ไข">
-                        <Pencil size={16} />
-                      </button>
-                      <button type="button" className="mission-management-delete" onClick={() => handleDeleteMission(mission)} title="ลบ">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="mission-management-section">
-        <h2>
-          <Award size={18} />
-          <span>เหรียญตรา / รางวัล</span>
-        </h2>
-
-        <form className="mission-management-form" onSubmit={handleCreateReward}>
-          <div className="mission-management-form-grid">
-            <label>
-              ชื่อเหรียญตรา
-              <input
-                type="text"
-                value={rewardForm.name}
-                onChange={(e) => setRewardForm((f) => ({ ...f, name: e.target.value }))}
-                required
-              />
-            </label>
-            <label>
-              คะแนนสะสมที่ต้องการ
-              <input
-                type="number"
-                min={0}
-                value={rewardForm.pointsRequired}
-                onChange={(e) => setRewardForm((f) => ({ ...f, pointsRequired: e.target.value }))}
-              />
-            </label>
-            <label>
-              ไอคอน (ชื่อไอคอนจาก lucide-react)
-              <input
-                type="text"
-                list="lucide-icon-names"
-                placeholder="เช่น Sprout, Award, Trophy"
-                value={rewardForm.icon}
-                onChange={(e) => setRewardForm((f) => ({ ...f, icon: e.target.value }))}
-              />
-            </label>
-          </div>
-          <label className="mission-management-description-field">
-            คำอธิบาย
-            <textarea
-              value={rewardForm.description}
-              onChange={(e) => setRewardForm((f) => ({ ...f, description: e.target.value }))}
-              rows={2}
-            />
-          </label>
-          {rewardError && <p className="mission-management-error">{rewardError}</p>}
-          <button type="submit" className="btn btn-primary" disabled={savingReward}>
-            <Plus size={16} />
-            <span>{savingReward ? "กำลังเพิ่ม..." : "เพิ่มเหรียญตรา"}</span>
-          </button>
-        </form>
-
-        {rewards.length === 0 ? (
-          <p className="mission-management-empty">ยังไม่มีเหรียญตราในระบบ</p>
-        ) : (
-          <ul className="mission-management-list">
-            {rewards.map((reward) => (
-              <li key={reward._id}>
-                {editingRewardId === reward._id ? (
-                  <div className="mission-management-edit-form">
-                    <input
-                      value={rewardEditForm.name}
-                      onChange={(e) => setRewardEditForm((f) => ({ ...f, name: e.target.value }))}
-                    />
-                    <input
-                      type="number"
-                      min={0}
-                      value={rewardEditForm.pointsRequired}
-                      onChange={(e) => setRewardEditForm((f) => ({ ...f, pointsRequired: e.target.value }))}
-                    />
-                    <input
-                      value={rewardEditForm.icon || ""}
-                      onChange={(e) => setRewardEditForm((f) => ({ ...f, icon: e.target.value }))}
-                    />
-                    <button type="button" onClick={saveEditReward} title="บันทึก">
-                      <Check size={16} />
-                    </button>
-                    <button type="button" onClick={() => setEditingRewardId(null)} title="ยกเลิก">
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="mission-management-list-body">
-                      <p className="mission-management-list-title">{reward.name}</p>
-                      <p className="mission-management-list-meta">
-                        <span>ต้องการ {reward.pointsRequired} แต้ม</span>
-                        {reward.icon && <span>ไอคอน: {reward.icon}</span>}
-                      </p>
-                    </div>
-                    <div className="mission-management-list-actions">
-                      <button type="button" onClick={() => startEditReward(reward)} title="แก้ไข">
-                        <Pencil size={16} />
-                      </button>
-                      <button type="button" className="mission-management-delete" onClick={() => handleDeleteReward(reward)} title="ลบ">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="mission-management-section">
-        <h2>
-          <Heart size={18} />
-          <span>ภารกิจครอบครัวร่วมกัน</span>
-        </h2>
-
-        <form className="mission-management-form" onSubmit={handleCreateFamilyMission}>
-          <div className="mission-management-form-grid">
-            <label>
-              ชื่อภารกิจ
-              <input
-                type="text"
-                value={familyMissionForm.title}
-                onChange={(e) => setFamilyMissionForm((f) => ({ ...f, title: e.target.value }))}
-                required
-              />
-            </label>
-            <label>
-              แต้มรางวัล (ให้ผู้ใช้งานเมื่อยืนยันครบทั้งสองฝ่าย)
-              <input
-                type="number"
-                min={0}
-                value={familyMissionForm.points}
-                onChange={(e) => setFamilyMissionForm((f) => ({ ...f, points: e.target.value }))}
-              />
-            </label>
-          </div>
-          <label className="mission-management-description-field">
-            คำอธิบายภารกิจ
-            <textarea
-              value={familyMissionForm.description}
-              onChange={(e) => setFamilyMissionForm((f) => ({ ...f, description: e.target.value }))}
-              rows={2}
-            />
-          </label>
-          {familyMissionError && <p className="mission-management-error">{familyMissionError}</p>}
-          <button type="submit" className="btn btn-primary" disabled={savingFamilyMission}>
-            <Plus size={16} />
-            <span>{savingFamilyMission ? "กำลังเพิ่ม..." : "เพิ่มภารกิจครอบครัว"}</span>
-          </button>
-        </form>
-
-        {familyMissions.length === 0 ? (
-          <p className="mission-management-empty">ยังไม่มีภารกิจครอบครัวในระบบ</p>
-        ) : (
-          <ul className="mission-management-list">
-            {familyMissions.map((mission) => (
-              <li key={mission._id}>
-                <div className="mission-management-list-body">
-                  <p className="mission-management-list-title">{mission.title}</p>
-                  <p className="mission-management-list-meta">
-                    <span>+{mission.points} แต้ม เมื่อยืนยันครบทั้งสองฝ่าย</span>
-                  </p>
-                </div>
-                <div className="mission-management-list-actions">
-                  <button type="button" className="mission-management-delete" onClick={() => handleDeleteFamilyMission(mission)} title="ลบ">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {tab === "missions" && <MissionsTab items={missions} setItems={setMissions} notify={setNotice} />}
+      {tab === "rewards" && <RewardsTab items={rewards} setItems={setRewards} />}
+      {tab === "daily" && <ActivityMissionManager />}
+      {tab === "family" && <FamilyTab items={familyMissions} setItems={setFamilyMissions} />}
+      {tab === "categories" && <CategoriesTab items={categories} setItems={setCategories} />}
+      {tab === "levels" && <LevelsTab pointsPerLevel={pointsPerLevel} setPointsPerLevel={setPointsPerLevel} />}
     </div>
   );
 }
