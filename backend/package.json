@@ -26,11 +26,11 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "express-rate-limit": "^8.7.0",
+    "express-rate-limit": "^8.7.1",
     "express-validator": "^7.3.2",
-    "fast-xml-parser": "^5.10.1",
-    "file-type": "^22.1.1",
-    "google-auth-library": "^11.0.0",
+    "fast-xml-parser": "^5.11.2",
+    "file-type": "^22.2.0",
+    "google-auth-library": "^11.3.1",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.5.1",
@@ -39,11 +39,11 @@
     "nodemailer": "^10.2.1",
     "sanitize-html": "^2.17.7",
     "sharp": "^0.35.5",
-    "socket.io": "^4.8.3",
+    "socket.io": "^4.8.4",
     "validator": "^13.15.35"
   },
   "devDependencies": {
     "autocannon": "^8.0.0",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.4"
   }
 }
