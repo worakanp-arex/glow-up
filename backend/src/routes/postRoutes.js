@@ -21,6 +21,7 @@ import {
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
+import { profanityGuard } from "../services/profanityService.js";
 import { objectIdParam, paginationQuery } from "../middleware/validators.js";
 import { REPORT_REASON_VALUES } from "../constants/reportReasons.js";
 
@@ -82,6 +83,7 @@ router.post(
   verifyToken,
   [objectIdParam("id"), ...COMMENT_BODY],
   validate,
+  profanityGuard("content"),
   asyncHandler(addComment)
 );
 router.put(
@@ -89,6 +91,7 @@ router.put(
   verifyToken,
   [objectIdParam("id"), objectIdParam("commentId"), ...COMMENT_BODY],
   validate,
+  profanityGuard("content"),
   asyncHandler(updateComment)
 );
 router.delete(

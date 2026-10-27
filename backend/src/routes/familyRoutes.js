@@ -19,6 +19,7 @@ import { familyRequestLimiter, familyInviteLimiter, familyInviteRecipientLimiter
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
+import { profanityGuard } from "../services/profanityService.js";
 import { emailBody, objectIdParam } from "../middleware/validators.js";
 
 const router = Router();
@@ -92,6 +93,7 @@ router.post(
   requireRole("user", "family"),
   [objectIdParam("linkId"), body("message").trim().notEmpty().isLength({ max: 500 }), body("replyTo").optional().isMongoId()],
   validate,
+  profanityGuard("message"),
   asyncHandler(sendEncouragementMessage)
 );
 router.get(
