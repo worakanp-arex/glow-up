@@ -105,7 +105,8 @@
   border-color: var(--color-primary-300);
 }
 
-/* Blue: something on this day is still in progress. Grey: all of it is finished. */
+/* Blue: something on this day is still in progress. Green: all of it is
+   finished. Red: everything scheduled that day was cancelled. */
 .booking-calendar-cell.has-open {
   background-color: var(--color-primary-100);
   color: var(--color-primary-800);
@@ -113,13 +114,25 @@
 }
 
 .booking-calendar-cell.all-done {
-  background-color: var(--color-ink-200);
-  color: var(--color-text-secondary);
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
   font-weight: 600;
 }
 
 .booking-calendar-cell.all-done .booking-calendar-count {
-  background-color: var(--color-ink-500, #6b7a8c);
+  background-color: var(--color-success);
+  color: #ffffff;
+}
+
+.booking-calendar-cell.all-cancelled {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.booking-calendar-cell.all-cancelled .booking-calendar-count {
+  background-color: var(--color-danger);
+  color: #ffffff;
 }
 
 .booking-calendar-cell.selected {
@@ -183,7 +196,8 @@
 .booking-calendar-legend li { display: inline-flex; align-items: center; gap: 6px; }
 .legend-dot { width: 12px; height: 12px; border-radius: 4px; }
 .legend-dot.is-open { background: var(--color-primary-200); border: 1px solid var(--color-primary-400); }
-.legend-dot.is-done { background: var(--color-ink-200); border: 1px solid var(--color-ink-300); }
+.legend-dot.is-done { background: var(--color-success-bg); border: 1px solid var(--color-success); }
+.legend-dot.is-cancelled { background: var(--color-danger-bg); border: 1px solid var(--color-danger); }
 .booking-calendar-scope { display: inline-flex; gap: 4px; margin: 0 0 12px; padding: 3px; border-radius: 999px; background: var(--color-surface-hover); }
 .booking-calendar-scope button { padding: 4px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--color-text-secondary); font: inherit; font-size: 0.75rem; cursor: pointer; }
 .booking-calendar-scope button[aria-pressed="true"] { background: var(--color-surface); color: var(--color-primary-700); font-weight: 600; box-shadow: var(--shadow-sm); }

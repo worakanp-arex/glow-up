@@ -8,23 +8,18 @@ const BAD_WORDS = [
   "ไปตายซะ", "ไปตายเถอะ", "พ่อมึงตาย", "แม่มึงตาย",
 ];
 
-// Real words that contain a listed one. Removed from the text before matching.
-// Keep these as whole compounds: allowing "เหี้ยม" alone would let "เหี้ยมาก" through.
 const ALLOW_WORDS = [
   "หีบ", "เหี่ยว", "โหดเหี้ยม", "เหี้ยมโหด", "เหี้ยมหาญ", "สัดส่วน", "สัสดี", "ตอแหล่ง",
   "แกงกะหรี่", "ผงกะหรี่", "กะหรี่ปั๊บ",
 ];
 
-// English words are matched as whole words (so "class" and "cocktail" pass),
-// with letters allowed to stretch: "fuuuck" matches, "as" does not match "ass".
 const LATIN_WORDS = [
   "fuck", "shit", "bitch", "bastard", "asshole", "cunt", "whore", "slut", "dick", "dickhead", "pussy", "ass",
 ];
 
 const LEET = { "@": "a", $: "s", 0: "o", 1: "i", 3: "e", 4: "a", 5: "s", 7: "t" };
 const INVISIBLE = /[­​-‍⁠﻿]/g;
-// Mai taikhu, the four tone marks and thanthakhat: people drop or swap them to
-// slip past a filter ("เหี้ย" / "เหี่ย" / "เหีย").
+
 const THAI_MARKS = /[็-์]/g;
 const THAI_REPEAT = /([ก-๛])\1+/g;
 const SEPARATORS = /[\s\p{P}\p{S}\p{Cc}]+/u;

@@ -16,8 +16,9 @@ function localDateKey(dateInput) {
 }
 
 // Month view of appointments. A day is blue while something on it is still in
-// progress and grey once everything on it is finished; cancelled appointments
-// are not drawn. Pass `title` / `actions` to put a heading and controls on top.
+// progress, green once everything on it is finished, and red when the only
+// appointments on it were cancelled. Pass `title` / `actions` to put a
+// heading and controls on top.
 function BookingCalendar({ sessions, selectedDate, onSelectDate, compact = false, title = "ปฏิทินนัดหมายของฉัน", actions = null }) {
   const today = useMemo(() => new Date(), []);
   const [year, setYear] = useState(today.getFullYear());
@@ -26,10 +27,11 @@ function BookingCalendar({ sessions, selectedDate, onSelectDate, compact = false
   const dayStats = useMemo(() => {
     const map = new Map();
     for (const session of sessions || []) {
-      if (!session.scheduledAt || session.status === "cancelled") continue;
+      if (!session.scheduledAt) continue;
       const key = localDateKey(session.scheduledAt);
-      const entry = map.get(key) || { open: 0, done: 0 };
-      if (session.status === FINISHED) entry.done += 1;
+      const entry = map.get(key) || { open: 0, done: 0, cancelled: 0 };
+      if (session.status === "cancelled") entry.cancelled += 1;
+      else if (session.status === FINISHED) entry.done += 1;
       else if (OPEN.includes(session.status) || !session.status) entry.open += 1;
       map.set(key, entry);
     }
@@ -84,10 +86,10 @@ function BookingCalendar({ sessions, selectedDate, onSelectDate, compact = false
             return <span key={`blank-${index}`} className="booking-calendar-cell booking-calendar-cell-blank" />;
           }
           const stats = dayStats.get(cell.dateKey);
-          const count = stats ? stats.open + stats.done : 0;
+          const count = stats ? stats.open + stats.done + stats.cancelled : 0;
           const isSelected = selectedDate === cell.dateKey;
           const isToday = cell.dateKey === todayKey;
-          const tone = !stats ? "" : stats.open > 0 ? " has-open" : " all-done";
+          const tone = !stats ? "" : stats.open > 0 ? " has-open" : stats.done > 0 ? " all-done" : " all-cancelled";
           return (
             <button
               type="button"
@@ -107,6 +109,7 @@ function BookingCalendar({ sessions, selectedDate, onSelectDate, compact = false
       <ul className="booking-calendar-legend" aria-label="สีในปฏิทิน">
         <li><span className="legend-dot is-open" aria-hidden="true" />มีนัดที่ยังดำเนินอยู่</li>
         <li><span className="legend-dot is-done" aria-hidden="true" />นัดที่เสร็จแล้ว</li>
+        <li><span className="legend-dot is-cancelled" aria-hidden="true" />นัดที่ยกเลิก</li>
       </ul>
     </div>
   );

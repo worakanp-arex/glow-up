@@ -55,7 +55,9 @@ function Queue() {
   }, []);
 
   const filteredSessions = useMemo(() => {
-    if (filter === "unclaimed") return sessions.filter((s) => !s.counsellor);
+    // Cancelled or closed requests have nothing left to claim, even if no
+    // counsellor ever picked them up.
+    if (filter === "unclaimed") return sessions.filter((s) => !s.counsellor && s.status !== "cancelled" && s.status !== "closed");
     if (filter === "mine") return sessions.filter((s) => s.counsellor?._id === user._id);
     return sessions;
   }, [sessions, filter, user._id]);

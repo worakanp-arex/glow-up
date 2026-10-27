@@ -5,6 +5,12 @@
 .confirm-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .dialog-error { color: var(--color-danger); }
 .confirm-dialog-wide { width: min(720px, calc(100% - 32px)); }
+/* Modals are portaled to <body>, outside .layout-content, so they need their
+   own copy of the base input styling instead of inheriting it. */
+.confirm-dialog :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) { width: 100%; box-sizing: border-box; border: 1px solid var(--color-border-strong); border-radius: 12px; min-height: 44px; padding: 10px 14px; transition: border-color .15s, box-shadow .15s; max-width: 100%; }
+.confirm-dialog :is(input, select, textarea):focus { outline: none; border-color: var(--color-primary-500); box-shadow: 0 0 0 3px var(--color-primary-50); }
+.confirm-dialog textarea { resize: vertical; line-height: 1.8; }
+.confirm-dialog input::placeholder, .confirm-dialog textarea::placeholder { color: var(--color-text-muted); opacity: .85; }
 .reason-dialog-field { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; font-size: .85rem; font-weight: 600; }
 .reason-dialog-field textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; font-weight: 400; }
 .reason-dialog-field small { align-self: flex-end; font-weight: 400; color: var(--color-text-muted); }

@@ -23,7 +23,8 @@ import FamilyConnectionsCard from "../components/profile/FamilyConnectionsCard.j
 import SkillPicker from "../components/profile/SkillPicker.jsx";
 import useConfirmDialog from "../components/common/useConfirmDialog.jsx";
 import { THAI_PROVINCES } from "../constants/provinces.js";
-import { SKILL_LEVELS } from "../constants/skillLevels.js";
+import { skillLevelLabel } from "../constants/skillLevels.js";
+import SkillLevelDialog from "../components/profile/SkillLevelDialog.jsx";
 import { roleHome } from "../constants/roleHome.js";
 import { courseRange, courseStatus } from "../utils/courseDates.js";
 import { getPreviousRoute } from "../utils/routeHistory.js";
@@ -85,7 +86,7 @@ function Profile() {
 
   const [allSkills, setAllSkills] = useState([]);
   const [mySkills, setMySkills] = useState([]);
-  const [skillLevel, setSkillLevel] = useState(3);
+  const [levelPrompt, setLevelPrompt] = useState(null);
   const [skillsLoading, setSkillsLoading] = useState(isUser);
 
   const [recovery, setRecovery] = useState(null);
@@ -280,21 +281,27 @@ function Profile() {
   const ownedSkills = mySkills.filter((item) => item.skill);
   const ownedSkillIds = ownedSkills.map((item) => item.skill._id);
 
-  // Picking a skill in the list adds it at the chosen level; picking it again removes it.
+  // Picking a skill that's already owned removes it; picking a new one opens
+  // the level popup instead of adding it straight away.
   async function handleToggleSkill(skill) {
     const existing = ownedSkills.find((item) => item.skill._id === skill._id);
-    try {
-      if (existing) {
+    if (existing) {
+      try {
         await skillService.removeMySkill(existing._id);
         setMySkills((prev) => prev.filter((item) => item._id !== existing._id));
-      } else {
-        const created = await skillService.addMySkill({ skill: skill._id, level: Number(skillLevel) });
-        setMySkills((prev) => [...prev, created]);
+        setError("");
+      } catch (err) {
+        setError(err.response?.data?.message || "บันทึกทักษะไม่สำเร็จ");
       }
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "บันทึกทักษะไม่สำเร็จ");
+      return;
     }
+    setLevelPrompt({ mode: "add", skill });
+  }
+
+  async function handleAddSkillWithLevel(skill, level) {
+    const created = await skillService.addMySkill({ skill: skill._id, level: Number(level) });
+    setMySkills((prev) => [...prev, created]);
+    setError("");
   }
 
   async function handleSkillLevelChange(id, newLevel) {
@@ -670,16 +677,14 @@ function Profile() {
                     {ownedSkills.map((item) => (
                       <span className="profile-skill-chip" key={item._id}>
                         <span className="profile-skill-chip-name">{item.skill.skillName}</span>
-                        <select
-                          value={item.level ?? 3}
-                          onChange={(e) => handleSkillLevelChange(item._id, e.target.value)}
+                        <button
+                          type="button"
                           className="profile-skill-chip-level"
-                          aria-label={`ระดับความชำนาญของ ${item.skill.skillName}`}
+                          onClick={() => setLevelPrompt({ mode: "edit", item })}
+                          aria-label={`เปลี่ยนระดับความชำนาญของ ${item.skill.skillName}`}
                         >
-                          {SKILL_LEVELS.map((level) => (
-                            <option key={level.value} value={level.value}>{level.label}</option>
-                          ))}
-                        </select>
+                          {skillLevelLabel(item.level)}
+                        </button>
                         <button type="button" onClick={() => handleRemoveSkill(item._id)} aria-label={`ลบทักษะ ${item.skill.skillName}`}>
                           <X size={12} />
                         </button>
@@ -688,18 +693,21 @@ function Profile() {
                     {ownedSkills.length === 0 && !skillsLoading && <p className="profile-empty-note">ยังไม่มีทักษะ เลือกจากรายการด้านล่างได้เลย</p>}
                   </div>
 
-                  <label className="ui-field profile-skill-level-field">
-                    ระดับความชำนาญที่จะใช้เมื่อเพิ่มทักษะ
-                    <select value={skillLevel} onChange={(e) => setSkillLevel(e.target.value)}>
-                      {SKILL_LEVELS.map((level) => (
-                        <option key={level.value} value={level.value}>{level.value} · {level.label}</option>
-                      ))}
-                    </select>
-                    <small>{SKILL_LEVELS.find((level) => level.value === Number(skillLevel))?.description}</small>
-                  </label>
-
                   <SkillPicker skills={allSkills} selectedIds={ownedSkillIds} onToggle={handleToggleSkill} loading={skillsLoading} />
                   <p className="profile-tip"><Briefcase size={14} aria-hidden="true" />เพิ่มทักษะที่คุณมีจริง เพื่อให้การเทียบกับงานตรงขึ้น</p>
+
+                  {levelPrompt && (
+                    <SkillLevelDialog
+                      skillName={levelPrompt.mode === "add" ? levelPrompt.skill.skillName : levelPrompt.item.skill.skillName}
+                      initialLevel={levelPrompt.mode === "add" ? 3 : levelPrompt.item.level ?? 3}
+                      onConfirm={(level) =>
+                        levelPrompt.mode === "add"
+                          ? handleAddSkillWithLevel(levelPrompt.skill, level)
+                          : handleSkillLevelChange(levelPrompt.item._id, level)
+                      }
+                      onClose={() => setLevelPrompt(null)}
+                    />
+                  )}
                 </section>
 
                 <div className="profile-col">

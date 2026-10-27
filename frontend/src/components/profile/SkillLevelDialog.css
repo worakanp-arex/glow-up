@@ -1,0 +1,5 @@
+.skill-level-options { display: flex; flex-direction: column; gap: 8px; }
+.skill-level-option.ui-choice { align-items: center; }
+.skill-level-option .ui-choice-text { display: flex; flex-direction: column; gap: 2px; }
+.skill-level-option .ui-choice-text strong { font-size: .88rem; }
+.skill-level-option .ui-choice-text small { font-weight: 400; color: var(--color-text-muted); }
