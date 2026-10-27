@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { pathToFileURL } from "node:url";
 import { connectDB } from "../src/config/db.js";
+import { assertLocalDatabase } from "../src/config/localOnly.js";
 import User from "../src/models/User.js";
 import Job from "../src/models/Job.js";
 import Post from "../src/models/Post.js";
@@ -16,6 +17,7 @@ async function cleanup() {
     console.error(`Refusing to clean up load-test data with NODE_ENV=${process.env.NODE_ENV}`);
     process.exit(1);
   }
+  assertLocalDatabase();
 
   await connectDB();
 

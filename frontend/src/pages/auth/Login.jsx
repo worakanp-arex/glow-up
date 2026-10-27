@@ -87,6 +87,7 @@ function Login() {
         <Link to="/forgot-password" className="login-forgot-link">
           ลืมรหัสผ่าน?
         </Link>
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID && <p className="login-google-hint">สมัครด้วย Google? กรุณาเข้าสู่ระบบด้วยปุ่ม Google ด้านบน</p>}
 
         <button type="submit" className="btn btn-primary" disabled={submitting}>
           {submitting ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}

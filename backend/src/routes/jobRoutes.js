@@ -21,7 +21,7 @@ import {
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { objectIdParam, paginationQuery } from "../middleware/validators.js";
+import { objectIdParam, paginationQuery, urlBody } from "../middleware/validators.js";
 import { ATTACHMENT_TYPES } from "../constants/attachmentTypes.js";
 import { uploadJobImage as uploadJobImageFile, verifyUploadedFile } from "../middleware/upload.js";
 
@@ -31,7 +31,7 @@ const JOB_BODY = [
   body("title").trim().notEmpty().isLength({ max: 200 }),
   body("description").optional().trim().isLength({ max: 5000 }),
   // Blank inputs arrive as "" and mean "not set", so they skip validation.
-  body("externalUrl").optional({ values: "falsy" }).trim().isURL().isLength({ max: 500 }),
+  urlBody("externalUrl"),
   body("location").optional().trim().isLength({ max: 200 }),
   body("salary").optional({ values: "falsy" }).isFloat({ min: 0 }),
   body("expiredAt").optional({ values: "falsy" }).isISO8601(),
@@ -44,7 +44,7 @@ const JOB_BODY = [
 const JOB_BODY_UPDATE = [
   body("title").optional().trim().notEmpty().isLength({ max: 200 }),
   body("description").optional().trim().isLength({ max: 5000 }),
-  body("externalUrl").optional({ values: "falsy" }).trim().isURL().isLength({ max: 500 }),
+  urlBody("externalUrl"),
   body("location").optional().trim().isLength({ max: 200 }),
   body("salary").optional({ values: "falsy" }).isFloat({ min: 0 }),
   body("status").optional().isIn(["open", "closed", "expired"]),

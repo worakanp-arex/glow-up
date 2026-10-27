@@ -1,3 +1,4 @@
+import User from "../models/User.js";
 import UserMission from "../models/UserMission.js";
 import ActivityMissionLog from "../models/ActivityMissionLog.js";
 import GamePlay from "../models/GamePlay.js";
@@ -15,6 +16,11 @@ const DEFAULT_FAMILY_MESSAGE = "มีความคืบหน้าใหม
 // `message` lets callers send a specific milestone-day announcement instead
 // of the generic default (e.g. crossing a 7/30/90/180/365-day streak).
 export async function notifyLinkedFamily(recoveringUserId, message = DEFAULT_FAMILY_MESSAGE) {
+  // Milestones are progress information, so they follow the same switch the
+  // family summary honours: with progress sharing off the family hears nothing.
+  const recoveringUser = await User.findById(recoveringUserId).select("familySharing");
+  if (recoveringUser?.familySharing?.progress === false) return;
+
   const links = await FamilyLink.find({ recoveringUser: recoveringUserId, status: "active" });
   for (const link of links) {
     await notifyUser(link.familyUser, message, "milestone", { link: "/family/dashboard" });

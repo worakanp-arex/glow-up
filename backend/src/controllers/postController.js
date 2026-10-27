@@ -9,6 +9,7 @@ import { REPORT_REASON_VALUES, reportReasonLabel } from "../constants/reportReas
 
 const USER_PUBLIC_FIELDS = "name role avatarUrl avatarStyle avatarColor specialization";
 const STAFF_ROLES = ["admin", "counsellor"];
+const REPORTS_PER_DAY = 10;
 
 // Staff (admin/counsellor) see every post, for moderation. Everyone else
 // only sees posts with no audience restriction (visibleToRoles: []) or ones
@@ -41,6 +42,17 @@ async function withCommentCount(post, userId, savedIds) {
   return { ...serializePost(post, userId, savedIds), commentCount };
 }
 
+// Comment counts for a whole page of posts in one query, not one per post.
+async function withCommentCounts(posts, userId, savedIds) {
+  if (posts.length === 0) return [];
+  const rows = await Comment.aggregate([
+    { $match: { post: { $in: posts.map((post) => post._id) } } },
+    { $group: { _id: "$post", count: { $sum: 1 } } },
+  ]);
+  const counts = new Map(rows.map((row) => [String(row._id), row.count]));
+  return posts.map((post) => ({ ...serializePost(post, userId, savedIds), commentCount: counts.get(String(post._id)) || 0 }));
+}
+
 async function getSavedIdSet(userId) {
   const saved = await SavedPost.find({ user: userId }).select("post");
   return new Set(saved.map((s) => s.post.toString()));
@@ -55,7 +67,8 @@ export async function listPosts(req, res) {
     postQuery.skip(pagination.skip).limit(pagination.limit);
   }
   const [posts, savedIds] = await Promise.all([postQuery, getSavedIdSet(req.user.id)]);
-  res.json(await Promise.all(posts.map((post) => withCommentCount(post, req.user.id, savedIds))));
+  // Posts whose author's account was deleted are not shown.
+  res.json(await withCommentCounts(posts.filter((post) => post.user), req.user.id, savedIds));
 }
 
 export async function myPosts(req, res) {
@@ -67,7 +80,7 @@ export async function myPosts(req, res) {
     postQuery.skip(pagination.skip).limit(pagination.limit);
   }
   const [posts, savedIds] = await Promise.all([postQuery, getSavedIdSet(req.user.id)]);
-  res.json(await Promise.all(posts.map((post) => withCommentCount(post, req.user.id, savedIds))));
+  res.json(await withCommentCounts(posts, req.user.id, savedIds));
 }
 
 // Preserves the user's save order (most-recently-saved first) rather than
@@ -88,21 +101,22 @@ export async function mySavedPosts(req, res) {
   );
   const postById = new Map(posts.map((p) => [p._id.toString(), p]));
   const savedIds = new Set(postIds.map((id) => id.toString()));
-  const ordered = postIds.map((id) => postById.get(id.toString())).filter(Boolean);
-  res.json(await Promise.all(ordered.map((post) => withCommentCount(post, req.user.id, savedIds))));
+  const ordered = postIds.map((id) => postById.get(id.toString())).filter((post) => post?.user);
+  res.json(await withCommentCounts(ordered, req.user.id, savedIds));
 }
 
 export async function getPost(req, res) {
   const post = await Post.findOne(
     { _id: req.params.id, ...visibilityFilter(req.user.role) }
   ).populate("user", USER_PUBLIC_FIELDS);
-  if (!post) {
+  if (!post || !post.user) {
     return res.status(404).json({ message: "Not found" });
   }
 
-  const comments = await Comment.find({ post: post._id })
+  // Comments by people whose account was deleted are not shown.
+  const comments = (await Comment.find({ post: post._id })
     .populate("user", USER_PUBLIC_FIELDS)
-    .sort({ createdAt: 1 });
+    .sort({ createdAt: 1 })).filter((comment) => comment.user);
   const savedIds = await getSavedIdSet(req.user.id);
 
   res.json({ ...serializePost(post, req.user.id, savedIds), comments });
@@ -197,11 +211,9 @@ export async function deletePost(req, res) {
 }
 
 export async function addComment(req, res) {
-  const post = await Post.findById(req.params.id);
+  // Same visibility as reading the post: a post you can't see answers 404.
+  const post = await Post.findOne({ _id: req.params.id, ...visibilityFilter(req.user.role) });
   if (!post) {
-    return res.status(404).json({ message: "Not found" });
-  }
-  if (post.needsReview && !STAFF_ROLES.includes(req.user.role)) {
     return res.status(404).json({ message: "Not found" });
   }
   if (!post.commentsEnabled) {
@@ -251,7 +263,7 @@ export async function likePost(req, res) {
   const userId = new mongoose.Types.ObjectId(req.user.id);
   const members = { $ifNull: ["$likedBy", []] };
   const liked = typeof req.body.liked === "boolean" ? req.body.liked : { $not: [{ $in: [userId, members] }] };
-  const updated = await Post.findByIdAndUpdate(req.params.id, [
+  const updated = await Post.findOneAndUpdate({ _id: req.params.id, ...visibilityFilter(req.user.role) }, [
     { $set: { likedBy: { $cond: [liked, { $setUnion: [members, [userId]] }, { $setDifference: [members, [userId]] }] } } },
     { $set: { likes: { $size: "$likedBy" } } },
   ], { new: true });
@@ -280,6 +292,15 @@ export async function flagPostForReview(req, res) {
   }
   if (post.user.toString() === req.user.id) {
     return res.status(400).json({ message: "ไม่สามารถรายงานโพสต์ของตัวเองได้" });
+  }
+
+  // A report hides the post for everyone until staff look at it, so one account
+  // can only file a handful a day: it can't be used to blank out the community.
+  const reportsToday = await Post.countDocuments({
+    reports: { $elemMatch: { reporter: req.user.id, createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } },
+  });
+  if (reportsToday >= REPORTS_PER_DAY) {
+    return res.status(429).json({ message: "รายงานโพสต์ครบจำนวนที่ทำได้ต่อวันแล้ว กรุณาลองใหม่พรุ่งนี้" });
   }
 
   const reason = REPORT_REASON_VALUES.includes(req.body?.reason) ? req.body.reason : "other";
@@ -322,31 +343,28 @@ export async function listFlaggedPosts(req, res) {
   }
   const posts = await query;
   res.json(posts.map((post) => {
+    // Who reported is only for admins; counsellors (who may be the post's author) see the reason alone.
     const reports = (post.reports || []).map((report) => ({
       reason: report.reason,
       reasonLabel: reportReasonLabel(report.reason),
       detail: report.detail || "",
       createdAt: report.createdAt,
-      reporter: report.reporter ? { _id: report.reporter._id, name: report.reporter.name, role: report.reporter.role } : null,
+      reporter: req.user.role === "admin" && report.reporter ? { _id: report.reporter._id, name: report.reporter.name, role: report.reporter.role } : null,
     }));
     return { ...serializePost(post, req.user.id), reports };
   }));
 }
 
 export async function toggleSavePost(req, res) {
-  const post = await Post.findById(req.params.id);
-  if (!post) {
-    return res.status(404).json({ message: "Not found" });
-  }
-
-  if (post.needsReview && !STAFF_ROLES.includes(req.user.role)) {
-    return res.status(404).json({ message: "Not found" });
-  }
-
-  const existing = await SavedPost.findOne({ user: req.user.id, post: post._id });
+  const post = await Post.findOne({ _id: req.params.id, ...visibilityFilter(req.user.role) }).select("_id");
+  // A bookmark can always be removed, even after the post stopped being visible to you.
+  const existing = await SavedPost.findOne({ user: req.user.id, post: req.params.id });
   if (existing) {
     await SavedPost.deleteOne({ _id: existing._id });
     return res.json({ savedByMe: false });
+  }
+  if (!post) {
+    return res.status(404).json({ message: "Not found" });
   }
   await SavedPost.create({ user: req.user.id, post: post._id });
   res.json({ savedByMe: true });

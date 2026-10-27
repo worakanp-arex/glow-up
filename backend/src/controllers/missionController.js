@@ -11,7 +11,7 @@ import { computeLevel, getPointsPerLevel, pointsToNextLevel } from "../utils/lev
 import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 import { bangkokStartOfDay, bangkokEndOfDay, isWithinWindow } from "../utils/dateKey.js";
 
-const { getAll, getOne } = createCrudController(Mission);
+const { getAll, getOne } = createCrudController(Mission, { hideInactive: true });
 
 const MISSION_FIELDS = ["title", "description", "targetValue", "rewardPoints", "badgeIcon", "active", "order"];
 
@@ -67,7 +67,8 @@ async function currentValueForMission(userId, mission, streakStats) {
   if (mission.type === "streak") return streakStats.currentStreak;
   if (mission.type === "totalCheckins") return streakStats.totalCheckIns;
   if (mission.type === "scenarioCompleted") {
-    return ScenarioAttempt.countDocuments({ user: userId, passed: true });
+    // Distinct scenarios: passing the same one again and again must not count again.
+    return (await ScenarioAttempt.distinct("scenario", { user: userId, passed: true })).length;
   }
   // "custom" missions are completed manually (e.g. by an admin), not
   // recomputed here.

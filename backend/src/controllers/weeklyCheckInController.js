@@ -1,7 +1,7 @@
 import WeeklyCheckIn from "../models/WeeklyCheckIn.js";
 import User from "../models/User.js";
 import { toIsoWeekKey } from "../utils/dateKey.js";
-import { notifyUser } from "../services/notificationService.js";
+import { notifyCareTeam, RISK_ALERT_COOLDOWN_MS } from "../services/notificationService.js";
 import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
 export async function submitWeeklyCheckIn(req, res) {
@@ -21,15 +21,24 @@ export async function submitWeeklyCheckIn(req, res) {
     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
   );
 
-  // Safety-critical path: immediately alert every admin/counsellor account
-  // when self-harm risk is flagged — there's no existing risk-assessment
-  // alert mechanism to reuse (RiskAssessment is on-demand and passive).
+  // Safety-critical path: immediately alert the patient's care team when
+  // self-harm risk is flagged — there's no existing risk-assessment alert
+  // mechanism to reuse (RiskAssessment is on-demand and passive). The alert is
+  // claimed atomically so resubmitting the form can't page the team again
+  // within the cooldown.
   if (checkIn.selfHarmRiskFlag) {
-    const staff = await User.find({ role: { $in: ["admin", "counsellor"] } }).select("_id");
-    const requestingUser = await User.findById(req.user.id).select("name");
-    for (const member of staff) {
-      await notifyUser(
-        member._id,
+    const claimed = await WeeklyCheckIn.findOneAndUpdate(
+      {
+        _id: checkIn._id,
+        selfHarmRiskFlag: true,
+        $or: [{ riskAlertedAt: null }, { riskAlertedAt: { $lt: new Date(Date.now() - RISK_ALERT_COOLDOWN_MS) } }],
+      },
+      { riskAlertedAt: new Date() }
+    );
+    if (claimed) {
+      const requestingUser = await User.findById(req.user.id).select("name");
+      await notifyCareTeam(
+        req.user.id,
         `แจ้งเตือนความเสี่ยง: ${requestingUser.name} รายงานความเสี่ยงทำร้ายตนเองในแบบประเมินรายสัปดาห์`,
         "riskAlert",
         { link: `/counsellor/patients/${req.user.id}` }

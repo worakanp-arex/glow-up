@@ -52,7 +52,12 @@ npm run seed:skills --prefix backend
 
 ## การตั้งค่าและข้อมูลส่วนตัว
 
-- โหลด environment ก่อนสร้างบริการ Google/SMTP; production ต้องมี JWT secret อย่างน้อย 32 ตัวอักษรและ SMTP
+- โหลด environment ก่อนสร้างบริการ Google/SMTP; ทุกโหมด**ยกเว้น** `NODE_ENV=development` และ `test` ถือเป็น production: ต้องมี JWT secret สุ่มอย่างน้อย 32 ตัวอักษร (ไม่ใช่ค่าตัวอย่างหรือรูปแบบซ้ำ), `CORS_ORIGIN`, `FRONTEND_URL` และ SMTP การลืมตั้ง `NODE_ENV` จึงไม่ทำให้ระบบหลวมลง — **ตอนพัฒนาในเครื่อง ให้ใส่ `NODE_ENV=development` ใน `backend/.env`**
+- การล็อกอินใช้ cookie แบบ HttpOnly อายุเท่ากับ token (ค่าเริ่มต้น 1 วัน ปรับด้วย `JWT_EXPIRES_IN`) token ไม่ถูกส่งกลับใน JSON และถูกยกเลิกทันทีเมื่อเปลี่ยน/รีเซ็ตรหัสผ่าน ระงับ ลบ หรือถอนการยืนยันบัญชี
+- รหัสผ่านใหม่ต้องยาว 10–128 ตัวอักษรและไม่ใช่รหัสที่เดาง่าย (รหัสเดิมที่ตั้งไว้ก่อนหน้ายังล็อกอินได้)
+- การลบบัญชีเป็นแบบ soft delete: บัญชีหายจากระบบและเข้าสู่ระบบไม่ได้ทันที ข้อมูลเก็บไว้ 90 วัน (admin ดู/กู้คืนได้ที่ `/admin/deleted-users` ทุกการเปิดดูถูกบันทึกใน `AuditLog`) แล้วงานรายวันจะลบชื่อ อีเมล ไฟล์ และข้อความส่วนตัวถาวร (เก็บเฉพาะตัวเลขสถิติ) เจ้าของบัญชีลบเองได้จากหน้าโปรไฟล์
+- หน้าเว็บส่ง Content-Security-Policy (นิยามใน `backend/src/config/csp.js` และคัดลอกไว้ใน `deploy/nginx/security-headers.conf`, `frontend/vercel.json` — มีเทสต์ตรวจว่าตรงกัน) ฟอนต์โหลดจากเซิร์ฟเวอร์เราเอง ไม่ส่งข้อมูลผู้เยี่ยมชมให้ Google Fonts
+- รูปที่อัปโหลดถูกประมวลผลใหม่เพื่อลบข้อมูลซ่อน (EXIF/GPS)
 - ไม่มีโหมดทดลองสำหรับอีเมลแล้ว: ต้องตั้ง SMTP_HOST/SMTP_USER/SMTP_PASS ใน backend/.env (ดูตัวอย่างใน .env.example) มิฉะนั้นการขอ OTP และคำเชิญจะตอบ 503 อีเมลทุกฉบับมีส่วนท้ายระบุแหล่งที่มาและหน่วยงานที่รับผิดชอบ
 - รหัสผ่านของคำขอสมัครที่รอ OTP ถูก hash ก่อนบันทึก คำขอเก่าที่ไม่มี hash ต้องขอ OTP ใหม่
 - รูปโปรไฟล์ยังเป็น public; เรซูเม่ เกียรติบัตร และเอกสารสมัครงานต้องเข้าสู่ระบบและผ่านการตรวจสิทธิ์
@@ -78,15 +83,25 @@ npm run build --prefix frontend
 npm test --prefix frontend
 ```
 
-Backend tests ใช้ model doubles และ configuration สำหรับทดสอบ ไม่เชื่อมฐานข้อมูลจริงหรือส่งอีเมล
+Backend tests ส่วนใหญ่ใช้ model doubles และ configuration สำหรับทดสอบ ไม่ส่งอีเมลจริง ยกเว้น `test/account-lifecycle.integration.test.js`
+ที่เชื่อม MongoDB ในเครื่อง (`mongodb://127.0.0.1:27017`, ใช้ฐานข้อมูลชั่วคราวแล้วลบทิ้ง) เพื่อทดสอบการลบ/กู้คืน/ทำให้ไม่ระบุตัวตนของบัญชีกับ MongoDB จริง
+หากไม่มี MongoDB เทสต์ชุดนี้จะถูกข้าม (CI เปิด MongoDB ให้)
 Browser tests ใช้ API fixtures เพื่อตรวจทุกบทบาทบน desktop, mobile และ dark mode รวม error/retry และ pagination
 บน Windows ใช้ Chrome ที่ติดตั้งในเครื่อง; บนระบบอื่นติดตั้ง Chromium ด้วย `npx playwright install chromium` ในโฟลเดอร์ frontend
 ผลภาพและ trace อยู่ใน `frontend/test-results/`
 
-GitHub Actions รัน backend tests, lint, build และ browser tests ทุก push / pull request
+GitHub Actions รัน `npm audit` (ช่องโหว่ระดับสูงขึ้นไปทำให้ build ล้ม), backend tests (พร้อม MongoDB), lint, build และ browser tests ทุก push / pull request
+และมี CodeQL กับ Dependabot ตรวจโค้ดและ dependency (ดู `SECURITY.md`)
 การทดสอบเหล่านี้ยังไม่แทนการทดสอบกับ MongoDB, SMTP และ Google OAuth ที่ตั้งค่าจริง
 
 ## ก่อนอัปเกรดระบบที่มีข้อมูลอยู่
+
+การอัปเกรดด้านความปลอดภัยรอบล่าสุด (ไม่มี migration ข้อมูล): ให้ตรวจก่อน deploy
+- `backend/.env`/ตัวแปรบนเซิร์ฟเวอร์: ตั้ง `NODE_ENV` ให้ถูก (production บนเซิร์ฟเวอร์, development ในเครื่อง), `JWT_SECRET` ต้องสุ่มยาว ≥ 32, ต้องมี `CORS_ORIGIN` และ `FRONTEND_URL`
+  เปลี่ยน `JWT_SECRET` จะทำให้ทุกคนต้องล็อกอินใหม่ (ควรทำถ้าเคยใช้ค่าสั้นหรือค่าตัวอย่าง)
+- เซิร์ฟเวอร์ nginx: คัดลอก `deploy/nginx/security-headers.conf` ไปที่ `/etc/nginx/snippets/glow-up-security-headers.conf` ก่อน reload (ดู `deploy/DEPLOY.md`)
+- ถ้ามีบัญชีที่สมัครด้วยอีเมลที่เคยมี `+tag`/จุดต่างกัน อาจมีบัญชีซ้ำของคนเดียวกัน (Google กับรหัสผ่าน) ตรวจรายชื่อที่ซ้ำก่อนใช้งาน
+- การลบบัญชีเปลี่ยนเป็น soft delete: บัญชีที่ลบไปก่อนอัปเกรดถูกลบถาวรแล้ว ไม่มีรายการให้กู้คืน
 
 มี unique index ใหม่บน `Application(user, job)` เพื่อกันสมัครซ้ำจากคำขอพร้อมกัน
 ตรวจและจัดการคู่ user/job ที่ซ้ำในฐานข้อมูลเดิมก่อนสร้าง index โดยสำรองข้อมูลก่อนเสมอ

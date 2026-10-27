@@ -19,7 +19,7 @@ test("errorHandler converts each known error shape into a clean, stable response
   const cast = response();
   errorHandler(Object.assign(new Error("cast failed"), { name: "CastError", path: "_id", value: "abc" }), {}, cast, () => {});
   assert.equal(cast.code, 400);
-  assert.equal(cast.body.message, "Invalid _id: abc");
+  assert.equal(cast.body.message, "Invalid _id", "the rejected value is not echoed back");
 
   const multer = response();
   errorHandler(Object.assign(new Error("File too large"), { name: "MulterError" }), {}, multer, () => {});
@@ -51,4 +51,28 @@ test("errorHandler hides internal error messages in production but shows them ot
   const withStatus = response();
   errorHandler(Object.assign(new Error("teapot"), { status: 418 }), {}, withStatus, () => {});
   assert.equal(withStatus.code, 418);
+});
+
+test("a missing or mistyped NODE_ENV is treated as production, never as development", (t) => {
+  t.mock.method(console, "error", () => {});
+  const original = process.env.NODE_ENV;
+  t.after(() => { process.env.NODE_ENV = original; });
+
+  for (const value of [undefined, "", "prod", "staging"]) {
+    if (value === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = value;
+    const res = response();
+    errorHandler(new Error("internal detail"), {}, res, () => {});
+    assert.equal(res.body.message, "ระบบไม่สามารถทำรายการได้ กรุณาลองอีกครั้ง", `NODE_ENV=${value}`);
+  }
+});
+
+test("logs describe the failure without dumping the error object (which can carry patient text)", (t) => {
+  const logged = [];
+  t.mock.method(console, "error", (...args) => logged.push(args));
+  const err = Object.assign(new Error("Cast to Number failed"), { name: "ValidationError", value: "บันทึกส่วนตัวของผู้ป่วย" });
+  errorHandler(err, { method: "POST", path: "/api/emotion" }, response(), () => {});
+  assert.ok(logged.length >= 1);
+  assert.ok(logged.flat().every((part) => typeof part === "string"), "no object is logged");
+  assert.ok(!JSON.stringify(logged).includes("บันทึกส่วนตัวของผู้ป่วย"));
 });

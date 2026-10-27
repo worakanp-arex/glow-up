@@ -2,14 +2,15 @@ import ActivityMission from "../models/ActivityMission.js";
 import ActivityMissionLog from "../models/ActivityMissionLog.js";
 import User from "../models/User.js";
 import { checkAndAwardRewards } from "../services/rewardService.js";
-import { notifyUser } from "../services/notificationService.js";
+import { notifyUser, notifyCareTeam } from "../services/notificationService.js";
 import { createCrudController } from "./crudFactory.js";
 import { toBangkokDateKey, bangkokStartOfDay, bangkokEndOfDay, openWindowFilter } from "../utils/dateKey.js";
 import { sanitizeText } from "../utils/sanitizeText.js";
+import { reviewablePatientIds } from "../utils/patientAccess.js";
 
 const USER_LOG_FIELDS = "name avatarUrl avatarStyle avatarColor";
 
-const { getAll, getOne } = createCrudController(ActivityMission);
+const { getAll, getOne } = createCrudController(ActivityMission, { hideInactive: true });
 
 export { getAll as listActivityMissions, getOne as getActivityMission };
 
@@ -116,16 +117,15 @@ export async function logActivity(req, res) {
   }
 
   if (activity.requiresApproval) {
-    const staff = await User.find({ role: { $in: ["admin", "counsellor"] } }).select("_id");
+    // A patient with a counsellor of their own is only announced to that
+    // counsellor and the admins; otherwise every counsellor can pick it up.
     const reportingUser = await User.findById(req.user.id).select("name");
-    for (const member of staff) {
-      await notifyUser(
-        member._id,
-        `${reportingUser.name} ทำภารกิจ "${activity.title}" รอการอนุมัติจากคุณ`,
-        "system",
-        { link: "/counsellor/activity-missions" }
-      );
-    }
+    await notifyCareTeam(
+      req.user.id,
+      `${reportingUser.name} ทำภารกิจ "${activity.title}" รอการอนุมัติจากคุณ`,
+      "system",
+      { link: "/counsellor/activity-missions" }
+    );
   }
 
   // Points from an approval-required mission aren't counted until approved
@@ -140,7 +140,12 @@ export async function listPendingActivityApprovals(req, res) {
     .populate("user", USER_LOG_FIELDS)
     .populate("activityMission", "title category points")
     .sort({ createdAt: -1 });
-  res.json(logs);
+  if (req.user.role === "admin") return res.json(logs);
+
+  // Logs carry the patient's own notes, so a counsellor only sees the ones
+  // they may review (see reviewablePatientIds).
+  const reviewable = await reviewablePatientIds(req.user.id, logs.filter((log) => log.user).map((log) => log.user._id));
+  res.json(logs.filter((log) => log.user && reviewable.has(String(log.user._id))));
 }
 
 export async function reviewActivityLog(req, res) {
@@ -149,6 +154,9 @@ export async function reviewActivityLog(req, res) {
   const log = await ActivityMissionLog.findOne({ _id: req.params.id, requiresApproval: true, approved: null });
   if (!log) {
     return res.status(404).json({ message: "ไม่พบรายการที่รออนุมัติ" });
+  }
+  if (req.user.role === "counsellor" && !(await reviewablePatientIds(req.user.id, [log.user])).has(String(log.user))) {
+    return res.status(403).json({ message: "ผู้ใช้งานนี้อยู่ในความดูแลของผู้ให้คำปรึกษาท่านอื่น" });
   }
 
   log.approved = approved;

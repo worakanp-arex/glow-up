@@ -15,11 +15,11 @@ import {
   latestFamilyMessage,
   markFamilyMessageRead,
 } from "../controllers/familyController.js";
-import { familyRequestLimiter } from "../middleware/rateLimiters.js";
+import { familyRequestLimiter, familyInviteLimiter, familyInviteRecipientLimiter } from "../middleware/rateLimiters.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { objectIdParam } from "../middleware/validators.js";
+import { emailBody, objectIdParam } from "../middleware/validators.js";
 
 const router = Router();
 
@@ -27,8 +27,10 @@ router.post(
   "/invite",
   verifyToken,
   requireRole("user"),
-  [body("email").isEmail().normalizeEmail()],
+  familyInviteLimiter,
+  [emailBody()],
   validate,
+  familyInviteRecipientLimiter,
   asyncHandler(inviteFamilyMember)
 );
 router.get("/invited", verifyToken, requireRole("user"), asyncHandler(myInvitedFamily));
@@ -37,7 +39,7 @@ router.post(
   verifyToken,
   requireRole("family"),
   familyRequestLimiter,
-  [body("email").isEmail().normalizeEmail()],
+  [emailBody()],
   validate,
   asyncHandler(requestFamilyLink)
 );

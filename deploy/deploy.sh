@@ -18,6 +18,9 @@ git pull --ff-only || echo "(git pull skipped)"
 echo "==> Installing backend dependencies"
 npm ci --omit=dev --prefix backend
 
+echo "==> Checking dependencies for known vulnerabilities (warning only)"
+npm audit --omit=dev --audit-level=high --prefix backend || echo "WARNING: backend has known high-severity vulnerabilities; update dependencies soon." >&2
+
 echo "==> Building frontend"
 npm ci --prefix frontend
 npm run build --prefix frontend

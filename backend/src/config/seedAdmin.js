@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { connectDB } from "./db.js";
 import User from "../models/User.js";
+import { passwordProblem } from "../utils/passwordPolicy.js";
 
 dotenv.config();
 
@@ -12,6 +13,12 @@ async function seedAdmin() {
 
   if (!email || !password) {
     console.error("Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD before running this script.");
+    process.exit(1);
+  }
+  // An admin can read every patient's record: hold this account to the same rules as everyone's.
+  const weakness = passwordProblem(password);
+  if (weakness) {
+    console.error(`SEED_ADMIN_PASSWORD is not acceptable: ${weakness}`);
     process.exit(1);
   }
 

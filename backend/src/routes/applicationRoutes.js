@@ -13,7 +13,7 @@ import {
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { objectIdParam, paginationQuery } from "../middleware/validators.js";
+import { objectIdParam, paginationQuery, textBody } from "../middleware/validators.js";
 import { uploadApplicationAttachment, verifyUploadedFile } from "../middleware/upload.js";
 
 const router = Router();
@@ -58,7 +58,12 @@ router.put(
   "/:id/status",
   verifyToken,
   requireRole("employer", "admin"),
-  [objectIdParam("id"), body("status").isIn(["pending", "interview", "passed", "rejected", "cancelled"])],
+  [
+    objectIdParam("id"),
+    body("status").isIn(["pending", "interview", "passed", "rejected", "cancelled"]),
+    textBody("employerFeedback", { max: 1000 }),
+    textBody("rejectionReason", { max: 500 }),
+  ],
   validate,
   asyncHandler(updateApplicationStatus)
 );

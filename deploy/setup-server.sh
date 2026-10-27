@@ -11,13 +11,22 @@ echo "==> Installing Nginx, Git, certbot, firewall persistence"
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
   nginx git curl rsync certbot python3-certbot-nginx iptables-persistent
 
+echo "==> Automatic security updates and SSH brute-force protection"
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y unattended-upgrades fail2ban
+sudo systemctl enable --now fail2ban
+echo 'APT::Periodic::Update-Package-Lists "1"; APT::Periodic::Unattended-Upgrade "1";' | sudo tee /etc/apt/apt.conf.d/20auto-upgrades >/dev/null
+
 echo "==> Installing Node.js 22"
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+# Download first, then run: a dropped connection can't execute half a script.
+NODESOURCE_SCRIPT="$(mktemp)"
+curl -fsSL https://deb.nodesource.com/setup_22.x -o "$NODESOURCE_SCRIPT"
+sudo -E bash "$NODESOURCE_SCRIPT"
+rm -f "$NODESOURCE_SCRIPT"
 sudo apt-get install -y nodejs
 node -v
 
 echo "==> Installing PM2"
-sudo npm install -g pm2
+sudo npm install -g pm2@7.1.1
 
 echo "==> Opening ports 80 and 443 in the Ubuntu firewall (Oracle images block them by default)"
 for port in 80 443; do

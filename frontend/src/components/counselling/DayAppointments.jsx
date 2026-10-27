@@ -29,6 +29,23 @@ export default function DayAppointments({ dateKey, sessions }) {
         <ul>
           {items.map((session) => {
             const finished = session.status === "closed";
+            // Another counsellor's case is shown as a busy slot only; its detail page is off limits.
+            if (session.restricted) {
+              return (
+                <li key={session._id} className={`is-restricted${finished ? " is-finished" : ""}`}>
+                  <div className="day-appointments-row">
+                    <Avatar user={null} size={40} />
+                    <span className="day-appointments-text">
+                      <strong>เคสของ {session.counsellor?.name || "ผู้ให้คำปรึกษาท่านอื่น"}</strong>
+                      <small><Clock size={12} aria-hidden="true" />{time(session.scheduledAt)}</small>
+                    </span>
+                    <span className={`counselling-status-badge ${COUNSELLING_STATUS_CLASS[session.status] || ""}`}>
+                      {COUNSELLING_STATUS_LABELS[session.status] || session.status}
+                    </span>
+                  </div>
+                </li>
+              );
+            }
             return (
               <li key={session._id} className={finished ? "is-finished" : ""}>
                 <Link to={`/counsellor/requests/${session._id}`}>

@@ -2,7 +2,7 @@ import EmotionLog from "../models/EmotionLog.js";
 import RiskAssessment from "../models/RiskAssessment.js";
 import User from "../models/User.js";
 import { assessRisk } from "./riskPredictionService.js";
-import { notifyUser } from "./notificationService.js";
+import { notifyCareTeam } from "./notificationService.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
 
 // Recomputes and stores a user's rule-based risk level from their recent
@@ -30,18 +30,13 @@ export async function runRiskAssessment(userId) {
       createdAt: { $gte: new Date(`${todayKey}T00:00:00+07:00`) },
     });
     if (!alreadyAlertedToday) {
-      const [staff, targetUser] = await Promise.all([
-        User.find({ role: { $in: ["admin", "counsellor"] } }).select("_id"),
-        User.findById(userId).select("name"),
-      ]);
-      for (const member of staff) {
-        await notifyUser(
-          member._id,
-          `แจ้งเตือนความเสี่ยง: ระบบประเมินว่า ${targetUser.name} มีความเสี่ยงสูงจากข้อมูลอารมณ์/ความอยากล่าสุด`,
-          "riskAlert",
-          { link: `/counsellor/patients/${userId}` }
-        );
-      }
+      const targetUser = await User.findById(userId).select("name");
+      await notifyCareTeam(
+        userId,
+        `แจ้งเตือนความเสี่ยง: ระบบประเมินว่า ${targetUser.name} มีความเสี่ยงสูงจากข้อมูลอารมณ์/ความอยากล่าสุด`,
+        "riskAlert",
+        { link: `/counsellor/patients/${userId}` }
+      );
     }
   }
 

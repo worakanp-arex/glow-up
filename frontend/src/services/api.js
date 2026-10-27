@@ -1,19 +1,9 @@
 import axios from "axios";
 
+// The login session lives in an HttpOnly cookie that the browser attaches by
+// itself (`withCredentials`). Scripts on the page never see the token, so a
+// script injected into the page could not steal it.
 const api = axios.create({ baseURL: "/api", withCredentials: true });
-
-let authToken = null;
-
-export function setAuthToken(token) {
-  authToken = token;
-}
-
-api.interceptors.request.use((config) => {
-  if (authToken) {
-    config.headers.Authorization = `Bearer ${authToken}`;
-  }
-  return config;
-});
 
 api.interceptors.response.use((response) => response, (error) => {
   if (error.code !== "ERR_CANCELED" && error.config?.url !== "/auth/me" && !error.config?.silent) {

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { BCRYPT_COST } from "../utils/passwordPolicy.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -60,6 +61,19 @@ const userSchema = new mongoose.Schema(
     },
     resetPasswordTokenHash: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
+    // Every login token issued before this moment is refused (see
+    // middleware/authMiddleware.js), so changing or resetting the password
+    // signs out whoever else might be holding a session.
+    passwordChangedAt: { type: Date, select: false },
+    // Soft delete. A deleted account is invisible to the whole app (it cannot sign
+    // in, nobody can look it up, no email or reminder reaches it) but its data is
+    // kept for RETENTION_DAYS so an admin can review or restore it; after that it
+    // is anonymised (services/accountLifecycleService.js). Only code that passes
+    // the `withDeleted` option, or filters on `deletedAt` itself, can see these.
+    deletedAt: { type: Date },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    deletionReason: { type: String },
+    anonymizedAt: { type: Date },
     pdpaConsent: { type: Boolean, required: true },
     pdpaConsentAt: { type: Date },
     resumeUrl: { type: String },
@@ -74,13 +88,31 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.index({ deletedAt: 1 });
+
+// Every ordinary lookup of users leaves out deleted accounts. Doing it here, once,
+// instead of in each query means no code path (a reminder job, a notification, a
+// list, a populate) can forget to and reach a deleted person.
+const QUERIES_THAT_HIDE_DELETED_USERS = [
+  "find", "findOne", "findOneAndUpdate", "findOneAndReplace", "findOneAndDelete",
+  "updateOne", "updateMany", "countDocuments", "distinct",
+];
+userSchema.pre(QUERIES_THAT_HIDE_DELETED_USERS, function hideDeletedUsers() {
+  if (this.getOptions().withDeleted) return;
+  // A query that names `deletedAt` itself (the admin's deleted-accounts screens) is asking on purpose.
+  if (this.getFilter().deletedAt !== undefined) return;
+  this.where({ deletedAt: null });
+});
+
 userSchema.pre("save", async function hashPassword(next) {
   if (!this.isModified("password")) return next();
+  // A password replaced on an existing account ends every older session.
+  if (!this.isNew) this.passwordChangedAt = new Date();
   if (this.$locals.passwordAlreadyHashed) {
     delete this.$locals.passwordAlreadyHashed;
     return next();
   }
-  this.password = await bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, BCRYPT_COST);
   next();
 });
 

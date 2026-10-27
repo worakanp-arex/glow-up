@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { HAPPINESS_LEVELS, happinessByLevel } from "../../constants/happiness.js";
 import { WEEKDAY_LABELS, buildMonthGrid } from "../../utils/calendarGrid.js";
+import { BACKFILL_WINDOW_DAYS } from "../../constants/emotionLog.js";
 import "./EmotionCalendar.css";
 
 function monthLabel(year, month) {
@@ -27,6 +28,10 @@ function EmotionCalendar({
 }) {
   const today = useMemo(() => new Date(), []);
   const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+  // Older days can no longer be filled in: the server only accepts the last week.
+  const oldestBackfill = new Date(today);
+  oldestBackfill.setDate(oldestBackfill.getDate() - (BACKFILL_WINDOW_DAYS - 1));
+  const oldestBackfillKey = `${oldestBackfill.getFullYear()}-${pad(oldestBackfill.getMonth() + 1)}-${pad(oldestBackfill.getDate())}`;
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
 
@@ -92,7 +97,7 @@ function EmotionCalendar({
           const log = logByDateKey.get(cell.dateKey);
           const happiness = log?.happinessLevel ? happinessByLevel(log.happinessLevel) : null;
           const isFuture = cell.dateKey > todayKey;
-          const clickable = Boolean(onSelectEmptyDay) && !happiness && !isFuture;
+          const clickable = Boolean(onSelectEmptyDay) && !happiness && !isFuture && cell.dateKey >= oldestBackfillKey;
           const cellContent = (
             <span className={`emotion-calendar-daynum${happiness ? " emotion-calendar-daynum-filled" : ""}`}>
               {cell.day}

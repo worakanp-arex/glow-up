@@ -18,6 +18,7 @@ import RecoveryRadarChart from "../components/user/RecoveryRadarChart.jsx";
 import ProfileHero from "../components/profile/ProfileHero.jsx";
 import AvatarPickerDialog from "../components/profile/AvatarPickerDialog.jsx";
 import AccountCard from "../components/profile/AccountCard.jsx";
+import DeleteAccountCard from "../components/profile/DeleteAccountCard.jsx";
 import FamilyConnectionsCard from "../components/profile/FamilyConnectionsCard.jsx";
 import SkillPicker from "../components/profile/SkillPicker.jsx";
 import useConfirmDialog from "../components/common/useConfirmDialog.jsx";
@@ -861,7 +862,12 @@ function Profile() {
               </div>
             )}
 
-            {tab === "personal" && personalForm}
+            {tab === "personal" && (
+              <>
+                {personalForm}
+                <DeleteAccountCard user={user} />
+              </>
+            )}
           </div>
         </>
       )}

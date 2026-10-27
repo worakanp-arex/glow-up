@@ -1,6 +1,7 @@
 import { test, mock } from "node:test";
 import assert from "node:assert/strict";
 import bcrypt from "bcryptjs";
+import { createHash } from "node:crypto";
 import jwt from "jsonwebtoken";
 import User from "../src/models/User.js";
 import Job from "../src/models/Job.js";
@@ -148,35 +149,54 @@ test("concurrent family-invite-accept: exactly one acceptance wins", { timeout: 
   assert.equal(statuses.filter((s) => s === 409).length, 7);
 });
 
-test("concurrent OTP guesses can under-count failed attempts (documents an existing low-severity race)", async (t) => {
+test("concurrent OTP guesses cannot exceed the attempt limit (the attempt is claimed atomically before the code is checked)", async (t) => {
+  const registrationToken = "b".repeat(64);
+  const pending = {
+    _id: "pending1",
+    otpHash: "hash",
+    registrationTokenHash: createHash("sha256").update(registrationToken).digest("hex"),
+    otpExpiresAt: new Date(Date.now() + 60000),
+  };
+  t.mock.method(PendingRegistration, "findOne", () => ({ select: async () => pending }));
+  t.mock.method(PendingRegistration, "deleteOne", async () => ({}));
+  // Stands in for MongoDB's atomic conditional increment: the check and the
+  // increment happen in one step, so concurrent callers can't both pass the limit.
   let storedAttempts = 0;
-  t.mock.method(PendingRegistration, "findOne", () => ({
-    select: () => ({
-      _id: "pending1",
-      otpHash: "hash",
-      otpExpiresAt: new Date(Date.now() + 60000),
-      attempts: storedAttempts,
-      async save() { storedAttempts = this.attempts; },
-    }),
-  }));
-  // Real bcrypt work is what naturally separates the "read" and "write" halves
-  // of `pending.attempts += 1; await pending.save()` across concurrent calls;
-  // an artificial delay here just makes that gap reliable in a test.
+  t.mock.method(PendingRegistration, "findOneAndUpdate", async (filter) => {
+    if (storedAttempts >= filter.attempts.$lt) return null;
+    storedAttempts += 1;
+    return pending;
+  });
+  // Real bcrypt work is what naturally lets many guesses be in flight at once.
+  let codeChecks = 0;
   t.mock.method(bcrypt, "compare", async () => {
+    codeChecks += 1;
     await new Promise((resolve) => setTimeout(resolve, 15));
     return false;
   });
 
-  const CONCURRENT = 5;
-  await Promise.all(
-    Array.from({ length: CONCURRENT }, () =>
-      verifyRegistrationOtp({ body: { email: "race@example.com", otp: "000000" } }, response())
-    )
+  const CONCURRENT = 12;
+  const responses = await Promise.all(
+    Array.from({ length: CONCURRENT }, () => {
+      const res = response();
+      return verifyRegistrationOtp({ body: { email: "race@example.com", otp: "000000", registrationToken } }, res).then(() => res);
+    })
   );
 
-  assert.ok(
-    storedAttempts < CONCURRENT,
-    `expected the non-atomic read-modify-write to under-count (got ${storedAttempts} recorded attempts for ${CONCURRENT} concurrent guesses)`
-  );
-  assert.ok(storedAttempts >= 1);
+  assert.equal(storedAttempts, 5, "no more than the allowed number of guesses is ever recorded");
+  assert.equal(codeChecks, 5, "the code is only compared for guesses that were within the limit");
+  assert.equal(responses.filter((r) => /เกินจำนวนที่กำหนด/.test(r.body.message)).length, CONCURRENT - 5);
+});
+
+test("a wrong registration token neither reveals the pending request nor uses up the owner's attempts", async (t) => {
+  t.mock.method(PendingRegistration, "findOne", () => ({
+    select: async () => ({ _id: "pending1", registrationTokenHash: createHash("sha256").update("c".repeat(64)).digest("hex"), otpExpiresAt: new Date(Date.now() + 60000) }),
+  }));
+  t.mock.method(PendingRegistration, "findOneAndUpdate", async () => assert.fail("attempts must not be touched"));
+  for (const registrationToken of ["d".repeat(64), undefined, "short"]) {
+    const res = response();
+    await verifyRegistrationOtp({ body: { email: "victim@example.com", otp: "123456", registrationToken } }, res);
+    assert.equal(res.code, 400);
+    assert.match(res.body.message, /ไม่พบคำขอสมัครสมาชิก/);
+  }
 });

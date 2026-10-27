@@ -13,12 +13,13 @@ import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
 import BackfillEmotionModal from "../../components/user/BackfillEmotionModal.jsx";
 import WeeklyCheckInWidget from "../../components/user/WeeklyCheckInWidget.jsx";
 import { groupByMonth, monthGroupLabel } from "../../utils/calendarGrid.js";
+import { BACKFILL_WINDOW_DAYS } from "../../constants/emotionLog.js";
 import "./CravingTracker.css";
 
 // The history box scrolls, so show a fuller month before "load more".
 const MONTH_INITIAL_LIMIT = 15;
 const MONTH_LOAD_MORE_STEP = 10;
-const MISSING_DAYS_WINDOW = 7;
+const MISSING_DAYS_WINDOW = BACKFILL_WINDOW_DAYS;
 
 const RISK_LABELS = { low: "ต่ำ", medium: "ปานกลาง", high: "สูง" };
 const RISK_CLASS = { low: "craving-tracker-risk-low", medium: "craving-tracker-risk-medium", high: "craving-tracker-risk-high" };
@@ -161,7 +162,7 @@ function CravingTracker() {
   async function handleAssessRisk() {
     setAssessing(true);
     try {
-      const result = await riskService.getMyRisk();
+      const result = await riskService.assessMyRisk();
       setRisk(result);
     } finally {
       setAssessing(false);

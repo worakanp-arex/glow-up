@@ -57,12 +57,14 @@ test("profile uses the latest completed record, excludes future dates, and respe
 test("like response only patches reactions, preserving the author's populated profile", async () => {
   const id = "507f1f77bcf86cd799439011";
   let updates;
-  mock.method(Post, "findByIdAndUpdate", async (_id, pipeline) => {
+  mock.method(Post, "findOneAndUpdate", async (filter, pipeline) => {
+    assert.equal(filter._id, "post");
+    assert.deepEqual(filter.needsReview, { $ne: true }, "members can't react to a post that is hidden from them");
     updates = pipeline;
     return { user: "unpopulated-author-id", likes: 1, likedBy: [id] };
   });
   const res = response();
-  await likePost({ params: { id: "post" }, user: { id }, body: { liked: true } }, res);
+  await likePost({ params: { id: "post" }, user: { id, role: "user" }, body: { liked: true } }, res);
   assert.deepEqual(res.body, { likes: 1, likedByMe: true });
   assert.equal(updates[0].$set.likedBy.$cond[0], true);
   assert.deepEqual(updates[1], { $set: { likes: { $size: "$likedBy" } } });

@@ -8,7 +8,7 @@ import { insertOnce } from "../utils/insertOnce.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
 import { createCrudController } from "./crudFactory.js";
 
-const { getAll, create, update, remove } = createCrudController(FamilyMission);
+const { getAll, create, update, remove } = createCrudController(FamilyMission, { fields: ["title", "description", "points", "active"] });
 export { getAll as listFamilyMissions, create as createFamilyMission, update as updateFamilyMission, remove as deleteFamilyMission };
 
 async function findMyActiveLink(req) {

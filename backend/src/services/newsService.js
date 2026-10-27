@@ -60,6 +60,26 @@ function toHttps(url) {
   return typeof url === "string" ? url.replace(/^http:\/\//, "https://") : url;
 }
 
+// Readers are sent to an article's link, so it must really point at the
+// publisher: a feed item can't redirect people to some other site, or to a
+// non-web scheme. Images only have to be https, never a data: or javascript: URL.
+function trustedArticleLink(url) {
+  try {
+    const { protocol, hostname, href } = new URL(url);
+    return protocol === "https:" && (hostname === "hfocus.org" || hostname.endsWith(".hfocus.org")) ? href : "";
+  } catch {
+    return "";
+  }
+}
+
+function httpsImage(url) {
+  try {
+    return new URL(url).protocol === "https:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 function extractImage(html) {
   if (typeof html !== "string") return null;
   const match = html.match(/<img[^>]+src="([^"]+)"/);
@@ -77,7 +97,7 @@ function buildExcerpt(description, title) {
 function normalizeItem(item, index) {
   const title = typeof item.title === "string" ? item.title.trim() : "";
   const description = typeof item.description === "string" ? item.description : "";
-  const link = typeof item.link === "string" ? toHttps(item.link.trim()) : "";
+  const link = typeof item.link === "string" ? trustedArticleLink(toHttps(item.link.trim())) : "";
   const pubDate = typeof item.pubDate === "string" ? new Date(item.pubDate) : null;
 
   return {
@@ -85,7 +105,7 @@ function normalizeItem(item, index) {
     title,
     excerpt: buildExcerpt(description, title),
     link,
-    image: extractImage(description),
+    image: httpsImage(extractImage(description)),
     source: "Hfocus เจาะลึกระบบสุขภาพ",
     publishedAt: pubDate && !Number.isNaN(pubDate.getTime()) ? pubDate.toISOString() : null,
   };

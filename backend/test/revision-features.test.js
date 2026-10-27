@@ -131,6 +131,7 @@ test("messages cannot be added to a closed request, but sessions without a statu
 // ---------- post reports ----------
 
 test("reporting a post stores the reason, hides it and alerts the staff", async () => {
+  mock.method(Post, "countDocuments", async () => 0);
   mock.method(Post, "findOne", async () => ({ _id: "p1", user: { toString: () => "author" } }));
   let update;
   mock.method(Post, "findOneAndUpdate", async (filter, change) => { update = { filter, change }; return { _id: "p1" }; });
@@ -146,6 +147,7 @@ test("reporting a post stores the reason, hides it and alerts the staff", async 
 });
 
 test("an unknown report reason falls back to 'other' and own posts cannot be reported", async () => {
+  mock.method(Post, "countDocuments", async () => 0);
   mock.method(Post, "findOne", async () => ({ _id: "p1", user: { toString: () => "author" } }));
   let update;
   mock.method(Post, "findOneAndUpdate", async (filter, change) => { update = change; return { _id: "p1" }; });
@@ -159,6 +161,7 @@ test("an unknown report reason falls back to 'other' and own posts cannot be rep
 });
 
 test("a repeat report from the same person does not alert staff again", async () => {
+  mock.method(Post, "countDocuments", async () => 0);
   mock.method(Post, "findOne", async () => ({ _id: "p1", user: { toString: () => "author" } }));
   mock.method(Post, "findOneAndUpdate", async () => null);
   const created = captureNotifications();
@@ -367,10 +370,13 @@ test("rejecting an account saves the reason and includes it in the notification"
   assert.match(created[0].message, /เหตุผล: เลขผู้เสียภาษีไม่ตรง/);
 });
 
-test("admin-created accounts need a password of at least 8 characters", async () => {
-  const res = response();
-  await createUserByAdmin({ body: { name: "แอดมิน", email: "a@example.com", password: "short", role: "admin" } }, res);
-  assert.equal(res.code, 400);
+test("admin-created accounts follow the same password policy as everyone else", async () => {
+  // Staff accounts can read patient records, so a short or obvious password is refused.
+  for (const password of ["short", "Abcdefg12", "password123", "aaaaaaaaaaaa"]) {
+    const res = response();
+    await createUserByAdmin({ body: { name: "แอดมิน", email: "a@example.com", password, role: "admin" } }, res);
+    assert.equal(res.code, 400, password);
+  }
 });
 
 test("profile pictures and covers are picked from fixed keys and never from arbitrary URLs", async () => {

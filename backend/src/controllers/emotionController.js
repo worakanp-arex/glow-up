@@ -1,11 +1,14 @@
 import EmotionLog from "../models/EmotionLog.js";
 import User from "../models/User.js";
 import { computeStreakStats } from "../services/streakService.js";
-import { toBangkokDateKey } from "../utils/dateKey.js";
+import { toBangkokDateKey, shiftDateKey } from "../utils/dateKey.js";
 import { checkAndAwardMissions } from "./missionController.js";
 import { runRiskAssessment } from "../services/riskAssessmentService.js";
 
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// The check-in screen offers the last 7 days; one more is allowed for the
+// difference between the person's clock and Bangkok time around midnight.
+const MAX_BACKFILL_DAYS = 7;
 
 export async function createEmotionLog(req, res) {
   const { happinessLevel, cravingLevel, context, note } = req.body;
@@ -18,15 +21,21 @@ export async function createEmotionLog(req, res) {
   const todayKey = toBangkokDateKey(now);
 
   // Optional `dateKey` lets a user backfill a past day they missed — never
-  // allow logging into the future, and validate the format before trusting it.
+  // allow logging into the future, validate the format before trusting it, and
+  // only reach back a week: streaks, milestones and rewards are computed from
+  // these entries, so unlimited backfilling would let anyone fabricate a long
+  // streak (and bury a worsening trend that the risk assessment looks for).
   let dateKey = todayKey;
   let date = now;
   if (req.body.dateKey !== undefined) {
-    if (!DATE_KEY_PATTERN.test(req.body.dateKey)) {
+    if (typeof req.body.dateKey !== "string" || !DATE_KEY_PATTERN.test(req.body.dateKey) || Number.isNaN(Date.parse(req.body.dateKey))) {
       return res.status(400).json({ message: "รูปแบบวันที่ไม่ถูกต้อง" });
     }
     if (req.body.dateKey > todayKey) {
       return res.status(400).json({ message: "ไม่สามารถบันทึกล่วงหน้าในอนาคตได้" });
+    }
+    if (req.body.dateKey < shiftDateKey(todayKey, -MAX_BACKFILL_DAYS)) {
+      return res.status(400).json({ message: `บันทึกย้อนหลังได้ไม่เกิน ${MAX_BACKFILL_DAYS} วัน` });
     }
     dateKey = req.body.dateKey;
     date = new Date(`${dateKey}T12:00:00+07:00`);

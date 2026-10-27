@@ -14,7 +14,7 @@ import {
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { objectIdParam, paginationQuery } from "../middleware/validators.js";
+import { objectIdParam, paginationQuery, urlBody } from "../middleware/validators.js";
 import { uploadCertificate, uploadCourseCover, verifyUploadedFile } from "../middleware/upload.js";
 
 const router = Router();
@@ -30,7 +30,19 @@ const COURSE_BODY = [
   body("coverImage").optional({ values: "falsy" }).matches(/^\/(images\/[\w\-/]+\.(png|webp|jpe?g)|uploads\/course-covers\/[\w.-]+)$/),
 ];
 
-router.get("/", [query("status").optional().isIn(["active", "upcoming", "expired", "all"]), ...paginationQuery()], validate, asyncHandler(listCourses));
+router.get(
+  "/",
+  [
+    query("status").optional().isIn(["active", "upcoming", "expired", "all"]),
+    // Search terms must be plain text: ?q[]=a would otherwise reach the regex builder as an array.
+    query("q").optional().isString().isLength({ max: 100 }),
+    query("category").optional().isString().isLength({ max: 100 }),
+    query("tag").optional().isString().isLength({ max: 100 }),
+    ...paginationQuery(),
+  ],
+  validate,
+  asyncHandler(listCourses)
+);
 router.get("/mine", verifyToken, requireRole("user"), asyncHandler(myCourses));
 router.post(
   "/cover",
@@ -47,7 +59,7 @@ router.post(
   requireRole("admin", "counsellor"),
   [
     body("title").trim().notEmpty().isLength({ max: 200 }),
-    body("externalUrl").trim().isURL().isLength({ max: 500 }),
+    urlBody("externalUrl", { required: true }),
     ...COURSE_BODY,
   ],
   validate,
@@ -60,7 +72,7 @@ router.put(
   [
     objectIdParam("id"),
     body("title").optional().trim().notEmpty().isLength({ max: 200 }),
-    body("externalUrl").optional().trim().isURL().isLength({ max: 500 }),
+    urlBody("externalUrl"),
     ...COURSE_BODY,
   ],
   validate,

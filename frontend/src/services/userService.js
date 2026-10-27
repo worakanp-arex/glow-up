@@ -61,4 +61,23 @@ export function deleteUser(id) {
   return api.delete(`/users/${id}`).then((res) => res.data);
 }
 
+// "Delete my account": the password (or, for a Google-only account, the typed address) confirms it.
+export function deleteMyAccount(payload) {
+  return api.delete("/users/me", { data: payload }).then((res) => res.data);
+}
+
+export function listDeletedUsersPage(params, signal) {
+  return api
+    .get("/admin/deleted-users", { params, signal })
+    .then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+}
+
+export function getDeletedUser(id) {
+  return api.get(`/admin/deleted-users/${id}`).then((res) => res.data);
+}
+
+export function restoreDeletedUser(id) {
+  return api.post(`/admin/deleted-users/${id}/restore`).then((res) => res.data);
+}
+
 export const getMyRecoverySummary = () => api.get("/users/me/recovery-summary").then(res => res.data);

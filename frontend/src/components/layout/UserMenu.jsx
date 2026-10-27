@@ -42,7 +42,13 @@ function UserMenu() {
   }, []);
 
   async function handleLogout() {
-    await logout();
+    try {
+      await logout();
+    } catch {
+      // The error banner already told the person it didn't work; they are still
+      // signed in, so stay put and let them try again.
+      return;
+    }
     setOpen(false);
     navigate("/login");
   }

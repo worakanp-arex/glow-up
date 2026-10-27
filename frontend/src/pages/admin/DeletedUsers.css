@@ -1,0 +1,75 @@
+.deleted-users-search {
+  display: flex;
+  align-items: center;
+  flex: 1 1 220px;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 12px;
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.deleted-users-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.deleted-users-head,
+.deleted-users-row {
+  grid-template-columns: minmax(0, 1fr) 170px 190px 70px;
+}
+
+.deleted-users-when { display: flex; flex-direction: column; gap: 2px; font-size: 0.85rem; }
+.deleted-users-when small { color: var(--color-text-muted); font-size: 0.75rem; }
+
+.deleted-users-state { font-size: 0.82rem; font-weight: 600; color: var(--color-primary-700); }
+.deleted-users-state.is-anonymized { color: var(--color-text-muted); font-weight: 500; }
+
+@media (max-width: 900px) {
+  .deleted-users-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .deleted-users-when, .deleted-users-state { grid-column: 1 / -1; }
+}
+
+/* Detail page */
+.deleted-user-detail { max-width: var(--content-width); margin: 0 auto; padding: 2.5rem 1.5rem 4rem; display: flex; flex-direction: column; gap: 1.25rem; }
+.layout .deleted-user-detail > .page-header { margin-bottom: 0; }
+
+.deleted-user-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-hover);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.deleted-user-banner.is-retained { border-color: var(--color-primary-200); background-color: var(--color-primary-50); }
+.deleted-user-banner strong { display: block; }
+
+.deleted-user-section ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.deleted-user-section li { padding: 0.7rem 0.9rem; border: 1px solid var(--color-border); border-radius: 12px; font-size: 0.85rem; line-height: 1.6; overflow-wrap: anywhere; }
+.deleted-user-section li small { display: block; color: var(--color-text-muted); }
+.deleted-user-section details { margin-top: 0.4rem; }
+.deleted-user-section summary { cursor: pointer; color: var(--color-primary-700); font-size: 0.8rem; }
+.deleted-user-chat { margin-top: 0.4rem; padding-left: 0.75rem; border-left: 3px solid var(--color-border-strong); display: flex; flex-direction: column; gap: 0.35rem; }
+.deleted-user-chat p { margin: 0; }
+.deleted-user-muted { margin: 0; color: var(--color-text-muted); font-size: 0.85rem; }
+.deleted-user-counts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 0; font-size: 0.85rem; color: var(--color-text-secondary); }
+
+@media (max-width: 520px) {
+  .deleted-user-detail { padding: 1.5rem 1rem 2.5rem; }
+}

@@ -1,6 +1,6 @@
 import PageHeader from "../../components/common/PageHeader.jsx";
-import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { KeyRound } from "lucide-react";
 import * as authService from "../../services/authService.js";
 import "./Login.css";
@@ -8,8 +8,17 @@ import "./Login.css";
 function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const token = searchParams.get("token") || "";
-  const email = searchParams.get("email") || "";
+  const location = useLocation();
+  // Read the link's secrets once, then take them out of the address bar so they
+  // don't linger in browser history, screenshots or a shared screen. The link is
+  // single-use anyway; reloading simply asks for a new one.
+  const [{ token, email }] = useState(() => ({
+    token: searchParams.get("token") || "",
+    email: searchParams.get("email") || "",
+  }));
+  useEffect(() => {
+    if (location.search) navigate({ pathname: location.pathname, search: "" }, { replace: true });
+  }, [location.pathname, location.search, navigate]);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -85,7 +94,8 @@ function ResetPassword() {
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            minLength={6}
+            minLength={10}
+            maxLength={128}
             required
             disabled={done}
           />
@@ -96,7 +106,8 @@ function ResetPassword() {
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            minLength={6}
+            minLength={10}
+            maxLength={128}
             required
             disabled={done}
           />

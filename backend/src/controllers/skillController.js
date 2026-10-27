@@ -2,7 +2,7 @@ import Skill from "../models/Skill.js";
 import { createCrudController } from "./crudFactory.js";
 import { paginationOptions, escapeRegex } from "../utils/pagination.js";
 
-const { create } = createCrudController(Skill);
+const { create } = createCrudController(Skill, { fields: ["skillName", "category"] });
 
 // Optional ?q= (name search) and ?category= filters; grouped by category so the
 // pickers can render headings without re-sorting.

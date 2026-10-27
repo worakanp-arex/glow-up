@@ -15,6 +15,16 @@ function removeUploadedImage(fileUrl) {
   fs.unlink(path.join(UPLOAD_ROOT, fileUrl.replace("/uploads/", "")), () => {});
 }
 
+// Applicants' documents live on disk, so deleting their applications must delete them too.
+function removeApplicationAttachments(applications) {
+  for (const application of applications) {
+    for (const attachment of application.attachments || []) {
+      if (!attachment.url?.startsWith("/uploads/application-attachments/")) continue;
+      fs.unlink(path.join(UPLOAD_ROOT, "application-attachments", path.basename(attachment.url)), () => {});
+    }
+  }
+}
+
 const EMPLOYER_EDITABLE_FIELDS = [
   "title",
   "description",
@@ -32,6 +42,12 @@ const EMPLOYER_PUBLIC_FIELDS = "name companyName avatarUrl avatarStyle avatarCol
 const EMPLOYER_ADMIN_FIELDS = `${EMPLOYER_PUBLIC_FIELDS} email phone taxId address verifiedStatus`;
 // Fields that arrive as "" from a blank form input mean "not set".
 const BLANKABLE_FIELDS = ["externalUrl", "salary", "expiredAt", "category"];
+// What a moderator actually reads when approving a posting.
+const MODERATED_FIELDS = ["title", "description", "externalUrl", "location", "salary", "attachmentRequests"];
+
+function moderatedContent(job) {
+  return JSON.stringify(MODERATED_FIELDS.map((field) => job[field] ?? null));
+}
 
 async function attachSkills(job) {
   const jobSkills = await JobSkill.find({ job: job._id }).populate("skill");
@@ -39,6 +55,21 @@ async function attachSkills(job) {
   obj.skills = jobSkills.map((js) => js.skill);
   return obj;
 }
+
+// One query for the skills of a whole page of jobs, instead of one per job.
+async function attachSkillsToAll(jobs) {
+  const jobSkills = await JobSkill.find({ job: { $in: jobs.map((job) => job._id) } }).populate("skill");
+  const skillsByJob = new Map();
+  for (const jobSkill of jobSkills) {
+    const key = String(jobSkill.job);
+    if (!skillsByJob.has(key)) skillsByJob.set(key, []);
+    skillsByJob.get(key).push(jobSkill.skill);
+  }
+  return jobs.map((job) => ({ ...job.toObject(), skills: skillsByJob.get(String(job._id)) || [] }));
+}
+
+// The public list needs no sign-in, so without ?page= it still returns at most this many.
+const PUBLIC_UNPAGED_LIMIT = 200;
 
 export async function listJobs(req, res) {
   const filter = { status: "open", verifiedStatus: "verified", $and: [{ $or: [{ expiredAt: null }, { expiredAt: { $gt: new Date() } }] }] };
@@ -88,10 +119,12 @@ export async function listJobs(req, res) {
   if (pagination) {
     res.setHeader("X-Total-Count", await Job.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
+  } else {
+    query.limit(PUBLIC_UNPAGED_LIMIT);
   }
-  const jobs = await query;
-  const withSkills = await Promise.all(jobs.map(attachSkills));
-  res.json(withSkills);
+  // Postings of an employer whose account was deleted are not listed.
+  const jobs = (await query).filter((job) => job.employer);
+  res.json(await attachSkillsToAll(jobs));
 }
 
 // Bookmarks for job seekers. Only jobs that are still publicly listed are
@@ -142,7 +175,7 @@ export async function getJob(req, res) {
   })
     .populate("employer", `${EMPLOYER_PUBLIC_FIELDS} verifiedStatus`)
     .populate("category");
-  if (!job) {
+  if (!job || !job.employer) {
     return res.status(404).json({ message: "Not found" });
   }
   res.json(await attachSkills(job));
@@ -160,7 +193,7 @@ export async function listAllJobsForAdmin(req, res) {
     res.setHeader("X-Total-Count", await Job.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
   }
-  const jobs = await query;
+  const jobs = (await query).filter((job) => job.employer);
   const withSkills = await Promise.all(jobs.map(attachSkills));
   res.json(withSkills);
 }
@@ -250,13 +283,17 @@ export async function updateJob(req, res) {
     return res.status(403).json({ message: "Forbidden" });
   }
 
+  const contentBefore = moderatedContent(job);
   for (const field of EMPLOYER_EDITABLE_FIELDS) {
     if (req.body[field] === undefined) continue;
     job[field] = BLANKABLE_FIELDS.includes(field) && req.body[field] === "" ? undefined : req.body[field];
   }
   // Editing a rejected posting resubmits it for review (a status-only change
-  // such as closing it does not).
-  const resubmitted = req.user.role === "employer" && job.verifiedStatus === "rejected" && Object.keys(req.body).some((key) => key !== "status");
+  // such as closing it does not). So does changing what a moderator approved on
+  // a live posting, otherwise a benign ad could be swapped for a harmful one.
+  const editedRejected = job.verifiedStatus === "rejected" && Object.keys(req.body).some((key) => key !== "status");
+  const editedApproved = job.verifiedStatus === "verified" && moderatedContent(job) !== contentBefore;
+  const resubmitted = req.user.role === "employer" && (editedRejected || editedApproved);
   if (resubmitted) {
     job.verifiedStatus = "pending";
     job.rejectionReason = undefined;
@@ -283,10 +320,12 @@ export async function deleteJob(req, res) {
     return res.status(403).json({ message: "Forbidden" });
   }
 
+  const applications = await Application.find({ job: job._id }).select("attachments");
   await Job.findByIdAndDelete(job._id);
   await JobSkill.deleteMany({ job: job._id });
   await Application.deleteMany({ job: job._id });
   removeUploadedImage(job.imageUrl);
+  removeApplicationAttachments(applications);
 
   res.status(204).send();
 }
@@ -302,6 +341,8 @@ export async function uploadJobImage(req, res) {
   }
   const previous = job.imageUrl;
   job.imageUrl = publicUrl("jobImage", req.file.filename);
+  // A new picture on a live posting hasn't been seen by a moderator.
+  if (req.user.role === "employer" && job.verifiedStatus === "verified") job.verifiedStatus = "pending";
   await job.save();
   removeUploadedImage(previous);
   res.json(await attachSkills(job));

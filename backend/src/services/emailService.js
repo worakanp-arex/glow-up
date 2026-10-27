@@ -1,12 +1,18 @@
 import nodemailer from "nodemailer";
+import { isProductionLike } from "../config/env.js";
 
 const smtpConfigured = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 
+const smtpPort = Number(process.env.SMTP_PORT) || 587;
 const transporter = smtpConfigured
   ? nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: Number(process.env.SMTP_PORT) === 465,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      // Verification codes and reset links must never travel unencrypted: refuse
+      // to send if the server won't upgrade the connection to TLS (STARTTLS).
+      // Left optional for local development against a plain-text mail catcher.
+      requireTLS: isProductionLike() && smtpPort !== 465,
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     })
   : null;
@@ -119,6 +125,25 @@ export function sendOtpEmail(to, otp) {
   });
 }
 
+// Sent instead of a verification code when someone starts a sign-up with an
+// address that already has an account. The sign-up page answers exactly as it
+// does for a new address, so it can't be used to find out who has registered;
+// the real owner learns about it here.
+export function sendAccountExistsEmail(to) {
+  const siteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+  const login = escapeHtml(`${siteUrl}/login`);
+  const forgot = escapeHtml(`${siteUrl}/forgot-password`);
+  return sendMail({
+    to,
+    subject: `อีเมลนี้มีบัญชี ${APP_NAME} อยู่แล้ว`,
+    html: renderEmail({
+      heading: "อีเมลนี้มีบัญชีอยู่แล้ว",
+      body: `<p>มีการใช้อีเมลนี้เพื่อสมัครสมาชิกใหม่ แต่อีเมลนี้มีบัญชีอยู่แล้ว จึงไม่มีการสร้างบัญชีใหม่</p><p>หากเป็นคุณ <a href="${login}" style="color:#2563eb;">เข้าสู่ระบบ</a> ได้เลย หรือ <a href="${forgot}" style="color:#2563eb;">ตั้งรหัสผ่านใหม่</a> หากลืมรหัสผ่าน</p><p>หากไม่ใช่คุณ ไม่ต้องทำอะไร บัญชีของคุณยังปลอดภัยอยู่</p>`,
+      reason: "เนื่องจากมีการใช้อีเมลนี้เริ่มสมัครสมาชิก",
+    }),
+  });
+}
+
 export function sendPasswordResetEmail(to, resetUrl) {
   const url = escapeHtml(resetUrl);
   return sendMail({
@@ -134,10 +159,12 @@ export function sendPasswordResetEmail(to, resetUrl) {
 
 export function sendFamilyInviteEmail(to, inviterName, acceptUrl) {
   const url = escapeHtml(acceptUrl);
-  const inviter = escapeHtml(inviterName);
+  // The inviter's name is free text typed by a member, so it stays in the escaped
+  // body only: a subject line is where a spoofed message would be read first.
+  const inviter = escapeHtml(String(inviterName).replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 100));
   return sendMail({
     to,
-    subject: `${inviterName} เชิญคุณติดตามความคืบหน้าบน ${APP_NAME}`,
+    subject: `คำเชิญติดตามความคืบหน้าบน ${APP_NAME}`,
     html: renderEmail({
       heading: "คำเชิญติดตามความคืบหน้า",
       body: `<p>${inviter} เชิญคุณเข้าร่วมติดตามความคืบหน้าการฟื้นฟูแบบจำกัดสิทธิ์ (เห็นเฉพาะระดับความสำเร็จ ไม่เห็นข้อมูลสุขภาพโดยละเอียด)</p><p><a href="${url}" style="display:inline-block;padding:12px 22px;background:#2563eb;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;">ตอบรับคำเชิญ</a></p><p style="font-size:12px;color:#5b6784;word-break:break-all;">ลิงก์นี้จะหมดอายุใน 7 วัน: ${url}</p>`,

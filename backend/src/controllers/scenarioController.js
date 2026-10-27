@@ -53,8 +53,12 @@ export async function createScenario(req, res) {
   res.status(201).json(scenario);
 }
 
+const SCENARIO_EDITABLE_FIELDS = ["title", "lesson", "prompt", "options", "active"];
+
 export async function updateScenario(req, res) {
-  const scenario = await ScenarioSimulation.findByIdAndUpdate(req.params.id, req.body, {
+  const changes = {};
+  for (const field of SCENARIO_EDITABLE_FIELDS) if (req.body[field] !== undefined) changes[field] = req.body[field];
+  const scenario = await ScenarioSimulation.findByIdAndUpdate(req.params.id, changes, {
     new: true,
     runValidators: true,
   });

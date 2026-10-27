@@ -27,7 +27,8 @@ const STATUS_MESSAGE = {
 
 function canAccessSession(session, user) {
   if (user.role === "admin") return true;
-  if (user.role === "user") return session.user._id.toString() === user.id;
+  // `session.user` is null when the patient's account has been deleted.
+  if (user.role === "user") return session.user?._id.toString() === user.id;
   if (user.role === "counsellor") {
     return !session.counsellor || session.counsellor._id.toString() === user.id;
   }
@@ -72,10 +73,29 @@ export async function mySessions(req, res) {
   res.json(await query);
 }
 
+// A case another counsellor is handling is reduced to a bare calendar entry, so
+// the team view still shows who is busy without exposing the patient, their
+// message, the chat thread or the clinical outcome (getSession denies the same).
+const CALENDAR_ENTRY_FIELDS = ["_id", "sessionType", "status", "scheduledAt", "counsellor", "createdAt"];
+
+function claimedByAnotherCounsellor(session, counsellorId) {
+  const owner = session.populated("counsellor") ?? session.counsellor?._id;
+  return Boolean(owner) && String(owner) !== String(counsellorId);
+}
+
+function toCalendarEntry(session) {
+  const entry = { restricted: true };
+  for (const field of CALENDAR_ENTRY_FIELDS) entry[field] = session[field];
+  return entry;
+}
+
 export async function listQueue(req, res) {
+  const isCounsellor = req.user.role === "counsellor";
   const filter = {};
   if (req.query.status) filter.status = req.query.status;
   if (req.query.user) filter.user = req.query.user;
+  // Searching by patient must not reveal whether that patient has a case with another counsellor.
+  if (isCounsellor && req.query.user) filter.$or = [{ counsellor: null }, { counsellor: req.user.id }];
 
   const pagination = paginationOptions(req.query);
   const query = CounsellingSession.find(filter)
@@ -86,7 +106,10 @@ export async function listQueue(req, res) {
     res.setHeader("X-Total-Count", await CounsellingSession.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
   }
-  res.json(await query);
+  // Cases of patients whose account was deleted drop out of the queue.
+  const sessions = (await query).filter((session) => session.user);
+  if (!isCounsellor) return res.json(sessions);
+  res.json(sessions.map((session) => (claimedByAnotherCounsellor(session, req.user.id) ? toCalendarEntry(session) : session)));
 }
 
 export async function mySchedule(req, res) {
@@ -106,7 +129,7 @@ export async function getSession(req, res) {
     .populate("user", USER_SUMMARY_FIELDS)
     .populate("counsellor", COUNSELLOR_SUMMARY_FIELDS)
     .populate("messages.sender", "name avatarUrl avatarStyle avatarColor role");
-  if (!session) {
+  if (!session || !session.user) {
     return res.status(404).json({ message: "Not found" });
   }
   if (!canAccessSession(session, req.user)) {
@@ -129,6 +152,12 @@ export async function claimSession(req, res) {
     return res.status(exists ? 409 : 404).json({
       message: exists ? "เคสนี้มีบุคลากรรับไปแล้วหรือถูกยกเลิกแล้ว" : "Not found",
     });
+  }
+
+  // The patient's account was deleted after asking: there is no one to look after.
+  if (!session.user) {
+    await CounsellingSession.updateOne({ _id: session._id }, { counsellor: null, status: "cancelled" });
+    return res.status(409).json({ message: "เคสนี้ถูกยกเลิกแล้ว" });
   }
 
   // First counsellor to claim any of this user's sessions becomes their
@@ -206,9 +235,11 @@ export async function updateSchedule(req, res) {
   await session.populate("user", USER_SUMMARY_FIELDS);
   await session.populate("counsellor", COUNSELLOR_SUMMARY_FIELDS);
 
-  await notifyUser(session.user._id, STATUS_MESSAGE.scheduled(session.topic), "counselling", {
-    link: `/counselling/${session._id}`,
-  });
+  if (session.user) {
+    await notifyUser(session.user._id, STATUS_MESSAGE.scheduled(session.topic), "counselling", {
+      link: `/counselling/${session._id}`,
+    });
+  }
   res.json(session);
 }
 
@@ -268,6 +299,11 @@ export async function updateStatus(req, res) {
   }
   if (req.user.role === "counsellor" && session.counsellor?.toString() !== req.user.id) {
     return res.status(403).json({ message: "Forbidden" });
+  }
+  // A closed case, or one the person withdrew, stays that way: staff reopening it
+  // would put someone back into counselling they had ended.
+  if (FINISHED_STATUSES.includes(session.status)) {
+    return res.status(409).json({ message: "เคสนี้ปิดหรือยกเลิกไปแล้ว ไม่สามารถเปลี่ยนสถานะได้" });
   }
 
   session.status = status;

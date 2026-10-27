@@ -14,6 +14,7 @@ import {
   UserCircle,
   Users,
   FileSearch,
+  Archive,
 } from "lucide-react";
 
 // `icon` and `group` are used by the left side navigation (admin and
@@ -67,6 +68,7 @@ export const LINKS_BY_ROLE = {
     { to: "/counsellor/analytics", label: "ภาพรวมผู้ใช้งาน", icon: BarChart3, group: "ภาพรวม" },
     { to: "/admin/assessments", label: "ผลประเมินความเสี่ยง", icon: ShieldAlert, group: "ภาพรวม" },
     { to: "/admin/users", label: "จัดการผู้ใช้งาน", icon: Users, group: "ผู้ใช้และงาน" },
+    { to: "/admin/deleted-users", label: "บัญชีที่ถูกลบ", icon: Archive, group: "ผู้ใช้และงาน" },
     { to: "/admin/jobs", label: "ตรวจสอบประกาศงาน", icon: Briefcase, group: "ผู้ใช้และงาน" },
     { to: "/admin/applications", label: "ใบสมัครงานทั้งหมด", icon: FileSearch, group: "ผู้ใช้และงาน" },
     { to: "/admin/job-categories", label: "หมวดหมู่งาน", icon: Tags, group: "ผู้ใช้และงาน" },

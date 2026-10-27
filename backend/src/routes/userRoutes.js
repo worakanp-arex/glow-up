@@ -18,12 +18,14 @@ import {
   verifyUser,
   updateUser,
   deleteUser,
+  deleteMyAccount,
   getUser,
 } from "../controllers/userController.js";
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { objectIdParam, paginationQuery } from "../middleware/validators.js";
+import { changePasswordLimiter } from "../middleware/rateLimiters.js";
+import { objectIdParam, paginationQuery, urlBody, newPasswordBody } from "../middleware/validators.js";
 import { uploadAvatar, uploadResume, uploadCertificate, verifyUploadedFile } from "../middleware/upload.js";
 import { AVATAR_PRESET_KEYS, AVATAR_COLORS, COVER_PRESET_KEYS } from "../constants/profileArt.js";
 
@@ -54,7 +56,7 @@ router.put(
     PROFILE_TEXT_FIELD("taxId"),
     PROFILE_TEXT_FIELD("specialization"),
     PROFILE_TEXT_FIELD("hospital"),
-    body("website").optional().trim().isLength({ max: 300 }),
+    urlBody("website", { max: 300 }),
     PROFILE_TEXT_FIELD("companySize"),
     body("companyDescription").optional().trim().isLength({ max: 1000 }),
     PROFILE_TEXT_FIELD("contactPosition"),
@@ -119,6 +121,19 @@ router.post(
   asyncHandler(addRehabilitationRecord)
 );
 
+// "Delete my account" for every role. Wrong passwords are counted like failed password changes.
+router.delete(
+  "/me",
+  verifyToken,
+  changePasswordLimiter,
+  [
+    body("password").optional().isString().isLength({ max: 128 }),
+    body("confirmEmail").optional().isString().isLength({ max: 254 }),
+  ],
+  validate,
+  asyncHandler(deleteMyAccount)
+);
+
 router.get("/me/skills", verifyToken, requireRole("user"), asyncHandler(listMySkills));
 router.post(
   "/me/skills",
@@ -164,7 +179,7 @@ router.post(
   [
     body("name").trim().notEmpty().isLength({ max: 200 }),
     body("email").isEmail().normalizeEmail(),
-    body("password").isLength({ min: 8 }),
+    newPasswordBody("password"),
     body("role").isIn(["user", "family", "employer", "admin", "counsellor"]),
     body("phone").optional().trim().isLength({ max: 50 }),
     body("specialization").optional().trim().isLength({ max: 200 }),

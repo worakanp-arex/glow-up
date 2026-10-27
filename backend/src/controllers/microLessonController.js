@@ -1,19 +1,32 @@
 import MicroLesson from "../models/MicroLesson.js";
 import SavedLesson from "../models/SavedLesson.js";
-import { createCrudController } from "./crudFactory.js";
 
-const { getOne } = createCrudController(MicroLesson);
-export { getOne as getMicroLesson };
+const STAFF_ROLES = ["admin", "counsellor"];
+const EDITABLE_FIELDS = ["title", "body", "category", "audience", "order", "active"];
+
+// Lessons created before the `audience` field existed have no value set —
+// treat those as "user" so they keep showing up for existing installs.
+function readableLessonFilter(role) {
+  return role === "family"
+    ? { active: true, audience: "family" }
+    : { active: true, $or: [{ audience: "user" }, { audience: { $exists: false } }] };
+}
 
 export async function listActiveLessons(req, res) {
-  // Lessons created before the `audience` field existed have no value set —
-  // treat those as "user" so they keep showing up for existing installs.
-  const filter =
-    req.user.role === "family"
-      ? { active: true, audience: "family" }
-      : { active: true, $or: [{ audience: "user" }, { audience: { $exists: false } }] };
-  const lessons = await MicroLesson.find(filter).sort({ order: 1, createdAt: -1 });
+  const lessons = await MicroLesson.find(readableLessonFilter(req.user.role)).sort({ order: 1, createdAt: -1 });
   res.json(lessons);
+}
+
+// Staff may open any lesson (drafts included); everyone else only the active
+// lessons written for their audience — a draft or the other audience's lesson
+// answers 404 rather than confirming it exists.
+export async function getMicroLesson(req, res) {
+  const filter = STAFF_ROLES.includes(req.user.role) ? { _id: req.params.id } : { _id: req.params.id, ...readableLessonFilter(req.user.role) };
+  const lesson = await MicroLesson.findOne(filter);
+  if (!lesson) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  res.json(lesson);
 }
 
 export async function mySavedLessonIds(req, res) {
@@ -54,7 +67,9 @@ export async function createMicroLesson(req, res) {
 }
 
 export async function updateMicroLesson(req, res) {
-  const lesson = await MicroLesson.findByIdAndUpdate(req.params.id, req.body, {
+  const changes = {};
+  for (const field of EDITABLE_FIELDS) if (req.body[field] !== undefined) changes[field] = req.body[field];
+  const lesson = await MicroLesson.findByIdAndUpdate(req.params.id, changes, {
     new: true,
     runValidators: true,
   });

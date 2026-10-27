@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import CounsellingSession from "../models/CounsellingSession.js";
 import RiskAssessment from "../models/RiskAssessment.js";
 import LoginEvent from "../models/LoginEvent.js";
@@ -23,6 +24,12 @@ export async function getOverview(req, res) {
   const fourteenDaysAgoKey = shiftDateKey(todayKey, -13);
   const thirtyDaysAgoKey = shiftDateKey(todayKey, -29);
   const sevenDaysAheadKey = shiftDateKey(todayKey, 6);
+
+  // Totals are anonymous counts for everyone; only the named leaderboard is
+  // limited to patients the viewer is allowed to see.
+  const allowed = await accessiblePatientIds(req.user);
+  const leaderboardMatch = { dateKey: { $gte: thirtyDaysAgoKey } };
+  if (allowed) leaderboardMatch.user = { $in: [...allowed].map((id) => new mongoose.Types.ObjectId(id)) };
 
   const [activeUserIds, riskByLevelRaw, appointmentsByDayRaw, loginTrendRaw, leaderboardRaw] = await Promise.all([
     LoginEvent.distinct("user", { dateKey: { $gte: sevenDaysAgoKey } }),
@@ -53,7 +60,7 @@ export async function getOverview(req, res) {
       { $sort: { _id: 1 } },
     ]),
     LoginEvent.aggregate([
-      { $match: { dateKey: { $gte: thirtyDaysAgoKey } } },
+      { $match: leaderboardMatch },
       { $group: { _id: "$user", days: { $sum: 1 } } },
       { $sort: { days: -1 } },
       { $limit: 10 },
@@ -136,6 +143,11 @@ async function pointsByUser() {
 export async function getActivityOverview(req, res) {
   const days = windowDays(req);
   const since = sinceDate(days);
+  // Counts above are anonymous; the named lists (top scorers, recent
+  // appointments) only include patients the viewer is allowed to see.
+  const allowed = await accessiblePatientIds(req.user);
+  const recentFilter = { scheduledAt: { $gte: since, $lte: new Date() } };
+  if (allowed) recentFilter.user = { $in: [...allowed] };
 
   const [missionLogs, gameRows, scenarioRows, statusRows, recentSessions, totals] = await Promise.all([
     ActivityMissionLog.aggregate([
@@ -169,7 +181,7 @@ export async function getActivityOverview(req, res) {
       { $match: { createdAt: { $gte: since } } },
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]),
-    CounsellingSession.find({ scheduledAt: { $gte: since, $lte: new Date() } })
+    CounsellingSession.find(recentFilter)
       .populate("user", "name")
       .populate("counsellor", "name")
       .select("topic status scheduledAt user counsellor")
@@ -185,7 +197,10 @@ export async function getActivityOverview(req, res) {
   const missionById = new Map(missionDocs.map((doc) => [String(doc._id), doc]));
   const scenarioById = new Map(scenarioDocs.map((doc) => [String(doc._id), doc]));
 
-  const topUserIds = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const topUserIds = [...totals.entries()]
+    .filter(([id]) => !allowed || allowed.has(id))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
   const topUsers = await User.find({ _id: { $in: topUserIds.map(([id]) => id) } }).select("name avatarUrl avatarStyle avatarColor");
   const userById = new Map(topUsers.map((u) => [String(u._id), u]));
 
@@ -293,19 +308,21 @@ export async function getOverviewUsers(req, res) {
   const todayKey = toBangkokDateKey(new Date());
 
   if (kind === "active") {
+    const allowed = await accessiblePatientIds(req.user);
     const rows = await LoginEvent.aggregate([
       { $match: { dateKey: { $gte: shiftDateKey(todayKey, -6) } } },
       { $group: { _id: "$user", lastLogin: { $max: "$dateKey" }, days: { $sum: 1 } } },
       { $sort: { lastLogin: -1, days: -1 } },
       { $limit: 200 },
     ]);
-    const users = await User.find({ _id: { $in: rows.map((row) => row._id) } }).select("name avatarUrl avatarStyle avatarColor");
+    const visible = rows.filter((row) => !allowed || allowed.has(String(row._id)));
+    const users = await User.find({ _id: { $in: visible.map((row) => row._id) } }).select("name avatarUrl avatarStyle avatarColor");
     const userById = new Map(users.map((u) => [String(u._id), u]));
     return res.json({
       kind,
       total: rows.length,
-      hidden: 0,
-      items: rows
+      hidden: rows.length - visible.length,
+      items: visible
         .filter((row) => userById.has(String(row._id)))
         .map((row) => ({ user: userById.get(String(row._id)), lastLogin: row.lastLogin, days: row.days })),
     });
@@ -336,16 +353,18 @@ export async function getOverviewUsers(req, res) {
   }
 
   if (kind === "appointments") {
+    const allowed = await accessiblePatientIds(req.user);
     const start = new Date(`${todayKey}T00:00:00+07:00`);
     const end = new Date(`${todayKey}T23:59:59.999+07:00`);
-    const sessions = await CounsellingSession.find({ scheduledAt: { $gte: start, $lte: end }, status: { $in: ["scheduled", "active", "closed"] } })
+    const allSessions = await CounsellingSession.find({ scheduledAt: { $gte: start, $lte: end }, status: { $in: ["scheduled", "active", "closed"] } })
       .populate("user", "name avatarUrl avatarStyle avatarColor")
       .populate("counsellor", "name")
       .sort({ scheduledAt: 1 });
+    const sessions = allSessions.filter((session) => !allowed || (session.user && allowed.has(String(session.user._id))));
     return res.json({
       kind,
-      total: sessions.length,
-      hidden: 0,
+      total: allSessions.length,
+      hidden: allSessions.length - sessions.length,
       items: sessions.map((session) => ({
         sessionId: session._id,
         user: session.user,

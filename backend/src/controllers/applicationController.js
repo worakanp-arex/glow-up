@@ -3,7 +3,7 @@ import Application from "../models/Application.js";
 import Job from "../models/Job.js";
 import User from "../models/User.js";
 import { notifyUser } from "../services/notificationService.js";
-import { publicUrl } from "../middleware/upload.js";
+import { publicUrl, removeUploadedFiles } from "../middleware/upload.js";
 import { paginationOptions } from "../utils/pagination.js";
 
 const STATUS_LABELS = {
@@ -18,6 +18,19 @@ const STATUS_LABELS = {
 // and other contact-sensitive fields are deliberately left out.
 const APPLICANT_PROFILE_FIELDS =
   "name nickname email phone age gender province bio verifiedStatus education experience resumeUrl certificates avatarUrl avatarStyle avatarColor";
+
+// Once an applicant withdraws, the employer keeps the fact that the application
+// existed but loses the applicant's contact details, profile and documents.
+const WITHDRAWN_APPLICANT_FIELDS = ["_id", "name", "nickname", "avatarUrl", "avatarStyle", "avatarColor"];
+
+function hideWithdrawnApplicantDetails(application, viewer) {
+  if (viewer.role === "admin" || application.status !== "cancelled") return application;
+  const plain = typeof application.toObject === "function" ? application.toObject() : application;
+  const user = plain.user && typeof plain.user === "object"
+    ? Object.fromEntries(WITHDRAWN_APPLICANT_FIELDS.filter((field) => plain.user[field] !== undefined).map((field) => [field, plain.user[field]]))
+    : plain.user;
+  return { ...plain, user, attachments: [] };
+}
 
 // Employers must be identity-verified before they can view or act on applicant
 // data; admins bypass this check.
@@ -68,6 +81,8 @@ export async function applyToJob(req, res) {
     name,
     url: publicUrl("applicationAttachment", files[i].filename),
   }));
+  // Anything uploaded beyond what the posting asked for is never referenced.
+  removeUploadedFiles(files.slice(requiredNames.length));
 
   const application = await Application.create({ user: req.user.id, job: job._id, attachments });
   res.status(201).json(application);
@@ -104,8 +119,10 @@ export async function jobApplicants(req, res) {
     res.setHeader("X-Total-Count", await Application.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
   }
-  const applications = await query;
-  res.json(await jobApplicantMatches(job._id, applications));
+  // Applicants whose account was deleted are no longer shown.
+  const applications = (await query).filter((application) => application.user);
+  const withMatches = await jobApplicantMatches(job._id, applications);
+  res.json(withMatches.map((application) => hideWithdrawnApplicantDetails(application, req.user)));
 }
 
 // Every application to any of the employer's postings (the dashboard's
@@ -124,7 +141,8 @@ export async function listEmployerApplications(req, res) {
     res.setHeader("X-Total-Count", await Application.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
   }
-  res.json(await query);
+  const applications = (await query).filter((application) => application.user);
+  res.json(applications.map((application) => hideWithdrawnApplicantDetails(application, req.user)));
 }
 
 // Admin overview of every application, optionally narrowed by status, for the
@@ -141,14 +159,14 @@ export async function listAllApplications(req, res) {
     res.setHeader("X-Total-Count", await Application.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
   }
-  res.json(await query);
+  res.json((await query).filter((application) => application.user));
 }
 
 export async function getApplication(req, res) {
   const application = await Application.findById(req.params.id)
     .populate("job")
     .populate("user", APPLICANT_PROFILE_FIELDS);
-  if (!application) {
+  if (!application || !application.user) {
     return res.status(404).json({ message: "Not found" });
   }
   if (req.user.role !== "admin" && application.job.employer.toString() !== req.user.id) {
@@ -156,7 +174,7 @@ export async function getApplication(req, res) {
   }
   if (!(await assertEmployerVerified(req, res))) return;
   const [withMatch] = await jobApplicantMatches(application.job._id, [application]);
-  res.json(withMatch);
+  res.json(hideWithdrawnApplicantDetails(withMatch, req.user));
 }
 
 export async function updateApplicationStatus(req, res) {
@@ -168,7 +186,7 @@ export async function updateApplicationStatus(req, res) {
   const application = await Application.findById(req.params.id)
     .populate("job")
     .populate("user", APPLICANT_PROFILE_FIELDS);
-  if (!application) {
+  if (!application || !application.user) {
     return res.status(404).json({ message: "Not found" });
   }
   if (req.user.role !== "admin" && application.job.employer.toString() !== req.user.id) {

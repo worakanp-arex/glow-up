@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { pathToFileURL } from "node:url";
 import { connectDB } from "../src/config/db.js";
+import { assertLocalDatabase } from "../src/config/localOnly.js";
 import User from "../src/models/User.js";
 import Job from "../src/models/Job.js";
 import Post from "../src/models/Post.js";
@@ -26,6 +27,8 @@ async function seed() {
     console.error(`Refusing to seed load-test data with NODE_ENV=${process.env.NODE_ENV}`);
     process.exit(1);
   }
+  // These accounts (one of them an admin) have passwords published in the repo.
+  assertLocalDatabase();
 
   await connectDB();
 

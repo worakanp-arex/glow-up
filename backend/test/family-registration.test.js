@@ -10,12 +10,15 @@ import { acceptFamilyInvite } from "../src/controllers/familyController.js";
 import { requireRole } from "../src/middleware/authMiddleware.js";
 
 afterEach(() => mock.restoreAll());
-const response = () => ({ code: 200, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; }, cookie() {} });
+// Registration looks accounts up including deleted ones (their address stays reserved).
+const accountLookup = (found) => () => ({ setOptions: async () => found });
+const cookies = {};
+const response = () => ({ code: 200, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; }, cookie(name, value) { cookies[name] = value; } });
 
-test("family registration preserves the role through OTP and excludes password from the response", async () => {
+test("family registration preserves the role through OTP and excludes password and token from the response", async () => {
   let pending;
-  mock.method(User, "findOne", async () => null);
-  mock.method(PendingRegistration, "findOne", async () => null);
+  mock.method(User, "findOne", accountLookup(null));
+  mock.method(PendingRegistration, "findOne", () => ({ select: async () => null }));
   mock.method(PendingRegistration, "findOneAndUpdate", async (_, payload) => { pending = { _id: "pending1", ...payload }; });
   mock.method(console, "log", () => {});
   const res = response();
@@ -23,15 +26,18 @@ test("family registration preserves the role through OTP and excludes password f
   assert.equal(res.code, 200);
   assert.equal(pending.payload.role, "family");
   assert.ok(await bcrypt.compare("correct-horse-123", pending.passwordHash));
+  const { registrationToken } = res.body;
   pending.otpHash = await bcrypt.hash("123456", 10);
   mock.method(PendingRegistration, "findOne", () => ({ select: async () => pending }));
+  mock.method(PendingRegistration, "findOneAndUpdate", async () => ({ _id: "pending1" }));
   mock.method(PendingRegistration, "deleteOne", async () => ({}));
   mock.method(User.prototype, "save", async function () { await this.validate(); });
-  await verifyRegistrationOtp({ body: { email: "family@example.com", otp: "123456" } }, res);
+  await verifyRegistrationOtp({ body: { email: "family@example.com", otp: "123456", registrationToken } }, res);
   assert.equal(res.code, 201);
   assert.equal(res.body.user.role, "family");
   assert.equal(res.body.user.password, undefined);
-  assert.equal(jwt.verify(res.body.token, process.env.JWT_SECRET).role, "family");
+  assert.equal("token" in res.body, false, "the session lives only in the HttpOnly cookie");
+  assert.equal(jwt.verify(cookies.token, process.env.JWT_SECRET).role, "family");
 });
 
 for (const role of ["family", "user"]) test(`${role} can accept an invitation sent to their own email`, async () => {

@@ -1,3 +1,6 @@
+.account-card-note { margin: 0 0 14px; font-size: .85rem; line-height: 1.6; color: var(--color-text-secondary); }
+.account-card-danger-button { color: var(--color-danger); border-color: var(--color-danger); }
+.account-card-danger-button:hover { background: var(--color-danger-bg); }
 .account-card-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
 .account-card .profile-facts dd { display: flex; align-items: center; gap: 6px; }
 .account-card-link { margin-top: 14px; width: 100%; }

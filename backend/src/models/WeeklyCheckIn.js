@@ -8,6 +8,9 @@ const weeklyCheckInSchema = new mongoose.Schema(
     stressLevel: { type: Number, min: 1, max: 5, required: true },
     moodTrend: { type: String, enum: ["improving", "stable", "worsening"], required: true },
     selfHarmRiskFlag: { type: Boolean, default: false },
+    // When the care team was last alerted about this check-in, so resubmitting
+    // the form doesn't page everyone again within the cooldown.
+    riskAlertedAt: { type: Date },
     notes: { type: String },
   },
   { timestamps: true }

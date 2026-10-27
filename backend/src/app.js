@@ -1,4 +1,4 @@
-import "./config/env.js";
+import { isProductionLike } from "./config/env.js";
 import express from "express";
 import path from "node:path";
 import { verifyToken } from "./middleware/authMiddleware.js";
@@ -9,6 +9,9 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import helmet from "helmet";
 import { sanitizeMongoOperators } from "./middleware/sanitizeMongoOperators.js";
+import { PAGE_CSP_DIRECTIVES } from "./config/csp.js";
+import { requireOwnOrigin } from "./middleware/originCheck.js";
+import { apiLimiter, apiWriteLimiter, uploadLimiter } from "./middleware/rateLimiters.js";
 import { UPLOAD_ROOT } from "./middleware/upload.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -56,20 +59,31 @@ if (process.env.TRUST_PROXY) {
   app.set("trust proxy", parseTrustProxy(process.env.TRUST_PROXY));
 }
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173", credentials: true }));
+// HTTPS-only for a year, for this host alone: the policy must not reach other
+// subdomains of the domain, which this app doesn't control.
+const HSTS = { maxAge: 31536000, includeSubDomains: false };
+const allowedOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
+app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
-app.use(morgan("dev"));
+// Production logs say who asked for which path and how it went, with a
+// timestamp, and leave the query string out (it can carry search terms or ids).
+morgan.token("path", (req) => req.originalUrl.split("?")[0]);
+app.use(morgan(isProductionLike() ? ":date[iso] :remote-addr :method :path :status :res[content-length] :response-time ms" : "dev"));
 app.use(sanitizeMongoOperators);
 
 // Optional single-service hosting: set FRONTEND_DIST to the built frontend
-// (e.g. ../frontend/dist) and this server also serves the web app. The page
-// itself skips helmet's CSP because Google Sign-In and Google Fonts load
-// third-party scripts, frames and styles; API responses keep the full helmet set.
+// (e.g. ../frontend/dist) and this server also serves the web app. The page gets
+// its own Content-Security-Policy (config/csp.js) that allows Google Sign-In's
+// script, frame and styles and nothing else third-party; API responses keep helmet's default one.
 if (process.env.FRONTEND_DIST) {
   const distDir = path.resolve(process.cwd(), process.env.FRONTEND_DIST);
   const isBackendPath = (p) => p.startsWith("/api") || p.startsWith("/uploads") || p.startsWith("/socket.io");
-  const pageHeaders = helmet({ contentSecurityPolicy: false, crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" } });
+  const pageHeaders = helmet({
+    contentSecurityPolicy: { useDefaults: false, directives: PAGE_CSP_DIRECTIVES },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    strictTransportSecurity: HSTS,
+  });
   app.use((req, res, next) => (isBackendPath(req.path) ? next() : pageHeaders(req, res, next)));
   const serveStatic = express.static(distDir, { index: false });
   app.use((req, res, next) => (isBackendPath(req.path) ? next() : serveStatic(req, res, next)));
@@ -79,7 +93,7 @@ if (process.env.FRONTEND_DIST) {
   });
 }
 
-app.use(helmet());
+app.use(helmet({ strictTransportSecurity: HSTS }));
 // Avatars, course covers and job images are intentionally public and rendered
 // cross-origin by the frontend; helmet's default same-origin CORP would
 // silently break that <img> loading, so relax it for these routes only.
@@ -100,6 +114,8 @@ app.get("/uploads/:kind/:filename", verifyToken, asyncHandler(authorizeDownload)
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
+
+app.use("/api", requireOwnOrigin(allowedOrigin), apiLimiter, apiWriteLimiter, uploadLimiter);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

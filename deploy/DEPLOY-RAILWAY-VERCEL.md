@@ -31,18 +31,28 @@
 
 ```sh
 npm test --prefix backend
-git add -A
+git status
+git add deploy frontend/vercel.json
 git commit -m "Add Railway + Vercel deployment support"
 git push
 ```
+
+> ⚠️ repo นี้เป็น **public** ทุกอย่างที่ push ขึ้นไปทุกคนอ่านได้ ดู `git status` ก่อน `git add` ทุกครั้ง
+> และเพิ่มเฉพาะไฟล์ที่ตั้งใจ (อย่าใช้ `git add -A`) ห้ามมีไฟล์ `.env`, ไฟล์คีย์ (`*.key`, `*.pem`)
+> หรือไฟล์สำรองข้อมูล (`*.gz`, `*.sql`) อยู่ในรายการ
 
 ## ขั้นที่ 1 — ฐานข้อมูล MongoDB Atlas (ฟรี)
 
 1. สมัคร https://www.mongodb.com/cloud/atlas/register (ใช้บัญชี Google ได้)
 2. **Create cluster** → **M0 (Free)** → Provider **AWS**, Region **Singapore (ap-southeast-1)**
 3. **Database Access** → Add user → ตั้ง username / password (ใช้ตัวอักษรกับตัวเลข เลี่ยงอักขระพิเศษ)
-4. **Network Access** → Add IP Address → **Allow access from anywhere** (`0.0.0.0/0`)
-   (Railway ไม่มี IP คงที่ จึงต้องเปิดแบบนี้ — ความปลอดภัยพึ่งรหัสผ่านฐานข้อมูล ตั้งให้ยาวและเดายาก)
+4. **Network Access** → ถ้าทำได้ ให้ใส่เฉพาะ IP ขาออกคงที่ของ Railway (แผนที่มี Static Outbound IP) หรือใช้ Private Networking / VPC peering
+   แทนการเปิด `0.0.0.0/0` เพราะฐานข้อมูลนี้เก็บข้อมูลสุขภาพจิต
+   ถ้าแผนฟรีบังคับต้องเปิด **Allow access from anywhere** (`0.0.0.0/0`) ให้ลดความเสี่ยงดังนี้:
+   - ผู้ใช้ฐานข้อมูล (ขั้นที่ 3) ให้สิทธิ์ **readWrite เฉพาะฐาน `glow-up`** ไม่ใช่ Atlas admin
+   - รหัสผ่านฐานข้อมูลสุ่มยาวอย่างน้อย 24 ตัวอักษร และห้ามนำไปใช้ที่อื่น
+   - เปิด Atlas alerts และเปลี่ยนรหัสผ่านทันทีเมื่อสงสัยว่ารั่ว
+   - ใช้ข้อมูลจริงเมื่อย้ายไปแผนที่จำกัด IP ได้แล้วเท่านั้น (ช่วงทดลองใช้ข้อมูลสมมติ)
 5. **Database → Connect → Drivers** → คัดลอก connection string แล้วเติม `glow-up` หลัง `.net/`
    ```
    mongodb+srv://growup:รหัสผ่าน@cluster0.xxxxx.mongodb.net/glow-up?retryWrites=true&w=majority
@@ -68,11 +78,11 @@ git push
 
    ```
    NODE_ENV=production
-   TRUST_PROXY=1
+   TRUST_PROXY=1   # ทดสอบหลัง deploy: ดูว่า log แสดง IP ของผู้ใช้จริง ไม่ใช่ IP ของ Vercel (ดูหัวข้อ "ตรวจหลัง deploy" ท้ายไฟล์)
    SOCKET_PING_INTERVAL_MS=10000
    MONGODB_URI=mongodb+srv://...ของคุณ...
    JWT_SECRET=สุ่มอย่างน้อย32ตัวอักษร
-   JWT_EXPIRES_IN=7d
+   JWT_EXPIRES_IN=1d
    CORS_ORIGIN=https://ชั่วคราว.vercel.app
    FRONTEND_URL=https://ชั่วคราว.vercel.app
    BREVO_API_KEY=xkeysib-...
@@ -113,20 +123,25 @@ git push
 
 ## ขั้นที่ 6 — สร้างข้อมูลเริ่มต้น (รันจากคอมตัวเอง)
 
-ในโฟลเดอร์โปรเจ็คบนคอมตัวเอง ตั้ง `MONGODB_URI` ใน `backend/.env` ให้เป็นของ Atlas แล้ว:
+ในโฟลเดอร์โปรเจ็คบนคอมตัวเอง ใส่ `MONGODB_URI` ของ Atlas **เฉพาะในคำสั่งนี้** อย่าบันทึกลง `backend/.env`
+(ไฟล์นั้นอาจถูก sync ขึ้นคลาวด์ เช่น OneDrive/Google Drive) และใช้อีเมลของผู้ดูแลจริง ไม่ใช่ `admin@example.com`:
 
 ```sh
 npm ci --prefix backend
-SEED_ADMIN_EMAIL=admin@example.com SEED_ADMIN_PASSWORD='รหัสผ่านที่แข็งแรง' SEED_ADMIN_NAME='ผู้ดูแลระบบ' npm run seed:admin --prefix backend
-npm run seed:missions --prefix backend
+MONGODB_URI='mongodb+srv://...ของคุณ...' SEED_ADMIN_EMAIL=ผู้ดูแลจริง@โดเมนของคุณ SEED_ADMIN_PASSWORD='รหัสผ่านยาวอย่างน้อย10ตัว' SEED_ADMIN_NAME='ผู้ดูแลระบบ' npm run seed:admin --prefix backend
+MONGODB_URI='mongodb+srv://...ของคุณ...' npm run seed:missions --prefix backend
 ```
+
+รหัสผ่านผู้ดูแลต้องยาวอย่างน้อย 10 ตัวและไม่ใช่รหัสที่เดาง่าย (สคริปต์จะปฏิเสธรหัสที่อ่อน) หลังรันเสร็จให้ล้างประวัติคำสั่งของ shell
+หรือใส่ `HISTCONTROL=ignorespace` แล้วเว้นวรรคหน้าคำสั่ง เพราะรหัสผ่านอยู่ในบรรทัดคำสั่ง
 
 Windows PowerShell:
 
 ```powershell
-$env:SEED_ADMIN_EMAIL="admin@example.com"; $env:SEED_ADMIN_PASSWORD="รหัสผ่านที่แข็งแรง"; $env:SEED_ADMIN_NAME="ผู้ดูแลระบบ"
+$env:MONGODB_URI="mongodb+srv://...ของคุณ..."; $env:SEED_ADMIN_EMAIL="ผู้ดูแลจริง@โดเมนของคุณ"; $env:SEED_ADMIN_PASSWORD="รหัสผ่านยาวอย่างน้อย10ตัว"; $env:SEED_ADMIN_NAME="ผู้ดูแลระบบ"
 npm.cmd run seed:admin --prefix backend
 npm.cmd run seed:missions --prefix backend
+Remove-Item Env:MONGODB_URI, Env:SEED_ADMIN_PASSWORD   # ล้างตัวแปรหลังใช้เสร็จ
 ```
 
 เปิดลิงก์ Vercel → ลองสมัครสมาชิก รับ OTP และล็อกอิน 🎉
@@ -163,3 +178,15 @@ npm.cmd run seed:missions --prefix backend
 - Volume mount path: `/app/backend/uploads`
 
 แล้วข้ามขั้นที่ 4–5 ไปได้เลย ใช้ลิงก์ Railway เปิดเว็บ
+
+## ตรวจหลัง deploy (ความปลอดภัย)
+
+ทำครั้งแรกหลัง deploy เสร็จ และทุกครั้งที่เปลี่ยนโครงสร้างการเชื่อมต่อ:
+
+1. **IP ของผู้ใช้ต้องไม่ใช่ IP ของ Vercel** — Vercel → Railway มี proxy 2 ชั้น ถ้า `req.ip` เป็น IP ของ Vercel ผู้ใช้ทุกคนจะใช้โควตา rate-limit ร่วมกัน
+   (ล็อกอินผิดเกินกำหนดแล้วทุกคนถูกล็อก) ลองล็อกอินผิด 12 ครั้งจากเครื่องหนึ่ง แล้วลองล็อกอินจากอีกเครือข่าย (เช่นมือถือ 4G) ต้องไม่โดนล็อกตามไปด้วย
+   ถ้าโดน ให้ปรับค่า `TRUST_PROXY` เป็นจำนวน proxy ที่ถูกต้อง
+2. เปิดหน้าเว็บแล้วดูหัวข้อ response ว่ามี `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options` (DevTools → Network → เอกสารหน้าแรก)
+3. ปุ่ม Google Sign-In ยังแสดงและใช้งานได้ (ถ้ามี `Content-Security-Policy` ที่ปิดกั้นเกินไปจะเห็นข้อความใน Console)
+4. บน GitHub: เปิด 2FA, ตั้ง branch protection ให้ `master` (ต้องผ่าน checks ก่อน merge) เพราะการ push ขึ้น `master` deploy ขึ้น production ทันที,
+   เปิด Dependabot alerts และ secret scanning (ดู `SECURITY.md`)

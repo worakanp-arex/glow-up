@@ -9,9 +9,13 @@ export async function login(baseUrl, email, password) {
   if (!res.ok) {
     throw new Error(`Login failed for ${email}: ${res.status} — did you run "node loadtest/seed.js" first?`);
   }
-  const data = await res.json();
-  if (!data.token) throw new Error(`Login response for ${email} had no token`);
-  return data.token;
+  await res.text();
+  // The server keeps the session in an HttpOnly cookie and no longer repeats the
+  // token in the response body; the load test presents it as a Bearer header,
+  // which the API accepts from non-browser clients.
+  const cookie = res.headers.getSetCookie().find((entry) => entry.startsWith("token="));
+  if (!cookie) throw new Error(`Login response for ${email} set no session cookie`);
+  return decodeURIComponent(cookie.split(";")[0].slice("token=".length));
 }
 
 export function loginUser(baseUrl) {

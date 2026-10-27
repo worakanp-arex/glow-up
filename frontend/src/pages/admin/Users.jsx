@@ -11,6 +11,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Ban, CalendarHeart, Check, Filter, Pencil, RotateCcw, Trash2, UserPlus, Users as UsersIcon, X } from "lucide-react";
 import * as userService from "../../services/userService.js";
 import { ROLE_LABELS } from "../../constants/roleLabels.js";
+import { ACCOUNT_RETENTION_DAYS } from "../../constants/accountRetention.js";
 import "./Users.css";
 
 const INITIAL_ACCOUNT_FORM = { role: "counsellor", name: "", email: "", password: "", phone: "", specialization: "", hospital: "", position: "", department: "" };
@@ -95,7 +96,7 @@ function Users() {
   function handleDelete(user) {
     confirm({
       title: "ลบผู้ใช้",
-      message: `ต้องการลบผู้ใช้ "${user.name}" ใช่ไหม? การลบไม่สามารถย้อนกลับได้`,
+      message: `ต้องการลบผู้ใช้ "${user.name}" ใช่ไหม? บัญชีจะถูกซ่อนและเข้าสู่ระบบไม่ได้ทันที ข้อมูลจะถูกเก็บไว้ ${ACCOUNT_RETENTION_DAYS} วัน (กู้คืนได้จากหน้า "บัญชีที่ถูกลบ") แล้วจึงถูกทำให้ไม่ระบุตัวตนถาวร`,
       confirmLabel: "ลบผู้ใช้",
       onConfirm: async () => {
         await userService.deleteUser(user._id);
@@ -248,7 +249,7 @@ function Users() {
           onSave={createAccount}
           onClose={() => setCreating(null)}
           saveLabel="สร้างบัญชี"
-          saveDisabled={!accountForm.name.trim() || !accountForm.email.trim() || accountForm.password.length < 8}
+          saveDisabled={!accountForm.name.trim() || !accountForm.email.trim() || accountForm.password.length < 10}
         >
           <label className="ui-field">ประเภทบัญชี
             <select value={accountForm.role} onChange={(e) => setAccount("role", e.target.value)}>
@@ -261,7 +262,7 @@ function Users() {
             <label className="ui-field">อีเมล<input type="email" value={accountForm.email} onChange={(e) => setAccount("email", e.target.value)} required /></label>
           </div>
           <div className="editor-dialog-row">
-            <label className="ui-field">รหัสผ่าน (อย่างน้อย 8 ตัวอักษร)<input type="password" value={accountForm.password} onChange={(e) => setAccount("password", e.target.value)} minLength={8} autoComplete="new-password" required /></label>
+            <label className="ui-field">รหัสผ่าน (อย่างน้อย 10 ตัวอักษร)<input type="password" value={accountForm.password} onChange={(e) => setAccount("password", e.target.value)} minLength={10} maxLength={128} autoComplete="new-password" required /></label>
             <label className="ui-field">เบอร์โทร<input value={accountForm.phone} onChange={(e) => setAccount("phone", e.target.value)} /></label>
           </div>
           {accountForm.role === "counsellor" ? (

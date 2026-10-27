@@ -2,7 +2,7 @@ import JobCategory from "../models/JobCategory.js";
 import Job from "../models/Job.js";
 import { createCrudController } from "./crudFactory.js";
 
-const { getAll, create } = createCrudController(JobCategory);
+const { getAll, create } = createCrudController(JobCategory, { fields: ["name"] });
 
 export { getAll as getJobCategories, create as createJobCategory };
 

@@ -31,10 +31,34 @@ const INITIAL_FORM = {
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
-function buildPayload(form, avatarFile) {
-  if (!avatarFile) return form;
+// The server hands this secret only to the browser that started the sign-up.
+// It is what lets the same person ask for a new code or finish verifying, and
+// what stops anyone else who knows the email address from interfering. It is
+// kept for this tab only, so a page reload mid-sign-up doesn't lock the person out.
+const REGISTRATION_TOKEN_KEY = "registrationToken";
+
+function readRegistrationToken() {
+  try {
+    return window.sessionStorage.getItem(REGISTRATION_TOKEN_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function storeRegistrationToken(token) {
+  try {
+    if (token) window.sessionStorage.setItem(REGISTRATION_TOKEN_KEY, token);
+    else window.sessionStorage.removeItem(REGISTRATION_TOKEN_KEY);
+  } catch {
+    // Private mode: the token still lives in component state for this visit.
+  }
+}
+
+function buildPayload(form, avatarFile, registrationToken) {
+  const fields = registrationToken ? { ...form, registrationToken } : form;
+  if (!avatarFile) return fields;
   const formData = new FormData();
-  Object.entries(form).forEach(([key, value]) => formData.append(key, value));
+  Object.entries(fields).forEach(([key, value]) => formData.append(key, value));
   formData.append("avatar", avatarFile);
   return formData;
 }
@@ -53,6 +77,7 @@ function Register() {
   const [otp, setOtp] = useState("");
   const [cooldown, setCooldown] = useState(0);
   const [consentExpanded, setConsentExpanded] = useState(false);
+  const [registrationToken, setRegistrationToken] = useState(readRegistrationToken);
   const avatarInputRef = useRef(null);
 
   useEffect(() => {
@@ -98,7 +123,9 @@ function Register() {
     setError("");
     setSubmitting(true);
     try {
-      await authService.requestRegistrationOtp(buildPayload(form, avatarFile));
+      const data = await authService.requestRegistrationOtp(buildPayload(form, avatarFile, registrationToken));
+      setRegistrationToken(data.registrationToken);
+      storeRegistrationToken(data.registrationToken);
       setStep("otp");
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
@@ -127,7 +154,8 @@ function Register() {
     setError("");
     setSubmitting(true);
     try {
-      const user = await completeRegistration({ email: form.email, otp });
+      const user = await completeRegistration({ email: form.email, otp, registrationToken });
+      storeRegistrationToken("");
       navigate((["family", "user"].includes(user.role) && returnTo) || roleHome(user.role));
     } catch (err) {
       setError(err.response?.data?.message || "ยืนยัน OTP ไม่สำเร็จ");
@@ -175,6 +203,10 @@ function Register() {
           <button type="button" className="register-otp-resend" onClick={handleResend} disabled={cooldown > 0}>
             {cooldown > 0 ? `ส่งรหัสอีกครั้งได้ใน ${cooldown} วินาที` : "ส่งรหัส OTP อีกครั้ง"}
           </button>
+
+          <p className="register-otp-note">
+            หากไม่ได้รับรหัส อีเมลนี้อาจมีบัญชีอยู่แล้ว ลอง<Link to="/login">เข้าสู่ระบบ</Link>หรือ<Link to="/forgot-password">ตั้งรหัสผ่านใหม่</Link>
+          </p>
 
         </form>
       </div>
@@ -263,9 +295,12 @@ function Register() {
             name="password"
             value={form.password}
             onChange={handleChange}
-            minLength={6}
+            minLength={10}
+            maxLength={128}
+            autoComplete="new-password"
             required
           />
+          <small className="register-field-hint">อย่างน้อย 10 ตัวอักษร และไม่ใช่รหัสที่เดาง่าย เช่น password123</small>
         </label>
 
         {form.role === "user" && (

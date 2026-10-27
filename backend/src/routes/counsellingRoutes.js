@@ -17,7 +17,7 @@ import {
 import { verifyToken, requireRole } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { objectIdParam, paginationQuery } from "../middleware/validators.js";
+import { objectIdParam, paginationQuery, urlBody } from "../middleware/validators.js";
 
 const router = Router();
 
@@ -92,7 +92,7 @@ router.put(
   [
     objectIdParam("id"),
     body("scheduledAt").optional().isISO8601(),
-    body("meetingLink").optional().trim().notEmpty().isLength({ max: 500 }),
+    urlBody("meetingLink"),
   ],
   validate,
   asyncHandler(updateSchedule)

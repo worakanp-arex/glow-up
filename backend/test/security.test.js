@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import User from "../src/models/User.js";
 import PendingRegistration from "../src/models/PendingRegistration.js";
 import FamilyLink from "../src/models/FamilyLink.js";
@@ -34,10 +34,13 @@ import { scoreSkills } from "../src/services/jobMatchService.js";
 import { paginationOptions, escapeRegex } from "../src/utils/pagination.js";
 import { validateEnvironment } from "../src/config/env.js";
 import { sanitizeMongoOperators } from "../src/middleware/sanitizeMongoOperators.js";
-import { verifyUploadedFile } from "../src/middleware/upload.js";
+import { verifyUploadedFile, discardUploadsOnFailure } from "../src/middleware/upload.js";
 import { sanitizeText } from "../src/utils/sanitizeText.js";
+import sharp from "sharp";
 
 afterEach(() => mock.restoreAll());
+// Registration looks accounts up including deleted ones (their address stays reserved).
+const accountLookup = (found) => () => ({ setOptions: async () => found });
 const response = () => ({ code: 200, body: null, headers: {}, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; }, cookie() {}, setHeader(name, value) { this.headers[name] = value; } });
 // Mongoose query chains (.sort/.populate/.select/.skip/.limit) that all
 // resolve to `result` when awaited, regardless of which chain methods a
@@ -47,9 +50,10 @@ function chainable(result) {
   return obj;
 }
 
-test("pending registration stores only a hash of the password", async () => {
-  mock.method(User, "findOne", async () => null);
-  mock.method(PendingRegistration, "findOne", async () => null);
+const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+test("pending registration stores only hashes: of the password and of the secret handed to the browser", async () => {
+  mock.method(User, "findOne", accountLookup(null));
+  mock.method(PendingRegistration, "findOne", () => ({ select: async () => null }));
   let saved;
   mock.method(PendingRegistration, "findOneAndUpdate", async (_, payload) => { saved = payload; });
   mock.method(console, "log", () => {});
@@ -59,12 +63,15 @@ test("pending registration stores only a hash of the password", async () => {
   assert.equal(saved.payload.password, undefined);
   assert.ok(await bcrypt.compare("correct-horse-123", saved.passwordHash));
   assert.ok(!JSON.stringify(saved).includes("correct-horse-123"));
+  assert.match(res.body.registrationToken, /^[0-9a-f]{64}$/);
+  assert.equal(saved.registrationTokenHash, sha256(res.body.registrationToken));
+  assert.ok(!JSON.stringify(saved).includes(res.body.registrationToken), "the raw secret is never stored");
 });
 test("expired OTP cannot create a user", async () => {
-  mock.method(PendingRegistration, "findOne", () => ({ select: async () => ({ _id: "pending", otpExpiresAt: new Date(0) }) }));
+  mock.method(PendingRegistration, "findOne", () => ({ select: async () => ({ _id: "pending", otpExpiresAt: new Date(0), registrationTokenHash: sha256("a".repeat(64)) }) }));
   const deletion = mock.method(PendingRegistration, "deleteOne", async () => ({}));
   const res = response();
-  await verifyRegistrationOtp({ body: { email: "test@example.com", otp: "123456" } }, res);
+  await verifyRegistrationOtp({ body: { email: "test@example.com", otp: "123456", registrationToken: "a".repeat(64) } }, res);
   assert.equal(res.code, 400); assert.equal(deletion.mock.callCount(), 1);
 });
 test("incorrect password is rejected", async () => {
@@ -148,10 +155,36 @@ test("pagination is bounded and search treats regex metacharacters as text", () 
   assert.equal(paginationOptions({}), null);
   assert.equal(new RegExp(escapeRegex("a+b [x]")).test("a+b [x]"), true);
 });
-test("production configuration rejects missing and weak secrets", () => {
+const STRONG_SECRET = "9f2c71ab3d84e605b1c7a9d2f0e4863b5a1d7c9e2f4b6081";
+test("configuration rejects missing and weak secrets", () => {
   assert.throws(() => validateEnvironment({}), /MONGODB_URI/);
   assert.throws(() => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET: "short", NODE_ENV: "production" }), /JWT_SECRET/);
-  assert.doesNotThrow(() => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET: "development-secret" }));
+  // Only an explicit development/test environment may use a weak secret.
+  assert.doesNotThrow(() => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET: "development-secret", NODE_ENV: "development" }));
+});
+test("a forgotten or mistyped NODE_ENV is held to production standards, so the published placeholder secret never works", () => {
+  for (const NODE_ENV of [undefined, "", "prod", "staging"]) {
+    assert.throws(
+      () => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET: "change_this_secret", NODE_ENV }),
+      /JWT_SECRET/,
+      `NODE_ENV=${NODE_ENV}`
+    );
+  }
+});
+test("placeholder and repeated-pattern secrets are rejected even when long enough", () => {
+  for (const JWT_SECRET of ["x".repeat(32), "ab".repeat(24), "change_this_secret".padEnd(40, "!")]) {
+    assert.throws(
+      () => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET, NODE_ENV: "production", CORS_ORIGIN: "https://a.example", FRONTEND_URL: "https://a.example", SMTP_HOST: "h", SMTP_USER: "u", SMTP_PASS: "p" }),
+      /JWT_SECRET/,
+      JWT_SECRET
+    );
+  }
+});
+test("production requires the origins that reset and invite links are built from", () => {
+  const base = { MONGODB_URI: "test", JWT_SECRET: STRONG_SECRET, NODE_ENV: "production", SMTP_HOST: "h", SMTP_USER: "u", SMTP_PASS: "p" };
+  assert.throws(() => validateEnvironment({ ...base, FRONTEND_URL: "https://a.example" }), /CORS_ORIGIN/);
+  assert.throws(() => validateEnvironment({ ...base, CORS_ORIGIN: "https://a.example" }), /FRONTEND_URL/);
+  assert.doesNotThrow(() => validateEnvironment({ ...base, CORS_ORIGIN: "https://a.example", FRONTEND_URL: "https://a.example", TRUST_PROXY: "1" }));
 });
 test("deleted accounts cannot use a previously valid token", async () => {
   mock.method(User, "findById", () => ({ select: async () => null }));
@@ -183,23 +216,84 @@ test("uploaded file content that doesn't match its declared kind is rejected and
   const filePath = path.join(os.tmpdir(), `${randomUUID()}.bin`);
   fs.writeFileSync(filePath, "this is plain text, not an image");
   const res = response();
-  await verifyUploadedFile("avatar")({ file: { path: filePath } }, res, () => assert.fail("should not call next"));
+  await verifyUploadedFile("avatar")({ file: { path: filePath, mimetype: "image/png" } }, res, () => assert.fail("should not call next"));
   assert.equal(res.code, 400);
   assert.equal(fs.existsSync(filePath), false);
 });
+const realJpeg = (extra = {}) => sharp({ create: { width: 4, height: 2, channels: 3, background: "#f00" } }).jpeg().withExif(extra).toBuffer();
 test("uploaded file content matching its declared kind is accepted", async () => {
   const filePath = path.join(os.tmpdir(), `${randomUUID()}.jpg`);
-  fs.writeFileSync(filePath, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0]));
+  fs.writeFileSync(filePath, await realJpeg());
   let passed = false;
-  await verifyUploadedFile("avatar")({ file: { path: filePath } }, response(), () => { passed = true; });
+  await verifyUploadedFile("avatar")({ file: { path: filePath, mimetype: "image/jpeg" } }, response(), () => { passed = true; });
   assert.equal(passed, true);
   fs.rmSync(filePath, { force: true });
+});
+test("real content of another allowed type than the one declared is rejected, because the declared type names the stored file", async () => {
+  const filePath = path.join(os.tmpdir(), `${randomUUID()}.png`);
+  fs.writeFileSync(filePath, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0])); // a JPEG...
+  const res = response();
+  await verifyUploadedFile("avatar")({ file: { path: filePath, mimetype: "image/png" } }, res, () => assert.fail("declared PNG but bytes are JPEG")); // ...sent as PNG
+  assert.equal(res.code, 400);
+  assert.equal(fs.existsSync(filePath), false);
+});
+test("when one file in a request is bad, every uploaded file of that request is removed", async () => {
+  const good = path.join(os.tmpdir(), `${randomUUID()}.jpg`);
+  const bad = path.join(os.tmpdir(), `${randomUUID()}.jpg`);
+  fs.writeFileSync(good, await realJpeg());
+  fs.writeFileSync(bad, "not an image");
+  const res = response();
+  await verifyUploadedFile("applicationAttachment")({ files: [{ path: good, mimetype: "image/jpeg" }, { path: bad, mimetype: "image/jpeg" }] }, res, () => assert.fail("should not call next"));
+  assert.equal(res.code, 400);
+  assert.equal(fs.existsSync(good), false, "the valid file is not left behind");
+  assert.equal(fs.existsSync(bad), false);
+});
+test("uploads of a refused request are deleted, uploads of an accepted one are kept", async () => {
+  const run = (statusCode) => {
+    const filePath = path.join(os.tmpdir(), `${randomUUID()}.jpg`);
+    fs.writeFileSync(filePath, "x");
+    const handlers = {};
+    const res = { statusCode, on: (event, fn) => { handlers[event] = fn; } };
+    discardUploadsOnFailure({ file: { path: filePath } }, res, () => {});
+    handlers.close();
+    return new Promise((resolve) => setTimeout(() => resolve(filePath), 50));
+  };
+  const refused = await run(409);
+  assert.equal(fs.existsSync(refused), false);
+  const accepted = await run(201);
+  assert.equal(fs.existsSync(accepted), true);
+  fs.rmSync(accepted, { force: true });
+});
+test("a photo's hidden metadata (owner, camera, location fields) is removed on upload", async () => {
+  const filePath = path.join(os.tmpdir(), `${randomUUID()}.jpg`);
+  fs.writeFileSync(filePath, await realJpeg({ IFD0: { Artist: "SomchaiOwner", Make: "SecretPhone" } }));
+  // Metadata is read from bytes, not the path: sharp would keep the file open on Windows.
+  const read = () => sharp(fs.readFileSync(filePath)).metadata();
+  assert.ok((await read()).exif, "the test photo starts out with metadata");
+  let passed = false;
+  await verifyUploadedFile("avatar")({ file: { path: filePath, mimetype: "image/jpeg" } }, response(), () => { passed = true; });
+  assert.equal(passed, true);
+  const cleaned = await read();
+  assert.equal(cleaned.exif, undefined, "no EXIF block left");
+  const bytes = fs.readFileSync(filePath).toString("latin1");
+  assert.ok(!bytes.includes("SecretPhone") && !bytes.includes("SomchaiOwner"));
+  assert.deepEqual([cleaned.width, cleaned.height], [4, 2], "the picture itself is unchanged");
+  fs.rmSync(filePath, { force: true });
+});
+test("an image that looks right but can't be decoded is rejected and deleted", async () => {
+  const filePath = path.join(os.tmpdir(), `${randomUUID()}.png`);
+  const valid = await sharp({ create: { width: 8, height: 8, channels: 3, background: "#00f" } }).png().toBuffer();
+  fs.writeFileSync(filePath, valid.subarray(0, valid.length - 40)); // valid signature, truncated body
+  const res = response();
+  await verifyUploadedFile("avatar")({ file: { path: filePath, mimetype: "image/png" } }, res, () => assert.fail("a corrupt image must not pass"));
+  assert.equal(res.code, 400);
+  assert.equal(fs.existsSync(filePath), false);
 });
 test("legacy .doc content (generic OLE container) is accepted where application/msword is allowed", async () => {
   const filePath = path.join(os.tmpdir(), `${randomUUID()}.doc`);
   fs.writeFileSync(filePath, Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1, 0, 0, 0, 0]));
   let passed = false;
-  await verifyUploadedFile("resume")({ file: { path: filePath } }, response(), () => { passed = true; });
+  await verifyUploadedFile("resume")({ file: { path: filePath, mimetype: "application/msword" } }, response(), () => { passed = true; });
   assert.equal(passed, true);
   fs.rmSync(filePath, { force: true });
 });
@@ -244,14 +338,15 @@ test("listUsers only paginates when a page is requested, and sets X-Total-Count"
   assert.equal(find.mock.callCount(), 2);
 });
 test("listPosts sets X-Total-Count only when paginated", async () => {
-  mock.method(Post, "find", () => chainable([{ _id: "p1", likedBy: [] }]));
+  mock.method(Post, "find", () => chainable([{ _id: "p1", likedBy: [], user: { _id: "author" } }]));
   mock.method(Post, "countDocuments", async () => 42);
   mock.method(SavedPost, "find", () => chainable([]));
-  mock.method(Comment, "countDocuments", async () => 0);
+  mock.method(Comment, "aggregate", async () => [{ _id: "p1", count: 3 }]);
 
   const unpaged = response();
   await listPosts({ query: {}, user: { id: "u1" } }, unpaged);
   assert.equal(unpaged.headers["X-Total-Count"], undefined);
+  assert.equal(unpaged.body[0].commentCount, 3, "counts come from one grouped query for the whole page");
 
   const paged = response();
   await listPosts({ query: { page: "1" }, user: { id: "u1" } }, paged);
@@ -266,15 +361,17 @@ test("course search escapes regex metacharacters instead of building a raw RegEx
   assert.equal(capturedFilter.$or[0].title.test("aaab"), false, "unescaped metacharacters must not be interpreted as regex");
 });
 test("production configuration requires SMTP settings", () => {
+  const origins = { CORS_ORIGIN: "https://a.example", FRONTEND_URL: "https://a.example" };
   assert.throws(
-    () => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET: "x".repeat(32), NODE_ENV: "production" }),
+    () => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET: STRONG_SECRET, NODE_ENV: "production", ...origins }),
     /SMTP/
   );
   assert.doesNotThrow(() =>
     validateEnvironment({
       MONGODB_URI: "test",
-      JWT_SECRET: "x".repeat(32),
+      JWT_SECRET: STRONG_SECRET,
       NODE_ENV: "production",
+      ...origins,
       SMTP_HOST: "smtp.example.com",
       SMTP_USER: "user",
       SMTP_PASS: "pass",

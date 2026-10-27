@@ -8,7 +8,8 @@ export default defineConfig(({ mode }) => {
   return {
   plugins: [react()],
   server: {
-    host: true,
+    // Localhost only (the default): the dev server and its /api proxy must not be
+    // reachable from other machines on the network. Pass --host explicitly if needed.
     proxy: {
       '/api': {
         target,

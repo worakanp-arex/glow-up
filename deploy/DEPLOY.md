@@ -147,6 +147,8 @@ echo "VITE_GOOGLE_CLIENT_ID=ใส่_client_id" > frontend/.env
 ## ขั้นที่ 10 — ตั้งค่า Nginx
 
 ```sh
+sudo mkdir -p /etc/nginx/snippets
+sudo cp deploy/nginx/security-headers.conf /etc/nginx/snippets/glow-up-security-headers.conf   # CSP และ header ความปลอดภัย (ต้องมี ไม่งั้น nginx -t จะไม่ผ่าน)
 sudo cp deploy/nginx/glow-up.conf /etc/nginx/sites-available/glow-up
 sudo sed -i 's/YOUR_DOMAIN/growup-kku.duckdns.org/' /etc/nginx/sites-available/glow-up   # เปลี่ยนเป็นโดเมนของคุณ
 sudo ln -sf /etc/nginx/sites-available/glow-up /etc/nginx/sites-enabled/glow-up
@@ -183,7 +185,7 @@ sudo certbot --nginx -d YOUR_DOMAIN
 
 ```sh
 cd ~/glow-up
-SEED_ADMIN_EMAIL=admin@example.com SEED_ADMIN_PASSWORD='รหัสผ่านที่แข็งแรง' SEED_ADMIN_NAME='ผู้ดูแลระบบ' npm run seed:admin --prefix backend
+SEED_ADMIN_EMAIL=ผู้ดูแลจริง@โดเมนของคุณ SEED_ADMIN_PASSWORD='รหัสผ่านยาวอย่างน้อย10ตัว' SEED_ADMIN_NAME='ผู้ดูแลระบบ' npm run seed:admin --prefix backend
 npm run seed:missions --prefix backend
 ```
 
@@ -202,19 +204,32 @@ bash deploy/deploy.sh
 
 Atlas M0 **ไม่มีระบบ backup อัตโนมัติ** และไฟล์อัปโหลดอยู่บนเครื่อง ให้สำรองทั้งสองอย่าง:
 
-```sh
-# ไฟล์อัปโหลด
-tar czf ~/uploads-$(date +%F).tar.gz -C ~/glow-up/backend uploads
+ไฟล์สำรองมีข้อมูลสุขภาพและเอกสารส่วนตัวของผู้ใช้จริง ต้อง**เข้ารหัส**ก่อนเก็บ/ย้าย เก็บ**นอก repo** (ห้ามวางในโฟลเดอร์โปรเจ็คที่ใช้ `git add`)
+และลบเมื่อครบ 90 วัน เพื่อให้สอดคล้องกับการลบข้อมูลบัญชีที่ลบแล้ว (ระบบทำให้บัญชีที่ลบ "ไม่ระบุตัวตน" หลัง 90 วัน แต่ไฟล์สำรองเก่ายังมีข้อมูลดิบอยู่)
 
-# ฐานข้อมูล (ติดตั้งเครื่องมือครั้งแรก: sudo apt-get install -y mongodb-database-tools
-#  ถ้าไม่มีใน apt ให้ดาวน์โหลดจากเว็บ MongoDB)
-mongodump --uri "MONGODB_URI_ของคุณ" --archive=$HOME/db-$(date +%F).gz --gzip
+```sh
+umask 077   # ให้ไฟล์ที่สร้างอ่านได้เฉพาะเจ้าของ
+mkdir -p ~/backups
+
+# ฐานข้อมูล: เก็บ connection string ในไฟล์ config แทนการพิมพ์บนบรรทัดคำสั่ง (ไม่ให้โผล่ใน ps / ประวัติ shell)
+printf 'uri: "MONGODB_URI_ของคุณ"\n' > ~/.mongodump.yml && chmod 600 ~/.mongodump.yml
+# ติดตั้งเครื่องมือครั้งแรก: sudo apt-get install -y mongodb-database-tools (ถ้าไม่มีใน apt ให้ดาวน์โหลดจากเว็บ MongoDB)
+mongodump --config ~/.mongodump.yml --archive=$HOME/backups/db-$(date +%F).gz --gzip
+
+# ไฟล์อัปโหลด
+tar czf ~/backups/uploads-$(date +%F).tar.gz -C ~/glow-up/backend uploads
+
+# เข้ารหัสด้วยรหัสผ่านที่เก็บแยกต่างหาก แล้วลบไฟล์ที่ไม่เข้ารหัสทิ้ง
+for f in ~/backups/db-$(date +%F).gz ~/backups/uploads-$(date +%F).tar.gz; do gpg --symmetric --cipher-algo AES256 "$f" && shred -u "$f"; done
+
+# ลบไฟล์สำรองที่เก่ากว่า 90 วัน
+find ~/backups -name '*.gpg' -mtime +90 -delete
 ```
 
-แล้วดาวน์โหลดไฟล์ backup ลงเครื่องตัวเอง:
+แล้วดาวน์โหลดไฟล์ที่เข้ารหัสแล้วลงเครื่องตัวเอง (เก็บที่ที่เข้ารหัสดิสก์ ไม่ใช่โฟลเดอร์ที่ sync ขึ้นคลาวด์สาธารณะ):
 
 ```sh
-scp -i ssh-key.key ubuntu@PUBLIC_IP:~/uploads-*.tar.gz .
+scp -i ssh-key.key ubuntu@PUBLIC_IP:~/backups/*.gpg .
 ```
 
 ---
@@ -232,6 +247,7 @@ scp -i ssh-key.key ubuntu@PUBLIC_IP:~/uploads-*.tar.gz .
 | ขอ OTP แล้วขึ้น 503 / ไม่ได้รับอีเมล | App Password ผิด หรือดูในโฟลเดอร์สแปม |
 | แจ้งเตือนเรียลไทม์ไม่ขึ้น | ตรวจว่าใช้ไฟล์ nginx ในชุดนี้ (มีส่วน `/socket.io/`) |
 | อัปโหลดไฟล์แล้วขึ้น `413` | ยังไม่ได้ reload nginx หลังคัดลอก config |
+| ปุ่ม Google ไม่ขึ้น / รูปหรือฟอนต์หาย หลังเปิด CSP | เปิดคอนโซลเบราว์เซอร์ดูข้อความ `Content-Security-Policy` แล้วแก้ที่ `backend/src/config/csp.js` คู่กับ `deploy/nginx/security-headers.conf` และ `frontend/vercel.json` |
 | `npm ci` ค้างหรือถูก kill | RAM ไม่พอ — ตรวจว่ามี swap: `free -h` |
 
 คำสั่งที่ใช้บ่อย:

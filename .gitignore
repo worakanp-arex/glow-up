@@ -6,6 +6,23 @@ node_modules/
 .env.local
 .env.*.local
 
+# Secrets and credentials of any kind. Only the *.example templates are committed.
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Backups and database dumps hold real people's data and must never be committed.
+*.gz
+*.tgz
+*.tar
+*.sql
+*.dump
+*.bak
+*.archive
+
 # Build output
 dist/
 dist-ssr/

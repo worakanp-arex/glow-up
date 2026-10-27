@@ -1,9 +1,14 @@
 import fs from "fs";
 import path from "path";
+import validator from "validator";
 import User from "../models/User.js";
 import RehabilitationRecord from "../models/RehabilitationRecord.js";
 import UserSkill from "../models/UserSkill.js";
 import { notifyUser } from "../services/notificationService.js";
+import { disconnectUser } from "../services/socket.js";
+import { passwordProblem } from "../utils/passwordPolicy.js";
+import { softDeleteUser } from "../services/accountLifecycleService.js";
+import { clearSessionCookie } from "./authController.js";
 import { UPLOAD_ROOT, publicUrl } from "../middleware/upload.js";
 import { paginationOptions } from "../utils/pagination.js";
 import { sanitizeText } from "../utils/sanitizeText.js";
@@ -205,8 +210,9 @@ export async function createUserByAdmin(req, res) {
   if (!["user", "family", "employer", "admin", "counsellor"].includes(role)) {
     return res.status(400).json({ message: "Invalid role" });
   }
-  if (String(password).length < 8) {
-    return res.status(400).json({ message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" });
+  const weakness = passwordProblem(password);
+  if (weakness) {
+    return res.status(400).json({ message: weakness });
   }
 
   const existing = await User.findOne({ email: email.toLowerCase() });
@@ -299,6 +305,8 @@ export async function verifyUser(req, res) {
 
   const message = reason && status !== "verified" ? `${VERIFY_STATUS_MESSAGES[status]} เหตุผล: ${reason}` : VERIFY_STATUS_MESSAGES[status];
   await notifyUser(user._id, message, "system", { link: "/profile" });
+  // A suspended or rejected account loses its live connection now, not when its token runs out.
+  if (status !== "verified") disconnectUser(user._id);
 
   res.json(user);
 }
@@ -326,6 +334,9 @@ export async function updateUser(req, res) {
   res.json(user);
 }
 
+// Deleting an account hides it and ends its sessions, requests and family links,
+// but keeps its records for RETENTION_DAYS (an admin can review or restore it from
+// the deleted-accounts screen) before they are anonymised.
 export async function deleteUser(req, res) {
   if (String(req.params.id) === String(req.user.id)) {
     return res.status(400).json({ message: "ไม่สามารถลบบัญชีของตัวเองได้" });
@@ -334,10 +345,39 @@ export async function deleteUser(req, res) {
   if (target && await isLastActiveAdmin(target)) {
     return res.status(400).json({ message: "ต้องมีผู้ดูแลระบบที่ใช้งานได้อย่างน้อยหนึ่งคน" });
   }
-  const user = await User.findByIdAndDelete(req.params.id);
+  const reason = typeof req.body?.reason === "string" ? sanitizeText(req.body.reason).slice(0, 300) : "";
+  const user = await softDeleteUser(req.params.id, { actorId: req.user.id, reason: reason || "ลบโดยผู้ดูแลระบบ" });
   if (!user) {
     return res.status(404).json({ message: "Not found" });
   }
+  res.status(204).send();
+}
+
+// "Delete my account". The person must prove it is them (their password, or for a
+// Google-only account the address typed out), because a stolen session could
+// otherwise erase someone's recovery history in one click.
+export async function deleteMyAccount(req, res) {
+  const user = await User.findById(req.user.id).select("+password");
+  if (!user) {
+    return res.status(404).json({ message: "Not found" });
+  }
+  if (user.password) {
+    if (typeof req.body.password !== "string" || !(await user.comparePassword(req.body.password))) {
+      return res.status(401).json({ message: "รหัสผ่านไม่ถูกต้อง" });
+    }
+  } else {
+    const typed = typeof req.body.confirmEmail === "string" ? req.body.confirmEmail : "";
+    const same = (value) => validator.normalizeEmail(value) || String(value).toLowerCase();
+    if (!typed || same(typed) !== same(user.email)) {
+      return res.status(400).json({ message: "กรุณาพิมพ์อีเมลของบัญชีให้ถูกต้องเพื่อยืนยันการลบ" });
+    }
+  }
+  if (await isLastActiveAdmin(user)) {
+    return res.status(400).json({ message: "ต้องมีผู้ดูแลระบบที่ใช้งานได้อย่างน้อยหนึ่งคน" });
+  }
+
+  await softDeleteUser(user._id, { actorId: user._id, reason: "ผู้ใช้ลบบัญชีของตัวเอง" });
+  clearSessionCookie(res);
   res.status(204).send();
 }
 

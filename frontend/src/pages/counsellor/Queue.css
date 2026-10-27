@@ -125,6 +125,14 @@
   box-shadow: var(--shadow-md);
 }
 
+.counsellor-queue-item.is-restricted,
+.counsellor-queue-item.is-restricted:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+}
+
 .counsellor-queue-avatar {
   flex-shrink: 0;
   display: flex;

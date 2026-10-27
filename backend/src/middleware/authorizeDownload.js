@@ -13,9 +13,12 @@ export async function canDownloadFile(actor, fileUrl) {
   if (employer?.verifiedStatus !== "verified") return false;
   const jobs = await Job.find({ employer: actor.id }).select("_id");
   const jobIds = jobs.map((job) => job._id);
-  if (await Application.exists({ job: { $in: jobIds }, "attachments.url": fileUrl })) return true;
+  // An applicant who withdrew takes their documents back: a cancelled
+  // application no longer entitles the employer to anything.
+  const stillApplied = { job: { $in: jobIds }, status: { $ne: "cancelled" } };
+  if (await Application.exists({ ...stillApplied, "attachments.url": fileUrl })) return true;
   const owner = await User.findOne({ $or: [{ resumeUrl: fileUrl }, { "certificates.url": fileUrl }] }).select("_id");
-  return Boolean(owner && await Application.exists({ job: { $in: jobIds }, user: owner._id }));
+  return Boolean(owner && await Application.exists({ ...stillApplied, user: owner._id }));
 }
 
 export async function authorizeDownload(req, res, next) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { KeyRound, Mail, ShieldCheck, UserPlus } from "lucide-react";
 import StatusBadge from "../common/StatusBadge.jsx";
+import DeleteAccountCard from "./DeleteAccountCard.jsx";
 import * as authService from "../../services/authService.js";
 import "./AccountCard.css";
 
@@ -24,8 +25,8 @@ export default function AccountCard({ user, roleLabel, children }) {
     event.preventDefault();
     setMessage("");
     setError("");
-    if (form.newPassword.length < 8) {
-      setError("รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร");
+    if (form.newPassword.length < 10) {
+      setError("รหัสผ่านใหม่ต้องมีอย่างน้อย 10 ตัวอักษร");
       return;
     }
     if (form.newPassword !== form.confirm) {
@@ -80,8 +81,8 @@ export default function AccountCard({ user, roleLabel, children }) {
           </label>
           <label className="ui-field">
             รหัสผ่านใหม่
-            <input type="password" name="newPassword" value={form.newPassword} onChange={handleChange} autoComplete="new-password" minLength={8} required />
-            <small>อย่างน้อย 8 ตัวอักษร</small>
+            <input type="password" name="newPassword" value={form.newPassword} onChange={handleChange} autoComplete="new-password" minLength={10} maxLength={128} required />
+            <small>อย่างน้อย 10 ตัวอักษร และไม่ใช่รหัสที่เดาง่าย เช่น password123</small>
           </label>
           <label className="ui-field">
             ยืนยันรหัสผ่านใหม่
@@ -92,6 +93,8 @@ export default function AccountCard({ user, roleLabel, children }) {
           {saving ? "กำลังบันทึก..." : "เปลี่ยนรหัสผ่าน"}
         </button>
       </form>
+
+      <DeleteAccountCard user={user} />
     </div>
   );
 }

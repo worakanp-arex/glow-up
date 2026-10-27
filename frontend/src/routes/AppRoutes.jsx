@@ -6,6 +6,7 @@ import PageHeader from "../components/common/PageHeader.jsx";
 import { SearchX } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import GuestRoute from "./GuestRoute.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { roleHome, canSearchJobs } from "../constants/roleHome.js";
 const Home = lazy(() => import("../pages/Home.jsx"));
@@ -52,6 +53,8 @@ const ApplicantDetail = lazy(() => import("../pages/employer/ApplicantDetail.jsx
 const AdminDashboard = lazy(() => import("../pages/admin/Dashboard.jsx"));
 const AdminUsers = lazy(() => import("../pages/admin/Users.jsx"));
 const AdminUserDetail = lazy(() => import("../pages/admin/UserDetail.jsx"));
+const DeletedUsers = lazy(() => import("../pages/admin/DeletedUsers.jsx"));
+const DeletedUserDetail = lazy(() => import("../pages/admin/DeletedUserDetail.jsx"));
 const AdminApplications = lazy(() => import("../pages/admin/Applications.jsx"));
 const JobsModeration = lazy(() => import("../pages/admin/JobsModeration.jsx"));
 const PostsModeration = lazy(() => import("../pages/admin/PostsModeration.jsx"));
@@ -77,8 +80,10 @@ function AppRoutes() {
       <Route element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="about" element={<About />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+        <Route element={<GuestRoute />}>
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+        </Route>
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="family/accept" element={<FamilyAcceptInvite />} />
@@ -153,6 +158,8 @@ function AppRoutes() {
           <Route path="admin/users" element={<AdminUsers />} />
           <Route path="admin/users/:userId" element={<AdminUserDetail />} />
           <Route path="admin/users/:userId/emotion" element={<UserEmotionHistory />} />
+          <Route path="admin/deleted-users" element={<DeletedUsers />} />
+          <Route path="admin/deleted-users/:userId" element={<DeletedUserDetail />} />
           <Route path="admin/applications" element={<AdminApplications />} />
           <Route path="admin/jobs" element={<JobsModeration />} />
           <Route path="admin/job-categories" element={<JobCategories />} />

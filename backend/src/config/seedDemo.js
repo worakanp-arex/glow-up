@@ -6,6 +6,7 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { connectDB } from "./db.js";
+import { assertLocalDatabase } from "./localOnly.js";
 import User from "../models/User.js";
 import MicroLesson from "../models/MicroLesson.js";
 import ScenarioSimulation from "../models/ScenarioSimulation.js";
@@ -242,6 +243,7 @@ async function main() {
     console.error("Refusing to run demo seed with NODE_ENV=production");
     process.exit(1);
   }
+  assertLocalDatabase();
   await connectDB();
   try {
     if (process.argv.includes("--clean")) await clean();

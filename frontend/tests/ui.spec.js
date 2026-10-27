@@ -4,6 +4,19 @@ const user = { _id: "507f1f77bcf86cd799439011", name: "ก้าวใหม่ 
 const employer = { ...user, role: "employer", companyName: "บริษัท โอกาสใหม่ จำกัด" };
 const jobs = Array.from({ length: 23 }, (_, i) => ({ _id: String(i + 1), title: `เจ้าหน้าที่ดูแลลูกค้า ${i + 1}`, description: "ร่วมเติบโตไปกับทีมที่พร้อมให้โอกาสและสนับสนุนการเรียนรู้", employer, location: "ขอนแก่น", salary: 18000, skills: [], verifiedStatus: "verified", status: "open", attachmentRequests: [] }));
 const streak = { currentStreak: 3, longestStreak: 7, totalCheckIns: 10, loggedToday: false, history: [] };
+const deletedUser = {
+  user: { ...user, _id: "1", name: "สมชาย ที่ถูกลบ", deletedAt: "2026-08-01T00:00:00Z", deletionReason: "ผู้ใช้ลบบัญชีของตัวเอง" },
+  deletedBySelf: true, anonymized: false, daysLeft: 12, anonymizeOn: "2026-10-30T00:00:00Z",
+  auditTrail: [{ _id: "a1", action: "account.deleted", createdAt: "2026-08-01T00:00:00Z", actor: null }],
+  history: {
+    rehabRecords: [{ _id: "r1", hospitalName: "โรงพยาบาลธัญญารักษ์", status: "completed", startDate: "2026-01-01T00:00:00Z" }],
+    riskAssessments: [{ _id: "k1", level: "medium", riskScore: 40, createdAt: "2026-07-01T00:00:00Z", triggerFactors: "ความอยากสูง" }],
+    riskSituations: [], weeklyCheckIns: [],
+    emotionLogs: [{ _id: "e1", dateKey: "2026-07-30", happinessLevel: 3, cravingLevel: 6, note: "วันนี้เครียด" }],
+    sessions: [{ _id: "s1", topic: "ขอคำปรึกษา", status: "closed", createdAt: "2026-06-01T00:00:00Z", message: "ต้องการพูดคุย", messages: [{ _id: "m1", senderRole: "counsellor", content: "ยินดีให้คำปรึกษา" }], counsellor: { name: "หมอใจดี" }, outcome: { summary: "นัดติดตามผล" } }],
+    familyLinkCount: 1, applicationCount: 2,
+  },
+};
 const summary = { activeUsers: { count: 12 }, risk: { byLevel: { low: 10, medium: 2, high: 0 } }, appointments: { today: 0, byDay: [] }, loginTrend: [], leaderboard: [] };
 
 async function fixture(page, role = "user", options = {}) {
@@ -33,6 +46,13 @@ async function fixture(page, role = "user", options = {}) {
     else if (p === "/counselling/1") data = { _id: "1", user, topic: "ขอคำปรึกษาเพื่อเตรียมความพร้อมในการทำงาน", message: "ต้องการพูดคุย", messages: [], sessionType: "chat", status: "pending", createdAt: "2026-09-01T00:00:00Z" };
     else if (p === "/emotion/1/streak") data = { ...streak, user };
     else if (p === "/users/1") data = { ...user, _id: "1", name: "สมาชิก 1" };
+    else if (p === "/admin/deleted-users/1") data = deletedUser;
+    else if (p === "/admin/deleted-users/2") data = { ...deletedUser, user: { ...deletedUser.user, _id: "2", name: "ผู้ใช้ที่ถูกลบ", anonymizedAt: "2026-09-10T00:00:00Z" }, anonymized: true, daysLeft: 0, history: null };
+    else if (p === "/admin/deleted-users/1/restore") data = { ...user, _id: "1" };
+    else if (p === "/admin/deleted-users") {
+      const items = [{ ...user, _id: "1", name: "สมชาย ที่ถูกลบ", deletedAt: "2026-08-01T00:00:00Z", deletedBySelf: true, daysLeft: 12, anonymizeOn: "2026-10-30T00:00:00Z" }];
+      return route.fulfill({ json: items, headers: { "X-Total-Count": "1" } });
+    }
     else if (p === "/overview") data = summary;
     else if (p === "/risk/all") data = summary.risk;
     else if (p === "/admin/dashboard") data = { users: { total: 12, employers: 3, pendingVerifications: 2 }, jobs: { total: 23, pending: 2, open: 21 }, applications: { total: 0, byStatus: {} }, risk: summary.risk };
@@ -58,7 +78,7 @@ const pages = {
   user: ["/dashboard", "/profile", "/my-applications", "/craving-tracker", "/streak", "/games", "/weekly-checkin", "/learning", "/community", "/community/saved", "/courses", "/counselling", "/jobs"],
   employer: ["/employer/dashboard", "/employer/jobs", "/employer/jobs/new", "/employer/jobs/1/applicants", "/employer/applications", "/profile"],
   counsellor: ["/counsellor", "/counsellor/courses", "/counsellor/lessons", "/counsellor/analytics", "/counsellor/activity-missions", "/community/mine", "/admin/posts-moderation", "/profile"],
-  admin: ["/admin", "/admin/users", "/admin/jobs", "/admin/job-categories", "/admin/assessments", "/admin/missions", "/admin/applications", "/admin/posts-moderation", "/profile"],
+  admin: ["/admin", "/admin/users", "/admin/deleted-users", "/admin/jobs", "/admin/job-categories", "/admin/assessments", "/admin/missions", "/admin/applications", "/admin/posts-moderation", "/profile"],
 };
 for (const [role, routes] of Object.entries(pages)) {
   for (const url of routes) test(`${role} ${url}`, async ({ page }, testInfo) => {
@@ -173,6 +193,8 @@ const details = [
   ["counsellor", "/counsellor/overview/active", "/counsellor/analytics"],
   ["admin", "/admin/users/1/emotion", "/admin/users"],
   ["admin", "/admin/users/1", "/admin/users"],
+  ["admin", "/admin/deleted-users/1", "/admin/deleted-users"],
+  ["admin", "/admin/deleted-users/2", "/admin/deleted-users"],
   ["admin", "/admin/applications", "/admin"],
   ["employer", "/employer/applications/1", "/employer/jobs/1/applicants"],
   ["employer", "/employer/jobs/1/applicants", "/employer/jobs/1"],

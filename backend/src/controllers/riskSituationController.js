@@ -1,6 +1,6 @@
 import RiskSituationLog from "../models/RiskSituationLog.js";
 import User from "../models/User.js";
-import { notifyUser } from "../services/notificationService.js";
+import { notifyCareTeam, RISK_ALERT_COOLDOWN_MS } from "../services/notificationService.js";
 import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
 export async function createRiskSituationLog(req, res) {
@@ -15,15 +15,20 @@ export async function createRiskSituationLog(req, res) {
   });
 
   // A logged relapse is safety-relevant the same way a self-harm risk flag
-  // is — alert every admin/counsellor so a real person can follow up.
+  // is — alert the patient's care team so a real person can follow up. Every
+  // entry stays on the patient's record, but only the first relapse inside the
+  // cooldown pages the team.
   if (outcome === "relapsed") {
-    const [staff, reportingUser] = await Promise.all([
-      User.find({ role: { $in: ["admin", "counsellor"] } }).select("_id"),
-      User.findById(req.user.id).select("name"),
-    ]);
-    for (const member of staff) {
-      await notifyUser(
-        member._id,
+    const alertedRecently = await RiskSituationLog.exists({
+      user: req.user.id,
+      outcome: "relapsed",
+      _id: { $ne: log._id },
+      createdAt: { $gte: new Date(Date.now() - RISK_ALERT_COOLDOWN_MS) },
+    });
+    if (!alertedRecently) {
+      const reportingUser = await User.findById(req.user.id).select("name");
+      await notifyCareTeam(
+        req.user.id,
         `แจ้งเตือนความเสี่ยง: ${reportingUser.name} บันทึกว่ากลับไปใช้ซ้ำในสถานการณ์เสี่ยงที่พบจริง`,
         "riskAlert",
         { link: `/counsellor/patients/${req.user.id}` }

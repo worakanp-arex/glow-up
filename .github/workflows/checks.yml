@@ -6,6 +6,15 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Real MongoDB for the account lifecycle integration tests.
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'"
+          --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,6 +26,9 @@ jobs:
             frontend/package-lock.json
       - run: npm ci --prefix backend
       - run: npm ci --prefix frontend
+      # Fails the build on a known high-severity vulnerability in anything that ships to production.
+      - run: npm audit --omit=dev --audit-level=high --prefix backend
+      - run: npm audit --omit=dev --audit-level=high --prefix frontend
       - run: npm test --prefix backend
       - run: npm run lint --prefix frontend
       - run: npm run build --prefix frontend

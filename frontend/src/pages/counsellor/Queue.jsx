@@ -129,6 +129,29 @@ function Queue() {
                 {visibleSessions.map((session) => {
                   const TypeIcon = SESSION_TYPE_ICONS[session.sessionType] || MessageCircle;
                   const mood = moodByValue(session.mood);
+                  // Another counsellor's case: only its time, type, status and owner are shared.
+                  if (session.restricted) {
+                    return (
+                      <li key={session._id}>
+                        <div className="counsellor-queue-item is-restricted">
+                          <span className="counsellor-queue-avatar"><Avatar user={null} size={40} fill /></span>
+                          <div className="counsellor-queue-body">
+                            <p className="counsellor-queue-topic">เคสที่ {session.counsellor?.name || "ผู้ให้คำปรึกษาท่านอื่น"} ดูแลอยู่</p>
+                            <p className="counsellor-queue-meta">
+                              <TypeIcon size={13} />
+                              {SESSION_TYPE_LABELS[session.sessionType]}
+                              {session.scheduledAt && ` · นัด ${formatDateTime(session.scheduledAt)}`}
+                            </p>
+                          </div>
+                          <div className="counsellor-queue-status-col">
+                            <span className={`counselling-status-badge ${COUNSELLING_STATUS_CLASS[session.status] || ""}`}>
+                              {COUNSELLING_STATUS_LABELS[session.status] || session.status}
+                            </span>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  }
                   return (
                     <li key={session._id}>
                       <Link to={`/counsellor/requests/${session._id}`} className="counsellor-queue-item">

@@ -23,7 +23,7 @@ router.get("/saved", verifyToken, requireRole("user", "family"), asyncHandler(my
 router.post("/:id/save", verifyToken, requireRole("user", "family"), [objectIdParam("id")], validate, asyncHandler(saveLesson));
 router.delete("/:id/save", verifyToken, requireRole("user", "family"), [objectIdParam("id")], validate, asyncHandler(unsaveLesson));
 router.get("/all", verifyToken, requireRole(...STAFF_ROLES), asyncHandler(listAllLessons));
-router.get("/:id", verifyToken, [objectIdParam("id")], validate, asyncHandler(getMicroLesson));
+router.get("/:id", verifyToken, requireRole("user", "family", ...STAFF_ROLES), [objectIdParam("id")], validate, asyncHandler(getMicroLesson));
 router.post("/", verifyToken, requireRole(...STAFF_ROLES), asyncHandler(createMicroLesson));
 router.put("/:id", verifyToken, requireRole(...STAFF_ROLES), [objectIdParam("id")], validate, asyncHandler(updateMicroLesson));
 router.delete("/:id", verifyToken, requireRole(...STAFF_ROLES), [objectIdParam("id")], validate, asyncHandler(deleteMicroLesson));
