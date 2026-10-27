@@ -20,7 +20,21 @@ const transporter = smtpConfigured
 // Hosts that block outbound SMTP (e.g. Railway Free/Trial/Hobby) can send
 // through Brevo's HTTPS API instead: set BREVO_API_KEY and EMAIL_FROM (a sender
 // address verified in Brevo). When both are set, this takes priority over SMTP.
-const brevoConfigured = Boolean(process.env.BREVO_API_KEY && process.env.EMAIL_FROM);
+// Values pasted into a hosting dashboard often pick up spaces or quotes.
+const cleanSetting = (value) => (value || "").trim().replace(/^(['"])(.*)\1$/, "$2").trim();
+const BREVO_API_KEY = cleanSetting(process.env.BREVO_API_KEY);
+const EMAIL_FROM = cleanSetting(process.env.EMAIL_FROM);
+const brevoConfigured = Boolean(BREVO_API_KEY && EMAIL_FROM);
+
+// Describe the key without revealing it, so a wrong key type shows up in logs.
+export function describeBrevoKey(key = BREVO_API_KEY) {
+  if (!key) return "not set";
+  const kind = key.startsWith("xkeysib-") ? "API key" : key.startsWith("xsmtpsib-") ? "SMTP key (wrong type - create an API key instead)" : "unrecognised format (expected xkeysib-...)";
+  return `${kind}, ${key.length} characters, ends with ...${key.slice(-4)}`;
+}
+if (brevoConfigured && process.env.NODE_ENV !== "test") {
+  console.log(`[email] Sending through Brevo as ${EMAIL_FROM}; BREVO_API_KEY: ${describeBrevoKey()}`);
+}
 
 const APP_NAME = "Glow Up";
 const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "worakan.p@kkumail.com";
@@ -34,9 +48,9 @@ export function isEmailDeliveryConfigured() {
 async function sendViaBrevo({ to, subject, html }) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
-    headers: { "api-key": process.env.BREVO_API_KEY.trim(), "content-type": "application/json", accept: "application/json" },
+    headers: { "api-key": BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({
-      sender: { name: process.env.EMAIL_FROM_NAME || APP_NAME, email: process.env.EMAIL_FROM.trim() },
+      sender: { name: process.env.EMAIL_FROM_NAME || APP_NAME, email: EMAIL_FROM },
       to: [{ email: to }],
       replyTo: { email: SUPPORT_EMAIL },
       subject,
