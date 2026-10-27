@@ -34,9 +34,9 @@ export function isEmailDeliveryConfigured() {
 async function sendViaBrevo({ to, subject, html }) {
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
-    headers: { "api-key": process.env.BREVO_API_KEY, "content-type": "application/json", accept: "application/json" },
+    headers: { "api-key": process.env.BREVO_API_KEY.trim(), "content-type": "application/json", accept: "application/json" },
     body: JSON.stringify({
-      sender: { name: process.env.EMAIL_FROM_NAME || APP_NAME, email: process.env.EMAIL_FROM },
+      sender: { name: process.env.EMAIL_FROM_NAME || APP_NAME, email: process.env.EMAIL_FROM.trim() },
       to: [{ email: to }],
       replyTo: { email: SUPPORT_EMAIL },
       subject,
