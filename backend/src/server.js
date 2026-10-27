@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 5001;
 const HOST = process.env.HOST;
 
 const httpServer = http.createServer(app);
-initSocket(httpServer, process.env.CORS_ORIGIN || "http://localhost:5173");
+initSocket(httpServer, (process.env.CORS_ORIGIN || "http://localhost:5173").trim().replace(/\/+$/, ""));
 
 connectDB()
   .then(() => {

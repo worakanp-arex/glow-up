@@ -62,7 +62,8 @@ if (process.env.TRUST_PROXY) {
 // HTTPS-only for a year, for this host alone: the policy must not reach other
 // subdomains of the domain, which this app doesn't control.
 const HSTS = { maxAge: 31536000, includeSubDomains: false };
-const allowedOrigin = process.env.CORS_ORIGIN || "http://localhost:5173";
+// An origin never ends in "/", so tolerate a trailing slash or spaces pasted into the setting.
+const allowedOrigin = (process.env.CORS_ORIGIN || "http://localhost:5173").trim().replace(/\/+$/, "");
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
