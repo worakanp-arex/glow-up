@@ -4,6 +4,7 @@ import ConfirmDialog from "../common/ConfirmDialog.jsx";
 import Avatar from "../common/Avatar.jsx";
 import CoverPicker, { coverStyle } from "../common/CoverPicker.jsx";
 import * as userService from "../../services/userService.js";
+import { shrinkImage, AVATAR_MAX_BYTES } from "../../utils/shrinkImage.js";
 import { AVATAR_PRESETS, AVATAR_COLORS, COVER_PRESETS, DEFAULT_COVER_PRESET } from "../../constants/profileArt.js";
 import "./AvatarPickerDialog.css";
 
@@ -14,7 +15,6 @@ const TABS = [
   { key: "gallery", label: "จากแกลเลอรี" },
 ];
 
-const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 
 // Picks a profile picture (a ready-made character, a coloured letter, or a
 // photo from the gallery as the last resort) and the cover behind the profile
@@ -48,11 +48,12 @@ export default function AvatarPickerDialog({ user, initialTab = "characters", on
   const avatarChanged = choice.type !== "keep" && !(choice.type === "initial" && user.avatarStyle === "initial" && choice.color === user.avatarColor);
   const nothingToSave = !avatarChanged && !coverChanged;
 
-  function handleFile(event) {
-    const picked = event.target.files[0];
+  async function handleFile(event) {
+    const original = event.target.files[0];
     event.target.value = "";
-    if (!picked) return;
-    if (picked.size > MAX_UPLOAD_BYTES) {
+    if (!original) return;
+    const picked = await shrinkImage(original);
+    if (picked.size > AVATAR_MAX_BYTES) {
       setError("รูปต้องมีขนาดไม่เกิน 2 MB");
       return;
     }

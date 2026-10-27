@@ -15,6 +15,9 @@ export function errorHandler(err, req, res, next) {
   if (err.name === "CastError") {
     return res.status(400).json({ message: `Invalid ${err.path}` });
   }
+  if (err.name === "MulterError" && err.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({ message: "ไฟล์มีขนาดใหญ่เกินกำหนด (รูปโปรไฟล์ไม่เกิน 2 MB, เอกสารไม่เกิน 5 MB) กรุณาเลือกไฟล์ที่เล็กลง" });
+  }
   if (err.name === "MulterError" || err.message?.startsWith("Invalid file type")) {
     return res.status(400).json({ message: err.message });
   }

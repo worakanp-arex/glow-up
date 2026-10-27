@@ -7,6 +7,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import * as authService from "../../services/authService.js";
 import GoogleSignInButton from "../../components/auth/GoogleSignInButton.jsx";
 import { roleHome } from "../../constants/roleHome.js";
+import { shrinkImage, AVATAR_MAX_BYTES } from "../../utils/shrinkImage.js";
 import "./Register.css";
 
 const ROLE_OPTIONS = [
@@ -95,9 +96,16 @@ function Register() {
     setForm((prev) => ({ ...prev, role }));
   }
 
-  function handleAvatarChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  async function handleAvatarChange(e) {
+    const picked = e.target.files[0];
+    e.target.value = "";
+    if (!picked) return;
+    const file = await shrinkImage(picked);
+    if (file.size > AVATAR_MAX_BYTES) {
+      setError("รูปโปรไฟล์ต้องมีขนาดไม่เกิน 2 MB กรุณาเลือกรูปอื่น");
+      return;
+    }
+    setError("");
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
   }
