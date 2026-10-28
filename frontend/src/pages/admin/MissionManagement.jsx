@@ -489,13 +489,16 @@ function MissionManagement() {
   if (loadError) return <div className="mission-management-page">{header}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
   if (loading) return <div className="mission-management-page">{header}<AsyncState /></div>;
 
+  // How many each section holds (daily missions load inside their own tab, and the level setting is not a list).
+  const tabSizes = { missions: missions.length, rewards: rewards.length, family: familyMissions.length, categories: categories.length };
+
   return (
     <div className="mission-management-page">
       {header}
       <div className="ui-tabs" role="tablist" aria-label="หมวดการจัดการ">
         {TABS.map((item) => (
           <button key={item.key} type="button" role="tab" aria-selected={tab === item.key} className="ui-tab" onClick={() => { setNotice(""); setSearchParams(item.key === "missions" ? {} : { tab: item.key }); }}>
-            {item.label}
+            {item.label}{tabSizes[item.key] !== undefined && ` (${tabSizes[item.key]})`}
           </button>
         ))}
       </div>

@@ -4,6 +4,7 @@ import app from "./app.js";
 import { connectDB } from "./config/db.js";
 import { initSocket } from "./services/socket.js";
 import { sendCourseExpiryReminders } from "./services/courseReminderService.js";
+import { sendContentExpiryReminders } from "./services/contentReminderService.js";
 import { anonymizeExpiredUsers } from "./services/accountLifecycleService.js";
 import { ensureDefaultSkills } from "./services/skillCatalogService.js";
 
@@ -30,6 +31,10 @@ connectDB()
     const remindAboutExpiringCourses = () => sendCourseExpiryReminders().catch((err) => console.error("Course expiry reminders failed", err));
     remindAboutExpiringCourses();
     setInterval(remindAboutExpiringCourses, 60 * 60 * 1000).unref();
+    // Same for lessons and scenarios, but the reminder goes to the staff member who wrote them.
+    const remindAboutExpiringContent = () => sendContentExpiryReminders().catch((err) => console.error("Content expiry reminders failed", err));
+    remindAboutExpiringContent();
+    setInterval(remindAboutExpiringContent, 60 * 60 * 1000).unref();
     // Deleted accounts are kept for RETENTION_DAYS and then anonymised for good. The job
     // can safely run any number of times: it only touches accounts whose time is up.
     const anonymizeDeletedAccounts = () =>

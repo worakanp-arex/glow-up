@@ -1,13 +1,26 @@
 import { ArrowLeft, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./PageHeader.css";
 
 export default function PageHeader({ children, icon: Icon = FileText, eyebrow, description, backTo, backLabel, onBack, actions, art, variant = "default" }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Back means "the page I just came from", whichever page that was. `backTo` is
+  // only the fallback for when there is nothing earlier in the app to return to
+  // (a pasted link, a new tab, a notification) and is kept as the link's href.
+  function goBack(event) {
+    const modified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
+    if (modified || location.key === "default") return;
+    event.preventDefault();
+    navigate(-1);
+  }
+
   return (
     <header className={`page-header page-header-${variant}${eyebrow ? " has-eyebrow" : ""}${art ? " has-art" : ""}`}>
       {art && <img className="page-header-art" src={`/images/illustrations/${art}.webp`} alt="" width="88" height="88" />}
       {(backTo || onBack) && (
-        backTo ? <Link className="page-back" to={backTo} aria-label={backLabel ? `ย้อนกลับไป${backLabel}` : "ย้อนกลับ"}>
+        backTo ? <Link className="page-back" to={backTo} onClick={goBack} aria-label={backLabel ? `ย้อนกลับไป${backLabel}` : "ย้อนกลับ"}>
           <ArrowLeft size={16} aria-hidden="true" /><span>ย้อนกลับ</span>
         </Link> : <button className="page-back" type="button" onClick={onBack} aria-label={backLabel ? `ย้อนกลับไป${backLabel}` : "ย้อนกลับ"}>
           <ArrowLeft size={16} aria-hidden="true" /><span>ย้อนกลับ</span>

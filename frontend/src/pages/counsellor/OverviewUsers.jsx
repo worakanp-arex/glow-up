@@ -7,6 +7,7 @@ import { CalendarClock, ShieldAlert, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as overviewService from "../../services/overviewService.js";
 import { COUNSELLING_STATUS_LABELS, COUNSELLING_STATUS_CLASS } from "../../constants/counsellingStatus.js";
+import { ROLE_LABELS } from "../../constants/roleLabels.js";
 import "./OverviewUsers.css";
 
 const KINDS = {
@@ -59,7 +60,7 @@ function OverviewUsers() {
                 <Avatar user={person} size={48} />
                 <div className="overview-users-text">
                   <strong>{person?.name || "ผู้ใช้งาน"}</strong>
-                  {kind === "active" && <small>เข้าล่าสุด {DATE.format(new Date(`${item.lastLogin}T00:00:00+07:00`))} · เข้าใช้ {item.days} วันใน 7 วัน</small>}
+                  {kind === "active" && <small>{ROLE_LABELS[person?.role] && `${ROLE_LABELS[person.role]} · `}เข้าล่าสุด {DATE.format(new Date(`${item.lastLogin}T00:00:00+07:00`))} · เข้าใช้ {item.days} วันใน 7 วัน</small>}
                   {kind === "risk" && <small>ประเมินเมื่อ {DATE.format(new Date(item.assessedAt))}</small>}
                   {kind === "appointments" && <small>{TIME.format(new Date(item.scheduledAt))} · {item.topic}{item.counsellor?.name && ` · ผู้ดูแล: ${item.counsellor.name}`}</small>}
                 </div>
@@ -67,7 +68,8 @@ function OverviewUsers() {
                 {kind === "appointments" && <span className={`counselling-status-badge ${COUNSELLING_STATUS_CLASS[item.status] || ""}`}>{COUNSELLING_STATUS_LABELS[item.status]}</span>}
                 {kind === "appointments" ? (
                   <Link to={`/counsellor/requests/${item.sessionId}`} className="ui-btn ui-btn-outline">ดูคำขอ</Link>
-                ) : person?._id && (
+                ) : person?._id && (user.role === "admin" || !person.role || person.role === "user") && (
+                  // A counsellor's profile view is for patients only; other roles have no page for them there.
                   <Link to={`${detailBase}/${person._id}`} className="ui-btn ui-btn-outline">ดูโปรไฟล์</Link>
                 )}
               </li>

@@ -92,11 +92,11 @@
 }
 
 .counselling-detail-card {
-  padding: 1.5rem;
+  padding: var(--card-pad);
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: var(--card-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--card-shadow);
 }
 
 .counselling-detail-card-head {
@@ -104,7 +104,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 1.1rem;
+  margin-bottom: 18px;
 }
 
 .counselling-detail-card h2 {
@@ -435,10 +435,6 @@
 }
 
 @media (max-width: 520px) {
-  .counselling-detail-card {
-    padding: 1.1rem;
-  }
-
   .counselling-detail-card-head {
     flex-wrap: wrap;
   }

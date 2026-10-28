@@ -9,6 +9,8 @@
 
 .layout .applicants-page > .page-header { margin-bottom: 0; }
 
+.applicants-count { margin: 0; font-size: .85rem; color: var(--color-text-secondary); }
+.applicants-count strong { color: var(--color-text); }
 .applicants-empty { margin: 0; padding: 32px 0; text-align: center; color: var(--color-text-muted); }
 .applicants-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 

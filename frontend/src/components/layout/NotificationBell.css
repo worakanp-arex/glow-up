@@ -115,3 +115,5 @@
   font-size: 0.7rem;
   color: var(--color-text-faint);
 }
+
+.notification-bell-panel .show-more { width: calc(100% - 24px); margin: 8px 12px 12px; min-height: 40px; }

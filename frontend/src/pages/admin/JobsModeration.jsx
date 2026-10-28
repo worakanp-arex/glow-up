@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Briefcase, Check, ChevronDown, ClipboardCheck, Mail, MapPin, Phone, Trash2, X } from "lucide-react";
 import * as jobService from "../../services/jobService.js";
+import { countByTab, useTabCounts } from "../../hooks/useTabCounts.js";
 import { formatCourseDate } from "../../utils/courseDates.js";
 import "./JobsModeration.css";
 
@@ -34,6 +35,7 @@ function JobsModeration() {
   const [actionError, setActionError] = useState("");
   const { confirm, confirmDialog } = useConfirmDialog();
   const { askReason, reasonDialog } = useReasonDialog();
+  const [counts, refreshCounts] = useTabCounts(() => countByTab(TABS, jobService.getAllJobsForAdminPage));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -56,6 +58,7 @@ function JobsModeration() {
 
   function leave(job) {
     // Once a job's status no longer matches the tab it is shown in, take it out of the list.
+    refreshCounts();
     if (tab === "all") return;
     setJobs((prev) => prev.filter((j) => j._id !== job._id));
     setTotal((count) => Math.max(0, count - 1));
@@ -96,6 +99,7 @@ function JobsModeration() {
         await jobService.deleteJob(job._id);
         setJobs((prev) => prev.filter((j) => j._id !== job._id));
         setTotal((count) => Math.max(0, count - 1));
+        refreshCounts();
       },
     });
   }
@@ -115,7 +119,7 @@ function JobsModeration() {
       <div className="ui-tabs" role="tablist" aria-label="สถานะการตรวจสอบ">
         {TABS.map((item) => (
           <button key={item.key} type="button" role="tab" aria-selected={tab === item.key} className="ui-tab" onClick={() => { setPage(1); setOpenId(null); setSearchParams(item.key === "pending" ? {} : { tab: item.key }); }}>
-            {item.label}
+            {item.label}{counts && ` (${counts[item.key] ?? 0})`}
           </button>
         ))}
       </div>

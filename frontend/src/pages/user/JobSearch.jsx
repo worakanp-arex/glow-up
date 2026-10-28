@@ -6,6 +6,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useMobileLayout } from "../../hooks/useMobileLayout.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useJobSeeker } from "../../hooks/useJobSeeker.js";
+import SavedJobHint from "../../components/jobs/SavedJobHint.jsx";
 import { skillMatch } from "../../utils/skillMatch.js";
 import { Bookmark, Briefcase, MapPin, Search, Sparkles } from "lucide-react";
 import JobPreview from "../../components/jobs/JobPreview.jsx";
@@ -37,7 +38,7 @@ function JobSearch() {
   const navigate = useNavigate();
   const mobile = useMobileLayout();
   const { user, isAuthenticated } = useAuth();
-  const { isSeeker, mySkills, mySkillIds, savedIds, toggleSaved } = useJobSeeker();
+  const { isSeeker, mySkills, mySkillIds, savedIds, toggleSaved, justSaved } = useJobSeeker();
   const [searchParams] = useSearchParams();
   const categoryFromUrl = searchParams.get("category") || "";
   const [jobs, setJobs] = useState([]);
@@ -239,6 +240,7 @@ function JobSearch() {
       ) : (
         <div className="job-search-layout">
           <div className="job-search-list">
+            <SavedJobHint show={Boolean(justSaved)} />
             {jobs.length > 0 && (
               <div className="job-search-list-header">
                 <span className="job-search-result-count">

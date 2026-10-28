@@ -232,6 +232,20 @@ test("the profile back button returns to the page the visitor came from", async 
   await expect(page.locator(".page-back")).toHaveAttribute("href", /\/courses$/);
 });
 
+test("back returns to the page the visitor just came from, not a fixed parent", async ({ page }) => {
+  await fixture(page, "admin"); await page.goto("/admin/users/1");
+  await page.locator('a[href="/counsellor/patients/1"]').click();
+  await expect(page).toHaveURL(/\/counsellor\/patients\/1$/);
+  await page.locator(".page-back").click();
+  await expect(page).toHaveURL(/\/admin\/users\/1$/);
+});
+
+for (const [role, canClaim] of [["counsellor", 1], ["admin", 0]]) test(`${role} ${canClaim ? "can" : "cannot"} claim an unclaimed case`, async ({ page }) => {
+  await fixture(page, role); await page.goto("/counsellor/requests/1");
+  await expect(page.getByRole("heading", { name: "ผู้ขอรับคำปรึกษา" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "รับเคสนี้" })).toHaveCount(canClaim);
+});
+
 test("profile has a large cover avatar and a picker with characters, letters and covers", async ({ page }) => {
   await fixture(page, "employer"); await page.goto("/profile");
   const avatar = await page.locator(".profile-banner-avatar").boundingBox();

@@ -18,7 +18,8 @@ import "./Queue.css";
 import Avatar from "../../components/common/Avatar.jsx";
 
 const SESSION_TYPE_ICONS = { chat: MessageCircle, hotline: Phone, video: Video };
-const PAGE_SIZE = 10;
+// Each list opens with a handful of cases; "show more" reveals the next batch.
+const PAGE_SIZE = 5;
 
 const FILTERS = [
   { value: "unclaimed", label: "รอรับเคส" },
@@ -54,13 +55,14 @@ function Queue() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredSessions = useMemo(() => {
-    // Cancelled or closed requests have nothing left to claim, even if no
-    // counsellor ever picked them up.
-    if (filter === "unclaimed") return sessions.filter((s) => !s.counsellor && s.status !== "cancelled" && s.status !== "closed");
-    if (filter === "mine") return sessions.filter((s) => s.counsellor?._id === user._id);
-    return sessions;
-  }, [sessions, filter, user._id]);
+  // Cancelled or closed requests have nothing left to claim, even if no
+  // counsellor ever picked them up.
+  const byFilter = useMemo(() => ({
+    unclaimed: sessions.filter((s) => !s.counsellor && s.status !== "cancelled" && s.status !== "closed"),
+    mine: sessions.filter((s) => s.counsellor?._id === user._id),
+    all: sessions,
+  }), [sessions, user._id]);
+  const filteredSessions = byFilter[filter];
 
   // The calendar is fed by the same list as the queue, so it also knows each
   // appointment's status (finished ones go grey) and who is responsible.
@@ -118,7 +120,7 @@ function Queue() {
                 className={`counsellor-queue-filter${filter === value ? " active" : ""}`}
                 onClick={() => changeFilter(value)}
               >
-                {label}
+                {label} ({byFilter[value].length})
               </button>
             ))}
           </div>
@@ -193,7 +195,7 @@ function Queue() {
                 <div className="counsellor-queue-more">
                   {visibleCount < filteredSessions.length && (
                     <button type="button" className="ui-btn ui-btn-outline" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
-                      <ChevronDown size={15} aria-hidden="true" />ดูเพิ่มเติม ({filteredSessions.length - visibleCount} รายการที่เหลือ)
+                      <ChevronDown size={15} aria-hidden="true" />แสดงเพิ่มเติม (อีก {filteredSessions.length - visibleCount} รายการ)
                     </button>
                   )}
                   {visibleCount > PAGE_SIZE && (

@@ -7,6 +7,7 @@ import { Briefcase, MapPin, Pencil, Plus, Tag, Trash2, Users, Wallet } from "luc
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import VerifyBanner from "../../components/employer/VerifyBanner.jsx";
 import * as jobService from "../../services/jobService.js";
+import { countByTab, useTabCounts } from "../../hooks/useTabCounts.js";
 import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import "./MyJobs.css";
 
@@ -29,6 +30,7 @@ function MyJobs() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [counts, refreshCounts] = useTabCounts(() => countByTab(FILTERS, jobService.getMyJobsPage));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -58,6 +60,7 @@ function MyJobs() {
     const nextStatus = job.status === "open" ? "closed" : "open";
     const updated = await jobService.updateJob(job._id, { status: nextStatus });
     setJobs((prev) => prev.map((j) => (j._id === job._id ? updated : j)));
+    refreshCounts();
   }
 
   const { confirm, confirmDialog } = useConfirmDialog();
@@ -71,6 +74,7 @@ function MyJobs() {
         await jobService.deleteJob(job._id);
         setJobs((prev) => prev.filter((j) => j._id !== job._id));
         setTotal((count) => Math.max(0, count - 1));
+        refreshCounts();
       },
     });
   }
@@ -98,7 +102,7 @@ function MyJobs() {
       <div className="ui-tabs" role="tablist" aria-label="กรองประกาศงาน">
         {FILTERS.map((item) => (
           <button key={item.key} type="button" role="tab" aria-selected={filter === item.key} className="ui-tab" onClick={() => changeFilter(item.key)}>
-            {item.label}
+            {item.label}{counts && ` (${counts[item.key] ?? 0})`}
           </button>
         ))}
       </div>

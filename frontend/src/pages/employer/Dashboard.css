@@ -25,6 +25,7 @@
 .employer-dashboard-job > svg { flex-shrink: 0; color: var(--color-text-muted); }
 
 .employer-dashboard-links { display: flex; flex-direction: column; gap: 6px; }
+.employer-dashboard-links > .ui-card-head { margin-bottom: 12px; }
 .employer-dashboard-links a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border-radius: 12px; color: var(--color-text); font-size: .88rem; font-weight: 500; text-decoration: none; }
 .employer-dashboard-links a > span { flex: 1; }
 .employer-dashboard-links a > svg:last-child { color: var(--color-text-faint); }

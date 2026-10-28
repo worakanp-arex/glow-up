@@ -1,15 +1,19 @@
 import MicroLesson from "../models/MicroLesson.js";
 import SavedLesson from "../models/SavedLesson.js";
+import { notExpiredFilter, parseOptionalEndOfDay } from "../utils/dateKey.js";
 
 const STAFF_ROLES = ["admin", "counsellor"];
 const EDITABLE_FIELDS = ["title", "body", "category", "audience", "order", "active"];
+const INVALID_EXPIRY = { message: "วันหมดอายุไม่ถูกต้อง" };
 
 // Lessons created before the `audience` field existed have no value set —
-// treat those as "user" so they keep showing up for existing installs.
+// treat those as "user" so they keep showing up for existing installs. Lessons
+// past their expiry date drop out of what members see.
 function readableLessonFilter(role) {
-  return role === "family"
+  const readable = role === "family"
     ? { active: true, audience: "family" }
     : { active: true, $or: [{ audience: "user" }, { audience: { $exists: false } }] };
+  return { ...readable, $and: [notExpiredFilter()] };
 }
 
 export async function listActiveLessons(req, res) {
@@ -58,17 +62,22 @@ export async function listAllLessons(req, res) {
 }
 
 export async function createMicroLesson(req, res) {
-  const { title, body, category, order } = req.body;
+  const { title, body, category, order, audience } = req.body;
   if (!title || !body) {
     return res.status(400).json({ message: "กรุณากรอกชื่อบทเรียนและเนื้อหา" });
   }
-  const lesson = await MicroLesson.create({ title, body, category, order, createdBy: req.user.id });
+  const expiresAt = parseOptionalEndOfDay(req.body.expiresAt);
+  if (expiresAt && Number.isNaN(expiresAt.getTime())) return res.status(400).json(INVALID_EXPIRY);
+  const lesson = await MicroLesson.create({ title, body, category, order, audience, expiresAt: expiresAt || undefined, createdBy: req.user.id });
   res.status(201).json(lesson);
 }
 
 export async function updateMicroLesson(req, res) {
   const changes = {};
   for (const field of EDITABLE_FIELDS) if (req.body[field] !== undefined) changes[field] = req.body[field];
+  const expiresAt = parseOptionalEndOfDay(req.body.expiresAt);
+  if (expiresAt && Number.isNaN(expiresAt.getTime())) return res.status(400).json(INVALID_EXPIRY);
+  if (expiresAt !== undefined) changes.expiresAt = expiresAt;
   const lesson = await MicroLesson.findByIdAndUpdate(req.params.id, changes, {
     new: true,
     runValidators: true,

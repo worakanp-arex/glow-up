@@ -99,3 +99,10 @@
 .ui-choice:has(input:focus-visible) { outline: 3px solid var(--color-primary-400); outline-offset: 2px; }
 .ui-choice:has(input:disabled) { opacity: .55; cursor: not-allowed; }
 .ui-choice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
+
+/* One search box for the whole app: an icon and a bare input inside a single frame. The frame, not the input, shows focus, so there is never a second outline inside it. */
+.ui-search { display: flex; align-items: center; gap: 10px; box-sizing: border-box; min-height: 44px; padding: 0 14px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text-muted); transition: border-color .15s, box-shadow .15s; }
+.ui-search:focus-within { border-color: var(--color-primary-500); box-shadow: 0 0 0 3px var(--color-primary-50); }
+.ui-search > svg { flex-shrink: 0; }
+.ui-search input { flex: 1; width: 100%; min-width: 0; min-height: 42px !important; padding: 0; border: 0 !important; border-radius: 0; background: transparent; box-shadow: none !important; outline: none !important; color: var(--color-text); font-size: .875rem; }
+

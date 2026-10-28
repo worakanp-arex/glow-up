@@ -10,6 +10,8 @@ const microLessonSchema = new mongoose.Schema(
     audience: { type: String, enum: ["user", "family"], default: "user" },
     order: { type: Number, default: 0 },
     active: { type: Boolean, default: true },
+    // Last day the lesson is shown to members; unset means it never expires.
+    expiresAt: { type: Date },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }

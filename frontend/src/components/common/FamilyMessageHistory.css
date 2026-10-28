@@ -3,3 +3,7 @@
 .family-history-list li.is-mine { align-self: flex-end; border-radius: 14px 14px 4px 14px; background: var(--color-primary-50); }
 .family-history-list p { margin: 0 0 4px; font-size: .88rem; line-height: 1.6; color: var(--color-text); overflow-wrap: anywhere; white-space: pre-line; }
 .family-history-list small { display: inline-flex; align-items: center; gap: 4px; font-size: .7rem; color: var(--color-text-muted); }
+.family-history-reply { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--color-border); }
+.family-history-reply textarea { width: 100%; box-sizing: border-box; padding: 10px 14px; font-size: .875rem; resize: vertical; }
+.family-history-reply .ui-btn { align-self: flex-end; }
+.family-history-error { margin: 0; font-size: .8rem; color: var(--color-danger); }

@@ -2,8 +2,8 @@ import PageHeader from "../../components/common/PageHeader.jsx";
 import AsyncState from "../../components/common/AsyncState.jsx";
 import Avatar from "../../components/common/Avatar.jsx";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { UserRound, Award, Briefcase, FileText, GraduationCap, Mail, MapPin, Paperclip, Phone, ShieldAlert, Sparkles } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
+import { UserRound, Award, Briefcase, FileText, GraduationCap, Mail, MapPin, Paperclip, Phone, ShieldAlert, Sparkles, Wallet } from "lucide-react";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as applicationService from "../../services/applicationService.js";
 import { getPreviousRoute } from "../../utils/routeHistory.js";
@@ -131,10 +131,21 @@ function ApplicantDetail() {
             {user.bio && <p className="applicant-detail-bio">{user.bio}</p>}
           </section>
 
+          <section className="ui-card applicant-detail-job-card">
+            <div className="ui-card-head"><h2><Briefcase size={16} aria-hidden="true" /> งานที่สมัคร</h2></div>
+            <p className="applicant-detail-job-title">{application.job.title}</p>
+            <dl className="applicant-detail-facts">
+              {application.job.location && <div><dt><MapPin size={14} aria-hidden="true" />สถานที่ทำงาน</dt><dd>{application.job.location}</dd></div>}
+              {application.job.salary > 0 && <div><dt><Wallet size={14} aria-hidden="true" />เงินเดือน</dt><dd>{application.job.salary.toLocaleString()} บาท/เดือน</dd></div>}
+            </dl>
+            {application.job.description && <p className="applicant-detail-job-desc">{application.job.description}</p>}
+            <Link to={`/employer/jobs/${application.job._id}`} className="ui-card-link">ดูรายละเอียดประกาศงาน</Link>
+          </section>
+
           <section className="ui-card applicant-detail-match-card">
             <div className="ui-card-head"><h2><Sparkles size={16} aria-hidden="true" /> ความตรงกันของทักษะ</h2></div>
             <p>
-              คะแนนทักษะตรงกับงาน: <strong>{application.match ? `${application.match.score}%` : "ยังไม่ระบุ"}</strong>
+              คะแนนทักษะตรงกับงาน: <strong>{application.match ? `${application.match.score}%` : "งานนี้ไม่ได้ระบุทักษะที่ต้องการ"}</strong>
             </p>
             {application.match && (
               <>

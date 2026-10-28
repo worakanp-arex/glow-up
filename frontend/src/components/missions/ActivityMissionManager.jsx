@@ -65,10 +65,11 @@ export default function ActivityMissionManager() {
   }, []);
 
   const categoryByKey = useMemo(() => Object.fromEntries(categories.map((c) => [c.key, c])), [categories]);
-  const visible = activities.filter((activity) => {
+  const belongsTo = (key, activity) => {
     const state = missionState(activity).key;
-    return filter === "all" ? true : filter === "current" ? state === "current" || state === "upcoming" : state === filter;
-  });
+    return key === "all" ? true : key === "current" ? state === "current" || state === "upcoming" : state === key;
+  };
+  const visible = activities.filter((activity) => belongsTo(filter, activity));
 
   function openCreate() {
     setForm({ ...EMPTY_FORM, category: categories[0]?.key || "" });
@@ -184,7 +185,7 @@ export default function ActivityMissionManager() {
       <div className="activity-manager-toolbar">
         <div className="ui-tabs" role="tablist" aria-label="กรองภารกิจ">
           {FILTERS.map((item) => (
-            <button key={item.key} type="button" role="tab" aria-selected={filter === item.key} className="ui-tab" onClick={() => setFilter(item.key)}>{item.label}</button>
+            <button key={item.key} type="button" role="tab" aria-selected={filter === item.key} className="ui-tab" onClick={() => setFilter(item.key)}>{item.label} ({activities.filter((activity) => belongsTo(item.key, activity)).length})</button>
           ))}
         </div>
         <button type="button" className="ui-btn ui-btn-primary" onClick={openCreate} disabled={categories.length === 0}><Plus size={16} aria-hidden="true" />เพิ่มภารกิจ</button>

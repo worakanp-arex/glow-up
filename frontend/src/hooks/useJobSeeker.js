@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
 import * as skillService from "../services/skillService.js";
 import * as jobService from "../services/jobService.js";
@@ -11,6 +11,10 @@ export function useJobSeeker() {
   const isSeeker = isAuthenticated && user?.role === "user";
   const [mySkills, setMySkills] = useState([]);
   const [savedIds, setSavedIds] = useState(() => new Set());
+  // The job just bookmarked, kept for a few seconds so the page can point to related courses.
+  const [justSaved, setJustSaved] = useState(null);
+  const hideTimer = useRef(null);
+  useEffect(() => () => clearTimeout(hideTimer.current), []);
 
   useEffect(() => {
     if (!isSeeker) return;
@@ -28,8 +32,15 @@ export function useJobSeeker() {
       return next;
     });
     try {
-      if (wasSaved) await jobService.unsaveJob(jobId);
-      else await jobService.saveJob(jobId);
+      if (wasSaved) {
+        await jobService.unsaveJob(jobId);
+        setJustSaved(null);
+      } else {
+        await jobService.saveJob(jobId);
+        clearTimeout(hideTimer.current);
+        setJustSaved(jobId);
+        hideTimer.current = setTimeout(() => setJustSaved(null), 12000);
+      }
     } catch {
       setSavedIds((prev) => {
         const revert = new Set(prev);
@@ -39,5 +50,5 @@ export function useJobSeeker() {
     }
   }, [savedIds]);
 
-  return { isSeeker, mySkills, mySkillIds, savedIds, toggleSaved };
+  return { isSeeker, mySkills, mySkillIds, savedIds, toggleSaved, justSaved };
 }

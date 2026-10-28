@@ -10,7 +10,7 @@ import { passwordProblem } from "../utils/passwordPolicy.js";
 import { softDeleteUser } from "../services/accountLifecycleService.js";
 import { clearSessionCookie } from "./authController.js";
 import { UPLOAD_ROOT, publicUrl } from "../middleware/upload.js";
-import { paginationOptions } from "../utils/pagination.js";
+import { paginationOptions, escapeRegex } from "../utils/pagination.js";
 import { sanitizeText } from "../utils/sanitizeText.js";
 import { AVATAR_PRESETS, AVATAR_COLORS, COVER_PRESET_KEYS } from "../constants/profileArt.js";
 
@@ -244,6 +244,10 @@ export async function listUsers(req, res) {
   const filter = {};
   if (req.query.role) filter.role = req.query.role;
   if (req.query.verifiedStatus) filter.verifiedStatus = req.query.verifiedStatus;
+  if (req.query.q) {
+    const pattern = new RegExp(escapeRegex(String(req.query.q).trim()), "i");
+    filter.$or = [{ name: pattern }, { email: pattern }];
+  }
 
   const pagination = paginationOptions(req.query);
   const query = User.find(filter).sort({ createdAt: -1 });

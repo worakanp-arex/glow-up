@@ -37,7 +37,6 @@
 .counselling-error { margin: 0; padding: 10px 12px; border-radius: 10px; background-color: var(--color-danger-bg); color: var(--color-danger); font-size: .85rem; }
 
 /* ---------- Appointments / history ---------- */
-.counselling-history .ui-card-head { margin-bottom: 16px; }
 .counselling-history-sub { margin: 2px 0 0; font-size: .75rem; font-weight: 400; color: var(--color-text-muted); }
 .counselling-history-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 16px; border-radius: 12px; background: var(--color-surface-hover); }
 .counselling-history-tabs button { min-height: 38px; border: 0; border-radius: 9px; background: none; color: var(--color-text-secondary); font: inherit; font-size: .8rem; cursor: pointer; }
@@ -91,7 +90,7 @@
   .counselling-history-scroll { max-height: 420px; }
 }
 
-.counselling-steps h2 { margin: 0 0 14px; font-size: .95rem; font-weight: 600; }
+.counselling-steps h2 { margin: 0 0 18px; font-size: .95rem; font-weight: 600; }
 .counselling-steps ol { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 0; list-style: none; }
 .counselling-steps li { display: flex; align-items: flex-start; gap: 12px; }
 .counselling-steps li > span { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .78rem; font-weight: 600; }

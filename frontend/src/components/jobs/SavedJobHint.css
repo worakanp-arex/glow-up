@@ -1,0 +1,4 @@
+.saved-job-hint { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; padding: 10px 14px; border: 1px solid var(--color-primary-200); border-radius: 12px; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .82rem; line-height: 1.6; }
+.saved-job-hint svg { flex-shrink: 0; }
+.saved-job-hint a { font-weight: 600; color: var(--color-primary-700); }
+.job-detail-page > .saved-job-hint { margin-bottom: 14px; }

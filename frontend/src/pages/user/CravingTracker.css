@@ -49,19 +49,6 @@
 .craving-tracker-lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 24px; align-items: start; }
 .craving-tracker-lower-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
-.craving-tracker-risk-result {
-  margin: 0 0 1rem;
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  background-color: var(--color-surface-hover);
-}
-.craving-tracker-risk-low strong { color: var(--color-success); }
-.craving-tracker-risk-medium strong { color: var(--color-warning); }
-.craving-tracker-risk-high strong { color: var(--color-danger); }
-.craving-tracker-risk-note { color: var(--color-text-muted); }
-
 .craving-tracker-risk-situation-form { display: flex; flex-direction: column; gap: 16px; }
 .craving-tracker-risk-situation-form > .ui-btn { align-self: flex-end; }
 .craving-tracker-risk-situation-toggle { display: flex; align-items: center; gap: 10px; font-size: .85rem; color: var(--color-text-secondary); cursor: pointer; }

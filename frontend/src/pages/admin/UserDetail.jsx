@@ -127,7 +127,7 @@ function UserDetail() {
           {person.role === "user" && (
             <section className="ui-card admin-user-links">
               <div className="ui-card-head"><h2>ข้อมูลการฟื้นฟู</h2></div>
-              <Link to={`/counsellor/patients/${person._id}`}><ClipboardList size={15} aria-hidden="true" />โปรไฟล์ผู้ป่วยและประวัติ</Link>
+              <Link to={`/counsellor/patients/${person._id}`}><ClipboardList size={15} aria-hidden="true" />โปรไฟล์และประวัติผู้รับคำปรึกษา</Link>
               <Link to={`/admin/users/${person._id}/emotion`}><CalendarHeart size={15} aria-hidden="true" />ปฏิทินอารมณ์</Link>
             </section>
           )}

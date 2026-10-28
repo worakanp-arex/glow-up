@@ -100,18 +100,18 @@
 }
 
 .patient-profile-card {
-  padding: 1.5rem;
+  padding: var(--card-pad);
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: var(--card-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--card-shadow);
 }
 
 .patient-profile-card h2 {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  margin: 0 0 1rem;
+  margin: 0 0 18px;
   font-size: 0.95rem;
   color: var(--color-text-secondary);
 }
@@ -257,7 +257,4 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .patient-profile-card {
-    padding: 1.1rem;
-  }
 }

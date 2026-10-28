@@ -83,8 +83,8 @@ function CounsellingDetail() {
     try {
       const updated = await counsellingService.claimSession(id);
       setSession(updated);
-    } catch (err) {
-      setError(err.response?.data?.message || "รับเคสไม่สำเร็จ");
+    } catch {
+      // The failure is already shown as a toast; keep the case on screen instead of replacing it with the message.
     } finally {
       setClaiming(false);
     }
@@ -293,7 +293,7 @@ function CounsellingDetail() {
 
           {isStaff ? (
             <div className="counselling-detail-card">
-              <h2>ผู้ขอรับคำปรึกษา</h2>
+              <div className="counselling-detail-card-head"><h2>ผู้ขอรับคำปรึกษา</h2></div>
               <div className="counselling-person">
                 <Avatar user={session.user} size={48} className="counselling-person-avatar" />
                 <div>
@@ -307,19 +307,24 @@ function CounsellingDetail() {
                 className="btn btn-secondary counselling-profile-link"
               >
                 <ClipboardList size={15} />
-                ดูโปรไฟล์ผู้ป่วย
+                ดูโปรไฟล์ผู้รับคำปรึกษา
               </Link>
 
               {isUnclaimed ? (
-                <button
-                  type="button"
-                  className="btn btn-primary counselling-claim-btn"
-                  onClick={handleClaim}
-                  disabled={claiming}
-                >
-                  <Check size={15} />
-                  {claiming ? "กำลังรับเคส..." : "รับเคสนี้"}
-                </button>
+                // Only counsellors can take a case (the API rejects anyone else), so admins just review it.
+                user.role === "counsellor" ? (
+                  <button
+                    type="button"
+                    className="btn btn-primary counselling-claim-btn"
+                    onClick={handleClaim}
+                    disabled={claiming}
+                  >
+                    <Check size={15} />
+                    {claiming ? "กำลังรับเคส..." : "รับเคสนี้"}
+                  </button>
+                ) : (
+                  <p className="counselling-detail-empty-note">ยังไม่มีบุคลากรรับเรื่อง · เฉพาะบุคลากรที่รับเคสได้</p>
+                )
               ) : (
                 canManage && (
                   <div className="counselling-status-actions">
@@ -344,7 +349,7 @@ function CounsellingDetail() {
             </div>
           ) : (
             <div className="counselling-detail-card">
-              <h2>บุคลากรผู้ดูแล</h2>
+              <div className="counselling-detail-card-head"><h2>บุคลากรผู้ดูแล</h2></div>
               {session.counsellor ? (
                 <div className="counselling-person">
                   <Avatar user={session.counsellor} size={48} className="counselling-person-avatar" />

@@ -55,3 +55,18 @@ export function openWindowFilter(now = new Date()) {
 export function isWithinWindow(doc, now = new Date()) {
   return !(doc.startDate && doc.startDate > now) && !(doc.endDate && doc.endDate < now);
 }
+
+// An optional "last day" typed as a plain date: undefined when the field was not
+// sent, null when it was cleared, the end of that Bangkok day otherwise (so an
+// item stays available through its last day). An unreadable value is an Invalid Date.
+export function parseOptionalEndOfDay(value) {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  const dateKey = String(value).slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(dateKey) ? bangkokEndOfDay(dateKey) : new Date(NaN);
+}
+
+// Mongo filter for items whose `expiresAt` has not passed; items without one never expire.
+export function notExpiredFilter(now = new Date()) {
+  return { $or: [{ expiresAt: null }, { expiresAt: { $gte: now } }] };
+}

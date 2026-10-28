@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ShieldAlert, Users } from "lucide-react";
 import * as applicationService from "../../services/applicationService.js";
+import * as jobService from "../../services/jobService.js";
 import "./Applicants.css";
 
 const PAGE_SIZE = 10;
@@ -28,6 +29,14 @@ function Applications() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [blocked, setBlocked] = useState(false);
+  // How many applications sit under each filter, so every tab can say what it holds.
+  const [counts, setCounts] = useState(null);
+
+  useEffect(() => {
+    jobService.getMyJobsSummary()
+      .then((summary) => setCounts(summary && !Array.isArray(summary) ? summary.applicants : null))
+      .catch(() => setCounts(null));
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -72,10 +81,12 @@ function Applications() {
       <div className="ui-tabs" role="tablist" aria-label="กรองสถานะใบสมัคร">
         {STATUS_FILTERS.map((item) => (
           <button key={item.key || "all"} type="button" role="tab" aria-selected={status === item.key} className="ui-tab" onClick={() => { setPage(1); setSearchParams(item.key ? { status: item.key } : {}); }}>
-            {item.label}
+            {item.label}{counts && ` (${item.key ? counts[item.key] ?? 0 : counts.total ?? 0})`}
           </button>
         ))}
       </div>
+
+      {!loading && <p className="applicants-count" role="status">พบ <strong>{total.toLocaleString("th-TH")}</strong> รายการ{status ? ` ในหมวด “${STATUS_FILTERS.find((item) => item.key === status).label}”` : ""}</p>}
 
       {loading ? <AsyncState /> : applications.length === 0 ? (
         <p className="applicants-empty">ยังไม่มีผู้สมัครในหมวดนี้</p>

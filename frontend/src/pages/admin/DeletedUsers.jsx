@@ -62,7 +62,7 @@ function DeletedUsers() {
       </PageHeader>
 
       <form className="users-filters" onSubmit={applyFilters} role="search">
-        <label className="deleted-users-search">
+        <label className="ui-search users-search">
           <Search size={15} aria-hidden="true" />
           <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="ค้นหาชื่อหรืออีเมล" aria-label="ค้นหาชื่อหรืออีเมล" maxLength={100} />
         </label>

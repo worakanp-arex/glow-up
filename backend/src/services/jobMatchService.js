@@ -45,6 +45,35 @@ export async function jobApplicantMatches(jobId, applications) {
   });
 }
 
+// Skill match for applications spread over several postings at once (the
+// employer's "all applicants" list). Every applicant is scored against the
+// posting they applied to, whatever the status of their application.
+export async function mixedApplicationMatches(applications) {
+  const keyOf = (value) => String(value?._id || value || "");
+  const jobIds = [...new Set(applications.map((application) => keyOf(application.job)).filter(Boolean))];
+  const userIds = [...new Set(applications.map((application) => keyOf(application.user)).filter(Boolean))];
+  const [required, owned] = await Promise.all([
+    jobIds.length ? JobSkill.find({ job: { $in: jobIds } }).populate("skill") : [],
+    userIds.length ? UserSkill.find({ user: { $in: userIds } }).select("user skill") : [],
+  ]);
+  const requiredByJob = new Map();
+  for (const jobSkill of required) {
+    const key = String(jobSkill.job);
+    if (!requiredByJob.has(key)) requiredByJob.set(key, []);
+    requiredByJob.get(key).push(jobSkill.skill);
+  }
+  const ownedByUser = new Map();
+  for (const userSkill of owned) {
+    const key = String(userSkill.user);
+    if (!ownedByUser.has(key)) ownedByUser.set(key, []);
+    ownedByUser.get(key).push(userSkill.skill);
+  }
+  return applications.map((application) => ({
+    ...application.toObject(),
+    match: scoreSkills(requiredByJob.get(keyOf(application.job)) || [], ownedByUser.get(keyOf(application.user)) || []),
+  }));
+}
+
 // Called once a job clears admin moderation (verifiedStatus -> "verified") —
 // pages every job-seeker whose declared skills clear the match threshold for
 // this specific job's required skills.

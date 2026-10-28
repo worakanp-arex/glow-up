@@ -17,12 +17,22 @@
 .courses-hero-copy > p:not(.courses-hero-eyebrow) { margin: 0 0 6px; font-size: .85rem; line-height: 1.7; color: var(--color-text-secondary); }
 .courses-hero .ui-btn { margin-top: 10px; }
 
+/* ---------- Suggested from saved jobs ---------- */
+.courses-recommended .ui-card-head { margin-bottom: 14px; }
+.courses-recommended .ui-card-head h2 { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; }
+.courses-recommended-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.courses-recommended-item { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 18px 20px; }
+.courses-recommended-item h3 { margin: 0; font-size: 1rem; line-height: 1.5; overflow-wrap: anywhere; }
+.courses-recommended-item h3 a { color: var(--color-text); text-decoration: none; }
+.courses-recommended-reason { display: flex; flex-direction: column; gap: 2px; margin: 0 0 4px; font-size: .82rem; line-height: 1.6; color: var(--color-text-secondary); }
+.courses-recommended-reason small { color: var(--color-text-muted); font-size: .76rem; }
+.courses-recommended-item .ui-btn { margin-top: auto; min-height: 40px; padding: 8px 16px; }
+@media (max-width: 900px) { .courses-recommended-list { grid-template-columns: minmax(0, 1fr); } }
+
 /* ---------- Tabs + search ---------- */
 .courses-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .courses-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-.courses-search { position: relative; display: flex; align-items: center; width: min(300px, 100%); }
-.courses-search svg { position: absolute; left: 14px; color: var(--color-text-muted); pointer-events: none; }
-.layout-content .courses-search input { width: 100%; padding: 10px 14px 10px 40px; font-size: .85rem; }
+.courses-search { width: min(300px, 100%); }
 .courses-empty { margin: 0; font-size: .875rem; color: var(--color-text-muted); }
 
 /* ---------- Course cards ---------- */

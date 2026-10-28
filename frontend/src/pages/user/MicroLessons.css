@@ -20,9 +20,7 @@
 /* ---------- Tabs + search ---------- */
 .lessons-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .lessons-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
-.lessons-search { position: relative; display: flex; align-items: center; width: min(300px, 100%); }
-.lessons-search svg { position: absolute; left: 14px; color: var(--color-text-muted); pointer-events: none; }
-.layout-content .lessons-search input { width: 100%; padding: 10px 14px 10px 40px; font-size: .85rem; }
+.lessons-search { width: min(300px, 100%); }
 
 .micro-lessons-empty { margin: 0; font-size: .875rem; color: var(--color-text-muted); }
 

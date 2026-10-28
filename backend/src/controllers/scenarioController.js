@@ -1,6 +1,14 @@
 import ScenarioSimulation from "../models/ScenarioSimulation.js";
 import ScenarioAttempt from "../models/ScenarioAttempt.js";
 import { checkAndAwardMissions } from "./missionController.js";
+import { notExpiredFilter, parseOptionalEndOfDay } from "../utils/dateKey.js";
+
+const INVALID_EXPIRY = { message: "วันหมดอายุไม่ถูกต้อง" };
+
+// What members can play: switched on and not past the last day.
+function playableFilter() {
+  return { active: true, ...notExpiredFilter() };
+}
 
 function sanitizeScenario(scenario) {
   const obj = scenario.toObject ? scenario.toObject() : scenario;
@@ -13,12 +21,12 @@ function sanitizeScenario(scenario) {
 // User-facing: don't leak which option is correct or its feedback text
 // before the user has actually attempted the scenario.
 export async function listActiveScenarios(req, res) {
-  const scenarios = await ScenarioSimulation.find({ active: true }).sort({ createdAt: -1 });
+  const scenarios = await ScenarioSimulation.find(playableFilter()).sort({ createdAt: -1 });
   res.json(scenarios.map(sanitizeScenario));
 }
 
 export async function getActiveScenario(req, res) {
-  const scenario = await ScenarioSimulation.findOne({ _id: req.params.id, active: true });
+  const scenario = await ScenarioSimulation.findOne({ _id: req.params.id, ...playableFilter() });
   if (!scenario) {
     return res.status(404).json({ message: "Not found" });
   }
@@ -43,11 +51,14 @@ export async function createScenario(req, res) {
   if (!title || !prompt || !Array.isArray(options) || options.length < 2) {
     return res.status(400).json({ message: "กรุณากรอกชื่อสถานการณ์ คำถาม และตัวเลือกอย่างน้อย 2 ข้อ" });
   }
+  const expiresAt = parseOptionalEndOfDay(req.body.expiresAt);
+  if (expiresAt && Number.isNaN(expiresAt.getTime())) return res.status(400).json(INVALID_EXPIRY);
   const scenario = await ScenarioSimulation.create({
     title,
     lesson: lesson || undefined,
     prompt,
     options,
+    expiresAt: expiresAt || undefined,
     createdBy: req.user.id,
   });
   res.status(201).json(scenario);
@@ -58,6 +69,9 @@ const SCENARIO_EDITABLE_FIELDS = ["title", "lesson", "prompt", "options", "activ
 export async function updateScenario(req, res) {
   const changes = {};
   for (const field of SCENARIO_EDITABLE_FIELDS) if (req.body[field] !== undefined) changes[field] = req.body[field];
+  const expiresAt = parseOptionalEndOfDay(req.body.expiresAt);
+  if (expiresAt && Number.isNaN(expiresAt.getTime())) return res.status(400).json(INVALID_EXPIRY);
+  if (expiresAt !== undefined) changes.expiresAt = expiresAt;
   const scenario = await ScenarioSimulation.findByIdAndUpdate(req.params.id, changes, {
     new: true,
     runValidators: true,
@@ -78,7 +92,7 @@ export async function deleteScenario(req, res) {
 
 export async function attemptScenario(req, res) {
   const { chosenOptionIndex } = req.body;
-  const scenario = await ScenarioSimulation.findOne({ _id: req.params.id, active: true });
+  const scenario = await ScenarioSimulation.findOne({ _id: req.params.id, ...playableFilter() });
   if (!scenario) {
     return res.status(404).json({ message: "Not found" });
   }

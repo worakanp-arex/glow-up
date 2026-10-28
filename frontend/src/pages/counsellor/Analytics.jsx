@@ -58,10 +58,13 @@ function OverviewTab({ data }) {
   const leaderboard = data.leaderboard || [];
   // Per-person risk lists are only for counsellors; admins see the numbers.
   const riskLink = user.role === "counsellor" ? "/counsellor/overview/risk" : undefined;
+  const byRole = data.activeUsers.byRole;
+  // Everyone who signed in counts; the hint says how that splits between patients, family and staff.
+  const activeHint = byRole ? `ผู้ใช้ ${byRole.user} · ครอบครัว ${byRole.family} · บุคลากร ${byRole.counsellor + byRole.admin}${byRole.employer ? ` · นายจ้าง ${byRole.employer}` : ""}` : "กดเพื่อดูว่าเป็นใคร";
   return (
     <>
       <div className="counsellor-analytics-stat-grid">
-        <StatTile label={`ใช้งานใน ${data.activeUsers.windowDays} วันล่าสุด`} value={data.activeUsers.count} tone="neutral" to="/counsellor/overview/active" hint="กดเพื่อดูว่าเป็นใคร" />
+        <StatTile label={`ใช้งานใน ${data.activeUsers.windowDays} วันล่าสุด`} value={data.activeUsers.count} tone="neutral" to="/counsellor/overview/active" hint={activeHint} />
         <StatTile label="ความเสี่ยงต่ำ" value={data.risk.byLevel.low} tone="good" />
         <StatTile label="ความเสี่ยงปานกลาง" value={data.risk.byLevel.medium} tone="warning" to={riskLink} hint={riskLink ? "กดเพื่อดูรายชื่อ" : undefined} />
         <StatTile label="ความเสี่ยงสูง" value={data.risk.byLevel.high} tone="critical" to={riskLink} hint={riskLink ? "กดเพื่อดูรายชื่อ" : undefined} />

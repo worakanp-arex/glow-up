@@ -7,8 +7,7 @@ import { DEFAULT_POINTS_PER_LEVEL, POINTS_PER_LEVEL_SETTING_KEY } from "../utils
 
 export async function getDashboard(req, res) {
   const [
-    totalUsers,
-    totalEmployers,
+    usersByRole,
     pendingVerifications,
     totalJobs,
     pendingJobs,
@@ -17,8 +16,7 @@ export async function getDashboard(req, res) {
     applicationsByStatus,
     riskByLevel,
   ] = await Promise.all([
-    User.countDocuments({ role: "user" }),
-    User.countDocuments({ role: "employer" }),
+    User.aggregate([{ $match: { deletedAt: null } }, { $group: { _id: "$role", count: { $sum: 1 } } }]),
     User.countDocuments({ verifiedStatus: "pending" }),
     Job.countDocuments(),
     Job.countDocuments({ verifiedStatus: "pending" }),
@@ -42,8 +40,19 @@ export async function getDashboard(req, res) {
     byLevel[item._id] = item.count;
   }
 
+  // `total` is every active account, whatever its role; the rest is the breakdown.
+  const roleCount = (role) => usersByRole.find((item) => item._id === role)?.count ?? 0;
+  const roles = ["user", "family", "counsellor", "employer", "admin"];
   res.json({
-    users: { total: totalUsers, employers: totalEmployers, pendingVerifications },
+    users: {
+      total: roles.reduce((sum, role) => sum + roleCount(role), 0),
+      patients: roleCount("user"),
+      family: roleCount("family"),
+      counsellors: roleCount("counsellor"),
+      employers: roleCount("employer"),
+      admins: roleCount("admin"),
+      pendingVerifications,
+    },
     jobs: { total: totalJobs, pending: pendingJobs, open: openJobs },
     applications: { total: totalApplications, byStatus },
     risk: { byLevel },

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Heart, Reply, Send } from "lucide-react";
 import * as familyService from "../../services/familyService.js";
+import { READ_MESSAGE_VISIBLE_MS } from "../../constants/familyMessages.js";
 import "./FamilyMessageCard.css";
 
 const MESSAGE_DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -8,7 +9,9 @@ const MESSAGE_DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "
 // Shows the newest encouragement from a family member inside the welcome card,
 // with "mark as read" and "reply". `data` is the /family/messages/latest
 // response; `onChange` receives the updated message after reading or replying.
-export default function FamilyMessageCard({ data, onChange }) {
+// Ten minutes after it was read the message leaves the home page (it stays in
+// the history on the profile); `onExpire` lets the page fall back to its welcome.
+export default function FamilyMessageCard({ data, onChange, onExpire }) {
   const { message, family, linkId } = data;
   const [replying, setReplying] = useState(false);
   const [reply, setReply] = useState("");
@@ -16,6 +19,24 @@ export default function FamilyMessageCard({ data, onChange }) {
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const unread = !message.readAt;
+  const readAtMs = message.readAt ? new Date(message.readAt).getTime() : null;
+  const [expired, setExpired] = useState(readAtMs !== null && Date.now() - readAtMs >= READ_MESSAGE_VISIBLE_MS);
+
+  useEffect(() => {
+    if (readAtMs === null) { setExpired(false); return undefined; }
+    const remaining = readAtMs + READ_MESSAGE_VISIBLE_MS - Date.now();
+    if (remaining <= 0) { setExpired(true); return undefined; }
+    setExpired(false);
+    const timer = setTimeout(() => setExpired(true), remaining);
+    return () => clearTimeout(timer);
+  }, [readAtMs]);
+
+  // Once the time is up, leave as soon as the person is not in the middle of writing a reply.
+  const leaving = expired && !replying;
+  useEffect(() => {
+    if (leaving) onExpire?.();
+  }, [leaving, onExpire]);
+  if (leaving) return null;
 
   async function markRead() {
     setBusy(true);
@@ -53,6 +74,7 @@ export default function FamilyMessageCard({ data, onChange }) {
       <p className="family-message-label"><Heart size={14} aria-hidden="true" />{unread ? "ข้อความใหม่จากครอบครัว" : "ข้อความจากครอบครัว"}</p>
       <blockquote>“{message.content}”</blockquote>
       <p className="family-message-from">— {family?.name || "ครอบครัว"} · {MESSAGE_DATE.format(new Date(message.createdAt))}</p>
+      {!unread && <p className="family-message-note">อ่านแล้ว · ข้อความนี้จะหายจากหน้าหลักใน 10 นาที (ดูย้อนหลังได้ที่โปรไฟล์)</p>}
 
       {sent && <p className="family-message-sent" role="status">ส่งข้อความตอบกลับแล้ว</p>}
       {error && <p className="family-message-error" role="alert">{error}</p>}

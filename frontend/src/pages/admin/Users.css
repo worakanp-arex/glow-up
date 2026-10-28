@@ -32,6 +32,10 @@
   font-family: inherit;
 }
 
+.users-search {
+  flex: 1 1 220px;
+}
+
 .users-filters .ui-btn { margin-left: auto; }
 
 .users-action-error { margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--color-danger-bg); color: var(--color-danger); font-size: 0.85rem; }

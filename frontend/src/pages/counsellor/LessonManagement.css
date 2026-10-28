@@ -2,177 +2,54 @@
   max-width: var(--content-width);
   margin: 0 auto;
   padding: 2.5rem 1.5rem 4rem;
-}
-
-.lesson-management-page h1 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.4rem;
-  font-size: 1.5rem;
-  color: var(--color-text);
-}
-
-.lesson-management-intro {
-  margin: 0 0 1.75rem;
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-}
-
-.lesson-management-form {
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.lesson-management-form h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin: 0 0 1.1rem;
-  font-size: 0.95rem;
-  color: var(--color-text);
-}
-
-.lesson-management-form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.lesson-management-form label,
-.lesson-management-body-field {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
+  gap: 2rem;
 }
 
-.lesson-management-body-field {
-  margin-bottom: 1.25rem;
+.layout .lesson-management-page > .page-header { margin-bottom: 0; }
+
+.lesson-management-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
-.lesson-management-form input,
-.lesson-management-form select,
-.lesson-management-form textarea {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  font-family: inherit;
-  background-color: var(--color-surface);
+.lesson-management-section-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
   color: var(--color-text);
-  resize: vertical;
 }
 
-.lesson-management-form input:focus,
-.lesson-management-form select:focus,
-.lesson-management-form textarea:focus {
-  outline: none;
-  border-color: var(--color-primary-400);
-  box-shadow: 0 0 0 3px var(--color-primary-50);
-}
-
-.lesson-management-error {
-  margin: 0 0 1rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-  font-size: 0.85rem;
-}
-
-.lesson-management-options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-bottom: 1.25rem;
-}
-
-.lesson-management-option-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.lesson-management-option-row input[type="text"] {
-  flex: 1;
-  min-width: 0;
-}
-
-.lesson-management-option-correct {
-  flex-direction: row !important;
-  align-items: center;
-  gap: 0.3rem !important;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.lesson-management-option-row button {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  border: none;
-  background: none;
-  color: var(--color-danger);
-  cursor: pointer;
-  padding: 0.3rem;
-}
-
-.lesson-management-add-option {
-  align-self: flex-start;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.4rem 0.8rem;
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background: none;
-  color: var(--color-text-secondary);
-  font-size: 0.82rem;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.lesson-management-add-option:hover {
-  border-color: var(--color-primary-400);
-  color: var(--color-primary-600);
-}
-
-.lesson-management-list-heading {
-  margin: 0 0 1rem;
-  font-size: 1rem;
-  color: var(--color-text);
+.lesson-management-count {
+  color: var(--color-text-muted);
+  font-weight: 500;
 }
 
 .lesson-management-empty {
+  margin: 0;
+  padding: 24px 0;
+  text-align: center;
   color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
 .lesson-management-list {
   list-style: none;
-  margin: 0 0 2rem;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
-.lesson-management-list li {
+.lesson-management-list > li {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  gap: 16px;
+  padding: 14px 18px;
 }
 
 .lesson-management-list-body {
@@ -183,53 +60,123 @@
 .lesson-management-list-title {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin: 0 0 0.35rem;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-text);
-  font-size: 0.92rem;
+  overflow-wrap: anywhere;
 }
 
-.lesson-management-list-category {
-  padding: 0.15rem 0.6rem;
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-50);
-  color: var(--color-primary-700);
+.lesson-management-list-title svg { flex-shrink: 0; color: var(--color-primary-600); }
+
+.lesson-management-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.lesson-management-expiry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: var(--color-surface-hover);
+  color: var(--color-text-secondary);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
-.lesson-management-list > li > button {
+.lesson-management-expiry.is-active { background: var(--color-success-bg); color: var(--color-success); }
+.lesson-management-expiry.is-expired { background: var(--color-danger-bg); color: var(--color-danger); }
+
+.lesson-management-actions {
+  display: flex;
+  gap: 6px;
   flex-shrink: 0;
+}
+
+.lesson-management-actions button,
+.lesson-management-option-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.lesson-management-actions button:hover { background: var(--color-surface-hover); color: var(--color-text); }
+.lesson-management-actions button.is-danger,
+.lesson-management-option-remove { color: var(--color-danger); }
+.lesson-management-actions button.is-danger:hover,
+.lesson-management-option-remove:hover { background: var(--color-danger-bg); }
+
+.lesson-management-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lesson-management-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.lesson-management-option-fields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lesson-management-option-fields input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+}
+
+.lesson-management-add-option {
+  align-self: flex-start;
   display: flex;
   align-items: center;
-  border: none;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: 12px;
   background: none;
-  color: var(--color-danger);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 0.82rem;
   cursor: pointer;
-  padding: 0.4rem;
+}
+
+.lesson-management-add-option:hover {
+  border-color: var(--color-primary-400);
+  color: var(--color-primary-600);
 }
 
 @media (max-width: 860px) {
-  .lesson-management-page {
-    padding: 2rem 1.25rem 3rem;
-  }
-
-  .lesson-management-form {
-    padding: 1.1rem;
-  }
+  .lesson-management-page { padding: 2rem 1.25rem 3rem; }
 }
 
 @media (max-width: 520px) {
-  .lesson-management-page {
-    padding: 1.5rem 1rem 2.5rem;
-  }
-
-  .lesson-management-option-row {
-    flex-wrap: wrap;
-  }
-
-  .lesson-management-option-row input[type="text"] {
-    flex: 1 1 100%;
-  }
+  .lesson-management-page { padding: 1.5rem 1rem 2.5rem; gap: 1.5rem; }
+  .lesson-management-list > li { flex-wrap: wrap; }
+  .lesson-management-actions { width: 100%; }
+  .lesson-management-section-head { flex-wrap: wrap; }
 }

@@ -7,16 +7,17 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Briefcase, ChevronDown, FileSearch, Mail, MapPin, Paperclip, Phone } from "lucide-react";
 import * as applicationService from "../../services/applicationService.js";
+import { countByTab, useTabCounts } from "../../hooks/useTabCounts.js";
 import "./Applications.css";
 
 const PAGE_SIZE = 10;
 const STATUS_FILTERS = [
-  { key: "", label: "ทั้งหมด" },
-  { key: "pending", label: "รอดำเนินการ" },
-  { key: "interview", label: "นัดสัมภาษณ์" },
-  { key: "passed", label: "ผ่านการคัดเลือก" },
-  { key: "rejected", label: "ถูกปฏิเสธ" },
-  { key: "cancelled", label: "ยกเลิกแล้ว" },
+  { key: "", label: "ทั้งหมด", params: {} },
+  { key: "pending", label: "รอดำเนินการ", params: { status: "pending" } },
+  { key: "interview", label: "นัดสัมภาษณ์", params: { status: "interview" } },
+  { key: "passed", label: "ผ่านการคัดเลือก", params: { status: "passed" } },
+  { key: "rejected", label: "ถูกปฏิเสธ", params: { status: "rejected" } },
+  { key: "cancelled", label: "ยกเลิกแล้ว", params: { status: "cancelled" } },
 ];
 const DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" });
 
@@ -31,6 +32,7 @@ function Applications() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [openId, setOpenId] = useState(null);
+  const [counts] = useTabCounts(() => countByTab(STATUS_FILTERS, applicationService.getAllApplicationsPage));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -59,7 +61,7 @@ function Applications() {
       <div className="ui-tabs" role="tablist" aria-label="กรองสถานะใบสมัคร">
         {STATUS_FILTERS.map((item) => (
           <button key={item.key || "all"} type="button" role="tab" aria-selected={status === item.key} className="ui-tab" onClick={() => { setPage(1); setOpenId(null); setSearchParams(item.key ? { status: item.key } : {}); }}>
-            {item.label}
+            {item.label}{counts && ` (${counts[item.key] ?? 0})`}
           </button>
         ))}
       </div>

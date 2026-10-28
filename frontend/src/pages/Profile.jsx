@@ -477,7 +477,7 @@ function Profile() {
 
   return (
     <div className="profile-page">
-      <PageHeader art="mascot" icon={User} eyebrow="Your own story" description="จัดการข้อมูล เป้าหมาย และสิ่งที่คุณเลือกแบ่งปัน" backTo={backTo} backLabel="หน้าที่คุณเข้ามา">โปรไฟล์ของฉัน</PageHeader>
+      <PageHeader icon={User} eyebrow="Your own story" description="จัดการข้อมูล เป้าหมาย และสิ่งที่คุณเลือกแบ่งปัน" backTo={backTo} backLabel="หน้าที่คุณเข้ามา">โปรไฟล์ของฉัน</PageHeader>
 
       <ProfileHero
         user={user}
@@ -848,7 +848,7 @@ function Profile() {
 
                 <div className="profile-col">
                 {familyLinks.some((link) => link.status === "active") && (
-                  <FamilyMessageHistory linkId={familyLinks.find((link) => link.status === "active")._id} viewerRole="user" title="ข้อความจากครอบครัว" />
+                  <FamilyMessageHistory linkId={familyLinks.find((link) => link.status === "active")._id} viewerRole="user" title="ข้อความจากครอบครัว" canReply />
                 )}
                 <aside className="ui-card ui-card-soft profile-privacy">
                   <span className="profile-privacy-icon" aria-hidden="true"><Lock size={18} /></span>

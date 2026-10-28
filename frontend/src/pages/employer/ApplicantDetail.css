@@ -29,6 +29,8 @@
 .applicant-detail-facts dd { margin: 0; font-size: 0.88rem; text-align: right; overflow-wrap: anywhere; }
 .applicant-detail-bio { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--color-surface-hover); font-size: 0.85rem; line-height: 1.7; color: var(--color-text-secondary); overflow-wrap: anywhere; white-space: pre-line; }
 
+.applicant-detail-job-title { margin: 0 0 10px; font-size: 1rem; font-weight: 600; overflow-wrap: anywhere; }
+.applicant-detail-job-desc { margin: 12px 0; font-size: .85rem; line-height: 1.7; color: var(--color-text-secondary); white-space: pre-line; overflow-wrap: anywhere; }
 .applicant-detail-match-card p { margin: 0 0 8px; font-size: 0.88rem; }
 .applicant-detail-match-card small { display: block; margin-top: 8px; color: var(--color-text-muted); }
 .applicant-detail-match-tags { margin: 8px 0 0 !important; font-size: 0.8rem !important; color: var(--color-text-secondary); overflow-wrap: anywhere; }

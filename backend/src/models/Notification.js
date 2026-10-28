@@ -22,6 +22,7 @@ const notificationSchema = new mongoose.Schema(
         "report",
         "moderation",
         "courseExpiry",
+        "contentExpiry",
       ],
     },
     status: { type: String, enum: ["unread", "read"], default: "unread" },

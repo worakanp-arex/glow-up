@@ -7,6 +7,7 @@ import {
   updateCourse,
   uploadCover,
   myCourses,
+  recommendedCourses,
   enrollCourse,
   unenrollCourse,
   uploadCourseCertificate,
@@ -44,6 +45,7 @@ router.get(
   asyncHandler(listCourses)
 );
 router.get("/mine", verifyToken, requireRole("user"), asyncHandler(myCourses));
+router.get("/recommended", verifyToken, requireRole("user"), asyncHandler(recommendedCourses));
 router.post(
   "/cover",
   verifyToken,

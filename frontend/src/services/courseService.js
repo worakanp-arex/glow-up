@@ -8,6 +8,11 @@ export function getCourse(id) {
   return api.get(`/courses/${id}`).then((res) => res.data);
 }
 
+// Open courses related to the jobs the signed-in job seeker bookmarked, each with a `reason`.
+export function getRecommendedCourses() {
+  return api.get("/courses/recommended").then((res) => res.data);
+}
+
 export function getMyCourses() {
   return api.get("/courses/mine").then((res) => res.data);
 }

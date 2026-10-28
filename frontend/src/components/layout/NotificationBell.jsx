@@ -4,6 +4,8 @@ import { Activity, AlertTriangle, Award, Bell, Briefcase, CalendarClock, Flag, H
 import * as notificationService from "../../services/notificationService.js";
 import { onNotification } from "../../services/socket.js";
 import ConfirmDialog from "../common/ConfirmDialog.jsx";
+import ShowMoreButton from "../common/ShowMore.jsx";
+import { useShowMore } from "../common/useShowMore.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./NotificationBell.css";
 
@@ -23,6 +25,7 @@ const TYPE_ICONS = {
   report: Flag,
   moderation: ShieldCheck,
   courseExpiry: CalendarClock,
+  contentExpiry: CalendarClock,
 };
 
 function NotificationBell() {
@@ -34,6 +37,8 @@ function NotificationBell() {
   const [confirmClear, setConfirmClear] = useState(false);
   const containerRef = useRef(null);
   const navigate = useNavigate();
+  // The panel opens on the latest few; older ones sit behind "show more" and fold back up each time it is opened.
+  const list = useShowMore(notifications, 5, open);
 
   useEffect(() => {
     notificationService.getMyNotifications().then(setNotifications).catch(() => setError("โหลดการแจ้งเตือนไม่สำเร็จ"));
@@ -125,7 +130,7 @@ function NotificationBell() {
             <p className="notification-bell-empty">ไม่มีการแจ้งเตือน</p>
           ) : (
             <ul>
-              {notifications.map((notification) => {
+              {list.shown.map((notification) => {
                 const Icon = TYPE_ICONS[notification.type] || Bell;
                 return (
                   <li
@@ -147,6 +152,7 @@ function NotificationBell() {
               })}
             </ul>
           )}
+          <ShowMoreButton hidden={list.hidden} expanded={list.expanded} onToggle={list.toggle} />
         </div>
       )}
       {confirmClear && <ConfirmDialog title="ล้างรายการแจ้งเตือนทั้งหมด" confirmLabel="ล้างรายการ" busy={busy} error={error} onConfirm={() => handleBulk(true)} onClose={() => setConfirmClear(false)}><p>รายการแจ้งเตือนจะถูกลบออกจากบัญชีของคุณ ประวัติการสนทนาและคำขอปรึกษายังอยู่ครบ</p></ConfirmDialog>}

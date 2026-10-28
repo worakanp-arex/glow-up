@@ -57,7 +57,7 @@ export default function SkillPicker({ skills, selectedIds, onToggle, loading = f
 
   return (
     <div className="skill-picker">
-      <label className="skill-picker-search">
+      <label className="ui-search">
         <Search size={16} aria-hidden="true" />
         <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="ค้นหาทักษะ เช่น ครัว ขับรถ คอมพิวเตอร์" aria-label="ค้นหาทักษะ" />
       </label>

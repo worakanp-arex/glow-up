@@ -1,4 +1,4 @@
-import { applicationMatches, jobApplicantMatches } from "../services/jobMatchService.js";
+import { applicationMatches, jobApplicantMatches, mixedApplicationMatches } from "../services/jobMatchService.js";
 import Application from "../models/Application.js";
 import Job from "../models/Job.js";
 import User from "../models/User.js";
@@ -134,7 +134,7 @@ export async function listEmployerApplications(req, res) {
   if (req.query.status) filter.status = req.query.status;
   const pagination = paginationOptions(req.query);
   const query = Application.find(filter)
-    .populate("job", "title location")
+    .populate("job", "title location salary description")
     .populate("user", APPLICANT_PROFILE_FIELDS)
     .sort({ createdAt: -1 });
   if (pagination) {
@@ -142,7 +142,9 @@ export async function listEmployerApplications(req, res) {
     query.skip(pagination.skip).limit(pagination.limit);
   }
   const applications = (await query).filter((application) => application.user);
-  res.json(applications.map((application) => hideWithdrawnApplicantDetails(application, req.user)));
+  // Each applicant is scored against the posting they applied to, so the list shows the skill match too.
+  const withMatches = await mixedApplicationMatches(applications);
+  res.json(withMatches.map((application) => hideWithdrawnApplicantDetails(application, req.user)));
 }
 
 // Admin overview of every application, optionally narrowed by status, for the

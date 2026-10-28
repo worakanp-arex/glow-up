@@ -20,6 +20,7 @@ import ImageSlot from "../../components/common/ImageSlot.jsx";
 import FamilyDashboard from "../family/FamilyDashboard.jsx";
 import * as emotionService from "../../services/emotionService.js";
 import * as familyService from "../../services/familyService.js";
+import { READ_MESSAGE_VISIBLE_MS } from "../../constants/familyMessages.js";
 import "./Dashboard.css";
 
 // Nickname if set, otherwise the first name; Latin names get a space after "คุณ".
@@ -29,7 +30,6 @@ function greetingName(user) {
 }
 
 const TODAY_LABEL = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "long", year: "numeric" });
-const RECENT_MESSAGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 function Dashboard() {
   const { user } = useAuth();
@@ -77,7 +77,7 @@ function Dashboard() {
 
   if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
 
-  const showFamilyMessage = Boolean(familyMessage) && (!familyMessage.message.readAt || Date.now() - new Date(familyMessage.message.createdAt).getTime() < RECENT_MESSAGE_MS);
+  const showFamilyMessage = Boolean(familyMessage) && (!familyMessage.message.readAt || Date.now() - new Date(familyMessage.message.readAt).getTime() < READ_MESSAGE_VISIBLE_MS);
 
   return (
     <div className="dashboard-page">
@@ -94,7 +94,7 @@ function Dashboard() {
           <p className="dashboard-hero-eyebrow">{showFamilyMessage ? "มีกำลังใจจากครอบครัวถึงคุณ" : "ยินดีที่ได้เจอกันอีกครั้ง"}</p>
           <h2>สวัสดี คุณ{greetingName(user)}</h2>
           {showFamilyMessage ? (
-            <FamilyMessageCard data={familyMessage} onChange={setFamilyMessage} />
+            <FamilyMessageCard data={familyMessage} onChange={setFamilyMessage} onExpire={() => setFamilyMessage(null)} />
           ) : (
             <>
               <p>ทุกก้าวมีความหมาย<br />ค่อย ๆ ไปในจังหวะที่เหมาะกับคุณ</p>

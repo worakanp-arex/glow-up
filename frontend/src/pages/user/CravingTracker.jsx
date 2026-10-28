@@ -6,12 +6,14 @@ import * as emotionService from "../../services/emotionService.js";
 import * as riskService from "../../services/riskService.js";
 import * as riskSituationService from "../../services/riskSituationService.js";
 import { happinessByLevel } from "../../constants/happiness.js";
+import { cravingWord } from "../../constants/craving.js";
 import { CONTEXT_OPTIONS } from "../../constants/emotionContext.js";
 import MoodFacePicker from "../../components/user/MoodFacePicker.jsx";
 import { CravingRange } from "../../components/user/DailyCheckin.jsx";
 import EmotionCalendar from "../../components/user/EmotionCalendar.jsx";
 import BackfillEmotionModal from "../../components/user/BackfillEmotionModal.jsx";
 import WeeklyCheckInWidget from "../../components/user/WeeklyCheckInWidget.jsx";
+import RiskGuidance from "../../components/user/RiskGuidance.jsx";
 import { groupByMonth, monthGroupLabel } from "../../utils/calendarGrid.js";
 import { BACKFILL_WINDOW_DAYS } from "../../constants/emotionLog.js";
 import "./CravingTracker.css";
@@ -20,9 +22,6 @@ import "./CravingTracker.css";
 const MONTH_INITIAL_LIMIT = 15;
 const MONTH_LOAD_MORE_STEP = 10;
 const MISSING_DAYS_WINDOW = BACKFILL_WINDOW_DAYS;
-
-const RISK_LABELS = { low: "ต่ำ", medium: "ปานกลาง", high: "สูง" };
-const RISK_CLASS = { low: "craving-tracker-risk-low", medium: "craving-tracker-risk-medium", high: "craving-tracker-risk-high" };
 
 const OUTCOME_LABELS = {
   handled_well: "รับมือได้ดี ไม่กระทบ",
@@ -306,7 +305,7 @@ function CravingTracker() {
                             {log.note && <p className="craving-tracker-note">{log.note}</p>}
                           </div>
                           {log.cravingLevel != null && (
-                            <span className="craving-tracker-badge"><b>{log.cravingLevel}/10</b>ความอยาก</span>
+                            <span className="craving-tracker-badge"><b>{cravingWord(log.cravingLevel)}</b>ความอยาก</span>
                           )}
                         </li>
                       );
@@ -337,26 +336,19 @@ function CravingTracker() {
           <section className="ui-card craving-tracker-risk">
             <div className="ui-card-head">
               <div>
-                <h2>ผลประเมินความเสี่ยง</h2>
-                <p>ประเมินจากบันทึกของคุณในช่วงที่ผ่านมา</p>
+                <h2>คำแนะนำสำหรับช่วงนี้</h2>
+                <p>สรุปจากบันทึกของคุณในช่วงที่ผ่านมา พร้อมสิ่งที่ช่วยดูแลใจได้</p>
               </div>
               <ShieldCheck size={18} aria-hidden="true" />
             </div>
-            {risk && (
-              <p className={`craving-tracker-risk-result ${RISK_CLASS[risk.level] || ""}`}>
-                ระดับความเสี่ยง: <strong>{RISK_LABELS[risk.level]}</strong>
-                {risk.triggerFactors && (
-                  <span className="craving-tracker-risk-note"> — {risk.triggerFactors}</span>
-                )}
-              </p>
-            )}
+            {risk && <RiskGuidance level={risk.level} />}
             <button
               type="button"
               className="ui-btn ui-btn-outline ui-btn-block craving-tracker-assess-button"
               onClick={handleAssessRiskClick}
               disabled={assessing}
             >
-              {assessing ? "กำลังประเมิน..." : "ประเมินความเสี่ยงตอนนี้"}
+              {assessing ? "กำลังสรุป..." : "ดูคำแนะนำสำหรับช่วงนี้"}
             </button>
           </section>
 
@@ -370,7 +362,7 @@ function CravingTracker() {
             </div>
             <dl className="craving-tracker-summary-stats">
               <div><dt>วันที่บันทึก</dt><dd>{summary.days}<small> วัน</small></dd></div>
-              <div><dt>ความอยากเฉลี่ย</dt><dd>{summary.avgCraving ?? "–"}<small> / 10</small></dd></div>
+              <div><dt>ความอยากโดยรวม</dt><dd className="craving-tracker-summary-mood">{cravingWord(summary.avgCraving) ?? "–"}</dd></div>
               <div><dt>ความรู้สึกที่พบบ่อย</dt><dd className="craving-tracker-summary-mood">{summary.topMood ?? "–"}</dd></div>
             </dl>
             {riskSituationLogs.length > 0 && (
@@ -469,7 +461,7 @@ function CravingTracker() {
             </div>
             <p>
               ในช่วง {MISSING_DAYS_WINDOW} วันที่ผ่านมา คุณยังไม่ได้บันทึกอารมณ์ {missingDays.length} วัน
-              การกรอกข้อมูลให้ครบจะช่วยให้ผลประเมินความเสี่ยงแม่นยำขึ้น ต้องการกรอกเพิ่มก่อนไหม?
+              การกรอกข้อมูลให้ครบจะช่วยให้คำแนะนำตรงกับช่วงนี้ของคุณมากขึ้น ต้องการกรอกเพิ่มก่อนไหม?
             </p>
             <div className="missing-days-chip-list">
               {missingDays.map((key) => (

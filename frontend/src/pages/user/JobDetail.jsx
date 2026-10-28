@@ -4,6 +4,7 @@ import AsyncState from "../../components/common/AsyncState.jsx";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import JobPreview from "../../components/jobs/JobPreview.jsx";
+import SavedJobHint from "../../components/jobs/SavedJobHint.jsx";
 import * as jobService from "../../services/jobService.js";
 import { useJobSeeker } from "../../hooks/useJobSeeker.js";
 import { skillMatch } from "../../utils/skillMatch.js";
@@ -13,7 +14,7 @@ function JobDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const fromApplications = searchParams.get("from") === "my-applications";
-  const { mySkillIds, savedIds, toggleSaved } = useJobSeeker();
+  const { mySkillIds, savedIds, toggleSaved, justSaved } = useJobSeeker();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -41,6 +42,7 @@ function JobDetail() {
   return (
     <div className="job-detail-page">
       {pageHeader}
+      <SavedJobHint show={justSaved === job._id} />
       <JobPreview job={job} showTitle={false} saved={savedIds.has(job._id)} onToggleSave={toggleSaved} match={skillMatch(job, mySkillIds)} />
     </div>
   );

@@ -1,10 +1,10 @@
 .patient-overview-widget {
   margin-bottom: 1.5rem;
-  padding: 1.5rem;
+  padding: var(--card-pad);
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: var(--card-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--card-shadow);
 }
 
 .patient-overview-widget-header {

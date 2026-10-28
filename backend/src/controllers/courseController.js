@@ -5,6 +5,7 @@ import { publicUrl, UPLOAD_ROOT } from "../middleware/upload.js";
 import { paginationOptions, escapeRegex } from "../utils/pagination.js";
 import { bangkokStartOfDay, bangkokEndOfDay } from "../utils/dateKey.js";
 import { sendCourseExpiryReminders } from "../services/courseReminderService.js";
+import { recommendCoursesForUser } from "../services/courseRecommendationService.js";
 import fs from "fs";
 import path from "path";
 
@@ -111,6 +112,12 @@ export async function uploadCover(req, res) {
     return res.status(400).json({ message: "No file uploaded" });
   }
   res.status(201).json({ url: publicUrl("courseCover", req.file.filename) });
+}
+
+// Open courses that relate to the jobs the person bookmarked, each with the job
+// that prompted it so the page can say why it is suggested.
+export async function recommendedCourses(req, res) {
+  res.json(await recommendCoursesForUser(req.user.id));
 }
 
 export async function myCourses(req, res) {

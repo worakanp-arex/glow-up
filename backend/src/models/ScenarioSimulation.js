@@ -13,6 +13,8 @@ const scenarioSimulationSchema = new mongoose.Schema(
       },
     ],
     active: { type: Boolean, default: true },
+    // Last day the scenario can be played; unset means it never expires.
+    expiresAt: { type: Date },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }

@@ -8,7 +8,7 @@ import useConfirmDialog from "../../components/common/useConfirmDialog.jsx";
 import useReasonDialog from "../../components/common/useReasonDialog.jsx";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Ban, CalendarHeart, Check, Filter, Pencil, RotateCcw, Trash2, UserPlus, Users as UsersIcon, X } from "lucide-react";
+import { Ban, CalendarHeart, Check, Filter, Pencil, RotateCcw, Search, Trash2, UserPlus, Users as UsersIcon, X } from "lucide-react";
 import * as userService from "../../services/userService.js";
 import { ROLE_LABELS } from "../../constants/roleLabels.js";
 import { ACCOUNT_RETENTION_DAYS } from "../../constants/accountRetention.js";
@@ -26,10 +26,12 @@ const STATUS_OPTIONS = [
 function Users() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState(searchParams.get("q") || "");
   const [roleFilter, setRoleFilter] = useState(searchParams.get("role") || "");
   const [statusFilter, setStatusFilter] = useState(searchParams.get("verifiedStatus") || "");
   const [appliedFilters, setAppliedFilters] = useState(() => {
     const params = {};
+    if (searchParams.get("q")) params.q = searchParams.get("q");
     if (searchParams.get("role")) params.role = searchParams.get("role");
     if (searchParams.get("verifiedStatus")) params.verifiedStatus = searchParams.get("verifiedStatus");
     return params;
@@ -62,9 +64,11 @@ function Users() {
     return () => controller.abort();
   }, [appliedFilters, page]);
 
-  function applyFilters() {
+  function applyFilters(event) {
+    event?.preventDefault();
     setPage(1);
     const params = {};
+    if (search.trim()) params.q = search.trim();
     if (roleFilter) params.role = roleFilter;
     if (statusFilter) params.verifiedStatus = statusFilter;
     setAppliedFilters(params);
@@ -143,7 +147,11 @@ function Users() {
       {reasonDialog}
       {header}
 
-      <div className="users-filters">
+      <form className="users-filters" onSubmit={applyFilters} role="search">
+        <label className="ui-search users-search">
+          <Search size={15} aria-hidden="true" />
+          <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหาชื่อหรืออีเมล" aria-label="ค้นหาชื่อหรืออีเมล" maxLength={100} />
+        </label>
         <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} aria-label="กรองตามบทบาท">
           <option value="">ทุกบทบาท</option>
           {Object.entries(ROLE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
@@ -152,11 +160,11 @@ function Users() {
           <option value="">ทุกสถานะ</option>
           {STATUS_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
-        <button type="button" className="ui-btn ui-btn-outline" onClick={applyFilters}>
+        <button type="submit" className="ui-btn ui-btn-outline">
           <Filter size={15} />
           <span>กรอง</span>
         </button>
-      </div>
+      </form>
 
       {actionError && <p className="users-action-error" role="alert">{actionError}</p>}
 

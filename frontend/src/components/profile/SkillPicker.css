@@ -1,7 +1,4 @@
 .skill-picker { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.skill-picker-search { display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text-muted); }
-.layout-content .skill-picker .skill-picker-search input, .confirm-dialog .skill-picker .skill-picker-search input { flex: 1; min-width: 0; min-height: 42px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-size: .875rem; }
-.skill-picker-search:focus-within { border-color: var(--color-primary-500); box-shadow: 0 0 0 3px var(--color-primary-50); }
 
 .skill-picker-step { margin: 0; font-size: .78rem; font-weight: 600; color: var(--color-text-muted); }
 

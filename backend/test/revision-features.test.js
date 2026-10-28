@@ -23,6 +23,9 @@ import {
 } from "../src/controllers/familyController.js";
 import { listCourses, createCourse, enrollCourse } from "../src/controllers/courseController.js";
 import { sendCourseExpiryReminders } from "../src/services/courseReminderService.js";
+import { sendContentExpiryReminders } from "../src/services/contentReminderService.js";
+import MicroLesson from "../src/models/MicroLesson.js";
+import ScenarioSimulation from "../src/models/ScenarioSimulation.js";
 import { updateMe, deleteUser, verifyUser, createUserByAdmin } from "../src/controllers/userController.js";
 import { confirmJob, updateJob, getMyJob } from "../src/controllers/jobController.js";
 import { ensureDefaultSkills } from "../src/services/skillCatalogService.js";
@@ -343,6 +346,28 @@ test("course expiry reminders go to people who saved the course, once per day", 
   assert.equal(String(created[0].user), "u1");
   assert.equal(created[0].type, "courseExpiry");
   assert.equal(created[0].link, "/courses/c1");
+});
+
+test("the staff member who wrote a lesson or scenario is reminded before it expires, once per day", async () => {
+  const soon = new Date(Date.now() + 36 * 60 * 60 * 1000);
+  mock.method(MicroLesson, "find", () => chainable([{ _id: "l1", title: "ปฏิเสธเพื่อน", expiresAt: soon, createdBy: "c1" }]));
+  mock.method(ScenarioSimulation, "find", () => chainable([
+    { _id: "s1", title: "งานเลี้ยง", expiresAt: soon, createdBy: "c1" },
+    { _id: "s2", title: "ไม่มีผู้เขียน", expiresAt: soon },
+  ]));
+  const already = new Set();
+  mock.method(Notification, "exists", async (filter) => (already.has(filter.message) ? { _id: "n" } : null));
+  const created = captureNotifications();
+
+  assert.equal(await sendContentExpiryReminders(), 2);
+  assert.deepEqual(created.map((item) => item.type), ["contentExpiry", "contentExpiry"]);
+  assert.match(created[0].message, /บทเรียน "ปฏิเสธเพื่อน" จะหมดอายุ/);
+  assert.match(created[1].message, /สถานการณ์จำลอง "งานเลี้ยง" จะหมดอายุ/);
+  assert.equal(created[0].link, "/counsellor/lessons");
+
+  created.length = 0;
+  already.add(`บทเรียน "ปฏิเสธเพื่อน" จะหมดอายุในอีก 2 วัน ต่ออายุหรือแก้ไขได้ที่หน้าจัดการทักษะการปฏิเสธ`);
+  assert.equal(await sendContentExpiryReminders(), 1, "an item already reminded about today is skipped");
 });
 
 // ---------- accounts: admin guards and profile art ----------

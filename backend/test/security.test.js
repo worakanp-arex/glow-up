@@ -337,6 +337,14 @@ test("listUsers only paginates when a page is requested, and sets X-Total-Count"
   assert.equal(paged.headers["X-Total-Count"], 137);
   assert.equal(find.mock.callCount(), 2);
 });
+test("listUsers search escapes regex metacharacters instead of building a raw RegExp from user input", async () => {
+  let capturedFilter;
+  mock.method(User, "find", (filter) => { capturedFilter = filter; return chainable([]); });
+  mock.method(User, "countDocuments", async () => 0);
+  await listUsers({ query: { q: "a+b(.*)" } }, response());
+  assert.ok(capturedFilter.$or[0].name.test("a+b(.*)"), "escaped pattern should still match the literal text");
+  assert.equal(capturedFilter.$or[0].name.test("aaab"), false, "unescaped metacharacters must not be interpreted as regex");
+});
 test("listPosts sets X-Total-Count only when paginated", async () => {
   mock.method(Post, "find", () => chainable([{ _id: "p1", likedBy: [], user: { _id: "author" } }]));
   mock.method(Post, "countDocuments", async () => 42);

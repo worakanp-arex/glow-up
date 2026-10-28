@@ -5,7 +5,7 @@ import AsyncState from "../../components/common/AsyncState.jsx";
 import ImageSlot from "../../components/common/ImageSlot.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Bookmark, BookOpen, CalendarDays, ExternalLink, MessageCircleWarning, Search } from "lucide-react";
+import { ArrowRight, Bookmark, BookOpen, CalendarDays, ExternalLink, Lightbulb, MessageCircleWarning, Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import * as courseService from "../../services/courseService.js";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
@@ -27,6 +27,7 @@ function Courses() {
   const isStaff = user.role === "counsellor" || user.role === "admin";
   const [courses, setCourses] = useState([]);
   const [myCourses, setMyCourses] = useState([]);
+  const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [query, setQuery] = useState("");
@@ -37,10 +38,13 @@ function Courses() {
       // Learners only see courses that are open now; staff also see upcoming and expired ones.
       courseService.getCourses({ status: isStaff ? "all" : "active" }),
       isUser ? courseService.getMyCourses() : Promise.resolve([]),
+      // Suggestions are a bonus: if they fail to load the rest of the page still works.
+      isUser ? courseService.getRecommendedCourses().catch(() => []) : Promise.resolve([]),
     ])
-      .then(([allCourses, enrolled]) => {
+      .then(([allCourses, enrolled, suggested]) => {
         setCourses(allCourses);
         setMyCourses(enrolled);
+        setRecommended(Array.isArray(suggested) ? suggested : []);
       })
       .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
@@ -96,9 +100,9 @@ function Courses() {
   }
 
   const tabs = [
-    { key: ALL, label: "ทั้งหมด" },
-    ...categories.map((c) => ({ key: c, label: c })),
-    ...(isUser ? [{ key: SAVED, label: "ที่บันทึกไว้" }] : []),
+    { key: ALL, label: "ทั้งหมด", count: courses.length },
+    ...categories.map((c) => ({ key: c, label: c, count: courses.filter((course) => course.category === c).length })),
+    ...(isUser ? [{ key: SAVED, label: "ที่บันทึกไว้", count: courses.filter((course) => enrollmentById.has(course._id)).length }] : []),
   ];
 
   return (
@@ -118,15 +122,36 @@ function Courses() {
         </section>
       )}
 
+      {recommended.length > 0 && (
+        <section className="courses-recommended" id="recommended" aria-labelledby="recommended-heading">
+          <div className="ui-card-head">
+            <h2 id="recommended-heading"><Lightbulb size={18} aria-hidden="true" /> แนะนำจากงานที่คุณบันทึกไว้</h2>
+          </div>
+          <ul className="courses-recommended-list">
+            {recommended.slice(0, 3).map((course) => (
+              <li key={course._id} className="ui-card courses-recommended-item">
+                <span className="course-card-category">{course.category || "คอร์สเรียน"}</span>
+                <h3><Link to={`/courses/${course._id}`}>{course.title}</Link></h3>
+                <p className="courses-recommended-reason">
+                  แนะนำเพราะคุณบันทึกงาน “{course.reason.jobTitle}” ไว้
+                  {course.reason.matched.length > 0 && <small>เกี่ยวข้องกับ: {course.reason.matched.join(", ")}</small>}
+                </p>
+                <Link to={`/courses/${course._id}`} className="ui-btn ui-btn-outline">ดูคอร์สนี้</Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div className="courses-toolbar">
         <div className="courses-tabs" role="tablist" aria-label="หมวดคอร์สเรียน">
           {tabs.map((t) => (
             <button key={t.key || "all"} type="button" role="tab" aria-selected={category === t.key} className="ui-tab" onClick={() => setCategory(t.key)}>
-              {t.label}
+              {t.label} ({t.count})
             </button>
           ))}
         </div>
-        <label className="courses-search">
+        <label className="ui-search courses-search">
           <Search size={16} aria-hidden="true" />
           <input type="search" placeholder="ค้นหาเรื่องที่อยากเรียน" aria-label="ค้นหาคอร์สเรียน" value={query} onChange={(e) => setQuery(e.target.value)} />
         </label>

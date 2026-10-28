@@ -59,13 +59,21 @@ export async function getOverview(req, res) {
       { $group: { _id: "$dateKey", count: { $sum: 1 } } },
       { $sort: { _id: 1 } },
     ]),
+    // The "most frequent" ranking is about people in recovery, so staff and family logins stay out of it.
     LoginEvent.aggregate([
       { $match: leaderboardMatch },
       { $group: { _id: "$user", days: { $sum: 1 } } },
+      { $lookup: { from: "users", localField: "_id", foreignField: "_id", pipeline: [{ $match: { role: "user", deletedAt: null } }, { $project: { _id: 1 } }], as: "patient" } },
+      { $match: { "patient.0": { $exists: true } } },
       { $sort: { days: -1 } },
       { $limit: 10 },
     ]),
   ]);
+
+  // Everyone who signed in counts; the breakdown says who they are.
+  const activeAccounts = await User.find({ _id: { $in: activeUserIds } }).select("role");
+  const activeByRole = { user: 0, family: 0, counsellor: 0, employer: 0, admin: 0 };
+  for (const account of activeAccounts) activeByRole[account.role] = (activeByRole[account.role] || 0) + 1;
 
   const byLevel = { low: 0, medium: 0, high: 0 };
   for (const item of riskByLevelRaw) {
@@ -84,7 +92,7 @@ export async function getOverview(req, res) {
   }));
 
   res.json({
-    activeUsers: { count: activeUserIds.length, windowDays: 7 },
+    activeUsers: { count: activeAccounts.length, windowDays: 7, byRole: activeByRole },
     risk: { byLevel },
     appointments: { today: todayEntry?.count ?? 0, byDay: appointmentsByDay },
     loginTrend: loginTrendRaw.map((item) => ({ dateKey: item._id, count: item.count })),
@@ -315,9 +323,13 @@ export async function getOverviewUsers(req, res) {
       { $sort: { lastLogin: -1, days: -1 } },
       { $limit: 200 },
     ]);
-    const visible = rows.filter((row) => !allowed || allowed.has(String(row._id)));
-    const users = await User.find({ _id: { $in: visible.map((row) => row._id) } }).select("name avatarUrl avatarStyle avatarColor");
+    const users = await User.find({ _id: { $in: rows.map((row) => row._id) } }).select("name role avatarUrl avatarStyle avatarColor");
     const userById = new Map(users.map((u) => [String(u._id), u]));
+    // Family, staff and the other non-patient accounts are not clinical data, so only patients are held back from a counsellor.
+    const visible = rows.filter((row) => {
+      const role = userById.get(String(row._id))?.role;
+      return (role && role !== "user") || !allowed || allowed.has(String(row._id));
+    });
     return res.json({
       kind,
       total: rows.length,

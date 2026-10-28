@@ -102,7 +102,7 @@ function Navbar() {
           />
           <nav className="navbar-mobile-panel" id="mobile-navigation" ref={panelRef} aria-label="เมนูหลักบนมือถือ">
             <div className="mobile-menu-heading"><strong>เมนูของคุณ</strong><button className="icon-button" onClick={() => setMenuOpen(false)} aria-label="ปิดเมนู"><X size={20} /></button></div>
-            {mobileLinks.map(({ to, label, end }) => (
+            {mobileLinks.map(({ to, label, end, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -110,7 +110,8 @@ function Navbar() {
                 className={({ isActive }) => `navbar-mobile-link${isActive ? " active" : ""}`}
                 onClick={() => setMenuOpen(false)}
               >
-                {label}
+                {Icon && <Icon size={18} aria-hidden="true" />}
+                <span>{label}</span>
               </NavLink>
             ))}
           </nav>

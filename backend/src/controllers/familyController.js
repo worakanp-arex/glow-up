@@ -350,6 +350,10 @@ export async function listFamilyMessages(req, res) {
   res.json(messages);
 }
 
+// A message stays on the dashboard for this long after it was marked as read,
+// then makes way for the usual welcome (it remains in the message history).
+export const READ_MESSAGE_VISIBLE_MS = 10 * 60 * 1000;
+
 // For the recovering user's dashboard: the most recent message from their
 // family (unread first) so it can be shown prominently with read / reply.
 export async function latestFamilyMessage(req, res) {
@@ -361,8 +365,10 @@ export async function latestFamilyMessage(req, res) {
     FamilyMessage.countDocuments({ familyLink: { $in: linkIds }, senderRole: "family", readAt: null }),
     FamilyMessage.findOne({ familyLink: { $in: linkIds }, senderRole: "family", readAt: null }).sort({ createdAt: -1 }),
   ]);
+  const recentlyRead = { $gte: new Date(Date.now() - READ_MESSAGE_VISIBLE_MS) };
   const message =
-    latestUnread || (await FamilyMessage.findOne({ familyLink: { $in: linkIds }, senderRole: "family" }).sort({ createdAt: -1 }));
+    latestUnread ||
+    (await FamilyMessage.findOne({ familyLink: { $in: linkIds }, senderRole: "family", readAt: recentlyRead }).sort({ createdAt: -1 }));
   if (!message) return res.json({ message: null, unreadCount: 0 });
 
   const link = links.find((item) => item._id.toString() === message.familyLink.toString());

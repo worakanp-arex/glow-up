@@ -85,10 +85,10 @@ function MicroLessons() {
   }
 
   const tabs = [
-    { key: ALL, label: "ทั้งหมด" },
-    ...categories.map((c) => ({ key: c, label: c })),
-    ...(scenarios.length > 0 ? [{ key: SCENARIOS, label: "สถานการณ์จำลอง" }] : []),
-    { key: SAVED, label: "ที่บันทึกไว้" },
+    { key: ALL, label: "ทั้งหมด", count: lessons.length + scenarios.length },
+    ...categories.map((c) => ({ key: c, label: c, count: lessons.filter((lesson) => lesson.category === c).length })),
+    ...(scenarios.length > 0 ? [{ key: SCENARIOS, label: "สถานการณ์จำลอง", count: scenarios.length }] : []),
+    { key: SAVED, label: "ที่บันทึกไว้", count: lessons.filter((lesson) => savedIds.has(lesson._id)).length },
   ];
   const nothing = visibleLessons.length === 0 && visibleScenarios.length === 0;
 
@@ -112,11 +112,11 @@ function MicroLessons() {
         <div className="lessons-tabs" role="tablist" aria-label="หมวดบทเรียน">
           {tabs.map((t) => (
             <button key={t.key} type="button" role="tab" aria-selected={tab === t.key} className="ui-tab" onClick={() => setTab(t.key)}>
-              {t.label}
+              {t.label} ({t.count})
             </button>
           ))}
         </div>
-        <label className="lessons-search">
+        <label className="ui-search lessons-search">
           <Search size={16} aria-hidden="true" />
           <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ค้นหาเรื่องที่อยากเรียน" aria-label="ค้นหาบทเรียน" />
         </label>

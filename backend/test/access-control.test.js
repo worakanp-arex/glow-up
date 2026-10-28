@@ -16,6 +16,8 @@ import WeeklyCheckIn from "../src/models/WeeklyCheckIn.js";
 import RiskSituationLog from "../src/models/RiskSituationLog.js";
 import LoginEvent from "../src/models/LoginEvent.js";
 import Notification from "../src/models/Notification.js";
+import JobSkill from "../src/models/JobSkill.js";
+import UserSkill from "../src/models/UserSkill.js";
 import { listQueue } from "../src/controllers/counsellingController.js";
 import { notifyLinkedFamily } from "../src/services/rewardService.js";
 import { listPendingActivityApprovals, reviewActivityLog } from "../src/controllers/activityMissionController.js";
@@ -348,9 +350,15 @@ test("an employer loses an applicant's contact details and documents once they w
   mock.method(User, "findById", () => chainable({ verifiedStatus: "verified" }));
   mock.method(Job, "find", () => chainable([{ _id: "j1" }]));
   const applicant = (extra) => ({ _id: "u1", name: "สมหญิง", email: "s@example.com", phone: "0811111111", resumeUrl: "/uploads/resumes/cv.pdf", avatarStyle: "initial", ...extra });
-  const withdrawn = doc({ _id: "a1", status: "cancelled", user: applicant(), attachments: [{ name: "บัตร", url: "/uploads/application-attachments/x.png" }] });
-  const active = doc({ _id: "a2", status: "pending", user: applicant({ _id: "u2" }), attachments: [{ name: "บัตร", url: "/uploads/application-attachments/y.png" }] });
+  const job = { _id: "j1", title: "พนักงานต้อนรับ" };
+  const withdrawn = doc({ _id: "a1", status: "cancelled", job, user: applicant(), attachments: [{ name: "บัตร", url: "/uploads/application-attachments/x.png" }] });
+  const active = doc({ _id: "a2", status: "pending", job, user: applicant({ _id: "u2" }), attachments: [{ name: "บัตร", url: "/uploads/application-attachments/y.png" }] });
   mock.method(Application, "find", () => chainable([withdrawn, active]));
+  mock.method(JobSkill, "find", () => chainable([
+    { job: "j1", skill: { _id: "s1", skillName: "สื่อสาร" } },
+    { job: "j1", skill: { _id: "s2", skillName: "บริการลูกค้า" } },
+  ]));
+  mock.method(UserSkill, "find", () => chainable([{ user: "u2", skill: "s1" }]));
 
   const res = response();
   await listEmployerApplications({ query: {}, user: { id: "e1", role: "employer" } }, res);
@@ -362,6 +370,29 @@ test("an employer loses an applicant's contact details and documents once they w
   assert.deepEqual(first.attachments, []);
   assert.equal(second.user.email, "s@example.com", "applications that are still live are untouched");
   assert.equal(second.attachments.length, 1);
+});
+
+test("every applicant in the employer's list is scored against the posting they applied to", async () => {
+  mock.method(User, "findById", () => chainable({ verifiedStatus: "verified" }));
+  mock.method(Job, "find", () => chainable([{ _id: "j1" }]));
+  const applicant = (id) => ({ _id: id, name: id, email: `${id}@example.com` });
+  const job = { _id: "j1", title: "พนักงานต้อนรับ" };
+  mock.method(Application, "find", () => chainable([
+    doc({ _id: "a1", status: "pending", job, user: applicant("u1"), attachments: [] }),
+    doc({ _id: "a2", status: "rejected", job, user: applicant("u2"), attachments: [] }),
+  ]));
+  mock.method(JobSkill, "find", () => chainable([
+    { job: "j1", skill: { _id: "s1", skillName: "สื่อสาร" } },
+    { job: "j1", skill: { _id: "s2", skillName: "บริการลูกค้า" } },
+  ]));
+  mock.method(UserSkill, "find", () => chainable([{ user: "u2", skill: "s1" }]));
+
+  const res = response();
+  await listEmployerApplications({ query: {}, user: { id: "e1", role: "employer" } }, res);
+  assert.equal(res.body[0].match.score, 0);
+  assert.equal(res.body[1].match.score, 50);
+  assert.deepEqual(res.body[1].match.matchedSkills, ["สื่อสาร"]);
+  assert.deepEqual(res.body[1].match.missingSkills, ["บริการลูกค้า"]);
 });
 
 test("an employer can only download documents of applications that were not withdrawn", async () => {
@@ -462,8 +493,13 @@ test("members only open active lessons for their own audience; staff open drafts
 
   assert.equal(filters[0].active, true);
   assert.deepEqual(filters[0].$or, [{ audience: "user" }, { audience: { $exists: false } }]);
-  assert.deepEqual(filters[1], { _id: "l1", active: true, audience: "family" });
+  assert.deepEqual({ _id: filters[1]._id, active: filters[1].active, audience: filters[1].audience }, { _id: "l1", active: true, audience: "family" });
   assert.deepEqual(filters[2], { _id: "l1" });
+  // Members never get a lesson past its expiry date (an unset date means it never expires); staff still can.
+  for (const memberFilter of [filters[0], filters[1]]) {
+    assert.deepEqual(memberFilter.$and[0].$or[0], { expiresAt: null });
+    assert.ok(memberFilter.$and[0].$or[1].expiresAt.$gte instanceof Date);
+  }
 });
 
 test("editing a lesson, a scenario or a family mission cannot rewrite who created it or any other field", async () => {
