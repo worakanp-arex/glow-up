@@ -57,8 +57,8 @@ function pick(source, fields) {
 
 export async function updateMe(req, res) {
   const updates = pick(req.body, OWN_PROFILE_FIELDS);
-  // Profile art is chosen from a fixed list of keys; the server maps a key to
-  // its URL so a client can never store an arbitrary image address.
+  // ภาพโปรไฟล์เลือกจากรายการคีย์ที่กำหนดไว้ เซิร์ฟเวอร์แปลงคีย์เป็น
+  // URL จึงไม่มีทางที่ไคลเอนต์จะเก็บที่อยู่รูปภาพอะไรก็ได้
   let replacedAvatarUrl;
   const preset = AVATAR_PRESETS.find((item) => item.key === req.body.avatarPreset);
   if (preset) {
@@ -72,7 +72,7 @@ export async function updateMe(req, res) {
     updates.avatarStyle = "image";
   }
   if (COVER_PRESET_KEYS.includes(req.body.coverPreset)) updates.coverPreset = req.body.coverPreset;
-  // Dotted paths so toggling one sharing option doesn't reset the other.
+  // ใช้ dotted path เพื่อให้การสลับตัวเลือกการแชร์ข้อใดข้อหนึ่งไม่รีเซ็ตอีกข้อ
   for (const key of ["progress", "missions"]) {
     if (typeof req.body.familySharing?.[key] === "boolean") {
       updates[`familySharing.${key}`] = req.body.familySharing[key];
@@ -199,9 +199,9 @@ export async function removeUserSkill(req, res) {
   res.status(204).send();
 }
 
-// Staff accounts (counsellors, and any other role admin manages directly)
-// can't go through the public self-registration/OTP flow, so admin creates
-// them here instead.
+// บัญชีเจ้าหน้าที่ (ผู้ให้คำปรึกษา และบทบาทอื่นที่แอดมินจัดการโดยตรง)
+// ผ่านขั้นตอนสมัครสมาชิก/OTP สาธารณะไม่ได้ แอดมินจึงสร้าง
+// ที่นี่แทน
 export async function createUserByAdmin(req, res) {
   const { name, email, password, role, phone, specialization, hospital } = req.body;
   if (!name || !email || !password || !role) {
@@ -229,8 +229,8 @@ export async function createUserByAdmin(req, res) {
     specialization,
     hospital,
     verifiedStatus: "verified",
-    // Admin-created staff accounts aren't a self-registration consent event —
-    // this just satisfies the schema's required field.
+    // บัญชีเจ้าหน้าที่ที่แอดมินสร้างไม่ใช่เหตุการณ์ให้ความยินยอมจากการสมัครเอง —
+    // ตรงนี้เพียงทำให้ฟิลด์บังคับของ schema ครบ
     pdpaConsent: true,
     pdpaConsentAt: new Date(),
   });
@@ -264,8 +264,8 @@ const VERIFY_STATUS_MESSAGES = {
   suspended: "บัญชีของคุณถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ",
 };
 
-// Admins must always keep at least one active admin account, and nobody can
-// lock themselves out of the system from the admin screens.
+// แอดมินต้องมีบัญชีแอดมินที่ใช้งานได้อย่างน้อยหนึ่งบัญชีเสมอ และไม่มีใคร
+// ล็อกตัวเองออกจากระบบจากหน้าจอแอดมินได้
 async function isLastActiveAdmin(user) {
   if (user.role !== "admin") return false;
   const others = await User.countDocuments({ role: "admin", _id: { $ne: user._id }, verifiedStatus: { $nin: ["rejected", "suspended"] } });
@@ -309,7 +309,7 @@ export async function verifyUser(req, res) {
 
   const message = reason && status !== "verified" ? `${VERIFY_STATUS_MESSAGES[status]} เหตุผล: ${reason}` : VERIFY_STATUS_MESSAGES[status];
   await notifyUser(user._id, message, "system", { link: "/profile" });
-  // A suspended or rejected account loses its live connection now, not when its token runs out.
+  // บัญชีที่ถูกระงับหรือปฏิเสธจะขาดการเชื่อมต่อสดทันที ไม่ต้องรอ token หมดอายุ
   if (status !== "verified") disconnectUser(user._id);
 
   res.json(user);
@@ -338,9 +338,9 @@ export async function updateUser(req, res) {
   res.json(user);
 }
 
-// Deleting an account hides it and ends its sessions, requests and family links,
-// but keeps its records for RETENTION_DAYS (an admin can review or restore it from
-// the deleted-accounts screen) before they are anonymised.
+// การลบบัญชีจะซ่อนบัญชีและสิ้นสุดเซสชัน คำขอ และการเชื่อมต่อครอบครัว
+// แต่เก็บข้อมูลไว้ RETENTION_DAYS วัน (แอดมินตรวจสอบหรือกู้คืนได้จาก
+// หน้าบัญชีที่ถูกลบ) ก่อนจะทำให้ไม่ระบุตัวตน
 export async function deleteUser(req, res) {
   if (String(req.params.id) === String(req.user.id)) {
     return res.status(400).json({ message: "ไม่สามารถลบบัญชีของตัวเองได้" });
@@ -357,9 +357,9 @@ export async function deleteUser(req, res) {
   res.status(204).send();
 }
 
-// "Delete my account". The person must prove it is them (their password, or for a
-// Google-only account the address typed out), because a stolen session could
-// otherwise erase someone's recovery history in one click.
+// "ลบบัญชีของฉัน" ผู้ใช้ต้องพิสูจน์ว่าเป็นตัวเอง (รหัสผ่าน หรือสำหรับ
+// บัญชี Google อย่างเดียวคือพิมพ์อีเมลให้ตรง) เพราะเซสชันที่ถูกขโมย
+// อาจลบประวัติการฟื้นฟูของใครสักคนได้ในคลิกเดียว
 export async function deleteMyAccount(req, res) {
   const user = await User.findById(req.user.id).select("+password");
   if (!user) {

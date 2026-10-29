@@ -45,9 +45,9 @@ import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
-// Behind a reverse proxy (e.g. Nginx on the same machine) set TRUST_PROXY=loopback
-// so rate limiting sees each visitor's real IP instead of the proxy's.
-// Accepts true/false, a hop count (e.g. 1) or names/IPs like "loopback".
+// เมื่ออยู่หลัง reverse proxy (เช่น Nginx บนเครื่องเดียวกัน) ให้ตั้ง TRUST_PROXY=loopback
+// เพื่อให้ rate limit เห็น IP จริงของผู้เข้าชมแทน IP ของ proxy
+// รับค่า true/false จำนวน hop (เช่น 1) หรือชื่อ/IP เช่น "loopback"
 export function parseTrustProxy(value) {
   const v = String(value).trim();
   if (/^(true|yes)$/i.test(v)) return true;
@@ -59,24 +59,24 @@ if (process.env.TRUST_PROXY) {
   app.set("trust proxy", parseTrustProxy(process.env.TRUST_PROXY));
 }
 
-// HTTPS-only for a year, for this host alone: the policy must not reach other
-// subdomains of the domain, which this app doesn't control.
+// บังคับใช้ HTTPS เป็นเวลา 1 ปี เฉพาะโฮสต์นี้เท่านั้น: นโยบายต้องไม่ลามไปยัง
+// ซับโดเมนอื่นของโดเมนนี้ ซึ่งแอปนี้ไม่ได้ควบคุม
 const HSTS = { maxAge: 31536000, includeSubDomains: false };
-// An origin never ends in "/", so tolerate a trailing slash or spaces pasted into the setting.
+// origin ไม่มีทางลงท้ายด้วย "/" จึงรองรับกรณีที่วางค่ามามีเครื่องหมาย / ต่อท้ายหรือมีช่องว่างเกินในการตั้งค่า
 const allowedOrigin = (process.env.CORS_ORIGIN || "http://localhost:5173").trim().replace(/\/+$/, "");
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
-// Production logs say who asked for which path and how it went, with a
-// timestamp, and leave the query string out (it can carry search terms or ids).
+// log ของ production ระบุว่าใครเรียก path ไหนและผลเป็นอย่างไร พร้อมเวลา
+// โดยไม่เก็บ query string (เพราะอาจมีคำค้นหาหรือรหัสอ้างอิง)
 morgan.token("path", (req) => req.originalUrl.split("?")[0]);
 app.use(morgan(isProductionLike() ? ":date[iso] :remote-addr :method :path :status :res[content-length] :response-time ms" : "dev"));
 app.use(sanitizeMongoOperators);
 
-// Optional single-service hosting: set FRONTEND_DIST to the built frontend
-// (e.g. ../frontend/dist) and this server also serves the web app. The page gets
-// its own Content-Security-Policy (config/csp.js) that allows Google Sign-In's
-// script, frame and styles and nothing else third-party; API responses keep helmet's default one.
+// โหมดโฮสต์บริการเดียว (ไม่บังคับ): ตั้ง FRONTEND_DIST ชี้ไปยัง frontend ที่ build แล้ว
+// (เช่น ../frontend/dist) เซิร์ฟเวอร์นี้จะให้บริการเว็บแอปด้วย หน้าเว็บจะมี
+// Content-Security-Policy ของตัวเอง (config/csp.js) ที่อนุญาตเฉพาะสคริปต์ เฟรม และสไตล์ของ Google Sign-In
+// และไม่อนุญาตบุคคลที่สามอื่น ส่วน response ของ API ใช้ค่าเริ่มต้นของ helmet
 if (process.env.FRONTEND_DIST) {
   const distDir = path.resolve(process.cwd(), process.env.FRONTEND_DIST);
   const isBackendPath = (p) => p.startsWith("/api") || p.startsWith("/uploads") || p.startsWith("/socket.io");
@@ -95,9 +95,9 @@ if (process.env.FRONTEND_DIST) {
 }
 
 app.use(helmet({ strictTransportSecurity: HSTS }));
-// Avatars, course covers and job images are intentionally public and rendered
-// cross-origin by the frontend; helmet's default same-origin CORP would
-// silently break that <img> loading, so relax it for these routes only.
+// รูปโปรไฟล์ ปกคอร์ส และรูปงานตั้งใจให้เป็นสาธารณะและถูกแสดงข้ามโดเมนโดย frontend
+// ค่า CORP แบบ same-origin ตามค่าเริ่มต้นของ helmet จะทำให้การโหลด <img> พังโดยไม่แจ้งเตือน
+// จึงผ่อนปรนเฉพาะ route เหล่านี้
 for (const [route, folder] of [["avatars", "avatars"], ["course-covers", "course-covers"], ["job-images", "job-images"]]) {
   app.use(`/uploads/${route}`, (req, res, next) => {
     if (!/\.(png|jpe?g|webp)$/i.test(req.path)) return res.sendStatus(404);

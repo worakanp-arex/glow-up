@@ -6,8 +6,8 @@ import { checkAndAwardMissions } from "./missionController.js";
 import { runRiskAssessment } from "../services/riskAssessmentService.js";
 
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-// The check-in screen offers the last 7 days; one more is allowed for the
-// difference between the person's clock and Bangkok time around midnight.
+// หน้าเช็คอินให้เลือกย้อนหลัง 7 วัน และอนุญาตเพิ่มอีก 1 วัน
+// เผื่อความต่างระหว่างนาฬิกาของผู้ใช้กับเวลาไทยช่วงเที่ยงคืน
 const MAX_BACKFILL_DAYS = 7;
 
 export async function createEmotionLog(req, res) {
@@ -20,11 +20,10 @@ export async function createEmotionLog(req, res) {
   const now = new Date();
   const todayKey = toBangkokDateKey(now);
 
-  // Optional `dateKey` lets a user backfill a past day they missed — never
-  // allow logging into the future, validate the format before trusting it, and
-  // only reach back a week: streaks, milestones and rewards are computed from
-  // these entries, so unlimited backfilling would let anyone fabricate a long
-  // streak (and bury a worsening trend that the risk assessment looks for).
+  // `dateKey` (ไม่บังคับ) ให้ผู้ใช้บันทึกย้อนหลังวันที่พลาดไป — ห้ามบันทึกล่วงหน้า
+  // ต้องตรวจรูปแบบก่อนเชื่อถือ และย้อนได้ไม่เกินหนึ่งสัปดาห์: สตรีค หมุดหมาย
+  // และรางวัลคำนวณจากบันทึกเหล่านี้ การบันทึกย้อนหลังไม่จำกัดจะทำให้ใครก็ปลอมสตรีคยาวๆ ได้
+  // (และปิดบังแนวโน้มที่แย่ลงซึ่งการประเมินความเสี่ยงใช้ตรวจจับ)
   let dateKey = todayKey;
   let date = now;
   if (req.body.dateKey !== undefined) {
@@ -41,8 +40,8 @@ export async function createEmotionLog(req, res) {
     date = new Date(`${dateKey}T12:00:00+07:00`);
   }
 
-  // One entry per calendar day: re-submitting the same day updates that
-  // entry instead of creating a duplicate (keeps the calendar/analysis unambiguous).
+  // หนึ่งรายการต่อหนึ่งวัน: การส่งซ้ำในวันเดียวกันจะอัปเดตรายการเดิม
+  // แทนการสร้างซ้ำ (ทำให้ปฏิทิน/การวิเคราะห์ไม่กำกวม)
   const log = await EmotionLog.findOneAndUpdate(
     { user: req.user.id, dateKey },
     { happinessLevel, cravingLevel, context, note, date, dateKey },
@@ -66,8 +65,8 @@ export async function myEmotionStreak(req, res) {
   res.json(stats);
 }
 
-// Admin-only: read-only view of a specific patient's check-in history, for
-// clinical review. Never exposes this to other users.
+// เฉพาะแอดมิน: มุมมองอ่านอย่างเดียวของประวัติเช็คอินของผู้ป่วยรายหนึ่ง เพื่อการทบทวนทางคลินิก
+// ไม่เปิดให้ผู้ใช้อื่นเห็นเด็ดขาด
 export async function userEmotionStreak(req, res) {
   const targetUser = await User.findById(req.params.userId).select("name email role");
   if (!targetUser || targetUser.role !== "user") {

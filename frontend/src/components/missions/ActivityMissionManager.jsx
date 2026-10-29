@@ -20,7 +20,7 @@ const FILTERS = [
   { key: "all", label: "ทั้งหมด" },
 ];
 
-// Where the mission stands: switched off, not started, running, or past its end date.
+// สถานะของภารกิจ: ปิดอยู่ ยังไม่เริ่ม กำลังดำเนินอยู่ หรือเลยวันสิ้นสุดแล้ว
 function missionState(activity, now = new Date()) {
   if (!activity.active) return { key: "inactive", label: "ปิดใช้งาน" };
   if (activity.startDate && new Date(activity.startDate) > now) return { key: "upcoming", label: "ยังไม่เริ่ม" };
@@ -33,8 +33,8 @@ function period(activity) {
   return [activity.startDate && `เริ่ม ${formatCourseDate(activity.startDate)}`, activity.endDate && `สิ้นสุด ${formatCourseDate(activity.endDate)}`].filter(Boolean).join(" · ");
 }
 
-// Create, edit, switch off and delete daily missions, and review the logs that
-// need approval. Used by both counsellors and admins.
+// สร้าง แก้ไข ปิด และลบภารกิจประจำวัน และตรวจบันทึกที่ต้องอนุมัติ
+// ใช้ทั้งผู้ให้คำปรึกษาและแอดมิน
 export default function ActivityMissionManager() {
   const [activities, setActivities] = useState([]);
   const [categories, setCategories] = useState([]);

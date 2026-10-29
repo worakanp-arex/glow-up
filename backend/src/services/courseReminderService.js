@@ -12,9 +12,9 @@ function daysLabel(endDate, now) {
   return days <= 1 ? "ภายในวันนี้หรือพรุ่งนี้" : `ในอีก ${days} วัน`;
 }
 
-// Tells people who saved a course that it is about to expire. Runs on login,
-// when they open their saved courses, and hourly for everyone (see server.js);
-// each person gets at most one reminder per course per day.
+// แจ้งผู้ที่บันทึกคอร์สไว้ว่าคอร์สใกล้หมดอายุ ทำงานตอนล็อกอิน
+// ตอนเปิดคอร์สที่บันทึก และทุกชั่วโมงสำหรับทุกคน (ดู server.js)
+// แต่ละคนได้รับการเตือนไม่เกินหนึ่งครั้งต่อคอร์สต่อวัน
 export async function sendCourseExpiryReminders({ userId, now = new Date() } = {}) {
   const horizon = new Date(now.getTime() + WARN_DAYS * DAY_MS);
   const courses = await Course.find({ endDate: { $gte: now, $lte: horizon } }).select("title endDate");

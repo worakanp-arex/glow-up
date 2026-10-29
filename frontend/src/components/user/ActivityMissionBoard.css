@@ -65,8 +65,10 @@
   background-color: var(--color-success-bg);
 }
 
-/* icon | text | action — the action drops below the text on narrow screens
-   instead of squeezing the title and overlapping the button. */
+/*
+ * ไอคอน | ข้อความ | ปุ่ม — ปุ่มย้ายลงใต้ข้อความบนหน้าจอแคบ
+ * แทนการบีบหัวเรื่องจนทับปุ่ม
+ */
 .activity-mission-item-main {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

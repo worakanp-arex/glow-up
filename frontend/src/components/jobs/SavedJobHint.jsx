@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 import { Lightbulb } from "lucide-react";
 import "./SavedJobHint.css";
 
-// Shown right after a job is bookmarked: courses are suggested from the jobs a
-// person saves, so point them to where those suggestions appear.
+// แสดงทันทีหลังบุ๊กมาร์กงาน: คอร์สถูกแนะนำจากงานที่
+// ผู้ใช้บันทึก จึงชี้ไปยังที่ที่คำแนะนำเหล่านั้นปรากฏ
 export default function SavedJobHint({ show }) {
   if (!show) return null;
   return (

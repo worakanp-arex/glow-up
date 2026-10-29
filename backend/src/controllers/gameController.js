@@ -9,9 +9,9 @@ import { RECOVERY_DOMAINS, WHEEL_SEGMENTS, COPING_PAIRS, QUIZ_BANK, EMOTION_CHOI
 
 const GAME_TYPES = ["wheel", "memory", "quiz", "breathing", "emotion"];
 
-// Games are open to play any time and as often as the user likes. Only the
-// first play of each game per Bangkok day is recorded and earns points (the
-// unique index on GamePlay enforces that); later plays are practice rounds.
+// เล่นเกมได้ทุกเมื่อและกี่ครั้งก็ได้ แต่บันทึกและให้คะแนนเฉพาะ
+// การเล่นครั้งแรกของแต่ละเกมต่อวัน (ตามเวลาไทย) (unique index บน GamePlay บังคับเรื่องนี้)
+// การเล่นครั้งต่อมาเป็นรอบฝึกซ้อม
 function isDuplicate(err) {
   return err?.code === 11000;
 }
@@ -26,7 +26,7 @@ function pickTodaysQuiz(dateKey) {
   return picked;
 }
 
-// A streak counts consecutive Bangkok days with at least one recorded play.
+// สตรีคนับจำนวนวัน (ตามเวลาไทย) ที่เล่นและมีบันทึกอย่างน้อยหนึ่งครั้งติดต่อกัน
 function streakFromPlays(plays) {
   const stats = computeStreakStats(plays.map((play) => ({ date: new Date(`${play.dateKey}T12:00:00+07:00`) })));
   return { current: stats.currentStreak, longest: stats.longestStreak, playedToday: stats.loggedToday };
@@ -105,8 +105,8 @@ export async function submitEmotion(req, res) {
   res.status(201).json({ correctCount, total: questions.length, answerKey, practice: false, pointsAwarded: correctCount, play });
 }
 
-// The 4-7-8 timer runs in the browser; the server just records a finished
-// session. Finishing every round earns the full 5 points, fewer earns 3.
+// ตัวจับเวลา 4-7-8 ทำงานในเบราว์เซอร์ เซิร์ฟเวอร์เพียงบันทึกรอบที่เล่นจบ
+// ถ้าจบครบทุกรอบได้ 5 คะแนนเต็ม จบไม่ครบได้ 3 คะแนน
 export async function submitBreathing(req, res) {
   const dateKey = toBangkokDateKey(new Date());
   const rounds = Math.max(0, Math.min(20, Number.parseInt(req.body.rounds, 10) || 0));
@@ -212,7 +212,7 @@ export async function submitQuiz(req, res) {
     if (answers[question.id] === question.correctIndex) correctCount += 1;
   }
   const points = correctCount * 3;
-  // Revealed only after submitting, so the player can see what they missed.
+  // เปิดเผยหลังส่งคำตอบเท่านั้น เพื่อให้ผู้เล่นเห็นว่าพลาดข้อไหน
   const answerKey = todaysQuestions.map(({ id, correctIndex }) => ({ id, correctIndex }));
 
   let play;
@@ -236,9 +236,8 @@ export async function submitQuiz(req, res) {
   res.status(201).json({ correctCount, total: todaysQuestions.length, answerKey, practice: false, pointsAwarded: points, play });
 }
 
-// Normalization targets are heuristic (documented, not clinically derived) —
-// the count of that domain's activity in the last 30 days needed to reach a
-// 100% axis on the radar chart.
+// เป้าหมายการทำให้เป็นมาตรฐานเป็นค่าประมาณ (มีเอกสารกำกับ ไม่ได้มาจากหลักการทางคลินิก) —
+// คือจำนวนกิจกรรมของโดเมนนั้นใน 30 วันล่าสุดที่ทำให้แกนในเรดาร์ถึง 100%
 const DOMAIN_TARGETS = {
   self_awareness: 20,
   coping: 15,

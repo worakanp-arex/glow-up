@@ -1,8 +1,8 @@
 const COVER_TONES = ["primary", "lilac", "peach", "sky"];
 
-// The picture shown for a course: its own cover when staff set one, otherwise
-// one of the built-in lesson covers chosen by position (`index`) or, when the
-// position is unknown, by the course id so the same course keeps its cover.
+// รูปที่แสดงของคอร์ส: ปกของตัวเองเมื่อเจ้าหน้าที่ตั้งไว้ มิฉะนั้นใช้
+// ปกบทเรียนที่มีมาในระบบตามตำแหน่ง (`index`) หรือเมื่อ
+// ไม่ทราบตำแหน่งก็ใช้ id ของคอร์ส เพื่อให้คอร์สเดิมได้ปกเดิมเสมอ
 export function courseCover(course, index) {
   if (course?.coverImage) return { src: course.coverImage, tone: "primary" };
   let position = index;

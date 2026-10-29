@@ -21,7 +21,7 @@ const STATUS_FILTERS = [
 ];
 const DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" });
 
-// Every job application in the system, one expandable row per application.
+// ใบสมัครงานทั้งหมดในระบบ หนึ่งแถวที่ขยายได้ต่อหนึ่งใบสมัคร
 function Applications() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requested = searchParams.get("status") || "";

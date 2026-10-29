@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// The login session lives in an HttpOnly cookie that the browser attaches by
-// itself (`withCredentials`). Scripts on the page never see the token, so a
-// script injected into the page could not steal it.
+// เซสชันล็อกอินอยู่ใน cookie แบบ HttpOnly ที่เบราว์เซอร์แนบเอง
+// (`withCredentials`) สคริปต์ในหน้าเว็บไม่เห็น token ดังนั้น
+// สคริปต์ที่ถูกแทรกเข้ามาจึงขโมยไม่ได้
 const api = axios.create({ baseURL: "/api", withCredentials: true });
 
 api.interceptors.response.use((response) => response, (error) => {

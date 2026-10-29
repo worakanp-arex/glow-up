@@ -18,7 +18,7 @@
 .job-preview-salary { margin: 16px 0 0; font-size: 1.45rem; font-weight: 700; color: var(--color-primary-600); }
 .job-preview-salary small { font-size: .85rem; font-weight: 600; }
 
-/* Skill match box */
+/* กล่องความตรงของทักษะ */
 .job-match { margin-top: 22px; padding: 18px; border: 1px solid var(--color-primary-100); border-radius: 16px; background: var(--color-primary-50); }
 .job-match-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: .85rem; }
 .job-match-head span { font-size: .75rem; color: var(--color-text-muted); }
@@ -30,7 +30,7 @@
 .job-match-note a { color: var(--color-primary-700); }
 .job-preview-section .job-match-chips span { background: var(--color-surface-hover); }
 
-/* Highlighted section headings */
+/* หัวข้อส่วนแบบเน้น */
 .job-preview-section { margin-top: 24px; }
 .job-preview-section h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 1rem; font-weight: 700; color: var(--color-text); }
 .job-preview-section h3::before { content: ""; width: 4px; height: 18px; border-radius: 4px; background: var(--color-primary-500); }

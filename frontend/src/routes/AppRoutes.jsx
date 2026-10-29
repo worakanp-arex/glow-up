@@ -67,8 +67,8 @@ const FamilyAcceptInvite = lazy(() => import("../pages/family/FamilyAcceptInvite
 const FamilyGuide = lazy(() => import("../pages/family/FamilyGuide.jsx"));
 const FamilyGuideDetail = lazy(() => import("../pages/family/FamilyGuideDetail.jsx"));
 
-// The job board is open to visitors, job seekers and employers; staff and
-// family accounts are sent to their own home instead.
+// กระดานงานเปิดให้ผู้เยี่ยมชม ผู้หางาน และนายจ้าง บัญชีเจ้าหน้าที่และ
+// ครอบครัวจะถูกส่งไปหน้าหลักของตนแทน
 function JobBoardGate() {
   const { user, isAuthenticated } = useAuth();
   return canSearchJobs(user, isAuthenticated) ? <Outlet /> : <Navigate to={roleHome(user.role)} replace />;

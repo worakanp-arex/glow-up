@@ -1,5 +1,5 @@
-// Removes everything loadtest/seed.js created, by the same name patterns it
-// used to write them. Safe to run even if nothing was seeded.
+// ลบทุกอย่างที่ loadtest/seed.js สร้างไว้ โดยใช้รูปแบบชื่อเดียวกับที่ใช้ตอนสร้าง
+// รันได้อย่างปลอดภัยแม้ยังไม่เคยสร้างข้อมูลมาก่อน
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { pathToFileURL } from "node:url";

@@ -14,7 +14,7 @@
 .counselling-sidebar, .counselling-side { min-width: 0; }
 .counselling-side { display: flex; flex-direction: column; gap: 24px; }
 
-/* ---------- Request form ---------- */
+/* ---------- ฟอร์มคำขอ ---------- */
 .counselling-form { display: flex; flex-direction: column; gap: 22px; }
 .counselling-form-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .counselling-form-title { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--color-text); }
@@ -36,7 +36,7 @@
 
 .counselling-error { margin: 0; padding: 10px 12px; border-radius: 10px; background-color: var(--color-danger-bg); color: var(--color-danger); font-size: .85rem; }
 
-/* ---------- Appointments / history ---------- */
+/* ---------- นัดหมาย / ประวัติ ---------- */
 .counselling-history-sub { margin: 2px 0 0; font-size: .75rem; font-weight: 400; color: var(--color-text-muted); }
 .counselling-history-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 16px; border-radius: 12px; background: var(--color-surface-hover); }
 .counselling-history-tabs button { min-height: 38px; border: 0; border-radius: 9px; background: none; color: var(--color-text-secondary); font: inherit; font-size: .8rem; cursor: pointer; }
@@ -77,7 +77,7 @@
   .counselling-type-btn { flex-direction: column; gap: 4px; padding: 10px 6px; font-size: .78rem; }
 }
 
-/* ---------- Right column fills the form's height; long lists scroll ---------- */
+/* ---------- คอลัมน์ขวาเต็มความสูงของฟอร์ม รายการยาวเลื่อนได้ ---------- */
 .counselling-layout { align-items: stretch; }
 .counselling-history { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .counselling-history-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin-right: -8px; padding-right: 8px; scrollbar-width: thin; }
@@ -100,7 +100,7 @@
 .counselling-counts dt { font-size: .68rem; color: var(--color-text-muted); }
 .counselling-counts dd { margin: 2px 0 0; font-size: 1.2rem; font-weight: 600; color: var(--color-primary-600); }
 
-/* ---------- request in progress: status, chat while waiting, cancel ---------- */
+/* ---------- คำขอที่ดำเนินอยู่: สถานะ แชทระหว่างรอ ยกเลิก ---------- */
 .counselling-active { display: flex; flex-direction: column; gap: 14px; }
 .counselling-active-topic { display: flex; align-items: flex-start; gap: 10px; margin: 0; font-size: 1.05rem; font-weight: 600; line-height: 1.5; color: var(--color-text); overflow-wrap: anywhere; }
 .counselling-active-topic svg { flex-shrink: 0; margin-top: 3px; color: var(--color-primary-600); }

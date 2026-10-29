@@ -1,5 +1,5 @@
-// Manual, opt-in load-test runner. Not wired into CI — see loadtest/README.md
-// for the run procedure (needs a live MongoDB and a running backend server).
+// ตัวรันการทดสอบโหลดแบบสั่งรันเอง ไม่ได้ผูกกับ CI ดูขั้นตอนใน loadtest/README.md
+// (ต้องมี MongoDB ที่ทำงานอยู่และ backend ที่กำลังรัน)
 import { run as authBruteforce } from "./scenarios/auth-bruteforce.js";
 import { run as listEndpoints } from "./scenarios/list-endpoints.js";
 import { run as fileUpload } from "./scenarios/file-upload.js";
@@ -16,9 +16,9 @@ async function main() {
     process.exit(1);
   }
 
-  // auth-bruteforce deliberately exhausts the login rate limiter for this
-  // client's IP (shared across login/OTP/reset — see rateLimiters.js), so it
-  // runs last: everything else here needs to log in first.
+  // auth-bruteforce ตั้งใจใช้โควตา rate limit ของการล็อกอินของ IP นี้จนหมด
+  // (ใช้ร่วมกันระหว่างล็อกอิน/OTP/รีเซ็ตรหัสผ่าน ดู rateLimiters.js) จึงต้องรันเป็นอันดับสุดท้าย
+  // เพราะสถานการณ์อื่นต้องล็อกอินก่อน
   await listEndpoints(baseUrl);
   await fileUpload(baseUrl);
   await socketConnections(baseUrl);

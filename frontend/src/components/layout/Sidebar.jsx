@@ -4,8 +4,8 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { getNavLinks } from "./navLinks.js";
 import "./Sidebar.css";
 
-// Left-hand navigation for roles with many menu items (admin, counsellor).
-// Links are grouped by `group` in the order they appear in navLinks.js.
+// เมนูนำทางด้านซ้ายสำหรับบทบาทที่มีรายการเมนูมาก (แอดมิน ผู้ให้คำปรึกษา)
+// ลิงก์จัดกลุ่มตาม `group` ตามลำดับที่ปรากฏใน navLinks.js
 function Sidebar() {
   const { user, isAuthenticated } = useAuth();
   const links = getNavLinks(user, isAuthenticated).filter(({ group }) => group);

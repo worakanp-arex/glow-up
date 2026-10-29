@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 
-// One attempt of a joint family mission on a given day — completed only once
-// both the recovering user and the linked family member have confirmed it.
+// ความพยายามหนึ่งครั้งของภารกิจร่วมในวันหนึ่ง — จะสำเร็จก็ต่อเมื่อ
+// ทั้งผู้ฟื้นฟูและสมาชิกครอบครัวที่เชื่อมต่อกันยืนยันแล้ว
 const familyMissionLogSchema = new mongoose.Schema(
   {
     familyLink: { type: mongoose.Schema.Types.ObjectId, ref: "FamilyLink", required: true },
-    // Denormalized from familyLink.recoveringUser so getTotalPoints() can sum
-    // this user's completed family-mission points with a single indexed
-    // query, the same shape as its other point sources, instead of a
-    // FamilyLink lookup on every points computation.
+    // สำเนาจาก familyLink.recoveringUser เพื่อให้ getTotalPoints() รวมคะแนน
+    // ภารกิจครอบครัวที่สำเร็จของผู้ใช้ได้ด้วย query เดียวที่มี index
+    // รูปแบบเดียวกับแหล่งคะแนนอื่น แทนการค้น FamilyLink
+    // ทุกครั้งที่คำนวณคะแนน
     recoveringUser: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     familyMission: { type: mongoose.Schema.Types.ObjectId, ref: "FamilyMission", required: true },
     dateKey: { type: String, required: true },

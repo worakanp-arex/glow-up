@@ -18,7 +18,7 @@ import { groupByMonth, monthGroupLabel } from "../../utils/calendarGrid.js";
 import { BACKFILL_WINDOW_DAYS } from "../../constants/emotionLog.js";
 import "./CravingTracker.css";
 
-// The history box scrolls, so show a fuller month before "load more".
+// กล่องประวัติเลื่อนได้ จึงแสดงเดือนที่เต็มขึ้นก่อนถึง "โหลดเพิ่ม"
 const MONTH_INITIAL_LIMIT = 15;
 const MONTH_LOAD_MORE_STEP = 10;
 const MISSING_DAYS_WINDOW = BACKFILL_WINDOW_DAYS;

@@ -77,7 +77,7 @@
   color: var(--color-primary-600);
 }
 
-/* ---------- Partners strip ---------- */
+/* ---------- แถบพันธมิตร ---------- */
 
 .footer-partners {
   border-top: 1px solid var(--color-border);
@@ -121,7 +121,7 @@
   transform: translateY(-2px);
 }
 
-/* ---------- Bottom bar ---------- */
+/* ---------- แถบด้านล่าง ---------- */
 
 .footer-bottom {
   border-top: 1px solid var(--color-border);

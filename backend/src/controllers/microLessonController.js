@@ -6,9 +6,9 @@ const STAFF_ROLES = ["admin", "counsellor"];
 const EDITABLE_FIELDS = ["title", "body", "category", "audience", "order", "active"];
 const INVALID_EXPIRY = { message: "วันหมดอายุไม่ถูกต้อง" };
 
-// Lessons created before the `audience` field existed have no value set —
-// treat those as "user" so they keep showing up for existing installs. Lessons
-// past their expiry date drop out of what members see.
+// บทเรียนที่สร้างก่อนมีฟิลด์ `audience` ไม่มีค่าตั้งไว้ —
+// ให้ถือเป็น "user" เพื่อให้ยังแสดงสำหรับระบบที่ติดตั้งอยู่เดิม
+// บทเรียนที่เลยวันหมดอายุจะหลุดจากสิ่งที่สมาชิกเห็น
 function readableLessonFilter(role) {
   const readable = role === "family"
     ? { active: true, audience: "family" }
@@ -21,9 +21,9 @@ export async function listActiveLessons(req, res) {
   res.json(lessons);
 }
 
-// Staff may open any lesson (drafts included); everyone else only the active
-// lessons written for their audience — a draft or the other audience's lesson
-// answers 404 rather than confirming it exists.
+// เจ้าหน้าที่เปิดบทเรียนใดก็ได้ (รวมฉบับร่าง) คนอื่นเปิดได้เฉพาะบทเรียน
+// ที่ใช้งานอยู่และเขียนสำหรับกลุ่มของตน — ฉบับร่างหรือบทเรียนของกลุ่มอื่น
+// จะตอบ 404 แทนการยืนยันว่ามีอยู่
 export async function getMicroLesson(req, res) {
   const filter = STAFF_ROLES.includes(req.user.role) ? { _id: req.params.id } : { _id: req.params.id, ...readableLessonFilter(req.user.role) };
   const lesson = await MicroLesson.findOne(filter);

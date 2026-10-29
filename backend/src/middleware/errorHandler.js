@@ -1,8 +1,8 @@
 import { isProductionLike } from "../config/env.js";
 
 export function errorHandler(err, req, res, next) {
-  // Log the failure, not the whole error object: Mongoose attaches the offending
-  // values (which can be a patient's notes) to validation and cast errors.
+  // บันทึกความล้มเหลว ไม่ใช่ทั้งอ็อบเจ็กต์ error: Mongoose แนบค่าที่ผิด
+  // (ซึ่งอาจเป็นโน้ตของผู้ป่วย) ไว้กับ error ของการตรวจสอบและการแปลงชนิด
   console.error(`[${req.method} ${req.path}]`, err.name || "Error", "-", err.message);
   if (err.stack && !isProductionLike()) console.error(err.stack);
   if (err.code === "EMAIL_DELIVERY_FAILED") {

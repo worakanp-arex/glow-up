@@ -24,7 +24,7 @@ function formatDateTime(iso) {
   return new Date(iso).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
 }
 
-// Progress shown in the sidebar, derived only from fields the session already has.
+// ความคืบหน้าที่แสดงในแถบด้านข้าง คำนวณจากฟิลด์ที่ session มีอยู่แล้วเท่านั้น
 function progressSteps(session) {
   const steps = [
     { label: "ส่งคำขอแล้ว", done: true, time: session.createdAt },
@@ -38,8 +38,8 @@ function progressSteps(session) {
   return steps.map((step, index) => ({ ...step, current: index === current }));
 }
 
-// datetime-local inputs need a *local*-time "YYYY-MM-DDTHH:mm" value — slicing
-// the ISO string directly would leave it in UTC and misalign by the tz offset.
+// input แบบ datetime-local ต้องการค่าเวลา *ท้องถิ่น* "YYYY-MM-DDTHH:mm" — การตัด
+// สตริง ISO ตรงๆ จะค้างเป็น UTC และคลาดเคลื่อนตามค่าเขตเวลา
 function toDatetimeLocalValue(iso) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -84,7 +84,7 @@ function CounsellingDetail() {
       const updated = await counsellingService.claimSession(id);
       setSession(updated);
     } catch {
-      // The failure is already shown as a toast; keep the case on screen instead of replacing it with the message.
+      // ความล้มเหลวแสดงเป็น toast แล้ว ให้คงเคสไว้บนหน้าจอแทนการแทนที่ด้วยข้อความ
     } finally {
       setClaiming(false);
     }
@@ -311,7 +311,7 @@ function CounsellingDetail() {
               </Link>
 
               {isUnclaimed ? (
-                // Only counsellors can take a case (the API rejects anyone else), so admins just review it.
+                // เฉพาะผู้ให้คำปรึกษาเท่านั้นที่รับเคสได้ (API ปฏิเสธคนอื่น) แอดมินจึงทำได้เพียงตรวจสอบ
                 user.role === "counsellor" ? (
                   <button
                     type="button"

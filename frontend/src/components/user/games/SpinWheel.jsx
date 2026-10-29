@@ -21,8 +21,8 @@ function slicePath(start, end) {
   return `M${R},${R} L${x1},${y1} A${R},${R} 0 ${large} 1 ${x2},${y2} Z`;
 }
 
-// Segment labels come from the server so the landing spot always matches
-// the segment it picked.
+// ป้ายของแต่ละช่องมาจากเซิร์ฟเวอร์ ตำแหน่งที่วงล้อหยุดจึงตรงกับ
+// ช่องที่เซิร์ฟเวอร์เลือกเสมอ
 function SpinWheel({ segments, onPlayed, onClose }) {
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
@@ -35,7 +35,7 @@ function SpinWheel({ segments, onPlayed, onClose }) {
   const count = segments.length;
   const angle = 360 / Math.max(count, 1);
 
-  // An older API without wheelSegments would otherwise draw an empty wheel.
+  // API รุ่นเก่าที่ไม่มี wheelSegments จะวาดวงล้อว่างเปล่า
   if (count === 0) return <p className="game-error">โหลดวงล้อไม่สำเร็จ ลองรีเฟรชหน้านี้อีกครั้ง</p>;
 
   async function handleSpin() {

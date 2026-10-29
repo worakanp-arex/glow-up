@@ -8,8 +8,8 @@ const emotionLogSchema = new mongoose.Schema(
     context: { type: String, enum: ["work", "family", "environment", "other"] },
     note: { type: String },
     date: { type: Date, default: Date.now },
-    // Asia/Bangkok calendar day (YYYY-MM-DD) this entry belongs to — enforces
-    // one entry per user per day; re-submitting the same day updates it instead.
+    // วันตามปฏิทิน Asia/Bangkok (YYYY-MM-DD) ที่รายการนี้เป็นของ — บังคับ
+    // หนึ่งรายการต่อผู้ใช้ต่อวัน การส่งซ้ำในวันเดียวกันจะอัปเดตรายการเดิม
     dateKey: { type: String, required: true },
   },
   { timestamps: true }

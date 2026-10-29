@@ -5,8 +5,8 @@ import * as rewardService from "../../services/rewardService.js";
 import { resolveIcon } from "../../utils/lucideIcon.js";
 import "./MissionBoard.css";
 
-// Icons are admin-chosen from the shared catalogue, so every icon an admin can
-// pick shows up here as picked (unknown names fall back to a plain circle).
+// ไอคอนแอดมินเลือกจากแคตตาล็อกที่ใช้ร่วมกัน ดังนั้นทุกไอคอนที่แอดมิน
+// เลือกได้จะแสดงตามที่เลือกที่นี่ (ชื่อที่ไม่รู้จักจะใช้วงกลมเปล่าแทน)
 function MissionIcon({ name, ...props }) {
   const Icon = resolveIcon(name);
   return <Icon {...props} />;

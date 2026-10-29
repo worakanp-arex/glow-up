@@ -1,4 +1,4 @@
-// Only preserve our invitation flow, never an arbitrary redirect supplied in a URL.
+// รักษาเฉพาะขั้นตอนคำเชิญของเราเท่านั้น ไม่รับ redirect ใดๆ ที่ส่งมาใน URL
 export function inviteReturnTo(searchParams) {
   const target = searchParams.get("redirect");
   if (!target?.startsWith("/family/accept?")) return null;

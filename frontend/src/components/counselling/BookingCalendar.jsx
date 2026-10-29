@@ -15,10 +15,9 @@ function localDateKey(dateInput) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// Month view of appointments. A day is blue while something on it is still in
-// progress, green once everything on it is finished, and red when the only
-// appointments on it were cancelled. Pass `title` / `actions` to put a
-// heading and controls on top.
+// มุมมองรายเดือนของนัดหมาย วันจะเป็นสีน้ำเงินขณะที่ยังมีบางอย่างดำเนินอยู่
+// เป็นสีเขียวเมื่อทุกอย่างเสร็จสิ้น และสีแดงเมื่อนัดหมายทั้งหมดในวันนั้นถูกยกเลิก
+// ส่ง `title` / `actions` เพื่อใส่หัวข้อและตัวควบคุมไว้ด้านบน
 function BookingCalendar({ sessions, selectedDate, onSelectDate, compact = false, title = "ปฏิทินนัดหมายของฉัน", actions = null }) {
   const today = useMemo(() => new Date(), []);
   const [year, setYear] = useState(today.getFullYear());

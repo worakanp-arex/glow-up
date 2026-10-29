@@ -10,9 +10,8 @@ export async function login(baseUrl, email, password) {
     throw new Error(`Login failed for ${email}: ${res.status} — did you run "node loadtest/seed.js" first?`);
   }
   await res.text();
-  // The server keeps the session in an HttpOnly cookie and no longer repeats the
-  // token in the response body; the load test presents it as a Bearer header,
-  // which the API accepts from non-browser clients.
+  // เซิร์ฟเวอร์เก็บเซสชันไว้ใน cookie แบบ HttpOnly และไม่ส่ง token ซ้ำใน response body แล้ว
+  // การทดสอบโหลดจึงส่ง token ผ่าน Bearer header ซึ่ง API ยอมรับสำหรับไคลเอนต์ที่ไม่ใช่เบราว์เซอร์
   const cookie = res.headers.getSetCookie().find((entry) => entry.startsWith("token="));
   if (!cookie) throw new Error(`Login response for ${email} set no session cookie`);
   return decodeURIComponent(cookie.split(";")[0].slice("token=".length));

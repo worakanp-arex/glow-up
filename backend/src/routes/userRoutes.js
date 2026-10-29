@@ -121,7 +121,7 @@ router.post(
   asyncHandler(addRehabilitationRecord)
 );
 
-// "Delete my account" for every role. Wrong passwords are counted like failed password changes.
+// "ลบบัญชีของฉัน" สำหรับทุกบทบาท รหัสผ่านที่ผิดนับเหมือนการเปลี่ยนรหัสผ่านที่ล้มเหลว
 router.delete(
   "/me",
   verifyToken,

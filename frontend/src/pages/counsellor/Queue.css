@@ -195,7 +195,7 @@
   color: var(--color-text-faint);
 }
 
-/* status badge — kept in sync with Counselling.css / CounsellingDetail.css */
+/* ป้ายสถานะ — ให้ตรงกับ Counselling.css / CounsellingDetail.css */
 
 .counselling-status-badge {
   flex-shrink: 0;

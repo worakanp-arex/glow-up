@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# One-time setup for a fresh Oracle Cloud Ubuntu (22.04/24.04, ARM or x86) server.
-# Run as the default "ubuntu" user:  bash deploy/setup-server.sh
+# ตั้งค่าครั้งเดียวสำหรับเซิร์ฟเวอร์ Oracle Cloud Ubuntu ใหม่ (22.04/24.04, ARM หรือ x86)
+# รันด้วยผู้ใช้ "ubuntu" ตามค่าเริ่มต้น:  bash deploy/setup-server.sh
 set -euo pipefail
 
 echo "==> Updating packages"
@@ -17,7 +17,7 @@ sudo systemctl enable --now fail2ban
 echo 'APT::Periodic::Update-Package-Lists "1"; APT::Periodic::Unattended-Upgrade "1";' | sudo tee /etc/apt/apt.conf.d/20auto-upgrades >/dev/null
 
 echo "==> Installing Node.js 22"
-# Download first, then run: a dropped connection can't execute half a script.
+# ดาวน์โหลดก่อนแล้วจึงรัน: ถ้าการเชื่อมต่อหลุดกลางทาง สคริปต์จะไม่ถูกรันค้างครึ่งเดียว
 NODESOURCE_SCRIPT="$(mktemp)"
 curl -fsSL https://deb.nodesource.com/setup_22.x -o "$NODESOURCE_SCRIPT"
 sudo -E bash "$NODESOURCE_SCRIPT"
@@ -31,7 +31,7 @@ sudo npm install -g pm2@7.1.1
 echo "==> Opening ports 80 and 443 in the Ubuntu firewall (Oracle images block them by default)"
 for port in 80 443; do
   if ! sudo iptables -C INPUT -p tcp --dport "$port" -m state --state NEW -j ACCEPT 2>/dev/null; then
-    # insert just above Oracle's catch-all REJECT rule (or append if there is none)
+    # แทรกไว้เหนือกฎ REJECT รวมของ Oracle (หรือต่อท้ายถ้าไม่มี)
     reject_line=$(sudo iptables -L INPUT --line-numbers -n | awk '$2=="REJECT"{print $1; exit}')
     if [ -n "$reject_line" ]; then
       sudo iptables -I INPUT "$reject_line" -p tcp --dport "$port" -m state --state NEW -j ACCEPT

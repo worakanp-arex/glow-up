@@ -7,13 +7,13 @@ const postSchema = new mongoose.Schema(
     content: { type: String },
     tags: { type: [String], default: [] },
     commentsEnabled: { type: Boolean, default: true },
-    // Which roles can see this post — set by the staff author. Empty means
-    // visible to everyone; staff (admin/counsellor) always see every post
-    // regardless of this field, for moderation.
+    // บทบาทที่เห็นโพสต์นี้ — กำหนดโดยเจ้าหน้าที่ผู้เขียน ถ้าว่างหมายถึง
+    // ทุกคนเห็น เจ้าหน้าที่ (แอดมิน/ผู้ให้คำปรึกษา) เห็นทุกโพสต์เสมอ
+    // ไม่ว่าฟิลด์นี้เป็นอย่างไร เพื่อการกลั่นกรอง
     visibleToRoles: { type: [String], enum: ["user", "family", "employer"], default: [] },
-    // Set when a user reports the post's content. A reported post is hidden
-    // from non-staff until a counsellor/admin resolves it (keeps it, edits it
-    // or deletes it); resolving clears the reports and notifies the reporters.
+    // ตั้งค่าเมื่อผู้ใช้รายงานเนื้อหาของโพสต์ โพสต์ที่ถูกรายงานจะถูกซ่อน
+    // จากคนที่ไม่ใช่เจ้าหน้าที่จนกว่าผู้ให้คำปรึกษา/แอดมินจะจัดการ (เก็บไว้ แก้ไข
+    // หรือลบ) การจัดการจะล้างรายงานและแจ้งผู้รายงาน
     needsReview: { type: Boolean, default: false },
     reports: [
       {
@@ -23,7 +23,7 @@ const postSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
-    // Most recent moderation outcome, kept for audit after reports are cleared.
+    // ผลการกลั่นกรองล่าสุด เก็บไว้เป็นหลักฐานตรวจสอบหลังล้างรายงานแล้ว
     lastReview: {
       reviewer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       action: { type: String, enum: ["kept", "edited"] },

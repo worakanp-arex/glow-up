@@ -7,6 +7,7 @@ import { UserRound, Award, Briefcase, FileText, GraduationCap, Mail, MapPin, Pap
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import * as applicationService from "../../services/applicationService.js";
 import { getPreviousRoute } from "../../utils/routeHistory.js";
+import { jobSummary } from "../../utils/jobDescription.js";
 import "./ApplicantDetail.css";
 
 const STATUS_OPTIONS = ["pending", "interview", "passed", "rejected"];
@@ -41,9 +42,12 @@ function ApplicantDetail() {
         setRejectionReason(data.rejectionReason || "");
       })
       .catch((err) => {
-        if (err.response?.status === 403) {
-          setBlocked(true);
-        } else setLoadError(err);
+        // 403 มีสองแบบ: บัญชีนายจ้างยังไม่ผ่านการยืนยัน (มีข้อความไทยจากเซิร์ฟเวอร์) กับใบสมัครของนายจ้างคนอื่น ("Forbidden")
+        // 404 คือไม่พบใบสมัคร ปล่อยให้ application เป็น null เพื่อแสดง "ไม่พบใบสมัครนี้"
+        const { status: code, data } = err.response || {};
+        if (code === 403 && data?.message !== "Forbidden") setBlocked(true);
+        else if (code === 403) setLoadError({ response: { data: { message: "คุณไม่มีสิทธิ์ดูใบสมัครนี้" } } });
+        else if (code !== 404) setLoadError(err);
       })
       .finally(() => setLoading(false));
   }, [id]);
@@ -59,7 +63,8 @@ function ApplicantDetail() {
         employerFeedback,
         rejectionReason,
       });
-      setApplication(updated);
+      // ผลบันทึกจากเซิร์ฟเวอร์ไม่มีคะแนนความตรงของทักษะ (คำนวณเฉพาะตอนโหลด) จึงคงค่าเดิมไว้
+      setApplication((prev) => ({ ...updated, match: prev?.match }));
       setSaved(true);
     } catch (err) {
       setError(err.response?.data?.message || "บันทึกไม่สำเร็จ");
@@ -120,13 +125,13 @@ function ApplicantDetail() {
           <section className="ui-card applicant-detail-info">
             <div className="ui-card-head"><h2>ข้อมูลส่วนตัว</h2></div>
             <dl className="applicant-detail-facts">
-              <div><dt><Mail size={14} aria-hidden="true" />อีเมล</dt><dd>{user.email}</dd></div>
+              {user.email && <div><dt><Mail size={14} aria-hidden="true" />อีเมล</dt><dd>{user.email}</dd></div>}
               {user.phone && <div><dt><Phone size={14} aria-hidden="true" />โทรศัพท์</dt><dd>{user.phone}</dd></div>}
               {facts.length > 0 && <div><dt><UserRound size={14} aria-hidden="true" />ข้อมูลทั่วไป</dt><dd>{facts.join(" · ")}</dd></div>}
               {user.province && <div><dt><MapPin size={14} aria-hidden="true" />จังหวัด</dt><dd>{user.province}</dd></div>}
               {user.education && <div><dt><GraduationCap size={14} aria-hidden="true" />การศึกษา</dt><dd>{user.education}</dd></div>}
               {user.experience && <div><dt><Briefcase size={14} aria-hidden="true" />ประสบการณ์</dt><dd>{user.experience}</dd></div>}
-              <div><dt>ยืนยันตัวตน</dt><dd><StatusBadge status={user.verifiedStatus} /></dd></div>
+              {user.verifiedStatus && <div><dt>ยืนยันตัวตน</dt><dd><StatusBadge status={user.verifiedStatus} /></dd></div>}
             </dl>
             {user.bio && <p className="applicant-detail-bio">{user.bio}</p>}
           </section>
@@ -138,7 +143,7 @@ function ApplicantDetail() {
               {application.job.location && <div><dt><MapPin size={14} aria-hidden="true" />สถานที่ทำงาน</dt><dd>{application.job.location}</dd></div>}
               {application.job.salary > 0 && <div><dt><Wallet size={14} aria-hidden="true" />เงินเดือน</dt><dd>{application.job.salary.toLocaleString()} บาท/เดือน</dd></div>}
             </dl>
-            {application.job.description && <p className="applicant-detail-job-desc">{application.job.description}</p>}
+            {jobSummary(application.job.description) && <p className="applicant-detail-job-desc">{jobSummary(application.job.description)}</p>}
             <Link to={`/employer/jobs/${application.job._id}`} className="ui-card-link">ดูรายละเอียดประกาศงาน</Link>
           </section>
 
@@ -212,7 +217,7 @@ function ApplicantDetail() {
 
               <label className="ui-field">
                 สถานะใบสมัคร
-                <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                <select value={status} onChange={(e) => { setStatus(e.target.value); setSaved(false); }}>
                   {STATUS_OPTIONS.map((option) => (
                     <option key={option} value={option}>
                       {STATUS_LABELS[option]}

@@ -1,7 +1,9 @@
 import api from "./api.js";
 
-export function searchJobsPage(params, signal) {
-  return api.get("/jobs", { params, signal }).then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
+// byMatch: ผู้หางานที่ล็อกอินให้เซิร์ฟเวอร์เรียงงานจากทักษะที่ตรงมากไปน้อย (ก่อนแบ่งหน้า)
+// ผู้เยี่ยมชมและบทบาทอื่นได้รายการเรียงตามวันที่ประกาศเหมือนเดิม
+export function searchJobsPage(params, signal, { byMatch = false } = {}) {
+  return api.get(byMatch ? "/jobs/matched" : "/jobs", { params, signal }).then((res) => ({ items: res.data, total: Number(res.headers["x-total-count"]) || res.data.length }));
 }
 
 export function searchJobs(params) {

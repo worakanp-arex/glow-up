@@ -7,8 +7,8 @@ export async function getPointsPerLevel() {
   return getSetting(POINTS_PER_LEVEL_SETTING_KEY, DEFAULT_POINTS_PER_LEVEL);
 }
 
-// Simple, transparent formula: every N cumulative points (admin-configurable
-// via /api/admin/settings/points-per-level) is one level.
+// สูตรที่เรียบง่ายและโปร่งใส: ทุก N คะแนนสะสม (แอดมินปรับได้
+// ผ่าน /api/admin/settings/points-per-level) เท่ากับหนึ่งระดับ
 export async function computeLevel(totalPoints) {
   const pointsPerLevel = await getPointsPerLevel();
   return 1 + Math.floor(Math.max(0, totalPoints) / pointsPerLevel);

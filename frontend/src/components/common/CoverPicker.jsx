@@ -1,8 +1,8 @@
 import { Check } from "lucide-react";
 import "./CoverPicker.css";
 
-// Style for an option's preview / the hero it decorates. `image` options use a
-// file, `gradient` options use a CSS background.
+// สไตล์ของตัวอย่างตัวเลือก/ส่วนหัวที่ตกแต่ง ตัวเลือก `image` ใช้
+// ไฟล์ ตัวเลือก `gradient` ใช้พื้นหลัง CSS
 export function coverStyle(option) {
   if (!option) return undefined;
   return option.kind === "gradient"
@@ -10,7 +10,7 @@ export function coverStyle(option) {
     : { backgroundImage: `url(${option.value})`, backgroundSize: "cover", backgroundPosition: "center" };
 }
 
-// A grid of selectable backgrounds with thumbnails, optionally grouped.
+// ตารางตัวเลือกพื้นหลังพร้อมภาพย่อ จัดกลุ่มได้ (ไม่บังคับ)
 // options: [{ key, label, kind: "image" | "gradient", value, group? }]
 export default function CoverPicker({ options, value, onChange, label = "เลือกพื้นหลัง" }) {
   const groups = [];

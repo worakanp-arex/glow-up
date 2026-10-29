@@ -1,5 +1,5 @@
-// Idempotent local seed data for the load-test scenarios. Never run against
-// production — refuses to run unless NODE_ENV is unset or "development".
+// ข้อมูลทดสอบในเครื่องที่รันซ้ำได้ (idempotent) สำหรับสถานการณ์ทดสอบโหลด ห้ามรันกับ production
+// สคริปต์จะปฏิเสธการทำงานเว้นแต่ NODE_ENV ไม่ได้ตั้งค่าหรือเป็น "development"
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { pathToFileURL } from "node:url";
@@ -27,7 +27,7 @@ async function seed() {
     console.error(`Refusing to seed load-test data with NODE_ENV=${process.env.NODE_ENV}`);
     process.exit(1);
   }
-  // These accounts (one of them an admin) have passwords published in the repo.
+  // บัญชีเหล่านี้ (หนึ่งในนั้นเป็นแอดมิน) มีรหัสผ่านที่เผยแพร่อยู่ใน repo
   assertLocalDatabase();
 
   await connectDB();

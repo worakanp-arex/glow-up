@@ -7,9 +7,9 @@ import * as userService from "../../services/userService.js";
 import { ACCOUNT_RETENTION_DAYS } from "../../constants/accountRetention.js";
 import "./AccountCard.css";
 
-// "Delete my account". Asks for the account's address (and the password, for
-// accounts that have one) so a stolen or forgotten-open session can't wipe
-// someone's recovery history with one click.
+// "ลบบัญชีของฉัน" ขออีเมลของบัญชี (และรหัสผ่านสำหรับ
+// บัญชีที่มี) เพื่อให้เซสชันที่ถูกขโมยหรือลืมปิดทิ้งไว้ ไม่สามารถลบ
+// ประวัติการฟื้นฟูของใครได้ในคลิกเดียว
 export default function DeleteAccountCard({ user }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ export default function DeleteAccountCard({ user }) {
       setBusy(false);
       return;
     }
-    // The server has already ended the session; this resets the screen too.
+    // เซิร์ฟเวอร์สิ้นสุดเซสชันไปแล้ว ตรงนี้รีเซ็ตหน้าจอด้วย
     await logout().catch(() => {});
     navigate("/", { replace: true });
   }

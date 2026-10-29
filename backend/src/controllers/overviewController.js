@@ -25,8 +25,8 @@ export async function getOverview(req, res) {
   const thirtyDaysAgoKey = shiftDateKey(todayKey, -29);
   const sevenDaysAheadKey = shiftDateKey(todayKey, 6);
 
-  // Totals are anonymous counts for everyone; only the named leaderboard is
-  // limited to patients the viewer is allowed to see.
+  // ยอดรวมเป็นจำนวนแบบไม่ระบุตัวตนสำหรับทุกคน เฉพาะลีดเดอร์บอร์ดที่แสดงชื่อ
+  // เท่านั้นที่จำกัดเฉพาะผู้ป่วยที่ผู้ดูมีสิทธิ์เห็น
   const allowed = await accessiblePatientIds(req.user);
   const leaderboardMatch = { dateKey: { $gte: thirtyDaysAgoKey } };
   if (allowed) leaderboardMatch.user = { $in: [...allowed].map((id) => new mongoose.Types.ObjectId(id)) };
@@ -59,7 +59,7 @@ export async function getOverview(req, res) {
       { $group: { _id: "$dateKey", count: { $sum: 1 } } },
       { $sort: { _id: 1 } },
     ]),
-    // The "most frequent" ranking is about people in recovery, so staff and family logins stay out of it.
+    // อันดับ "เข้าใช้บ่อยที่สุด" เป็นเรื่องของผู้ฟื้นฟู ดังนั้นการเข้าสู่ระบบของเจ้าหน้าที่และครอบครัวจึงไม่นับรวม
     LoginEvent.aggregate([
       { $match: leaderboardMatch },
       { $group: { _id: "$user", days: { $sum: 1 } } },
@@ -70,7 +70,7 @@ export async function getOverview(req, res) {
     ]),
   ]);
 
-  // Everyone who signed in counts; the breakdown says who they are.
+  // ทุกคนที่ล็อกอินนับรวมหมด ส่วนการแยกตามบทบาทบอกว่าเป็นใครบ้าง
   const activeAccounts = await User.find({ _id: { $in: activeUserIds } }).select("role");
   const activeByRole = { user: 0, family: 0, counsellor: 0, employer: 0, admin: 0 };
   for (const account of activeAccounts) activeByRole[account.role] = (activeByRole[account.role] || 0) + 1;
@@ -100,9 +100,9 @@ export async function getOverview(req, res) {
   });
 }
 
-// Admins see everyone; a counsellor only sees the clinical detail (answers,
-// risk levels) of patients who are assigned to them or have had a session with
-// them — the same rule as utils/patientAccess.js, resolved in bulk.
+// แอดมินเห็นทุกคน ผู้ให้คำปรึกษาเห็นรายละเอียดทางคลินิก (คำตอบ
+// ระดับความเสี่ยง) เฉพาะผู้ป่วยที่ได้รับมอบหมายหรือเคยมี session ด้วย
+// — กฎเดียวกับ utils/patientAccess.js แต่คำนวณเป็นชุดใหญ่
 async function accessiblePatientIds(user) {
   if (user.role === "admin") return null;
   const [assigned, sessionUserIds] = await Promise.all([
@@ -145,14 +145,14 @@ async function pointsByUser() {
   return totals;
 }
 
-// Participation overview for the analytics tabs: which daily missions, games
-// and scenario exercises people use most, who scores highest, and how
-// appointments ended up. No personal answers here (see getAttempts).
+// ภาพรวมการมีส่วนร่วมสำหรับแท็บวิเคราะห์: ภารกิจประจำวัน เกม
+// และแบบฝึกสถานการณ์ที่คนใช้มากที่สุด ใครได้คะแนนสูงสุด และนัดหมายจบลงอย่างไร
+// ไม่มีคำตอบส่วนตัวที่นี่ (ดู getAttempts)
 export async function getActivityOverview(req, res) {
   const days = windowDays(req);
   const since = sinceDate(days);
-  // Counts above are anonymous; the named lists (top scorers, recent
-  // appointments) only include patients the viewer is allowed to see.
+  // ตัวเลขข้างต้นไม่ระบุตัวตน ส่วนรายการที่แสดงชื่อ (ผู้ทำคะแนนสูงสุด
+  // นัดหมายล่าสุด) รวมเฉพาะผู้ป่วยที่ผู้ดูมีสิทธิ์เห็น
   const allowed = await accessiblePatientIds(req.user);
   const recentFilter = { scheduledAt: { $gte: since, $lte: new Date() } };
   if (allowed) recentFilter.user = { $in: [...allowed] };
@@ -255,9 +255,9 @@ export async function getActivityOverview(req, res) {
   });
 }
 
-// Who took which exercise and what they answered. Personal answers are only
-// returned for patients the viewer is allowed to see; `hidden` says how many
-// attempts were left out so the page can explain the difference.
+// ใครทำแบบฝึกใดและตอบอะไร คำตอบส่วนตัวจะคืนเฉพาะผู้ป่วย
+// ที่ผู้ดูมีสิทธิ์เห็น ส่วน `hidden` บอกจำนวนความพยายามที่ถูกตัดออก
+// เพื่อให้หน้าเว็บอธิบายความต่างได้
 export async function getAttempts(req, res) {
   const days = windowDays(req);
   const since = sinceDate(days);
@@ -309,8 +309,8 @@ export async function getAttempts(req, res) {
   });
 }
 
-// The people behind a dashboard number: ?kind=active (signed in during the
-// last 7 days), risk (latest assessment medium/high) or appointments (today).
+// ข้อมูลของคนที่อยู่เบื้องหลังตัวเลขบนแดชบอร์ด: ?kind=active (ล็อกอินใน
+// 7 วันล่าสุด), risk (ผลประเมินล่าสุดเป็น medium/high) หรือ appointments (วันนี้)
 export async function getOverviewUsers(req, res) {
   const kind = req.query.kind;
   const todayKey = toBangkokDateKey(new Date());
@@ -325,7 +325,7 @@ export async function getOverviewUsers(req, res) {
     ]);
     const users = await User.find({ _id: { $in: rows.map((row) => row._id) } }).select("name role avatarUrl avatarStyle avatarColor");
     const userById = new Map(users.map((u) => [String(u._id), u]));
-    // Family, staff and the other non-patient accounts are not clinical data, so only patients are held back from a counsellor.
+    // ครอบครัว เจ้าหน้าที่ และบัญชีอื่นที่ไม่ใช่ผู้ป่วยไม่ใช่ข้อมูลทางคลินิก จึงจำกัดเฉพาะผู้ป่วยไม่ให้ผู้ให้คำปรึกษาเห็น
     const visible = rows.filter((row) => {
       const role = userById.get(String(row._id))?.role;
       return (role && role !== "user") || !allowed || allowed.has(String(row._id));

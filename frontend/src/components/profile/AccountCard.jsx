@@ -8,8 +8,8 @@ import "./AccountCard.css";
 
 const THAI_DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "long", year: "numeric" });
 
-// Account facts and the change-password form shown beside the profile form for
-// roles that don't have the recovery tabs (family, employer, counsellor, admin).
+// ข้อมูลบัญชีและฟอร์มเปลี่ยนรหัสผ่านที่แสดงข้างฟอร์มโปรไฟล์ สำหรับ
+// บทบาทที่ไม่มีแท็บการฟื้นฟู (ครอบครัว นายจ้าง ผู้ให้คำปรึกษา แอดมิน)
 export default function AccountCard({ user, roleLabel, children }) {
   const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirm: "" });
   const [saving, setSaving] = useState(false);

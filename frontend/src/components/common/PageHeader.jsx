@@ -6,9 +6,9 @@ export default function PageHeader({ children, icon: Icon = FileText, eyebrow, d
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Back means "the page I just came from", whichever page that was. `backTo` is
-  // only the fallback for when there is nothing earlier in the app to return to
-  // (a pasted link, a new tab, a notification) and is kept as the link's href.
+  // ปุ่มย้อนกลับหมายถึง "หน้าที่เพิ่งมา" ไม่ว่าหน้านั้นจะเป็นหน้าไหน `backTo`
+  // เป็นเพียงค่าสำรองเมื่อไม่มีหน้าก่อนหน้าในแอปให้กลับ
+  // (ลิงก์ที่วางมา แท็บใหม่ การแจ้งเตือน) และเก็บเป็น href ของลิงก์
   function goBack(event) {
     const modified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
     if (modified || location.key === "default") return;

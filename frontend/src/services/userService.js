@@ -61,7 +61,7 @@ export function deleteUser(id) {
   return api.delete(`/users/${id}`).then((res) => res.data);
 }
 
-// "Delete my account": the password (or, for a Google-only account, the typed address) confirms it.
+// "ลบบัญชีของฉัน": รหัสผ่าน (หรืออีเมลที่พิมพ์สำหรับบัญชี Google อย่างเดียว) ใช้ยืนยัน
 export function deleteMyAccount(payload) {
   return api.delete("/users/me", { data: payload }).then((res) => res.data);
 }

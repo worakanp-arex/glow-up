@@ -18,7 +18,7 @@
 }
 .dashboard-date svg { color: var(--color-text-muted); }
 
-/* ---------- Welcome hero ---------- */
+/* ---------- ส่วนต้อนรับ (Hero) ---------- */
 .dashboard-hero {
   position: relative;
   display: grid;
@@ -39,7 +39,7 @@
 .dashboard-hero-meta > span:first-child { display: inline-flex; align-items: center; gap: 6px; }
 .dashboard-hero-meta svg { color: var(--color-primary-600); }
 
-/* ---------- Main two-column area ---------- */
+/* ---------- พื้นที่หลักสองคอลัมน์ ---------- */
 .dashboard-main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: stretch; }
 .dashboard-main-col > .checkin { flex: 1; }
 .dashboard-side-col > .dashboard-talk { flex: 0 0 auto; }
@@ -52,7 +52,7 @@
 .dashboard-talk-icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 10px; border-radius: 50%; background: var(--color-surface); color: var(--color-primary-600); box-shadow: 0 0 0 1px var(--color-primary-100); }
 .dashboard-quest .dashboard-talk-icon { background: var(--color-primary-50); box-shadow: none; }
 
-/* ---------- Overview widgets ---------- */
+/* ---------- วิดเจ็ตภาพรวม ---------- */
 .dashboard-section h2 {
   margin: 0 0 1rem;
   font-size: 1.15rem;
@@ -66,9 +66,11 @@
   gap: 1.25rem;
 }
 
-/* With 5 widgets, the last one is often left alone on its own row inside a
-   fluid auto-fit grid — span it full-width instead of leaving a gap next to
-   it. Mirrors the same fix already applied to .streak-widget on mobile. */
+/*
+ * เมื่อมี 5 วิดเจ็ต ตัวสุดท้ายมักถูกทิ้งไว้ในแถวของตัวเองคนเดียวใน
+ * กริด auto-fit แบบยืดหยุ่น — ให้ขยายเต็มความกว้างแทนการเว้นช่องว่างข้างๆ
+ * ตรงกับการแก้ไขเดียวกันที่ใช้กับ .streak-widget บนมือถือแล้ว
+ */
 @media (min-width: 601px) {
   .dashboard-grid .community-widget {
     grid-column: 1 / -1;
@@ -109,7 +111,7 @@
   }
 }
 
-/* Mascot illustration: fixed-size circle with a soft halo, scaled per breakpoint. */
+/* ภาพมาสคอต: วงกลมขนาดคงที่พร้อมแสงรัศมีอ่อน ปรับขนาดตาม breakpoint */
 .image-slot.dashboard-hero-art { position: relative; justify-self: center; align-self: center; width: 200px; height: 200px; min-height: 0; margin: 0; border-radius: 50%; background: transparent; overflow: visible; }
 .image-slot.dashboard-hero-art::before { content: ""; position: absolute; inset: -22px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--color-primary-200) 55%, transparent), transparent 70%); }
 .image-slot.dashboard-hero-art img { position: relative; width: 100%; height: 100%; object-fit: contain; }
@@ -117,5 +119,5 @@
 @media (max-width: 860px) { .image-slot.dashboard-hero-art { width: 160px; height: 160px; } }
 @media (max-width: 600px) { .image-slot.dashboard-hero-art { order: -1; width: 120px; height: 120px; margin: 0 auto 6px; } .image-slot.dashboard-hero-art::before { inset: -14px; } }
 
-/* The family message card sits inside the welcome card. */
+/* การ์ดข้อความครอบครัวอยู่ในการ์ดต้อนรับ */
 .dashboard-hero-copy > .family-message-card { margin-top: 4px; }

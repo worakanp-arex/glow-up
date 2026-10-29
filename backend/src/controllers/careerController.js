@@ -4,15 +4,21 @@ import JobSkill from "../models/JobSkill.js";
 import UserSkill from "../models/UserSkill.js";
 import { scoreSkills } from "../services/jobMatchService.js";
 
-// Rule-based career recommendation: for each job category, pool the distinct
-// skills required across its postings and score the user's own skills
-// against that pool with the same match% formula used for job applications
-// (matched / required * 100). Categories with no skill data are skipped
-// rather than shown with a misleading 0%/null score.
+// แนะนำอาชีพแบบอิงกฎ: สำหรับแต่ละหมวดงาน รวมทักษะที่ไม่ซ้ำซึ่งต้องใช้
+// ในทุกประกาศของหมวดนั้น แล้วให้คะแนนทักษะของผู้ใช้เทียบกับกลุ่มทักษะนี้
+// ด้วยสูตรเปอร์เซ็นต์ความตรงเดียวกับที่ใช้กับใบสมัครงาน
+// (ทักษะที่ตรง / ทักษะที่ต้องการ * 100) หมวดที่ไม่มีข้อมูลทักษะจะถูกข้าม
+// แทนที่จะแสดงคะแนน 0%/null ที่ทำให้เข้าใจผิด
 export async function getRecommendedCareers(req, res) {
   const [categories, jobs, owned] = await Promise.all([
     JobCategory.find(),
-    Job.find({ category: { $ne: null } }).select("category"),
+    // นับเฉพาะงานที่ผู้หางานเห็นได้จริง ไม่เอางานที่รอตรวจ ถูกปฏิเสธ ปิดรับ หรือหมดเขตมาคิดทักษะ
+    Job.find({
+      category: { $ne: null },
+      status: "open",
+      verifiedStatus: "verified",
+      $or: [{ expiredAt: null }, { expiredAt: { $gt: new Date() } }],
+    }).select("category"),
     UserSkill.find({ user: req.user.id }).select("skill"),
   ]);
 
@@ -28,7 +34,7 @@ export async function getRecommendedCareers(req, res) {
   for (const jobSkill of jobSkills) {
     const key = String(jobSkill.job);
     if (!skillsByJob.has(key)) skillsByJob.set(key, []);
-    skillsByJob.get(key).push(jobSkill.skill);
+    if (jobSkill.skill) skillsByJob.get(key).push(jobSkill.skill);
   }
 
   const ownedSkills = owned.map((s) => s.skill);

@@ -10,8 +10,8 @@ function time(iso) {
   return new Date(iso).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
 }
 
-// Who is booked on the selected day, with the staff member responsible and the
-// status of each appointment (finished ones are shown grey).
+// ใครมีนัดในวันที่เลือก พร้อมเจ้าหน้าที่ที่รับผิดชอบและ
+// สถานะของแต่ละนัด (นัดที่เสร็จแล้วแสดงเป็นสีเทา)
 export default function DayAppointments({ dateKey, sessions }) {
   const [year, month, day] = dateKey.split("-").map(Number);
   const items = sessions
@@ -29,7 +29,7 @@ export default function DayAppointments({ dateKey, sessions }) {
         <ul>
           {items.map((session) => {
             const finished = session.status === "closed";
-            // Another counsellor's case is shown as a busy slot only; its detail page is off limits.
+            // เคสของผู้ให้คำปรึกษาท่านอื่นแสดงเป็นช่วงเวลาไม่ว่างเท่านั้น หน้ารายละเอียดของเคสนั้นเข้าไม่ได้
             if (session.restricted) {
               return (
                 <li key={session._id} className={`is-restricted${finished ? " is-finished" : ""}`}>

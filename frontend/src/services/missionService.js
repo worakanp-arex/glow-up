@@ -6,7 +6,7 @@ export function getMyMissionProgress() {
 
 export const getMyPointsSummary = () => api.get("/missions/me/summary").then(res => res.data);
 
-// Admin management (points/badges/mission catalog).
+// การจัดการโดยแอดมิน (แคตตาล็อกคะแนน/ตรา/ภารกิจ)
 export function getMissions() {
   return api.get("/missions").then((res) => res.data);
 }
@@ -23,7 +23,7 @@ export function deleteMission(id) {
   return api.delete(`/missions/${id}`).then((res) => res.data);
 }
 
-// Counsellor/admin: approve a "custom" mission for a specific patient.
+// ผู้ให้คำปรึกษา/แอดมิน: อนุมัติภารกิจ "custom" ให้ผู้ป่วยเฉพาะราย
 export function approveCustomMission(missionId, userId) {
   return api.post(`/missions/${missionId}/approve`, { userId }).then((res) => res.data);
 }

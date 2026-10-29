@@ -28,7 +28,7 @@ function EmotionCalendar({
 }) {
   const today = useMemo(() => new Date(), []);
   const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
-  // Older days can no longer be filled in: the server only accepts the last week.
+  // วันที่เก่ากว่านี้เติมย้อนหลังไม่ได้แล้ว: เซิร์ฟเวอร์รับเฉพาะหนึ่งสัปดาห์ล่าสุด
   const oldestBackfill = new Date(today);
   oldestBackfill.setDate(oldestBackfill.getDate() - (BACKFILL_WINDOW_DAYS - 1));
   const oldestBackfillKey = `${oldestBackfill.getFullYear()}-${pad(oldestBackfill.getMonth() + 1)}-${pad(oldestBackfill.getDate())}`;

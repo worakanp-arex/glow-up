@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-// Generic admin-configurable key/value store (e.g. "pointsPerLevel").
+// ที่เก็บคีย์/ค่าทั่วไปที่แอดมินตั้งค่าได้ (เช่น "pointsPerLevel")
 const settingSchema = new mongoose.Schema(
   {
     key: { type: String, required: true, unique: true },

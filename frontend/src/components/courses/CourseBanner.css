@@ -1,0 +1,64 @@
+/* แบนเนอร์คอร์สแนะนำ: โทนเข้มคงที่ทั้งโหมดสว่าง/มืด เพราะข้อความขาวต้องอ่านได้บนภาพปกทุกแบบ */
+.course-banner { --banner-ink: #07111f; position: relative; border-radius: var(--radius-xl); background: #0b1f3a; color: #fff; overflow: hidden; box-shadow: var(--shadow-md); }
+.course-banner-track { display: grid; }
+
+.course-banner-slide { grid-area: 1 / 1; position: relative; display: flex; align-items: center; min-height: 330px; padding: 34px 44px 78px; overflow: hidden; isolation: isolate; opacity: 0; visibility: hidden; transition: opacity .55s ease, visibility .55s; }
+.course-banner-slide.is-active { opacity: 1; visibility: visible; }
+
+/* พื้นหลังเป็นภาพเดียวกันแต่เบลอ แล้วคลุมด้วยสีเข้มไล่จากซ้ายไปขวา */
+.course-banner-backdrop { position: absolute; inset: 0; z-index: -3; width: 100%; height: 100%; object-fit: cover; filter: blur(34px) saturate(1.2) brightness(.8); transform: scale(1.2); }
+.course-banner-slide::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, color-mix(in srgb, var(--banner-ink) 96%, transparent) 0%, color-mix(in srgb, var(--banner-ink) 88%, transparent) 36%, color-mix(in srgb, var(--banner-ink) 45%, transparent) 62%, color-mix(in srgb, var(--banner-ink) 6%, transparent) 100%); }
+/* ภาพปกเต็มสัดส่วน 16:9 สูงเต็มแบนเนอร์และชิดขวา ถ้าจอแคบกล่องจะยื่นไปหลังข้อความ ซึ่งถูกทำให้จางและมีสีเข้มทับอยู่แล้ว */
+/* ภาพปกเต็มสัดส่วน 16:9 ชิดขวา ขอบซ้ายค่อยๆ เลือนหายไปในสีเข้ม */
+.course-banner-art { position: absolute; top: 0; right: 0; bottom: 0; z-index: -2; aspect-ratio: 16 / 9; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 40%); mask-image: linear-gradient(90deg, transparent 0%, #000 40%); }
+/* กล่องเป็น 16:9 พอดี ปกขนาด 16:9 (แบบที่แนะนำให้เจ้าหน้าที่อัปโหลด) จึงไม่ถูกตัด */
+.course-banner-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.course-banner-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; max-width: min(560px, 58%); min-width: 0; }
+.course-banner-eyebrow { margin: 0; font-size: .75rem; font-weight: 600; letter-spacing: .02em; color: #a9d4ff; }
+.course-banner h2 { margin: 0; font-size: 1.55rem; font-weight: 700; line-height: 1.45; color: #fff; overflow-wrap: anywhere; text-shadow: 0 1px 14px rgb(0 0 0 / 35%); }
+.course-banner-desc { margin: 0 0 2px; font-size: .86rem; line-height: 1.7; color: rgb(255 255 255 / 84%); }
+.course-banner-reason { display: inline-flex; align-items: flex-start; gap: 6px; margin: 2px 0 0; padding: 4px 10px; border-radius: 999px; background: rgb(255 255 255 / 14%); font-size: .76rem; line-height: 1.5; color: #fff; }
+.course-banner-reason svg { flex-shrink: 0; margin-top: 3px; color: #ffd98a; }
+.course-banner-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 2px; font-size: .74rem; color: rgb(255 255 255 / 78%); }
+.course-banner-meta > span { display: inline-flex; align-items: center; gap: 5px; }
+.course-banner .ui-btn.ui-btn-primary { margin-top: 12px; background: #fff; color: var(--color-primary-700); box-shadow: 0 8px 22px rgb(0 0 0 / 30%); }
+.course-banner .ui-btn.ui-btn-primary:hover:not(:disabled) { background: #eaf4ff; }
+
+/* ตัวควบคุม: ก่อนหน้า · จุดเลือกสไลด์ · ถัดไป · หยุด/เล่น */
+.course-banner-controls { position: absolute; left: 44px; bottom: 22px; z-index: 2; display: flex; align-items: center; gap: 10px; }
+.course-banner-arrow { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid rgb(255 255 255 / 35%); border-radius: 50%; background: rgb(255 255 255 / 12%); color: #fff; cursor: pointer; backdrop-filter: blur(4px); transition: background-color .15s; }
+.course-banner-arrow:hover { background: rgb(255 255 255 / 26%); }
+.course-banner-toggle { margin-left: 4px; }
+.course-banner-dots { display: flex; align-items: center; gap: 8px; }
+.course-banner-dot { width: 9px; height: 9px; padding: 0; border: 0; border-radius: 999px; background: rgb(255 255 255 / 45%); cursor: pointer; transition: width .25s ease, background-color .25s ease; }
+.course-banner-dot:hover { background: rgb(255 255 255 / 75%); }
+.course-banner-dot.is-active { width: 26px; background: #fff; }
+.course-banner button:focus-visible, .course-banner a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* จอขนาดกลาง: ภาพแคบลงและสีเข้มกินพื้นที่มากขึ้น ข้อความจะไม่ไปทับส่วนที่สว่างของภาพ */
+@media (max-width: 860px) {
+  .course-banner-slide { padding-left: 32px; padding-right: 32px; }
+  .course-banner-controls { left: 32px; }
+  .course-banner-copy { max-width: 60%; }
+  /* กล่องภาพเต็มความสูงแบนเนอร์ (ไม่ใช้สัดส่วน 16:9 ที่จะทำให้กล่องเตี้ยและภาพไปติดขอบบน) ภาพย่อแบบ contain อยู่กึ่งกลางแนวตั้ง */
+  .course-banner-art { aspect-ratio: auto; width: 50%; max-width: none; }
+  .course-banner-art img { object-fit: contain; object-position: right center; }
+  .course-banner-slide::after { background: linear-gradient(90deg, color-mix(in srgb, var(--banner-ink) 96%, transparent) 0%, color-mix(in srgb, var(--banner-ink) 90%, transparent) 50%, color-mix(in srgb, var(--banner-ink) 40%, transparent) 75%, color-mix(in srgb, var(--banner-ink) 6%, transparent) 100%); }
+}
+
+/* มือถือ: ภาพอยู่ด้านบนเต็มความกว้าง เลือนหายลงไปหาข้อความด้านล่าง */
+@media (max-width: 640px) {
+  .course-banner-slide { flex-direction: column; align-items: stretch; justify-content: flex-start; min-height: 0; padding: 0 0 70px; }
+  .course-banner-art { position: relative; order: -1; inset: auto; width: 100%; max-width: none; aspect-ratio: 16 / 9; -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent 100%); mask-image: linear-gradient(180deg, #000 55%, transparent 100%); }
+  .course-banner-art img { object-fit: cover; }
+  .course-banner-slide::after { background: linear-gradient(180deg, color-mix(in srgb, var(--banner-ink) 8%, transparent) 0%, color-mix(in srgb, var(--banner-ink) 55%, transparent) 30%, color-mix(in srgb, var(--banner-ink) 92%, transparent) 55%); }
+  .course-banner-copy { max-width: none; margin-top: -34px; padding: 0 20px; }
+  .course-banner h2 { font-size: 1.3rem; }
+  .course-banner .ui-btn.ui-btn-primary { width: 100%; }
+  .course-banner-controls { left: 20px; bottom: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .course-banner-slide, .course-banner-dot { transition: none; }
+}

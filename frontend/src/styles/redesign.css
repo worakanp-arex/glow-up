@@ -1,7 +1,7 @@
 /*
- * Site-wide visual refresh: softer, roomier cards, pill tabs and a shared
- * card primitive. Brand colour (primary scale), Prompt font and logo are
- * unchanged — this file only adjusts shape, spacing and surfaces.
+ * การปรับโฉมภาพรวมทั้งไซต์: การ์ดที่นุ่มและโปร่งขึ้น แท็บแบบแคปซูล และ
+ * การ์ดพื้นฐานที่ใช้ร่วมกัน สีแบรนด์ (สเกล primary) ฟอนต์ Prompt และโลโก้
+ * ไม่เปลี่ยน — ไฟล์นี้ปรับเฉพาะรูปทรง ระยะห่าง และพื้นผิว
  */
 :root {
   --radius-md: 12px;
@@ -12,7 +12,7 @@
   --card-pad: 28px;
 }
 
-/* ---------- Shared card primitive ---------- */
+/* ---------- การ์ดพื้นฐานที่ใช้ร่วมกัน ---------- */
 .ui-card {
   min-width: 0;
   padding: var(--card-pad);
@@ -31,7 +31,7 @@
 .ui-divider { height: 1px; margin: 18px 0; border: 0; background: var(--color-border); }
 .ui-muted { color: var(--color-text-muted); font-size: .8rem; }
 
-/* ---------- Chips, pills, tabs ---------- */
+/* ---------- ชิป แคปซูล แท็บ ---------- */
 .ui-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 8px; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .72rem; font-weight: 500; line-height: 1.6; }
 .ui-chip-neutral { background: var(--color-surface-hover); color: var(--color-text-secondary); }
 .ui-chip-peach { background: color-mix(in srgb, #f2a071 18%, var(--color-surface)); color: #a4522a; }
@@ -44,11 +44,11 @@
 .ui-tab:hover { background: var(--color-surface-hover); color: var(--color-text); }
 .ui-tab[aria-selected="true"], .ui-tab.active { background: var(--color-primary-50); border-color: var(--color-primary-200); color: var(--color-primary-700); font-weight: 600; }
 
-/* ---------- Progress bar ---------- */
+/* ---------- แถบความคืบหน้า ---------- */
 .ui-progress { height: 6px; border-radius: 999px; background: var(--color-primary-50); overflow: hidden; }
 .ui-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--color-primary-500); transition: width .3s ease; }
 
-/* ---------- Buttons ---------- */
+/* ---------- ปุ่ม ---------- */
 .ui-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 20px; border: 1px solid transparent; border-radius: 12px; font: inherit; font-size: .875rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color .15s, border-color .15s, transform .15s, box-shadow .15s; }
 .ui-btn-primary { background: var(--color-primary-500); color: #fff; box-shadow: 0 6px 16px rgb(40 127 194 / 20%); }
 .ui-btn-primary:hover:not(:disabled) { background: var(--color-primary-600); transform: translateY(-1px); }
@@ -56,19 +56,19 @@
 .ui-btn-outline:hover:not(:disabled) { background: var(--color-primary-50); border-color: var(--color-primary-200); }
 .ui-btn-block { width: 100%; }
 
-/* ---------- Form fields ---------- */
+/* ---------- ช่องฟอร์ม ---------- */
 .ui-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; font-size: .82rem; font-weight: 600; color: var(--color-text); }
 .ui-field :is(input, select, textarea) { width: 100%; padding: 10px 14px; font-size: .875rem; font-weight: 400; }
 .layout-content .ui-field :is(input, select, textarea) { border-color: var(--color-border-strong); border-radius: 12px; }
 .ui-field small { font-weight: 400; color: var(--color-text-muted); }
 
-/* ---------- Switch ---------- */
+/* ---------- สวิตช์ ---------- */
 .ui-switch { position: relative; flex-shrink: 0; width: 46px; height: 26px; padding: 0; border: 0; border-radius: 999px; background: var(--color-ink-300); cursor: pointer; transition: background-color .2s; }
 .ui-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / 20%); transition: transform .2s; }
 .ui-switch[aria-checked="true"] { background: var(--color-primary-500); }
 .ui-switch[aria-checked="true"]::after { transform: translateX(20px); }
 
-/* ---------- Site-wide surface refresh ---------- */
+/* ---------- ปรับพื้นผิวทั้งไซต์ ---------- */
 .layout-content :is([class$="-card"], [class$="-widget"], .profile-card) { border-radius: var(--radius-lg); }
 .layout .btn { border-radius: 12px; }
 .layout-content :is(input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) { border-radius: 12px; }
@@ -85,10 +85,10 @@
   .ui-progress > span, .ui-switch, .ui-switch::after { transition: none; }
 }
 
-/* Small "private" hint used next to card titles. */
+/* ป้ายใบ้ "ส่วนตัว" เล็กๆ ที่ใช้ข้างหัวข้อการ์ด */
 .checkin-private { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--color-text-muted); }
 
-/* ---------- Selectable choice card (checkbox / radio with the tick inside the card) ---------- */
+/* ---------- การ์ดตัวเลือก (checkbox / radio ที่เครื่องหมายถูกอยู่ในการ์ด) ---------- */
 .ui-choice { position: relative; display: flex; align-items: flex-start; gap: 10px; min-width: 0; padding: 10px 12px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text); font-size: .85rem; font-weight: 500; line-height: 1.5; cursor: pointer; transition: border-color .15s, background-color .15s, box-shadow .15s; }
 .ui-choice:hover { border-color: var(--color-primary-300); background: var(--color-surface-hover); }
 .ui-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
@@ -100,7 +100,7 @@
 .ui-choice:has(input:disabled) { opacity: .55; cursor: not-allowed; }
 .ui-choice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin: 0; padding: 0; border: 0; min-width: 0; }
 
-/* One search box for the whole app: an icon and a bare input inside a single frame. The frame, not the input, shows focus, so there is never a second outline inside it. */
+/* ช่องค้นหาเดียวสำหรับทั้งแอป: ไอคอนและช่องกรอกเปล่าในกรอบเดียว กรอบ ไม่ใช่ช่องกรอก เป็นตัวแสดงโฟกัส จึงไม่มีเส้นขอบที่สองอยู่ข้างใน */
 .ui-search { display: flex; align-items: center; gap: 10px; box-sizing: border-box; min-height: 44px; padding: 0 14px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: var(--color-surface); color: var(--color-text-muted); transition: border-color .15s, box-shadow .15s; }
 .ui-search:focus-within { border-color: var(--color-primary-500); box-shadow: 0 0 0 3px var(--color-primary-50); }
 .ui-search > svg { flex-shrink: 0; }

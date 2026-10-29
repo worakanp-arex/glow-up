@@ -1,12 +1,11 @@
-// Recovery-domain axes for the radar chart, GamePlay's domain enum, and
-// every mini-game's domain tag (wheel segments, quiz questions). Order is
-// fixed — the radar chart renders axes in this exact order. These are also
-// the 8 default categories seeded into the admin-managed MissionCategory
-// catalog (see missionCategoryController.js) that ActivityMission now reads
-// its category list from — admins can rename or add to that catalog, but
-// any category beyond these 8 won't have a radar axis or game content of
-// its own; ActivityMissionLog points still count toward the user's total
-// regardless of category.
+// แกนด้านการฟื้นฟูสำหรับกราฟเรดาร์ enum domain ของ GamePlay
+// และป้ายโดเมนของมินิเกมทุกเกม (ช่องวงล้อ คำถามควิซ) ลำดับถูกกำหนดตายตัว —
+// กราฟเรดาร์วาดแกนตามลำดับนี้พอดี นี่ยังเป็น 8 หมวดเริ่มต้นที่ใส่ไว้ใน
+// แคตตาล็อก MissionCategory ที่แอดมินจัดการได้ (ดู missionCategoryController.js)
+// ซึ่ง ActivityMission ใช้เป็นรายการหมวดหมู่ — แอดมินเปลี่ยนชื่อหรือเพิ่มหมวดได้
+// แต่หมวดที่เกิน 8 หมวดนี้จะไม่มีแกนในเรดาร์หรือเนื้อหาเกมของตัวเอง
+// ส่วนคะแนนจาก ActivityMissionLog ยังนับรวมในคะแนนรวมของผู้ใช้
+// ไม่ว่าจะเป็นหมวดใด
 export const RECOVERY_DOMAINS = [
   { key: "self_awareness", label: "ตระหนักรู้ตนเอง" },
   { key: "coping", label: "ทักษะรับมือ" },
@@ -31,9 +30,9 @@ export const WHEEL_SEGMENTS = [
   { label: "ใจสงบ +4", points: 4, domain: "mindfulness" },
 ];
 
-// Trigger <-> coping-response pairs for the memory-match game. Each pair
-// becomes 2 cards (12 cards total) — matching them reinforces recall of a
-// healthy response to a common relapse trigger.
+// คู่ตัวกระตุ้น <-> วิธีรับมือสำหรับเกมจับคู่ความจำ แต่ละคู่
+// กลายเป็น 2 การ์ด (รวม 12 ใบ) — การจับคู่ช่วยย้ำให้จำ
+// วิธีรับมือที่ดีต่อตัวกระตุ้นการกลับไปใช้ซ้ำที่พบบ่อย
 export const COPING_PAIRS = [
   { id: "stress", trigger: "เครียดสะสม", coping: "หายใจเข้าลึกๆ นับ 1-10" },
   { id: "craving", trigger: "อยากใช้สารกะทันหัน", coping: "โทรหาเพื่อนหรือคนที่ไว้ใจ" },
@@ -43,8 +42,8 @@ export const COPING_PAIRS = [
   { id: "temptation", trigger: "เจอสิ่งกระตุ้นเก่าๆ", coping: "เปลี่ยนเส้นทาง หลีกเลี่ยงที่เดิม" },
 ];
 
-// Quiz bank — a small fixed pool; each day 3 questions are picked
-// deterministically from `dateKey` so every user sees the same daily quiz.
+// คลังโจทย์ควิซ — ชุดเล็กที่คงที่ ในแต่ละวันจะเลือก 3 ข้อ
+// แบบกำหนดแน่นอนจาก `dateKey` ดังนั้นผู้ใช้ทุกคนเห็นควิซประจำวันชุดเดียวกัน
 export const QUIZ_BANK = [
   {
     id: "q1",
@@ -116,8 +115,8 @@ export const QUIZ_BANK = [
   },
 ];
 
-// Moods used by the emotion-recognition game; the frontend shows
-// /images/illustrations/mood-<key>.webp for each (see RecoveryGame content).
+// อารมณ์ที่ใช้ในเกมจำแนกอารมณ์ frontend แสดงภาพ
+// /images/illustrations/mood-<key>.webp ของแต่ละอารมณ์ (ดูเนื้อหา RecoveryGame)
 export const EMOTION_CHOICES = [
   { key: "happy", label: "ดีใจ" },
   { key: "calm", label: "สงบ" },
@@ -129,8 +128,8 @@ export const EMOTION_CHOICES = [
   { key: "angry", label: "โกรธ" },
 ];
 
-// Situation -> the feeling it most likely brings. Each day 5 are picked
-// deterministically from the date, and each question offers 4 feelings.
+// สถานการณ์ -> ความรู้สึกที่มักตามมา ในแต่ละวันจะเลือก 5 ข้อ
+// แบบกำหนดแน่นอนจากวันที่ และแต่ละข้อมีตัวเลือกความรู้สึก 4 แบบ
 export const EMOTION_SCENARIOS = [
   { id: "e1", situation: "เพื่อนชวนไปงานเลี้ยงที่เคยใช้สาร แต่คุณปฏิเสธได้สำเร็จ", correct: "confident", options: ["confident", "sad", "angry", "surprised"] },
   { id: "e2", situation: "วันนี้ครบ 30 วันที่คุณเช็คอินต่อเนื่อง", correct: "happy", options: ["anxious", "happy", "angry", "calm"] },
@@ -144,5 +143,5 @@ export const EMOTION_SCENARIOS = [
   { id: "e10", situation: "ตัดสินใจได้เองว่าจะไม่ใช้สารในวันที่รู้สึกยากที่สุด", correct: "confident", options: ["sad", "angry", "confident", "anxious"] },
 ];
 
-// 4-7-8 breathing: inhale 4s, hold 7s, exhale 8s. One round is 19 seconds.
+// การหายใจ 4-7-8: หายใจเข้า 4 วินาที กลั้น 7 วินาที หายใจออก 8 วินาที หนึ่งรอบใช้เวลา 19 วินาที
 export const BREATHING_ROUNDS = 4;

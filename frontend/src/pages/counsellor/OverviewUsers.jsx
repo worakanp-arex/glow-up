@@ -20,7 +20,7 @@ const RISK_LABELS = { medium: "ความเสี่ยงปานกลา�
 const DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" });
 const TIME = new Intl.DateTimeFormat("th-TH", { hour: "2-digit", minute: "2-digit" });
 
-// The people behind a number on the overview: who they are and why they are counted.
+// คนที่อยู่เบื้องหลังตัวเลขในภาพรวม: เป็นใครและเหตุใดจึงถูกนับ
 function OverviewUsers() {
   const { kind } = useParams();
   const { user } = useAuth();
@@ -69,7 +69,7 @@ function OverviewUsers() {
                 {kind === "appointments" ? (
                   <Link to={`/counsellor/requests/${item.sessionId}`} className="ui-btn ui-btn-outline">ดูคำขอ</Link>
                 ) : person?._id && (user.role === "admin" || !person.role || person.role === "user") && (
-                  // A counsellor's profile view is for patients only; other roles have no page for them there.
+                  // หน้าโปรไฟล์ของผู้ให้คำปรึกษาสำหรับผู้ป่วยเท่านั้น บทบาทอื่นไม่มีหน้าให้ที่นั่น
                   <Link to={`${detailBase}/${person._id}`} className="ui-btn ui-btn-outline">ดูโปรไฟล์</Link>
                 )}
               </li>

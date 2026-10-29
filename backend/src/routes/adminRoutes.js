@@ -20,8 +20,8 @@ router.put(
   asyncHandler(updatePointsPerLevel)
 );
 
-// Accounts that were deleted but are still within their retention period (or have
-// since been anonymised). Read-only except for restoring.
+// บัญชีที่ถูกลบแต่ยังอยู่ในช่วงเก็บรักษา (หรือถูกทำให้ไม่ระบุตัวตนไปแล้ว)
+// อ่านอย่างเดียว ยกเว้นการกู้คืน
 router.get(
   "/deleted-users",
   verifyToken,

@@ -12,8 +12,8 @@ import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 const USER_SUMMARY_FIELDS = "name email phone avatarUrl avatarStyle avatarColor verifiedStatus";
 const COUNSELLOR_SUMMARY_FIELDS = "name specialization hospital avatarUrl avatarStyle avatarColor";
 
-// A user may only have one request in progress at a time; a new one can be
-// made after the current case is closed or cancelled.
+// ผู้ใช้มีคำขอที่กำลังดำเนินการได้ครั้งละหนึ่งรายการเท่านั้น
+// ขอใหม่ได้หลังจากเคสปัจจุบันปิดหรือยกเลิกแล้ว
 const OPEN_STATUSES = ["pending", "active", "scheduled"];
 const FINISHED_STATUSES = ["closed", "cancelled"];
 
@@ -27,7 +27,7 @@ const STATUS_MESSAGE = {
 
 function canAccessSession(session, user) {
   if (user.role === "admin") return true;
-  // `session.user` is null when the patient's account has been deleted.
+  // `session.user` เป็น null เมื่อบัญชีของผู้ป่วยถูกลบแล้ว
   if (user.role === "user") return session.user?._id.toString() === user.id;
   if (user.role === "counsellor") {
     return !session.counsellor || session.counsellor._id.toString() === user.id;
@@ -73,9 +73,9 @@ export async function mySessions(req, res) {
   res.json(await query);
 }
 
-// A case another counsellor is handling is reduced to a bare calendar entry, so
-// the team view still shows who is busy without exposing the patient, their
-// message, the chat thread or the clinical outcome (getSession denies the same).
+// เคสที่ผู้ให้คำปรึกษาท่านอื่นดูแลอยู่จะเหลือเพียงรายการในปฏิทิน
+// มุมมองทีมจึงยังเห็นว่าใครไม่ว่าง โดยไม่เปิดเผยผู้ป่วย ข้อความ
+// ห้องแชท หรือผลทางคลินิก (getSession ปฏิเสธเช่นเดียวกัน)
 const CALENDAR_ENTRY_FIELDS = ["_id", "sessionType", "status", "scheduledAt", "counsellor", "createdAt"];
 
 function claimedByAnotherCounsellor(session, counsellorId) {
@@ -94,7 +94,7 @@ export async function listQueue(req, res) {
   const filter = {};
   if (req.query.status) filter.status = req.query.status;
   if (req.query.user) filter.user = req.query.user;
-  // Searching by patient must not reveal whether that patient has a case with another counsellor.
+  // การค้นหาตามผู้ป่วยต้องไม่เปิดเผยว่าผู้ป่วยรายนั้นมีเคสกับผู้ให้คำปรึกษาท่านอื่นหรือไม่
   if (isCounsellor && req.query.user) filter.$or = [{ counsellor: null }, { counsellor: req.user.id }];
 
   const pagination = paginationOptions(req.query);
@@ -106,7 +106,7 @@ export async function listQueue(req, res) {
     res.setHeader("X-Total-Count", await CounsellingSession.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
   }
-  // Cases of patients whose account was deleted drop out of the queue.
+  // เคสของผู้ป่วยที่บัญชีถูกลบแล้วจะหลุดออกจากคิว
   const sessions = (await query).filter((session) => session.user);
   if (!isCounsellor) return res.json(sessions);
   res.json(sessions.map((session) => (claimedByAnotherCounsellor(session, req.user.id) ? toCalendarEntry(session) : session)));
@@ -154,14 +154,14 @@ export async function claimSession(req, res) {
     });
   }
 
-  // The patient's account was deleted after asking: there is no one to look after.
+  // บัญชีของผู้ป่วยถูกลบหลังจากขอรับบริการ: จึงไม่มีใครต้องดูแล
   if (!session.user) {
     await CounsellingSession.updateOne({ _id: session._id }, { counsellor: null, status: "cancelled" });
     return res.status(409).json({ message: "เคสนี้ถูกยกเลิกแล้ว" });
   }
 
-  // First counsellor to claim any of this user's sessions becomes their
-  // assigned counsellor, gating access to the full clinical profile.
+  // ผู้ให้คำปรึกษาคนแรกที่รับเคสใดๆ ของผู้ใช้รายนี้จะกลายเป็นผู้ให้คำปรึกษาที่รับผิดชอบ
+  // และเป็นตัวกำหนดสิทธิ์เข้าถึงโปรไฟล์ทางคลินิกฉบับเต็ม
   await User.updateOne({ _id: session.user._id, assignedCounsellor: null }, { assignedCounsellor: req.user.id });
 
   await notifyUser(session.user._id, STATUS_MESSAGE.active(session.topic), "counselling", {
@@ -265,7 +265,7 @@ export async function recordOutcome(req, res) {
   res.json(session);
 }
 
-// The person who made a request can withdraw it while it is still open.
+// ผู้ที่ส่งคำขอสามารถถอนคำขอได้ตราบที่ยังไม่ปิดเคส
 export async function cancelMySession(req, res) {
   const session = await CounsellingSession.findOneAndUpdate(
     { _id: req.params.id, user: req.user.id, status: { $in: OPEN_STATUSES } },
@@ -300,8 +300,8 @@ export async function updateStatus(req, res) {
   if (req.user.role === "counsellor" && session.counsellor?.toString() !== req.user.id) {
     return res.status(403).json({ message: "Forbidden" });
   }
-  // A closed case, or one the person withdrew, stays that way: staff reopening it
-  // would put someone back into counselling they had ended.
+  // เคสที่ปิดแล้ว หรือที่ผู้ขอถอนไปแล้ว จะคงสถานะนั้น: ถ้าเจ้าหน้าที่เปิดใหม่
+  // จะเป็นการดึงคนที่ยุติการปรึกษาไปแล้วกลับเข้ามาอีกครั้ง
   if (FINISHED_STATUSES.includes(session.status)) {
     return res.status(409).json({ message: "เคสนี้ปิดหรือยกเลิกไปแล้ว ไม่สามารถเปลี่ยนสถานะได้" });
   }
@@ -319,8 +319,8 @@ export async function updateStatus(req, res) {
   res.json(session);
 }
 
-// Counsellor/admin-only consolidated view for clinical review, mirroring the
-// admin emotion-history read model but bundling rehab + risk data alongside it.
+// มุมมองรวมสำหรับผู้ให้คำปรึกษา/แอดมินเท่านั้น เพื่อการทบทวนทางคลินิก
+// เลียนแบบ read model ประวัติอารมณ์ของแอดมิน แต่รวมข้อมูลการบำบัดและความเสี่ยงมาไว้ด้วย
 export async function getPatientProfile(req, res) {
   const targetUser = await User.findById(req.params.userId).select(
     "name nickname email phone age gender address province bio role verifiedStatus avatarUrl avatarStyle avatarColor createdAt"

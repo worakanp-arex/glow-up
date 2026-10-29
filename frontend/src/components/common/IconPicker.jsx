@@ -3,8 +3,8 @@ import { ChevronDown } from "lucide-react";
 import { ICON_OPTIONS, resolveIcon } from "../../utils/lucideIcon.js";
 import "./IconPicker.css";
 
-// Shows the actual icon (not its code name): a button with the current icon
-// opens a grid of every available icon with its Thai label.
+// แสดงไอคอนจริง (ไม่ใช่ชื่อรหัส): ปุ่มที่แสดงไอคอนปัจจุบัน
+// เปิดตารางไอคอนทั้งหมดที่มีพร้อมป้ายชื่อภาษาไทย
 export default function IconPicker({ value, onChange, label = "ไอคอน", allowNone = false }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();

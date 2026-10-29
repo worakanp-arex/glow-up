@@ -10,8 +10,8 @@ function weekdayOf(dateKey) {
 }
 
 /**
- * Pads a chronological list of { date: "YYYY-MM-DD", ... } entries with
- * leading blanks so a 7-row, column-major grid lines up with real weekdays.
+ * เติมช่องว่างนำหน้ารายการ { date: "YYYY-MM-DD", ... } ที่เรียงตามเวลา
+ * เพื่อให้กริด 7 แถวแบบเรียงตามคอลัมน์ตรงกับวันในสัปดาห์จริง
  */
 export function buildCalendarCells(history) {
   if (history.length === 0) return [];
@@ -20,9 +20,9 @@ export function buildCalendarCells(history) {
 }
 
 /**
- * Builds a flat, row-major (Sun-start) month grid: leading/trailing `null`
- * blanks pad the first and last week out to full 7-day rows, so a plain
- * `grid-template-columns: repeat(7, 1fr)` lines up like a normal calendar app.
+ * สร้างกริดเดือนแบบแบน เรียงตามแถว (เริ่มวันอาทิตย์): ช่องว่าง `null`
+ * นำหน้า/ท้ายเติมสัปดาห์แรกและสุดท้ายให้เต็มแถว 7 วัน ดังนั้น
+ * `grid-template-columns: repeat(7, 1fr)` ธรรมดาจึงเรียงเหมือนแอปปฏิทินทั่วไป
  */
 export function buildMonthGrid(year, month) {
   const startWeekday = new Date(Date.UTC(year, month, 1)).getUTCDay();
@@ -37,8 +37,8 @@ export function buildMonthGrid(year, month) {
 }
 
 /**
- * Buckets an already-date-sorted list into month groups, preserving order
- * (a Map keeps first-seen key order, so a newest-first input stays newest-first).
+ * แบ่งรายการที่เรียงตามวันที่แล้วเป็นกลุ่มรายเดือน คงลำดับเดิม
+ * (Map จำลำดับคีย์ที่เห็นก่อน ข้อมูลที่ส่งมาใหม่สุดก่อนจึงยังคงใหม่สุดก่อน)
  */
 export function groupByMonth(items, dateField) {
   const groups = new Map();

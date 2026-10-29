@@ -6,11 +6,11 @@ import "./FamilyMessageCard.css";
 
 const MESSAGE_DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
-// Shows the newest encouragement from a family member inside the welcome card,
-// with "mark as read" and "reply". `data` is the /family/messages/latest
-// response; `onChange` receives the updated message after reading or replying.
-// Ten minutes after it was read the message leaves the home page (it stays in
-// the history on the profile); `onExpire` lets the page fall back to its welcome.
+// แสดงกำลังใจล่าสุดจากสมาชิกครอบครัวในการ์ดต้อนรับ
+// พร้อม "ทำเครื่องหมายว่าอ่านแล้ว" และ "ตอบกลับ" `data` คือ response ของ /family/messages/latest
+// `onChange` รับข้อความที่อัปเดตหลังอ่านหรือตอบ
+// สิบนาทีหลังอ่าน ข้อความจะออกจากหน้าหลัก (ยังอยู่ใน
+// ประวัติในโปรไฟล์) `onExpire` ให้หน้ากลับไปแสดงข้อความต้อนรับ
 export default function FamilyMessageCard({ data, onChange, onExpire }) {
   const { message, family, linkId } = data;
   const [replying, setReplying] = useState(false);
@@ -31,7 +31,7 @@ export default function FamilyMessageCard({ data, onChange, onExpire }) {
     return () => clearTimeout(timer);
   }, [readAtMs]);
 
-  // Once the time is up, leave as soon as the person is not in the middle of writing a reply.
+  // เมื่อหมดเวลา ให้ออกทันทีที่ผู้ใช้ไม่ได้กำลังพิมพ์ตอบอยู่
   const leaving = expired && !replying;
   useEffect(() => {
     if (leaving) onExpire?.();

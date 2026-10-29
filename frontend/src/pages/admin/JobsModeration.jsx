@@ -57,7 +57,7 @@ function JobsModeration() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   function leave(job) {
-    // Once a job's status no longer matches the tab it is shown in, take it out of the list.
+    // เมื่อสถานะของงานไม่ตรงกับแท็บที่แสดงอยู่แล้ว ให้นำออกจากรายการ
     refreshCounts();
     if (tab === "all") return;
     setJobs((prev) => prev.filter((j) => j._id !== job._id));

@@ -8,9 +8,14 @@ export function getCourse(id) {
   return api.get(`/courses/${id}`).then((res) => res.data);
 }
 
-// Open courses related to the jobs the signed-in job seeker bookmarked, each with a `reason`.
+// คอร์สที่เปิดอยู่และเกี่ยวข้องกับงานที่ผู้หางานที่ล็อกอินบุ๊กมาร์กไว้ พร้อม `reason`
 export function getRecommendedCourses() {
   return api.get("/courses/recommended").then((res) => res.data);
+}
+
+// คอร์สสำหรับแบนเนอร์เลื่อนวนหน้าคอร์ส เลือกตามทักษะที่ผู้ใช้สนใจ พร้อม `reason` ({ source, label, matched })
+export function getFeaturedCourses() {
+  return api.get("/courses/featured").then((res) => res.data);
 }
 
 export function getMyCourses() {

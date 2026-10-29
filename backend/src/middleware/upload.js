@@ -97,11 +97,11 @@ export function publicUrl(kind, filename) {
   return `/uploads/${SUBFOLDERS[kind]}/${filename}`;
 }
 
-// Multer's fileFilter only trusts the client-supplied Content-Type, which is
-// trivially spoofable. This checks the bytes actually written to disk.
-// file-type can't disambiguate legacy OLE/CFB container formats (.doc/.xls/.ppt
-// all share one container signature), so a sniffed "application/x-cfb" is
-// accepted wherever "application/msword" is declared as allowed for the kind.
+// fileFilter ของ Multer เชื่อเพียง Content-Type ที่ไคลเอนต์ส่งมา ซึ่งปลอมได้ง่ายมาก
+// ที่นี่จึงตรวจไบต์ที่เขียนลงดิสก์จริง file-type แยกแยะรูปแบบคอนเทนเนอร์ OLE/CFB รุ่นเก่า
+// (.doc/.xls/.ppt ใช้ลายเซ็นคอนเทนเนอร์เดียวกัน) ไม่ได้ ดังนั้น
+// "application/x-cfb" ที่ตรวจพบจะยอมรับในทุกที่ที่ประกาศอนุญาต "application/msword"
+// สำหรับประเภทนั้น
 const CFB_COMPATIBLE_DECLARED_TYPES = new Set(["application/msword"]);
 
 function uploadedFiles(req) {
@@ -109,11 +109,10 @@ function uploadedFiles(req) {
   return req.file ? [req.file] : [];
 }
 
-// Multer writes each file to disk as soon as it arrives, before the route has
-// decided whether to accept the request. Put this in front of the uploader and
-// every file is removed again if the request ends up refused (bad input, a
-// duplicate, a rate limit, a failed check...), so rejected requests can't fill
-// the disk with files nothing refers to.
+// Multer เขียนแต่ละไฟล์ลงดิสก์ทันทีที่มาถึง ก่อนที่ route จะตัดสินว่ารับคำขอหรือไม่
+// ใส่ตัวนี้ไว้หน้าตัวอัปโหลด แล้วทุกไฟล์จะถูกลบอีกครั้งหากคำขอถูกปฏิเสธ
+// (ข้อมูลไม่ถูกต้อง ซ้ำ เกิน rate limit ตรวจไม่ผ่าน...) คำขอที่ถูกปฏิเสธจึงไม่ทำให้ดิสก์เต็ม
+// ด้วยไฟล์ที่ไม่มีอะไรอ้างอิง
 export function discardUploadsOnFailure(req, res, next) {
   res.on("close", () => {
     if (res.statusCode < 400) return;
@@ -126,29 +125,28 @@ export function removeUploadedFiles(files) {
   for (const file of files) fs.unlink(file.path, () => {});
 }
 
-// Deletes a stored file given the URL the app saved for it (/uploads/<kind>/<name>).
-// Anything that isn't exactly that shape is ignored, so a bad value in the
-// database can never point this at some other file on the server.
+// ลบไฟล์ที่เก็บไว้ตาม URL ที่แอปบันทึกไว้ (/uploads/<kind>/<name>)
+// สิ่งที่ไม่ตรงรูปแบบนั้นเป๊ะๆ จะถูกเมิน ดังนั้นค่าที่ผิดในฐานข้อมูล
+// จะไม่มีทางทำให้ชี้ไปลบไฟล์อื่นบนเซิร์ฟเวอร์
 export function removeStoredFile(fileUrl) {
   const match = /^\/uploads\/([\w-]+)\/([\w.-]+)$/.exec(fileUrl || "");
   if (!match || match[2].includes("..") || !Object.values(SUBFOLDERS).includes(match[1])) return Promise.resolve();
   return fs.promises.unlink(path.join(UPLOAD_ROOT, match[1], match[2])).catch(() => {});
 }
 
-// Photos carry hidden data: where and when they were taken (GPS), the phone
-// model, sometimes the owner's name. Profile pictures are served to anyone who
-// has the link, so they must not leak where a patient lives. Re-encoding the
-// picture drops all of that; `rotate()` first applies the camera's orientation
-// so the picture still looks the same way up.
+// รูปภาพมีข้อมูลซ่อน: สถานที่และเวลาที่ถ่าย (GPS) รุ่นโทรศัพท์ และบางครั้งชื่อเจ้าของ
+// รูปโปรไฟล์เปิดให้ทุกคนที่มีลิงก์ดูได้ จึงต้องไม่เผยว่าผู้ป่วยอาศัยอยู่ที่ไหน
+// การเข้ารหัสรูปใหม่ตัดข้อมูลเหล่านั้นทั้งหมด `rotate()` ใช้ทิศทางจากกล้องก่อน
+// เพื่อให้รูปยังหันถูกด้านเหมือนเดิม
 const REENCODED_IMAGE_FORMATS = { "image/jpeg": "jpeg", "image/png": "png", "image/webp": "webp" };
-// Refuse decompression bombs: a tiny file that expands to a gigantic bitmap.
+// ปฏิเสธ decompression bomb: ไฟล์เล็กๆ ที่ขยายเป็นบิตแมปขนาดมหึมา
 const MAX_IMAGE_PIXELS = 40_000_000;
 
 async function stripImageMetadata(file) {
   const format = REENCODED_IMAGE_FORMATS[file.mimetype];
-  if (!format) return; // PDFs and Word files are stored as they are
-  // Read the bytes first: handing sharp the path keeps the file open on Windows,
-  // which makes writing the cleaned picture back over it fail.
+  if (!format) return; // PDF และไฟล์ Word เก็บตามที่เป็นอยู่
+  // อ่านไบต์ก่อน: การส่งพาธให้ sharp ทำให้ไฟล์ค้างเปิดอยู่บน Windows
+  // ส่งผลให้เขียนรูปที่ล้างแล้วทับไฟล์เดิมไม่ได้
   const original = await fs.promises.readFile(file.path);
   const cleaned = await sharp(original, { limitInputPixels: MAX_IMAGE_PIXELS })
     .rotate()
@@ -165,9 +163,9 @@ export function verifyUploadedFile(kind) {
     const declared = FILE_FILTERS[kind];
     for (const file of files) {
       const sniffed = await fileTypeFromFile(file.path);
-      // The bytes must really be the type the upload claimed: the claimed type
-      // picks the stored file's extension, so a mismatch would label e.g. a
-      // script or document as an image.
+      // ไบต์ต้องเป็นประเภทเดียวกับที่ประกาศตอนอัปโหลดจริงๆ: ประเภทที่ประกาศ
+      // เป็นตัวกำหนดนามสกุลของไฟล์ที่เก็บ หากไม่ตรงจะทำให้เช่น
+      // สคริปต์หรือเอกสารถูกติดป้ายว่าเป็นรูปภาพ
       const matches =
         sniffed &&
         (sniffed.mime === file.mimetype ||
@@ -175,7 +173,7 @@ export function verifyUploadedFile(kind) {
             CFB_COMPATIBLE_DECLARED_TYPES.has(file.mimetype) &&
             declared.includes(file.mimetype)));
       if (!matches) {
-        // Remove all of them, not just this one, then refuse.
+        // ลบทั้งหมด ไม่ใช่แค่ไฟล์นี้ แล้วจึงปฏิเสธ
         await Promise.all(files.map((f) => fs.promises.unlink(f.path).catch(() => {})));
         return res.status(400).json({ message: `Invalid file content for ${kind}` });
       }
@@ -183,7 +181,7 @@ export function verifyUploadedFile(kind) {
     try {
       await Promise.all(files.map(stripImageMetadata));
     } catch {
-      // The signature looked right but the picture can't be decoded (corrupt, or absurdly large).
+      // ลายเซ็นดูถูกต้อง แต่ถอดรหัสรูปไม่ได้ (เสียหาย หรือใหญ่ผิดปกติ)
       await Promise.all(files.map((f) => fs.promises.unlink(f.path).catch(() => {})));
       return res.status(400).json({ message: `Invalid file content for ${kind}` });
     }

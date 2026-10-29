@@ -2,8 +2,8 @@ import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import "./ConfirmDialog.css";
 
-// `wide` gives pickers and forms more room; `confirmDisabled` keeps the confirm
-// button off until the content (e.g. a required reason) is filled in.
+// `wide` ให้ตัวเลือกและฟอร์มมีพื้นที่มากขึ้น `confirmDisabled` ปิดปุ่มยืนยัน
+// จนกว่าเนื้อหา (เช่น เหตุผลที่จำเป็น) จะถูกกรอก
 export default function ConfirmDialog({ title, children, confirmLabel = "ยืนยัน", busy, error, onConfirm, onClose, confirmDisabled = false, wide = false }) {
   const ref = useRef(null);
   const id = useId();

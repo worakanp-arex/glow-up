@@ -44,7 +44,7 @@ test("deleting your own account needs the address typed, then signs you out", as
   await dialog.getByLabel("รหัสผ่านปัจจุบัน").fill("my-own-password-123");
   await expect(confirm).toBeEnabled();
   await confirm.click();
-  // Signed out while on a signed-in page, so the app sends the person to the login screen.
+  // ออกจากระบบขณะอยู่ในหน้าที่ต้องล็อกอิน แอปจึงส่งผู้ใช้ไปหน้าเข้าสู่ระบบ
   await expect(page).toHaveURL(/\/login$/);
   expect(state.deleteBody).toEqual({ confirmEmail: "TEST@example.com", password: "my-own-password-123" });
   expect(state.signedIn).toBe(false);

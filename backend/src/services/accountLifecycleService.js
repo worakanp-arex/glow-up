@@ -21,8 +21,8 @@ import { removeStoredFile } from "../middleware/upload.js";
 import { notifyUser } from "./notificationService.js";
 import { disconnectUser } from "./socket.js";
 
-// How long a deleted account's data is kept (so an admin can look at it or put it
-// back) before it is anonymised for good.
+// ระยะเวลาที่เก็บข้อมูลของบัญชีที่ถูกลบ (เพื่อให้แอดมินดูหรือกู้คืนได้)
+// ก่อนทำให้ไม่ระบุตัวตนถาวร
 export const RETENTION_DAYS = 90;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -37,18 +37,18 @@ export function recordAudit({ actor = null, action, targetUser, meta }) {
   return AuditLog.create({ actor, action, targetUser, meta });
 }
 
-// ---------- deleting ----------
+// ---------- การลบ ----------
 
-// Takes a deleted account out of everything that is still live. Nothing is
-// erased here: the person's own records stay for the retention period.
+// นำบัญชีที่ถูกลบออกจากทุกอย่างที่ยังใช้งานอยู่ ไม่มีการลบข้อมูลที่นี่:
+// ข้อมูลของบุคคลนั้นยังอยู่ตลอดช่วงเก็บรักษา
 async function endLiveRelationships(user) {
   const id = user._id;
 
-  // Their own open requests are withdrawn.
+  // คำขอที่ยังเปิดอยู่ของตนเองจะถูกถอนออก
   await CounsellingSession.updateMany({ user: id, status: { $in: OPEN_SESSION_STATUSES } }, { status: "cancelled" });
 
-  // A counsellor's cases go back to the queue so someone else can take them, and
-  // the patients are told why their case moved.
+  // เคสของผู้ให้คำปรึกษากลับเข้าคิวเพื่อให้คนอื่นรับต่อ
+  // และผู้ป่วยจะถูกแจ้งเหตุผลที่เคสเปลี่ยนมือ
   const orphaned = await CounsellingSession.find({ counsellor: id, status: { $in: ["active", "scheduled"] } }).select("user topic");
   if (orphaned.length > 0) {
     await CounsellingSession.updateMany({ _id: { $in: orphaned.map((s) => s._id) } }, { counsellor: null, status: "pending" });
@@ -58,19 +58,19 @@ async function endLiveRelationships(user) {
   }
   await User.updateMany({ assignedCounsellor: id }, { $unset: { assignedCounsellor: "" } });
 
-  // Family connections in either direction end.
+  // การเชื่อมต่อครอบครัวสิ้นสุดลงทั้งสองทิศทาง
   await FamilyLink.updateMany(
     { $or: [{ recoveringUser: id }, { familyUser: id }], status: { $in: ["pending", "requested", "active"] } },
     { status: "revoked" }
   );
 
-  // Job applications that were still in play are withdrawn; an employer's open
-  // postings are closed.
+  // ใบสมัครงานที่ยังดำเนินอยู่ถูกถอน ส่วนประกาศงานที่เปิดอยู่ของนายจ้าง
+  // ถูกปิด
   await Application.updateMany({ user: id, status: { $in: ["pending", "interview"] } }, { status: "cancelled" });
   await Job.updateMany({ employer: id, status: "open" }, { status: "closed" });
 }
 
-// Returns the deleted user, or null if there is no such (live) account.
+// คืนผู้ใช้ที่ถูกลบ หรือ null ถ้าไม่มีบัญชีนั้น (ที่ยังใช้งานอยู่)
 export async function softDeleteUser(userId, { actorId, reason }) {
   const user = await User.findOneAndUpdate(
     { _id: userId },
@@ -84,11 +84,11 @@ export async function softDeleteUser(userId, { actorId, reason }) {
   return user;
 }
 
-// ---------- restoring ----------
+// ---------- การกู้คืน ----------
 
-// Brings a deleted account back, if it hasn't been anonymised yet. What was
-// wound down when it was deleted (cancelled requests, revoked family links, closed
-// postings) stays that way: those other people were already told or affected.
+// นำบัญชีที่ถูกลบกลับมา หากยังไม่ถูกทำให้ไม่ระบุตัวตน สิ่งที่ยุติไปตอนลบ
+// (คำขอที่ยกเลิก ลิงก์ครอบครัวที่เพิกถอน ประกาศงานที่ปิด)
+// จะคงเดิม: เพราะคนอื่นๆ ได้รับแจ้งหรือได้รับผลกระทบไปแล้ว
 export async function restoreUser(userId, actorId) {
   const user = await User.findOneAndUpdate(
     { _id: userId, deletedAt: { $ne: null }, anonymizedAt: null },
@@ -100,7 +100,7 @@ export async function restoreUser(userId, actorId) {
   return user;
 }
 
-// ---------- anonymising ----------
+// ---------- การทำให้ไม่ระบุตัวตน ----------
 
 async function wipeFreeTextOf(user) {
   const id = user._id;
@@ -110,8 +110,8 @@ async function wipeFreeTextOf(user) {
   const applications = await Application.find({ user: id }).select("attachments");
   const certificates = await UserCourse.find({ user: id, certificateUrl: { $ne: null } }).select("certificateUrl");
 
-  // Numbers and dates that describe the service as a whole stay; everything a
-  // person wrote about themselves goes.
+  // ตัวเลขและวันที่ที่อธิบายภาพรวมของบริการยังอยู่ ส่วนทุกอย่างที่
+  // บุคคลเขียนเกี่ยวกับตนเองจะถูกลบ
   await EmotionLog.updateMany({ user: id }, { $unset: { note: "" } });
   await CounsellingSession.updateMany(
     { user: id },
@@ -130,7 +130,7 @@ async function wipeFreeTextOf(user) {
   await UserCourse.updateMany({ user: id }, { $unset: { certificateUrl: "" } });
   if (linkIds.length > 0) {
     await FamilyMessage.updateMany({ familyLink: { $in: linkIds } }, { $set: { content: REMOVED_TEXT } });
-    // The other person's address is theirs, not ours to keep: replaced per link so each stays unique.
+    // ที่อยู่อีเมลของอีกฝ่ายเป็นของเขา ไม่ใช่ของเราที่จะเก็บ: แทนที่ต่อลิงก์ เพื่อให้แต่ละอันไม่ซ้ำกัน
     await FamilyLink.updateMany(
       { _id: { $in: linkIds } },
       [{ $set: { inviteEmail: { $concat: ["removed-", { $toString: "$_id" }, "@anonymized.invalid"] } } }, { $unset: "inviteTokenHash" }]
@@ -149,9 +149,9 @@ async function wipeFreeTextOf(user) {
   await Promise.all(fileUrls.map(removeStoredFile));
 }
 
-// Strips one deleted account of everything that identifies the person. Safe to
-// run again: the account only gets its `anonymizedAt` mark at the very end, so an
-// interrupted run is simply picked up next time.
+// ลบทุกอย่างที่ระบุตัวบุคคลออกจากบัญชีที่ถูกลบหนึ่งบัญชี รันซ้ำได้อย่างปลอดภัย:
+// บัญชีจะได้เครื่องหมาย `anonymizedAt` เมื่อจบขั้นตอนเท่านั้น ดังนั้นการรันที่
+// ถูกขัดจังหวะจะถูกทำต่อในรอบถัดไป
 export async function anonymizeUser(user) {
   await wipeFreeTextOf(user);
   await User.updateOne(
@@ -171,8 +171,8 @@ export async function anonymizeUser(user) {
   await recordAudit({ actor: null, action: "account.anonymized", targetUser: user._id });
 }
 
-// The scheduled job: anonymise every account whose retention period has run out.
-// Returns how many were done.
+// งานตามกำหนดเวลา: ทำให้ไม่ระบุตัวตนทุกบัญชีที่หมดระยะเก็บรักษา
+// คืนจำนวนที่ทำเสร็จ
 export async function anonymizeExpiredUsers(now = new Date(), batchSize = 50) {
   const cutoff = new Date(now.getTime() - RETENTION_DAYS * DAY_MS);
   const due = await User.find({ deletedAt: { $ne: null, $lte: cutoff }, anonymizedAt: null }).limit(batchSize);

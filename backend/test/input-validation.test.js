@@ -8,9 +8,9 @@ function tokenFor(role, id = "tester") {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "1h" });
 }
 
-// Table-driven boundary cases across the validator groups rolled out in
-// Phase 2 (ObjectId params, enum fields, free text, pagination) — a
-// representative sample, not an exhaustive endpoint-by-endpoint sweep.
+// เคสขอบเขตแบบตาราง ครอบคลุมกลุ่มตัวตรวจสอบที่ปล่อยใน
+// Phase 2 (พารามิเตอร์ ObjectId, ฟิลด์ enum, ข้อความอิสระ, การแบ่งหน้า) —
+// เป็นตัวอย่างตัวแทน ไม่ใช่การไล่ทดสอบทีละ endpoint ครบทุกตัว
 const CASES = [
   {
     name: "ObjectId param: malformed id is rejected before hitting the DB",

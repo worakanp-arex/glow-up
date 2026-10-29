@@ -11,10 +11,9 @@ const USER_PUBLIC_FIELDS = "name role avatarUrl avatarStyle avatarColor speciali
 const STAFF_ROLES = ["admin", "counsellor"];
 const REPORTS_PER_DAY = 10;
 
-// Staff (admin/counsellor) see every post, for moderation. Everyone else
-// only sees posts with no audience restriction (visibleToRoles: []) or ones
-// that explicitly include their own role — and never a post that is currently
-// reported and waiting for staff review.
+// เจ้าหน้าที่ (แอดมิน/ผู้ให้คำปรึกษา) เห็นทุกโพสต์เพื่อการกลั่นกรอง คนอื่นเห็นเฉพาะ
+// โพสต์ที่ไม่จำกัดกลุ่มผู้ชม (visibleToRoles: []) หรือที่ระบุบทบาทของตนไว้
+// และจะไม่เห็นโพสต์ที่ถูกรายงานและรอเจ้าหน้าที่ตรวจสอบ
 function visibilityFilter(role) {
   if (STAFF_ROLES.includes(role)) return {};
   return { needsReview: { $ne: true }, $or: [{ visibleToRoles: { $size: 0 } }, { visibleToRoles: role }] };
@@ -24,8 +23,8 @@ function reporterId(report) {
   return String(report.reporter?._id || report.reporter);
 }
 
-// `reports` carries who reported what, so it is only ever returned through the
-// staff moderation list. Everyone else just learns whether they reported it.
+// `reports` บอกว่าใครรายงานอะไร จึงคืนผ่านรายการกลั่นกรองของเจ้าหน้าที่เท่านั้น
+// คนอื่นจะรู้เพียงว่าตนเองรายงานไปแล้วหรือยัง
 function serializePost(post, userId, savedIds) {
   const obj = post.toObject ? post.toObject() : post;
   const likedByMe = Boolean(userId) && (obj.likedBy || []).some((id) => id.toString() === userId);
@@ -42,7 +41,7 @@ async function withCommentCount(post, userId, savedIds) {
   return { ...serializePost(post, userId, savedIds), commentCount };
 }
 
-// Comment counts for a whole page of posts in one query, not one per post.
+// นับคอมเมนต์ของโพสต์ทั้งหน้าใน query เดียว ไม่ใช่ทีละโพสต์
 async function withCommentCounts(posts, userId, savedIds) {
   if (posts.length === 0) return [];
   const rows = await Comment.aggregate([
@@ -67,7 +66,7 @@ export async function listPosts(req, res) {
     postQuery.skip(pagination.skip).limit(pagination.limit);
   }
   const [posts, savedIds] = await Promise.all([postQuery, getSavedIdSet(req.user.id)]);
-  // Posts whose author's account was deleted are not shown.
+  // ไม่แสดงโพสต์ของผู้เขียนที่บัญชีถูกลบแล้ว
   res.json(await withCommentCounts(posts.filter((post) => post.user), req.user.id, savedIds));
 }
 
@@ -83,8 +82,8 @@ export async function myPosts(req, res) {
   res.json(await withCommentCounts(posts, req.user.id, savedIds));
 }
 
-// Preserves the user's save order (most-recently-saved first) rather than
-// falling back to the posts' own createdAt order.
+// คงลำดับที่ผู้ใช้บันทึกไว้ (บันทึกล่าสุดก่อน)
+// แทนที่จะย้อนไปใช้ลำดับ createdAt ของโพสต์เอง
 export async function mySavedPosts(req, res) {
   const filter = { user: req.user.id };
   const pagination = paginationOptions(req.query);
@@ -113,7 +112,7 @@ export async function getPost(req, res) {
     return res.status(404).json({ message: "Not found" });
   }
 
-  // Comments by people whose account was deleted are not shown.
+  // ไม่แสดงคอมเมนต์ของผู้ที่บัญชีถูกลบแล้ว
   const comments = (await Comment.find({ post: post._id })
     .populate("user", USER_PUBLIC_FIELDS)
     .sort({ createdAt: 1 })).filter((comment) => comment.user);
@@ -149,8 +148,8 @@ export async function updatePost(req, res) {
   if (tags !== undefined) post.tags = Array.isArray(tags) ? tags : [];
   if (commentsEnabled !== undefined) post.commentsEnabled = Boolean(commentsEnabled);
   if (visibleToRoles !== undefined) post.visibleToRoles = Array.isArray(visibleToRoles) ? visibleToRoles : [];
-  // Editing a reported post counts as resolving it: it is shown again and the
-  // people who reported it are told it changed.
+  // การแก้ไขโพสต์ที่ถูกรายงานถือว่าจัดการเรื่องแล้ว: โพสต์จะแสดงอีกครั้ง และ
+  // ผู้ที่รายงานจะได้รับแจ้งว่ามีการเปลี่ยนแปลง
   const reporters = post.needsReview ? resolveReports(post, "edited", req.user.id) : [];
   await post.save();
   await notifyReporters(reporters, "โพสต์ที่คุณรายงานได้รับการแก้ไขแล้ว ขอบคุณที่ช่วยดูแลชุมชน", `/community/${post._id}`);
@@ -159,9 +158,9 @@ export async function updatePost(req, res) {
   res.json(await withCommentCount(post, req.user.id));
 }
 
-// Staff edit of a reported post (any author). Same outcome as the author
-// editing it: the reports are cleared, the post is shown again, and the
-// reporters and author are notified.
+// เจ้าหน้าที่แก้ไขโพสต์ที่ถูกรายงาน (ผู้เขียนคนใดก็ได้) ผลเหมือนกับที่ผู้เขียน
+// แก้เอง: ล้างรายงาน แสดงโพสต์อีกครั้ง และแจ้งทั้ง
+// ผู้รายงานและผู้เขียน
 export async function moderatePost(req, res) {
   const post = await Post.findById(req.params.id);
   if (!post) {
@@ -211,7 +210,7 @@ export async function deletePost(req, res) {
 }
 
 export async function addComment(req, res) {
-  // Same visibility as reading the post: a post you can't see answers 404.
+  // สิทธิ์เห็นเหมือนการอ่านโพสต์: โพสต์ที่คุณมองไม่เห็นจะตอบ 404
   const post = await Post.findOne({ _id: req.params.id, ...visibilityFilter(req.user.role) });
   if (!post) {
     return res.status(404).json({ message: "Not found" });
@@ -258,8 +257,8 @@ export async function deleteComment(req, res) {
 }
 
 export async function likePost(req, res) {
-  // Apply the requested state atomically, then derive the count from membership.
-  // Returning only the reaction avoids replacing a populated author in clients.
+  // บันทึกสถานะที่ขอแบบ atomic แล้วค่อยคำนวณจำนวนจากรายชื่อสมาชิก
+  // การคืนเฉพาะปฏิกิริยาช่วยไม่ให้ไปแทนที่ข้อมูลผู้เขียนที่ populate ไว้ในไคลเอนต์
   const userId = new mongoose.Types.ObjectId(req.user.id);
   const members = { $ifNull: ["$likedBy", []] };
   const liked = typeof req.body.liked === "boolean" ? req.body.liked : { $not: [{ $in: [userId, members] }] };
@@ -271,8 +270,8 @@ export async function likePost(req, res) {
   res.json({ likes: updated.likes, likedByMe: updated.likedBy.some(id => id.toString() === req.user.id) });
 }
 
-// Clears the reports (the post is shown again) and returns who had reported it
-// so they can be told what happened.
+// ล้างรายงาน (โพสต์แสดงอีกครั้ง) และคืนรายชื่อผู้ที่รายงาน
+// เพื่อให้แจ้งผลแก่พวกเขาได้
 function resolveReports(post, action, reviewerId, note) {
   const reporters = [...new Set((post.reports || []).map(reporterId))];
   post.reports = [];
@@ -294,8 +293,8 @@ export async function flagPostForReview(req, res) {
     return res.status(400).json({ message: "ไม่สามารถรายงานโพสต์ของตัวเองได้" });
   }
 
-  // A report hides the post for everyone until staff look at it, so one account
-  // can only file a handful a day: it can't be used to blank out the community.
+  // การรายงานซ่อนโพสต์จากทุกคนจนกว่าเจ้าหน้าที่จะตรวจสอบ ดังนั้นบัญชีหนึ่ง
+  // รายงานได้เพียงไม่กี่ครั้งต่อวัน: จะได้ไม่ถูกใช้ทำให้ชุมชนว่างเปล่า
   const reportsToday = await Post.countDocuments({
     reports: { $elemMatch: { reporter: req.user.id, createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } },
   });
@@ -305,8 +304,8 @@ export async function flagPostForReview(req, res) {
 
   const reason = REPORT_REASON_VALUES.includes(req.body?.reason) ? req.body.reason : "other";
   const detail = typeof req.body?.detail === "string" ? sanitizeText(req.body.detail).slice(0, 500) : "";
-  // The $ne guard makes a repeat report from the same person a no-op even if
-  // two requests race.
+  // เงื่อนไข $ne ทำให้การรายงานซ้ำจากคนเดิมไม่มีผล แม้
+  // สองคำขอจะแข่งกันเข้ามา
   const updated = await Post.findOneAndUpdate(
     { _id: post._id, "reports.reporter": { $ne: req.user.id } },
     { $push: { reports: { reporter: req.user.id, reason, detail } }, $set: { needsReview: true } },
@@ -318,7 +317,7 @@ export async function flagPostForReview(req, res) {
   res.json({ needsReview: true, reportedByMe: true });
 }
 
-// "Reviewed, no violation": the post is shown again unchanged.
+// "ตรวจแล้วไม่พบการละเมิด": โพสต์แสดงอีกครั้งโดยไม่เปลี่ยนแปลง
 export async function clearPostFlag(req, res) {
   const post = await Post.findById(req.params.id);
   if (!post) {
@@ -343,7 +342,7 @@ export async function listFlaggedPosts(req, res) {
   }
   const posts = await query;
   res.json(posts.map((post) => {
-    // Who reported is only for admins; counsellors (who may be the post's author) see the reason alone.
+    // ชื่อผู้รายงานเปิดให้แอดมินเท่านั้น ผู้ให้คำปรึกษา (ซึ่งอาจเป็นผู้เขียนโพสต์) เห็นแต่เหตุผล
     const reports = (post.reports || []).map((report) => ({
       reason: report.reason,
       reasonLabel: reportReasonLabel(report.reason),
@@ -357,7 +356,7 @@ export async function listFlaggedPosts(req, res) {
 
 export async function toggleSavePost(req, res) {
   const post = await Post.findOne({ _id: req.params.id, ...visibilityFilter(req.user.role) }).select("_id");
-  // A bookmark can always be removed, even after the post stopped being visible to you.
+  // ลบบุ๊กมาร์กได้เสมอ แม้โพสต์นั้นจะไม่ปรากฏให้คุณเห็นแล้ว
   const existing = await SavedPost.findOne({ user: req.user.id, post: req.params.id });
   if (existing) {
     await SavedPost.deleteOne({ _id: existing._id });

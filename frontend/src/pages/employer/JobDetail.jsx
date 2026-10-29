@@ -5,7 +5,7 @@ import JobPreview from "../../components/jobs/JobPreview.jsx";
 import ApplicantRow from "../../components/employer/ApplicantRow.jsx";
 import VerifyBanner from "../../components/employer/VerifyBanner.jsx";
 import { useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { Briefcase, CalendarDays, Download, FileText, MapPin, Pencil, ShieldAlert, Tag, Users, Wallet } from "lucide-react";
 import * as jobService from "../../services/jobService.js";
 import * as applicationService from "../../services/applicationService.js";
@@ -18,10 +18,12 @@ const TABS = [
   { key: "files", label: "ไฟล์ที่ได้รับ" },
 ];
 
-// The employer's own view of one posting: everything about it, who applied,
-// and the files they sent — whatever its moderation state.
+// มุมมองของนายจ้างเองต่อประกาศหนึ่งรายการ: ทุกอย่างเกี่ยวกับประกาศนั้น ใครสมัคร
+// และไฟล์ที่ส่งมา — ไม่ว่าจะอยู่ในสถานะการตรวจสอบใด
 function JobDetail() {
   const { jobId } = useParams();
+  // คำเตือนที่หน้าแก้ไขส่งมา (เช่น บันทึกประกาศได้แต่รูปไม่สำเร็จ)
+  const notice = useLocation().state?.notice;
   const [searchParams, setSearchParams] = useSearchParams();
   const requested = searchParams.get("tab");
   const tab = TABS.some((item) => item.key === requested) ? requested : "details";
@@ -39,7 +41,7 @@ function JobDetail() {
       .finally(() => setLoading(false));
   }, [jobId]);
 
-  // Applicants are needed for the count in the tab as well as the two tabs that list them.
+  // ต้องใช้ผู้สมัครสำหรับตัวเลขในแท็บด้วย และสำหรับสองแท็บที่แสดงรายชื่อ
   useEffect(() => {
     applicationService
       .getJobApplicants(jobId)
@@ -77,6 +79,7 @@ function JobDetail() {
     <div className="employer-job-detail-page">
       {header}
       <VerifyBanner />
+      {notice && <p className="employer-job-notice" role="alert">{notice}</p>}
 
       <div className="employer-job-status">
         <StatusBadge status={job.status} />

@@ -2,8 +2,8 @@ import JobSkill from "../models/JobSkill.js";
 import UserSkill from "../models/UserSkill.js";
 import { notifyUser } from "./notificationService.js";
 
-// Only page job-seekers whose skills clear this bar — avoids notifying every
-// user who happens to own one of ten required skills for a 1% "match".
+// แจ้งเฉพาะผู้หางานที่ทักษะผ่านเกณฑ์นี้ — เพื่อไม่แจ้งผู้ใช้ทุกคน
+// ที่บังเอิญมีทักษะหนึ่งในสิบที่ต้องการ ทั้งที่ "ความตรงกัน" แค่ 1%
 const NEW_JOB_MATCH_NOTIFY_THRESHOLD = 50;
 
 export function scoreSkills(required, owned) {
@@ -25,7 +25,7 @@ export async function applicationMatches(userId, applications) {
     match: scoreSkills(required.filter((s) => String(s.job) === String(application.job?._id)).map((s) => s.skill), owned.map((s) => s.skill)) }));
 }
 
-// Employer-side counterpart to applicationMatches: one job, many applicants.
+// ฝั่งนายจ้างที่คู่กับ applicationMatches: หนึ่งงาน ผู้สมัครหลายคน
 export async function jobApplicantMatches(jobId, applications) {
   const userIds = applications.map((application) => application.user?._id || application.user).filter(Boolean);
   const [required, owned] = await Promise.all([
@@ -45,9 +45,9 @@ export async function jobApplicantMatches(jobId, applications) {
   });
 }
 
-// Skill match for applications spread over several postings at once (the
-// employer's "all applicants" list). Every applicant is scored against the
-// posting they applied to, whatever the status of their application.
+// ความตรงของทักษะสำหรับใบสมัครที่กระจายอยู่หลายประกาศพร้อมกัน
+// (รายการ "ผู้สมัครทั้งหมด" ของนายจ้าง) ผู้สมัครทุกคนถูกให้คะแนนเทียบกับ
+// ประกาศที่ตนสมัคร ไม่ว่าใบสมัครจะมีสถานะใด
 export async function mixedApplicationMatches(applications) {
   const keyOf = (value) => String(value?._id || value || "");
   const jobIds = [...new Set(applications.map((application) => keyOf(application.job)).filter(Boolean))];
@@ -74,12 +74,12 @@ export async function mixedApplicationMatches(applications) {
   }));
 }
 
-// Called once a job clears admin moderation (verifiedStatus -> "verified") —
-// pages every job-seeker whose declared skills clear the match threshold for
-// this specific job's required skills.
+// เรียกเมื่อประกาศงานผ่านการตรวจของแอดมิน (verifiedStatus -> "verified") —
+// แจ้งผู้หางานทุกคนที่ทักษะที่ระบุไว้ผ่านเกณฑ์ความตรงกัน
+// กับทักษะที่งานนี้ต้องการ
 export async function notifyMatchingUsersForJob(job) {
   const jobSkills = await JobSkill.find({ job: job._id }).populate("skill");
-  const requiredSkills = jobSkills.map((js) => js.skill);
+  const requiredSkills = jobSkills.map((js) => js.skill).filter(Boolean);
   if (requiredSkills.length === 0) return;
 
   const matchingUserSkills = await UserSkill.find({ skill: { $in: requiredSkills.map((s) => s._id) } }).select(

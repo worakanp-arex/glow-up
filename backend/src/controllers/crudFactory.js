@@ -1,8 +1,8 @@
 import { paginationOptions } from "../utils/pagination.js";
 
-// `fields` is the list of body keys a caller may write. Without it create and
-// update would hand the whole request body to the model (mass assignment), so
-// every controller that exposes them must say what is writable.
+// `fields` คือรายการ key ใน body ที่ผู้เรียกเขียนได้ หากไม่ระบุ create และ
+// update จะส่ง body ทั้งหมดให้ model (mass assignment)
+// ดังนั้นทุก controller ที่เปิดใช้ต้องระบุว่าฟิลด์ไหนเขียนได้
 function pickFields(body, fields) {
   const picked = {};
   for (const key of fields) if (body[key] !== undefined) picked[key] = body[key];
@@ -11,8 +11,8 @@ function pickFields(body, fields) {
 
 const STAFF_ROLES = ["admin", "counsellor"];
 
-// `hideInactive`: catalog entries staff switched off (drafts, retired items)
-// are only returned to staff; everyone else gets the active ones.
+// `hideInactive`: รายการแคตตาล็อกที่เจ้าหน้าที่ปิดไว้ (ฉบับร่าง รายการเลิกใช้)
+// จะส่งคืนให้เจ้าหน้าที่เท่านั้น คนอื่นได้เฉพาะรายการที่ใช้งานอยู่
 export function createCrudController(Model, { fields = [], hideInactive = false } = {}) {
   const readableBy = (req) => (hideInactive && !STAFF_ROLES.includes(req.user?.role) ? { active: true } : {});
 

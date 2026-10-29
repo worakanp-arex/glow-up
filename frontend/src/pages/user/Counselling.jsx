@@ -32,8 +32,8 @@ function formatDateTime(iso) {
   return new Date(iso).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
 }
 
-// datetime-local's `min` needs local-time "YYYY-MM-DDTHH:mm" — toISOString()
-// is UTC and would let Bangkok users (UTC+7) pick a time up to 7h in the past.
+// `min` ของ datetime-local ต้องใช้เวลาท้องถิ่น "YYYY-MM-DDTHH:mm" — toISOString()
+// เป็น UTC และจะทำให้ผู้ใช้ในไทย (UTC+7) เลือกเวลาในอดีตได้ถึง 7 ชั่วโมง
 function nowAsDatetimeLocal() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
@@ -50,7 +50,7 @@ function Counselling() {
   const [sentSession, setSentSession] = useState(null);
   const [historyLimit, setHistoryLimit] = useState(HISTORY_PAGE_SIZE);
   const [historyTab, setHistoryTab] = useState("open");
-  // Full copy (with the populated chat) of the request that is still in progress.
+  // สำเนาเต็ม (พร้อมแชทที่ populate แล้ว) ของคำขอที่ยังดำเนินอยู่
   const [detail, setDetail] = useState(null);
   const { confirm: requestConfirm, confirmDialog } = useConfirmDialog();
 
@@ -62,8 +62,8 @@ function Counselling() {
       .finally(() => setLoading(false));
   }, []);
 
-  // A person has one request in progress at a time: its chat and status replace
-  // the request form until the case is closed or cancelled.
+  // บุคคลหนึ่งมีคำขอที่ดำเนินอยู่ได้ครั้งละหนึ่งรายการ: แชทและสถานะของมัน
+  // จะแทนที่ฟอร์มคำขอจนกว่าเคสจะปิดหรือยกเลิก
   const activeSession = sessions.find((s) => OPEN_STATUSES.includes(s.status));
   const activeId = activeSession?._id;
 
@@ -124,7 +124,7 @@ function Counselling() {
       setForm(INITIAL_FORM);
     } catch (err) {
       setError(err.response?.data?.message || "ส่งคำขอไม่สำเร็จ");
-      // Another request is already in progress (e.g. sent from another tab): show it.
+      // มีคำขออื่นดำเนินอยู่แล้ว (เช่น ส่งจากแท็บอื่น): แสดงคำขอนั้น
       if (err.response?.status === 409) counsellingService.getMySessions().then(setSessions).catch(() => {});
     } finally {
       setSubmitting(false);

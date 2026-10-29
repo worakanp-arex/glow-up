@@ -22,7 +22,7 @@ const TABS = [
   { key: "all", label: "ทั้งหมด" },
 ];
 
-// "Open now" covers both plain and soon-to-expire courses.
+// "เปิดอยู่ตอนนี้" ครอบคลุมทั้งคอร์สปกติและคอร์สที่ใกล้หมดอายุ
 function belongsTo(tab, course) {
   const { state } = courseStatus(course);
   if (tab === "all") return true;
@@ -42,7 +42,7 @@ function CourseManagement() {
   const coverInput = useRef(null);
 
   useEffect(() => {
-    // Staff see every course, including ones that are not open yet or have expired.
+    // เจ้าหน้าที่เห็นทุกคอร์ส รวมถึงที่ยังไม่เปิดหรือหมดอายุแล้ว
     courseService
       .getCourses({ status: "all" })
       .then((data) => setCourses(Array.isArray(data) ? data : []))
@@ -193,7 +193,7 @@ function CourseManagement() {
 
           <fieldset className="course-management-cover">
             <legend>ภาพปกคอร์ส</legend>
-            <p className="ui-muted">ไม่เลือกภาพจะใช้ภาพปกอัตโนมัติ เลือกจากภาพที่มีหรืออัปโหลดรูปของเอง</p>
+            <p className="ui-muted">ไม่เลือกภาพจะใช้ภาพปกอัตโนมัติ เลือกจากภาพที่มีหรืออัปโหลดรูปของเอง ภาพนี้จะขึ้นเป็นแบนเนอร์หน้าคอร์สของผู้เรียนด้วย ภาพแนวนอนสัดส่วน 16:9 จะแสดงได้เต็มที่ที่สุด</p>
             <div className="course-management-cover-actions">
               <button type="button" className={`ui-btn ui-btn-outline${form.coverImage ? "" : " is-selected"}`} aria-pressed={!form.coverImage} onClick={() => set("coverImage", "")}>ใช้ภาพอัตโนมัติ</button>
               <button type="button" className="ui-btn ui-btn-outline" onClick={() => coverInput.current?.click()} disabled={uploading}>

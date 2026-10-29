@@ -3,10 +3,10 @@ import Notification from "../models/Notification.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
 import { notifyUser } from "./notificationService.js";
 
-// Nudges a "user"-role account to check in once per day, on sign-in — there's no
-// scheduled-job infra in this backend yet, so login is the natural, reliable hook
-// instead of a cron (and LINE Notify itself was shut down by LINE in 2025, so this
-// stays an in-app notification rather than a push message).
+// เตือนบัญชีบทบาท "user" ให้เช็คอินวันละครั้งตอนล็อกอิน — backend นี้ยังไม่มี
+// โครงสร้างงานตามเวลา การล็อกอินจึงเป็นจุดเกาะที่เป็นธรรมชาติและเชื่อถือได้
+// แทน cron (และ LINE Notify เองถูก LINE ยุติบริการในปี 2025 จึง
+// ใช้การแจ้งเตือนในแอปแทนการส่ง push)
 export async function maybeSendDailyReminder(user) {
   if (user.role !== "user") return;
 

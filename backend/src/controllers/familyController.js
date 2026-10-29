@@ -15,8 +15,8 @@ import { counsellorCanAccessPatient } from "../utils/patientAccess.js";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-// PlantGrowth.jsx's own stage thresholds and labels, mirrored here so the
-// family summary can report a stage without exposing raw health data.
+// เกณฑ์และป้ายชื่อระดับของ PlantGrowth.jsx ที่คัดลอกมาไว้ที่นี่
+// เพื่อให้สรุปของครอบครัวรายงานระดับได้โดยไม่เปิดเผยข้อมูลสุขภาพดิบ
 const STAGE_THRESHOLDS = [0, 1, 3, 7, 14, 30];
 const STAGE_LABELS = [
   "เริ่มต้นวันนี้",
@@ -44,8 +44,8 @@ export async function inviteFamilyMember(req, res) {
     return res.status(400).json({ message: "กรุณากรอกอีเมลของสมาชิกครอบครัว" });
   }
 
-  // Spec allows only 1 invited family member at a time; revoke the existing
-  // one first to invite someone else.
+  // ตามข้อกำหนดเชิญสมาชิกครอบครัวได้ครั้งละ 1 คนเท่านั้น: ต้องเพิกถอนคนเดิมก่อน
+  // จึงจะเชิญคนอื่นได้
   const existingActive = await FamilyLink.findOne({
     recoveringUser: req.user.id,
     status: { $in: ["pending", "active"] },
@@ -73,8 +73,8 @@ export async function inviteFamilyMember(req, res) {
   try {
     await sendFamilyInviteEmail(email, inviter.name, acceptUrl);
   } catch (err) {
-    // Roll back the pending invite so a failed send doesn't permanently block
-    // retries under the "only 1 invite at a time" rule above.
+    // ย้อนคำเชิญที่ค้างอยู่กลับ เพื่อไม่ให้การส่งที่ล้มเหลวบล็อกการลองใหม่ถาวร
+    // ภายใต้กฎ "เชิญได้ครั้งละ 1 คน" ข้างต้น
     await FamilyLink.deleteOne({ _id: invite._id });
     throw err;
   }
@@ -111,8 +111,8 @@ export async function acceptFamilyInvite(req, res) {
   res.json({ _id: accepted._id, status: accepted.status });
 }
 
-// As the recovering user: list my current invites and connections. Revoked
-// ones are dropped from the list entirely.
+// ในมุมผู้ฟื้นฟู: แสดงคำเชิญและการเชื่อมต่อปัจจุบันของฉัน
+// รายการที่ถูกเพิกถอนจะไม่แสดงเลย
 export async function myInvitedFamily(req, res) {
   const links = await FamilyLink.find({ recoveringUser: req.user.id, status: { $ne: "revoked" } })
     .populate("familyUser", "name email avatarUrl avatarStyle avatarColor")
@@ -120,9 +120,9 @@ export async function myInvitedFamily(req, res) {
   res.json(links);
 }
 
-// A family member asks to follow a patient by the patient's email. The answer
-// is always the same, so this can't be used to find out whether an address
-// belongs to a patient; the patient decides in their profile (or ignores it).
+// สมาชิกครอบครัวขอติดตามผู้ป่วยด้วยอีเมลของผู้ป่วย คำตอบเป็นแบบเดียวกันเสมอ
+// จึงใช้เช็กไม่ได้ว่าอีเมลนั้นเป็นของผู้ป่วยหรือไม่
+// ผู้ป่วยตัดสินใจในโปรไฟล์ของตน (หรือเมินก็ได้)
 export async function requestFamilyLink(req, res) {
   const email = req.body.email?.toLowerCase();
   const requester = await User.findById(req.user.id).select("name email role");
@@ -155,7 +155,7 @@ export async function requestFamilyLink(req, res) {
   res.status(202).json(generic);
 }
 
-// The patient approves or declines a family member's request.
+// ผู้ป่วยอนุมัติหรือปฏิเสธคำขอของสมาชิกครอบครัว
 export async function respondToFamilyRequest(req, res) {
   const link = await FamilyLink.findOne({ _id: req.params.id, recoveringUser: req.user.id, status: "requested" });
   if (!link) {
@@ -164,7 +164,7 @@ export async function respondToFamilyRequest(req, res) {
 
   const patient = await User.findById(req.user.id).select("name familyName");
   if (req.body.approve === true) {
-    // Same rule as invitations: one family member at a time.
+    // กฎเดียวกับการเชิญ: สมาชิกครอบครัวได้ครั้งละหนึ่งคน
     const other = await FamilyLink.exists({
       recoveringUser: req.user.id,
       _id: { $ne: link._id },
@@ -210,8 +210,8 @@ export async function revokeFamilyLink(req, res) {
   res.json(link);
 }
 
-// Staff view: who a recovering user is currently connected to. Counsellors
-// only see patients assigned to them, same rule as clinical data.
+// มุมมองเจ้าหน้าที่: ผู้ฟื้นฟูรายนี้เชื่อมต่อกับใครอยู่ ผู้ให้คำปรึกษา
+// เห็นเฉพาะผู้ป่วยที่ได้รับมอบหมายให้ตน ตามกฎเดียวกับข้อมูลทางคลินิก
 export async function listFamilyLinksForUser(req, res) {
   const { userId } = req.params;
   if (req.user.role === "counsellor" && !(await counsellorCanAccessPatient(req.user.id, userId))) {
@@ -223,9 +223,8 @@ export async function listFamilyLinksForUser(req, res) {
   res.json(links);
 }
 
-// As a family member: list the recovering users I'm actively linked to. The
-// frontend uses this to decide whether to show the family dashboard instead
-// of the normal user dashboard.
+// ในมุมสมาชิกครอบครัว: แสดงผู้ฟื้นฟูที่ฉันเชื่อมต่ออยู่
+// frontend ใช้ผลนี้ตัดสินว่าจะแสดงแดชบอร์ดครอบครัวแทนแดชบอร์ดผู้ใช้ปกติหรือไม่
 export async function myFamilyLinksAsFamily(req, res) {
   const links = await FamilyLink.find({ familyUser: req.user.id, status: "active" }).populate(
     "recoveringUser",
@@ -234,10 +233,10 @@ export async function myFamilyLinksAsFamily(req, res) {
   res.json(links);
 }
 
-// Composes a fixed, hand-picked summary shape for the family view. This
-// function must never query EmotionLog scores/notes, CounsellingSession, or
-// RiskAssessment directly for anything beyond what's explicitly listed here —
-// that's what keeps the family view safely limited to achievement-level data.
+// สร้างสรุปรูปแบบตายตัวที่คัดมาเองสำหรับมุมมองครอบครัว ฟังก์ชันนี้
+// ห้าม query คะแนน/โน้ตใน EmotionLog, CounsellingSession หรือ
+// RiskAssessment โดยตรงเกินกว่าที่ระบุไว้ชัดเจนที่นี่ —
+// เพราะนี่คือสิ่งที่ทำให้มุมมองครอบครัวจำกัดอยู่เพียงข้อมูลระดับความสำเร็จได้อย่างปลอดภัย
 export async function getLinkedUserSummary(req, res) {
   const link = await FamilyLink.findById(req.params.linkId);
   if (!link || link.status !== "active" || link.familyUser?.toString() !== req.user.id) {
@@ -271,8 +270,8 @@ export async function getLinkedUserSummary(req, res) {
   const rewards = await UserReward.find({ user: link.recoveringUser })
     .populate("reward", "name icon")
     .sort({ earnedAt: -1 });
-  // Level is derived only from cumulative points earned (missions/activities/games),
-  // never from health-adjacent data — safe to expose in the family view.
+  // ระดับคำนวณจากคะแนนสะสมเท่านั้น (ภารกิจ/กิจกรรม/เกม)
+  // ไม่ได้ดึงจากข้อมูลที่เกี่ยวข้องกับสุขภาพ — เปิดในมุมมองครอบครัวได้อย่างปลอดภัย
   const totalPoints = await getTotalPoints(link.recoveringUser);
 
   res.json({
@@ -292,9 +291,9 @@ export async function getLinkedUserSummary(req, res) {
   });
 }
 
-// Messages between a recovering user and their linked family member. Either
-// side can write; a message is stored on the link (so history survives after
-// the notification is cleared) and announced with a notification.
+// ข้อความระหว่างผู้ฟื้นฟูกับสมาชิกครอบครัวที่เชื่อมต่อกัน เขียนได้ทั้งสองฝ่าย
+// ข้อความเก็บไว้ที่ลิงก์ (ประวัติจึงอยู่ต่อแม้ล้างการแจ้งเตือนแล้ว)
+// และแจ้งเตือนด้วย notification
 async function loadParticipantLink(linkId, userId) {
   const link = await FamilyLink.findById(linkId);
   if (!link || link.status !== "active") return null;
@@ -350,12 +349,12 @@ export async function listFamilyMessages(req, res) {
   res.json(messages);
 }
 
-// A message stays on the dashboard for this long after it was marked as read,
-// then makes way for the usual welcome (it remains in the message history).
+// ข้อความจะค้างบนแดชบอร์ดตามเวลานี้หลังจากทำเครื่องหมายว่าอ่านแล้ว
+// จากนั้นจึงให้ที่กับข้อความต้อนรับตามปกติ (ยังอยู่ในประวัติข้อความ)
 export const READ_MESSAGE_VISIBLE_MS = 10 * 60 * 1000;
 
-// For the recovering user's dashboard: the most recent message from their
-// family (unread first) so it can be shown prominently with read / reply.
+// สำหรับแดชบอร์ดของผู้ฟื้นฟู: ข้อความล่าสุดจากครอบครัว (ที่ยังไม่อ่านก่อน)
+// เพื่อแสดงเด่นๆ พร้อมปุ่มอ่าน/ตอบ
 export async function latestFamilyMessage(req, res) {
   const links = await FamilyLink.find({ recoveringUser: req.user.id, status: "active" }).select("_id familyUser");
   if (links.length === 0) return res.json({ message: null, unreadCount: 0 });
@@ -376,7 +375,7 @@ export async function latestFamilyMessage(req, res) {
   res.json({ message, unreadCount, linkId: message.familyLink, family });
 }
 
-// The recipient (never the sender) marks a message as read.
+// ผู้รับ (ไม่ใช่ผู้ส่ง) เท่านั้นที่ทำเครื่องหมายว่าอ่านแล้วได้
 export async function markFamilyMessageRead(req, res) {
   const message = await FamilyMessage.findById(req.params.id);
   if (!message) {

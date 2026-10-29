@@ -45,8 +45,8 @@ function UserMenu() {
     try {
       await logout();
     } catch {
-      // The error banner already told the person it didn't work; they are still
-      // signed in, so stay put and let them try again.
+      // แบนเนอร์ error บอกผู้ใช้แล้วว่าไม่สำเร็จ และผู้ใช้ยังล็อกอินอยู่
+      // จึงอยู่หน้าเดิมและให้ลองใหม่ได้
       return;
     }
     setOpen(false);

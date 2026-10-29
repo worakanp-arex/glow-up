@@ -14,8 +14,8 @@ import { anonymizeOn, recordAudit, restoreUser } from "../services/accountLifecy
 const LIST_FIELDS = "name email role avatarUrl avatarStyle avatarColor deletedAt deletedBy deletionReason anonymizedAt createdAt";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Every query here names `deletedAt`, which is how the User model knows the caller
-// is asking for deleted accounts on purpose (see the hook in models/User.js).
+// ทุก query ในที่นี้ระบุ `deletedAt` ซึ่งเป็นวิธีที่ model User รู้ว่าผู้เรียก
+// ตั้งใจขอบัญชีที่ถูกลบ (ดู hook ใน models/User.js)
 const deletedOnly = { deletedAt: { $ne: null } };
 
 function describeRetention(user) {
@@ -26,7 +26,7 @@ function describeRetention(user) {
   };
 }
 
-// Admin-only: the accounts that were deleted, and when each will be anonymised.
+// เฉพาะแอดมิน: บัญชีที่ถูกลบ และวันที่แต่ละบัญชีจะถูกทำให้ไม่ระบุตัวตน
 export async function listDeletedUsers(req, res) {
   const filter = { ...deletedOnly };
   if (req.query.state === "retained") filter.anonymizedAt = null;
@@ -44,7 +44,7 @@ export async function listDeletedUsers(req, res) {
   }
   const users = await query;
 
-  // Who deleted each account: an admin (shown by name) or the person themselves.
+  // ใครเป็นผู้ลบแต่ละบัญชี: แอดมิน (แสดงเป็นชื่อ) หรือเจ้าของบัญชีเอง
   const adminIds = [...new Set(users.filter((u) => u.deletedBy && String(u.deletedBy) !== String(u._id)).map((u) => String(u.deletedBy)))];
   const admins = adminIds.length > 0 ? await User.find({ _id: { $in: adminIds } }).select("name") : [];
   const adminName = new Map(admins.map((admin) => [String(admin._id), admin.name]));
@@ -57,8 +57,8 @@ export async function listDeletedUsers(req, res) {
   })));
 }
 
-// Admin-only, read-only: one deleted account with the records kept for it. Opening
-// it is written to the audit log first, so the record of who looked can't be skipped.
+// เฉพาะแอดมิน อ่านอย่างเดียว: บัญชีที่ถูกลบหนึ่งบัญชีพร้อมข้อมูลที่เก็บไว้ การเปิดดู
+// จะถูกบันทึกลง audit log ก่อนเสมอ เพื่อไม่ให้ข้ามบันทึกว่าใครเข้าดู
 export async function getDeletedUser(req, res) {
   const user = await User.findOne({ _id: req.params.id, ...deletedOnly });
   if (!user) {
@@ -74,7 +74,7 @@ export async function getDeletedUser(req, res) {
     ...describeRetention(user),
     auditTrail,
   };
-  // Once anonymised there is nothing left of the person to show, only that it happened.
+  // เมื่อทำให้ไม่ระบุตัวตนแล้วจะไม่เหลืออะไรของบุคคลนั้นให้แสดง นอกจากข้อเท็จจริงว่าเคยเกิดขึ้น
   if (user.anonymizedAt) {
     return res.json({ ...base, history: null });
   }

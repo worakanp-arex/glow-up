@@ -1,6 +1,6 @@
-// Words for the 1–10 craving slider, used wherever the number is only being
-// shown back to the person (history, summaries). A bare "8/10" reads like a
-// grade to chase or to fear; a few plain words describe how it felt instead.
+// คำสำหรับแถบเลื่อนความอยาก 1–10 ใช้ทุกที่ที่แสดงตัวเลขกลับให้ผู้ใช้ดูเท่านั้น
+// (ประวัติ สรุป) "8/10" เฉยๆ อ่านเหมือนเกรดที่ต้องไล่ตามหรือกลัว
+// คำง่ายๆ ไม่กี่คำอธิบายความรู้สึกได้ดีกว่า
 export function cravingWord(level) {
   if (level == null || Number.isNaN(Number(level))) return null;
   const value = Number(level);

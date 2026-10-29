@@ -174,7 +174,7 @@
   }
 }
 
-/* ---- Minimal restyle (airy cards, company logo tile). Delete this block to revert. ---- */
+/* ---- ปรับสไตล์แบบเรียบง่าย (การ์ดโปร่ง ไทล์โลโก้บริษัท) ลบบล็อกนี้เพื่อย้อนกลับ ---- */
 .my-applications-page .page-header { padding-bottom: 14px; position: relative; }
 .my-applications-page .page-header::after { content: ""; display: block; width: 36px; height: 3px; margin-top: 12px; border-radius: 2px; background: var(--color-primary-500); }
 .my-applications-list { gap: 14px; }

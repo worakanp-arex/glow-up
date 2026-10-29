@@ -37,7 +37,7 @@ const EMPTY_REWARD = { name: "", description: "", icon: "", pointsRequired: 10 }
 const EMPTY_FAMILY = { title: "", description: "", points: 10, active: true };
 const EMPTY_CATEGORY = { key: "", label: "", icon: "", order: 0 };
 
-// One row of any catalogue: the real icon, a title, chips and edit / delete actions.
+// หนึ่งแถวของแคตตาล็อกใดก็ได้: ไอคอนจริง หัวเรื่อง ชิป และปุ่มแก้ไข/ลบ
 function Row({ icon, title, description, chips, muted, actions }) {
   const Icon = resolveIcon(icon);
   return (
@@ -489,7 +489,7 @@ function MissionManagement() {
   if (loadError) return <div className="mission-management-page">{header}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
   if (loading) return <div className="mission-management-page">{header}<AsyncState /></div>;
 
-  // How many each section holds (daily missions load inside their own tab, and the level setting is not a list).
+  // แต่ละส่วนมีกี่รายการ (ภารกิจประจำวันโหลดในแท็บของตัวเอง และการตั้งค่าระดับไม่ใช่รายการ)
   const tabSizes = { missions: missions.length, rewards: rewards.length, family: familyMissions.length, categories: categories.length };
 
   return (

@@ -1,7 +1,7 @@
 import { HAPPINESS_LEVELS } from "../../constants/happiness.js";
 import "./MoodFacePicker.css";
 
-// The 7-step happiness scale as round faces with their labels underneath.
+// มาตราความสุข 7 ระดับเป็นใบหน้ากลมพร้อมป้ายชื่อด้านล่าง
 export default function MoodFacePicker({ value, onChange, label = "ระดับความสุขวันนี้" }) {
   return (
     <div className="mood-faces" role="radiogroup" aria-label={label}>

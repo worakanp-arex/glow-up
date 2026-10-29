@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Build and (re)start glow-up. Run from anywhere inside the repo:  bash deploy/deploy.sh
-# Safe to run again after every `git pull`.
+# build และ (รี)สตาร์ท glow-up รันจากที่ไหนก็ได้ภายใน repo:  bash deploy/deploy.sh
+# รันซ้ำได้อย่างปลอดภัยหลังทุกครั้งที่ `git pull`
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"

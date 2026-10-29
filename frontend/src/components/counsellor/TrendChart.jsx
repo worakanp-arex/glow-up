@@ -16,9 +16,9 @@ function asDate(dateKey) {
   return new Date(`${dateKey}T00:00:00Z`);
 }
 
-// Line chart of daily sign-ins with labelled axes: X = date, Y = number of
-// people. `trend` is the overview's loginTrend ([{ dateKey, count }]); days with
-// no data are drawn as zero. A table view is available for screen readers.
+// กราฟเส้นการเข้าสู่ระบบรายวันพร้อมป้ายแกน: X = วันที่ Y = จำนวน
+// คน `trend` คือ loginTrend ของภาพรวม ([{ dateKey, count }]) วันที่
+// ไม่มีข้อมูลวาดเป็นศูนย์ มีมุมมองตารางสำหรับโปรแกรมอ่านหน้าจอ
 export default function TrendChart({ trend, days = 14, yLabel = "จำนวนผู้เข้าใช้ (คน)", xLabel = "วันที่" }) {
   const [showTable, setShowTable] = useState(false);
   const [hover, setHover] = useState(null);

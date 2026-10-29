@@ -3,8 +3,8 @@ import { ListTodo } from "lucide-react";
 import ActivityMissionManager from "../../components/missions/ActivityMissionManager.jsx";
 import "./ActivityMissionManagement.css";
 
-// Daily missions are managed by both counsellors and admins through the same
-// manager, so there is one place to create, edit, switch off and delete them.
+// ภารกิจประจำวันถูกจัดการโดยทั้งผู้ให้คำปรึกษาและแอดมินผ่านตัวจัดการเดียวกัน
+// จึงมีที่เดียวสำหรับสร้าง แก้ไข ปิด และลบ
 function ActivityMissionManagement() {
   return (
     <div className="activity-mission-management-page">

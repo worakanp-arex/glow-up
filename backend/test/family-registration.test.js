@@ -10,7 +10,7 @@ import { acceptFamilyInvite } from "../src/controllers/familyController.js";
 import { requireRole } from "../src/middleware/authMiddleware.js";
 
 afterEach(() => mock.restoreAll());
-// Registration looks accounts up including deleted ones (their address stays reserved).
+// การสมัครค้นหาบัญชีรวมถึงที่ถูกลบ (อีเมลของบัญชีเหล่านั้นยังถูกจองไว้)
 const accountLookup = (found) => () => ({ setOptions: async () => found });
 const cookies = {};
 const response = () => ({ code: 200, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; }, cookie(name, value) { cookies[name] = value; } });

@@ -1,4 +1,4 @@
-// Mirrors backend/src/constants/skills.js — keep the keys in sync.
+// สะท้อนจาก backend/src/constants/skills.js — คีย์ต้องตรงกัน
 export const SKILL_CATEGORIES = [
   { key: "service", label: "บริการและค้าปลีก" },
   { key: "food", label: "ครัวและอาหาร" },

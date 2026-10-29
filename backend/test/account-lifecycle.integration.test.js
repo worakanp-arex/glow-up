@@ -1,7 +1,7 @@
-// Deleting, restoring and anonymising accounts leans on MongoDB itself (a query
-// hook on the User model, array updates, update pipelines), which mocks can't
-// vouch for. These tests run against a throw-away database on a local MongoDB and
-// are skipped when none is reachable. CI starts one (see .github/workflows/checks.yml).
+// การลบ กู้คืน และทำให้บัญชีไม่ระบุตัวตนพึ่งพา MongoDB เอง (query
+// hook บน model User, การอัปเดตอาร์เรย์, update pipeline) ซึ่ง mock รับรองไม่ได้
+// เทสต์เหล่านี้รันกับฐานข้อมูลชั่วคราวบน MongoDB ในเครื่อง และ
+// จะถูกข้ามหากเชื่อมต่อไม่ได้ CI เปิด MongoDB ให้ (ดู .github/workflows/checks.yml)
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -86,18 +86,18 @@ dbTest("deleting an account winds down its live relationships and keeps its reco
   const job = await Job.create({ title: "งาน", employer: employer._id, status: "open" });
   const application = await Application.create({ user: patient._id, job: job._id, status: "pending" });
 
-  // The patient is deleted: their own request is withdrawn, family link revoked, application withdrawn.
+  // ลบผู้ป่วย: คำขอของตนถูกถอน ลิงก์ครอบครัวถูกเพิกถอน ใบสมัครถูกถอน
   await softDeleteUser(patient._id, { actorId: patient._id, reason: "ผู้ใช้ลบบัญชีของตัวเอง" });
   assert.equal((await CounsellingSession.findById(asked._id)).status, "cancelled");
   assert.equal((await FamilyLink.findById(link._id)).status, "revoked");
   assert.equal((await Application.findById(application._id)).status, "cancelled");
   assert.equal((await EmotionLog.findOne({ user: patient._id })).note, "บันทึกส่วนตัว", "records are kept during the retention period");
 
-  // The employer is deleted: their open posting is closed.
+  // ลบนายจ้าง: ประกาศงานที่เปิดอยู่ถูกปิด
   await softDeleteUser(employer._id, { actorId: null, reason: "test" });
   assert.equal((await Job.findById(job._id)).status, "closed");
 
-  // The counsellor is deleted: the case goes back to the queue and the patient is told.
+  // ลบผู้ให้คำปรึกษา: เคสกลับเข้าคิวและผู้ป่วยได้รับแจ้ง
   const secondPatient = await makeUser();
   const reassigned = await session({ user: secondPatient._id, counsellor: counsellor._id, status: "scheduled" });
   await User.updateOne({ _id: secondPatient._id }, { assignedCounsellor: counsellor._id });
@@ -173,7 +173,7 @@ dbTest("accounts past the retention period are anonymised: identity, free text a
   assert.equal(await anonymizeExpiredUsers(), 0, "running again changes nothing");
 });
 
-// ---------- through the real HTTP API ----------
+// ---------- ผ่าน HTTP API จริง ----------
 
 dbTest("the admin's deleted-accounts screens: list, read-only detail with an audit trail, restore", async (t) => {
   const base = await startServer(t);

@@ -10,7 +10,7 @@
   border: 1px solid var(--color-border);
 }
 
-/* ---------- Decorative visual panel ---------- */
+/* ---------- แผงภาพตกแต่ง ---------- */
 
 .auth-visual {
   position: relative;
@@ -88,7 +88,7 @@
   opacity: 0.9;
 }
 
-/* ---------- Form panel ---------- */
+/* ---------- แผงฟอร์ม ---------- */
 
 .login-form {
   flex: 1 1 56%;

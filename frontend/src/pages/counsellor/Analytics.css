@@ -54,7 +54,7 @@
   color: var(--color-text-secondary);
 }
 
-/* Trend chart: single-series bars using the app's primary ramp, anchored to baseline */
+/* กราฟแนวโน้ม: แท่งชุดเดียวที่ใช้ไล่สีหลักของแอป ยึดกับเส้นฐาน */
 
 .overview-trend-chart {
   display: flex;
@@ -107,7 +107,7 @@
   color: var(--color-text-muted);
 }
 
-/* Appointments-by-day list */
+/* รายการนัดหมายรายวัน */
 
 .counsellor-analytics-day-list {
   list-style: none;
@@ -133,7 +133,7 @@
   color: var(--color-text);
 }
 
-/* Leaderboard */
+/* ลีดเดอร์บอร์ด */
 
 .counsellor-analytics-leaderboard {
   list-style: none;
@@ -235,7 +235,7 @@
   }
 }
 
-/* ---------- tabs, ranges, tables and attempts ---------- */
+/* ---------- แท็บ ช่วงเวลา ตาราง และผลการทำ ---------- */
 .counsellor-analytics-page > .ui-tabs { margin-bottom: 0; }
 .counsellor-analytics-range { display: inline-flex; gap: 4px; padding: 3px; border-radius: 999px; background: var(--color-surface-hover); align-self: flex-start; }
 .counsellor-analytics-range button { padding: 6px 14px; border: 0; border-radius: 999px; background: transparent; color: var(--color-text-secondary); font: inherit; font-size: .8rem; cursor: pointer; }

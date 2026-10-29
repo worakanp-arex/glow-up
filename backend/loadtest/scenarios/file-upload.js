@@ -1,12 +1,12 @@
-// Concurrent avatar uploads — exercises multer's per-request disk I/O plus
-// the Phase-1 magic-byte verification (backend/src/middleware/upload.js)
-// under load, not just a single mocked request.
+// อัปโหลดรูปโปรไฟล์พร้อมกันหลายคำขอ เพื่อทดสอบการเขียนดิสก์ต่อคำขอของ multer
+// และการตรวจ magic byte ของ Phase-1 (backend/src/middleware/upload.js)
+// ภายใต้โหลดจริง ไม่ใช่แค่คำขอเดียวที่จำลอง
 import autocannon from "autocannon";
 import { pathToFileURL } from "node:url";
 import { loginUser, printSummary, summarize } from "../helpers.js";
 
 const BOUNDARY = "----loadtestboundary";
-// Minimal bytes file-type recognizes as image/jpeg (see backend/test/security.test.js).
+// ไบต์ขั้นต่ำที่ file-type รู้จักว่าเป็นภาพ image/jpeg (ดู backend/test/security.test.js)
 const TINY_JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0]);
 
 function buildMultipartBody() {

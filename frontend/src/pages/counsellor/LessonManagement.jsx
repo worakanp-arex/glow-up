@@ -16,7 +16,7 @@ const AUDIENCE_LABELS = { user: "ผู้ใช้งาน (ผู้ผ่า
 const EMPTY_OPTION = { text: "", isCorrect: false, feedback: "" };
 const EMPTY_SCENARIO = { title: "", lesson: "", prompt: "", expiresAt: "", options: [{ ...EMPTY_OPTION }, { ...EMPTY_OPTION }] };
 
-// Items stay available through the last day, then drop out of what members see.
+// รายการยังใช้ได้ตลอดวันสุดท้าย แล้วจึงหลุดจากสิ่งที่สมาชิกเห็น
 function expiryInfo(expiresAt) {
   if (!expiresAt) return { state: "open", label: "ไม่มีวันหมดอายุ" };
   if (new Date(expiresAt) < new Date()) return { state: "expired", label: `หมดอายุแล้ว ${formatCourseDate(expiresAt)}` };
@@ -43,7 +43,7 @@ function LessonManagement() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
-  // `editingLesson` / `editingScenario` are null (closed), "new", or the record being edited.
+  // `editingLesson` / `editingScenario` เป็น null (ปิด), "new" หรือเรคคอร์ดที่กำลังแก้ไข
   const [editingLesson, setEditingLesson] = useState(null);
   const [lessonForm, setLessonForm] = useState(EMPTY_LESSON);
   const [editingScenario, setEditingScenario] = useState(null);
@@ -124,7 +124,7 @@ function LessonManagement() {
     }
     const payload = {
       title: scenarioForm.title.trim(),
-      // An empty value clears the link on edit; the server ignores it on create.
+      // ค่าว่างจะล้างลิงก์ตอนแก้ไข เซิร์ฟเวอร์เมินค่านี้ตอนสร้าง
       lesson: scenarioForm.lesson || null,
       prompt: scenarioForm.prompt.trim(),
       expiresAt: scenarioForm.expiresAt || null,

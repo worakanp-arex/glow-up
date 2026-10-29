@@ -9,9 +9,9 @@ function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  // Read the link's secrets once, then take them out of the address bar so they
-  // don't linger in browser history, screenshots or a shared screen. The link is
-  // single-use anyway; reloading simply asks for a new one.
+  // อ่านความลับของลิงก์ครั้งเดียวแล้วนำออกจากแถบที่อยู่ เพื่อไม่ให้
+  // ค้างในประวัติเบราว์เซอร์ ภาพหน้าจอ หรือหน้าจอที่แชร์ ลิงก์ใช้ได้
+  // ครั้งเดียวอยู่แล้ว การโหลดใหม่จะขอลิงก์ใหม่
   const [{ token, email }] = useState(() => ({
     token: searchParams.get("token") || "",
     email: searchParams.get("email") || "",

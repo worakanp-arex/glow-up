@@ -8,8 +8,8 @@ export default defineConfig(({ mode }) => {
   return {
   plugins: [react()],
   server: {
-    // Localhost only (the default): the dev server and its /api proxy must not be
-    // reachable from other machines on the network. Pass --host explicitly if needed.
+    // เฉพาะ localhost (ค่าเริ่มต้น): dev server และ proxy /api ของมันต้องไม่
+    // ถูกเข้าถึงจากเครื่องอื่นในเครือข่าย ส่ง --host อย่างชัดเจนหากต้องการ
     proxy: {
       '/api': {
         target,

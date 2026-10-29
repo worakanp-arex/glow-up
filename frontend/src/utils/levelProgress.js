@@ -1,7 +1,7 @@
-// Level maths shared by the growth card and the points page. Mirrors the
-// backend rule (utils/level.js): every `pointsPerLevel` cumulative points is
-// one level. `summary` is the /missions/me/summary response; missing fields
-// fall back to sensible defaults so a partial response still renders.
+// การคำนวณระดับที่ใช้ร่วมกันระหว่างการ์ดการเติบโตและหน้าคะแนน สะท้อน
+// กฎของ backend (utils/level.js): ทุก `pointsPerLevel` คะแนนสะสมเท่ากับ
+// หนึ่งระดับ `summary` คือ response ของ /missions/me/summary ฟิลด์ที่ขาด
+// ใช้ค่าเริ่มต้นที่สมเหตุสมผล เพื่อให้ response ไม่ครบก็ยังเรนเดอร์ได้
 export function levelProgress(summary) {
   const perLevel = summary?.pointsPerLevel > 0 ? summary.pointsPerLevel : 100;
   const total = Math.max(0, summary?.totalPoints ?? 0);

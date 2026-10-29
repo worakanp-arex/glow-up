@@ -11,13 +11,13 @@ import { insertOnce } from "../utils/insertOnce.js";
 
 const DEFAULT_FAMILY_MESSAGE = "มีความคืบหน้าใหม่ในเส้นทางฟื้นฟูที่คุณติดตามอยู่";
 
-// Tells any actively-linked family member a milestone was reached, without
-// revealing which mission or any health data — just that progress happened.
-// `message` lets callers send a specific milestone-day announcement instead
-// of the generic default (e.g. crossing a 7/30/90/180/365-day streak).
+// แจ้งสมาชิกครอบครัวที่เชื่อมต่ออยู่ว่าถึงหมุดหมาย โดยไม่เปิดเผยว่าภารกิจ
+// ใดหรือข้อมูลสุขภาพใดๆ — บอกแค่ว่ามีความคืบหน้า
+// `message` ให้ผู้เรียกส่งประกาศหมุดหมายวันที่เฉพาะเจาะจงแทน
+// ข้อความทั่วไป (เช่น ครบสตรีค 7/30/90/180/365 วัน)
 export async function notifyLinkedFamily(recoveringUserId, message = DEFAULT_FAMILY_MESSAGE) {
-  // Milestones are progress information, so they follow the same switch the
-  // family summary honours: with progress sharing off the family hears nothing.
+  // หมุดหมายคือข้อมูลความก้าวหน้า จึงเป็นไปตามสวิตช์เดียวกับที่สรุปของครอบครัวยึดถือ:
+  // เมื่อปิดการแชร์ความก้าวหน้า ครอบครัวจะไม่ได้ยินอะไร
   const recoveringUser = await User.findById(recoveringUserId).select("familySharing");
   if (recoveringUser?.familySharing?.progress === false) return;
 
@@ -27,15 +27,15 @@ export async function notifyLinkedFamily(recoveringUserId, message = DEFAULT_FAM
   }
 }
 
-// Cumulative points are always summed from completed UserMission docs,
-// logged ActivityMissionLog docs, and GamePlay docs rather than stored as a
-// mutable counter, so they can never drift out of sync.
+// คะแนนสะสมถูกรวมจากเอกสาร UserMission ที่สำเร็จ
+// เอกสาร ActivityMissionLog ที่บันทึก และเอกสาร GamePlay เสมอ
+// ไม่ได้เก็บเป็นตัวนับที่แก้ไขได้ จึงไม่มีทางคลาดเคลื่อน
 export async function getTotalPoints(userId) {
   const [completedMissions, activityLogs, gamePlays, familyMissionLogs] = await Promise.all([
     UserMission.find({ user: userId, completed: true }).populate("mission", "rewardPoints"),
-    // Logs from a mission that requires approval only count once approved;
-    // `requiresApproval: { $ne: true }` also matches pre-migration logs that
-    // predate this field, so their points keep counting as before.
+    // บันทึกของภารกิจที่ต้องอนุมัติจะนับเมื่ออนุมัติแล้วเท่านั้น
+    // `requiresApproval: { $ne: true }` ยังตรงกับบันทึกก่อน migration
+    // ที่ยังไม่มีฟิลด์นี้ คะแนนของบันทึกเหล่านั้นจึงนับต่อเหมือนเดิม
     ActivityMissionLog.find({
       user: userId,
       $or: [{ requiresApproval: { $ne: true } }, { approved: true }],

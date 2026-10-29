@@ -3,9 +3,9 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { roleHome } from "../constants/roleHome.js";
 import { inviteReturnTo } from "../utils/authNavigation.js";
 
-// Pages for people who are not signed in (login, register). Someone who already
-// is signed in is sent on instead of seeing a form that would silently swap
-// the account behind their open notifications.
+// หน้าสำหรับผู้ที่ยังไม่ล็อกอิน (เข้าสู่ระบบ สมัครสมาชิก) ผู้ที่ล็อกอินอยู่แล้ว
+// จะถูกส่งต่อ แทนที่จะเห็นฟอร์มที่เงียบๆ สลับบัญชี
+// ที่อยู่หลังการแจ้งเตือนที่เปิดอยู่
 function GuestRoute() {
   const { user, isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();

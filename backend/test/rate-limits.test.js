@@ -12,8 +12,8 @@ import {
 } from "../src/middleware/rateLimiters.js";
 import { startServer } from "./helpers/httpServer.js";
 
-// Each limiter is exercised in a tiny app of its own, so the counters belong to
-// the test and can't collide with other tests that go through the real app.
+// แต่ละ limiter ถูกทดสอบในแอปเล็กๆ ของตัวเอง ตัวนับจึงเป็นของเทสต์นั้น
+// และไม่ชนกับเทสต์อื่นที่ผ่านแอปจริง
 async function serve(t, limiter, { user } = {}) {
   const app = express();
   app.use(express.json());
@@ -97,7 +97,7 @@ test("the real app caps repeated failed sign-ins for one account", { timeout: 30
     const res = await fetch(`${base}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      // Spelled two ways (case differs) but one account.
+      // สะกดต่างกันสองแบบ (ตัวพิมพ์เล็ก/ใหญ่ต่างกัน) แต่เป็นบัญชีเดียว
       body: JSON.stringify({ email: i % 2 ? "Real.App.Victim@Example.com" : "real.app.victim@example.com", password: "wrong-password" }),
     });
     statuses.push(res.status);

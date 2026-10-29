@@ -1,3 +1,3 @@
-// How many days back (today included) a missed mood check-in can still be added.
-// The server enforces a slightly looser limit; keep this the smaller of the two.
+// ย้อนหลังได้กี่วัน (รวมวันนี้) สำหรับเพิ่มเช็คอินอารมณ์ที่พลาดไป
+// เซิร์ฟเวอร์บังคับขีดจำกัดที่หลวมกว่าเล็กน้อย ให้ใช้ค่าที่น้อยกว่าของสองค่า
 export const BACKFILL_WINDOW_DAYS = 7;

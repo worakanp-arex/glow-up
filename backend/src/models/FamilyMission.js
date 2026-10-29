@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-// Catalog of joint missions a recovering user and their linked family member
-// can do together — separate from the solo Mission/ActivityMission catalogs
-// because completing one requires confirmation from both sides.
+// แคตตาล็อกภารกิจร่วมที่ผู้ฟื้นฟูกับสมาชิกครอบครัวที่เชื่อมต่อกัน
+// ทำด้วยกันได้ — แยกจากแคตตาล็อก Mission/ActivityMission แบบทำคนเดียว
+// เพราะการทำให้สำเร็จต้องได้รับการยืนยันจากทั้งสองฝ่าย
 const familyMissionSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },

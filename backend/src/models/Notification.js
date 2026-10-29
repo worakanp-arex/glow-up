@@ -26,16 +26,16 @@ const notificationSchema = new mongoose.Schema(
       ],
     },
     status: { type: String, enum: ["unread", "read"], default: "unread" },
-    // where clicking the notification should take the user (optional)
+    // จุดหมายเมื่อกดการแจ้งเตือน (ไม่บังคับ)
     link: { type: String },
-    // Asia/Bangkok calendar day, used to dedupe once-per-day notifications (e.g. reminder)
+    // วันตามปฏิทิน Asia/Bangkok ใช้กันการแจ้งเตือนซ้ำที่ส่งได้วันละครั้ง (เช่น การเตือน)
     dateKey: { type: String },
   },
   { timestamps: true }
 );
 
 notificationSchema.index({ user: 1, status: 1, createdAt: -1 });
-// Notifications older than 90 days are purged automatically.
+// การแจ้งเตือนที่เก่ากว่า 90 วันจะถูกลบอัตโนมัติ
 notificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
 
 export default mongoose.model("Notification", notificationSchema);

@@ -3,8 +3,8 @@ import { HeartHandshake } from "lucide-react";
 import { RISK_GUIDANCE } from "../../constants/riskGuidance.js";
 import "./RiskGuidance.css";
 
-// The result of "assess now" for the person themself: encouragement and next
-// steps, never the risk label or the numbers behind it.
+// ผลของ "ประเมินตอนนี้" สำหรับตัวบุคคลเอง: กำลังใจและขั้นตอนถัดไป
+// ไม่แสดงป้ายความเสี่ยงหรือตัวเลขเบื้องหลัง
 export default function RiskGuidance({ level }) {
   const guidance = RISK_GUIDANCE[level] || RISK_GUIDANCE.low;
   return (

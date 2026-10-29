@@ -1,6 +1,6 @@
-// Hammers the login endpoint with invalid credentials to prove the Phase-1
-// rate limiter (backend/src/middleware/rateLimiters.js) actually engages
-// under real concurrency, rather than just in the mocked unit test.
+// ยิงคำขอล็อกอินด้วยข้อมูลที่ไม่ถูกต้องจำนวนมาก เพื่อพิสูจน์ว่า rate limiter ของ Phase-1
+// (backend/src/middleware/rateLimiters.js) ทำงานจริงภายใต้การเรียกพร้อมกัน
+// ไม่ใช่แค่ในยูนิตเทสต์ที่จำลองไว้
 import autocannon from "autocannon";
 import { pathToFileURL } from "node:url";
 

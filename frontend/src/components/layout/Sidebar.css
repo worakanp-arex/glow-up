@@ -1,4 +1,4 @@
-/* White (theme surface) side navigation with dark (theme text) labels. */
+/* เมนูด้านข้างพื้นขาว (สีพื้นผิวตามธีม) ป้ายสีเข้ม (สีข้อความตามธีม) */
 .side-nav {
   position: sticky;
   top: var(--navbar-height, 81px);
@@ -55,7 +55,7 @@
 
 .side-nav-link.active svg { color: var(--color-primary-600); }
 
-/* Handhelds use the slide-in drawer from the top bar instead. */
+/* อุปกรณ์พกพาใช้ลิ้นชักเลื่อนจากแถบบนแทน */
 @media (max-width: 860px) {
   .side-nav { display: none; }
 }

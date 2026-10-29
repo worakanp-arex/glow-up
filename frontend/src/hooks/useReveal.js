@@ -4,8 +4,8 @@ const prefersReducedMotion =
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
- * Adds a `.is-visible` class to the element once it scrolls into view,
- * so CSS can drive the reveal transition. No-ops under prefers-reduced-motion.
+ * เพิ่มคลาส `.is-visible` ให้องค์ประกอบเมื่อเลื่อนเข้ามาในหน้าจอ
+ * เพื่อให้ CSS ขับ transition ของการเผยได้ ไม่ทำอะไรเมื่อผู้ใช้ตั้ง prefers-reduced-motion
  */
 export function useReveal(options) {
   const ref = useRef(null);

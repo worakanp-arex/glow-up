@@ -7,7 +7,7 @@ import StatTile from "../../components/common/StatTile.jsx";
 import * as adminService from "../../services/adminService.js";
 import "./Dashboard.css";
 
-// Every number links to the list that explains it.
+// ทุกตัวเลขลิงก์ไปยังรายการที่อธิบายตัวเลขนั้น
 function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);

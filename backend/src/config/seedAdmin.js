@@ -15,7 +15,7 @@ async function seedAdmin() {
     console.error("Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD before running this script.");
     process.exit(1);
   }
-  // An admin can read every patient's record: hold this account to the same rules as everyone's.
+  // แอดมินอ่านข้อมูลผู้ป่วยได้ทุกคน: จึงต้องบังคับบัญชีนี้ด้วยกฎเดียวกับทุกคน
   const weakness = passwordProblem(password);
   if (weakness) {
     console.error(`SEED_ADMIN_PASSWORD is not acceptable: ${weakness}`);

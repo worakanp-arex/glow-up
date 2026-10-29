@@ -8,18 +8,18 @@ export async function notifyUser(userId, message, type, extra = {}) {
   return notification;
 }
 
-// Notifies every admin and counsellor (the people who moderate content).
+// แจ้งแอดมินและผู้ให้คำปรึกษาทุกคน (ผู้ที่กลั่นกรองเนื้อหา)
 export async function notifyStaff(message, type, extra = {}) {
   const staff = await User.find({ role: { $in: ["admin", "counsellor"] } }).select("_id");
   return Promise.all(staff.map((member) => notifyUser(member._id, message, type, extra)));
 }
 
-// The same safety alert about one patient is not repeated within this window.
+// การแจ้งเตือนความปลอดภัยเรื่องเดียวกันของผู้ป่วยคนหนึ่งจะไม่ซ้ำภายในช่วงเวลานี้
 export const RISK_ALERT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
-// Tells the people responsible for one patient: the admins and the counsellor
-// assigned to them. While nobody is assigned yet, every counsellor is told so a
-// person can pick the case up — a safety alert must never reach nobody.
+// แจ้งผู้ที่รับผิดชอบผู้ป่วยหนึ่งคน: แอดมินและผู้ให้คำปรึกษา
+// ที่ได้รับมอบหมาย ระหว่างที่ยังไม่มีผู้รับผิดชอบ จะแจ้งผู้ให้คำปรึกษาทุกคน เพื่อให้
+// มีคนรับเรื่อง — การแจ้งเตือนความปลอดภัยต้องไม่ไปถึงใครเลยไม่ได้
 export async function notifyCareTeam(patientId, message, type, extra = {}) {
   const patient = await User.findById(patientId).select("assignedCounsellor");
   const staff = await User.find(

@@ -1,5 +1,5 @@
-// The last `count` calendar days in Asia/Bangkok as "YYYY-MM-DD", oldest first —
-// used to give a trend chart a point for every day, including days with no data.
+// `count` วันตามปฏิทิน Asia/Bangkok ล่าสุดเป็น "YYYY-MM-DD" เก่าสุดก่อน —
+// ใช้ให้กราฟแนวโน้มมีจุดทุกวัน รวมวันที่ไม่มีข้อมูล
 const BANGKOK_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" });
 
 export function lastDays(count, now = new Date()) {
@@ -10,7 +10,7 @@ export function lastDays(count, now = new Date()) {
   return days;
 }
 
-// A "nice" upper bound and step for a count axis starting at 0.
+// ขอบบนและขั้นที่ "สวย" สำหรับแกนจำนวนที่เริ่มที่ 0
 export function niceAxis(max) {
   const top = Math.max(1, max);
   const rough = top / 4;

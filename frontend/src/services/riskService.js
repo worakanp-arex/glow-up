@@ -1,11 +1,11 @@
 import api from "./api.js";
 
-// Works out a fresh assessment from the latest emotion logs and stores it.
+// คำนวณผลประเมินใหม่จากบันทึกอารมณ์ล่าสุดและบันทึกไว้
 export function assessMyRisk() {
   return api.post("/risk/assess").then((res) => res.data);
 }
 
-// The most recent stored assessment, without computing a new one.
+// ผลประเมินที่บันทึกไว้ล่าสุด โดยไม่คำนวณใหม่
 export function getMyRisk() {
   return api.get("/risk/me").then((res) => res.data);
 }

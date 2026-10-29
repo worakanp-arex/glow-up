@@ -19,7 +19,7 @@ function CounsellingStatusWidget() {
       .finally(() => setLoading(false));
   }, []);
 
-  // The request still in progress takes priority over older, finished ones.
+  // คำขอที่ยังดำเนินอยู่มีลำดับก่อนคำขอเก่าที่เสร็จสิ้นแล้ว
   const latest = sessions.find((s) => ["pending", "active", "scheduled"].includes(s.status)) || sessions[0];
   const TypeIcon = latest ? SESSION_TYPE_ICONS[latest.sessionType] || MessageCircle : HeartHandshake;
 

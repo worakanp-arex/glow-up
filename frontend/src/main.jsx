@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-// The Prompt font is served from this site (Thai + Latin only), so visiting the app
-// doesn't tell Google's servers who is browsing a recovery platform.
+// ฟอนต์ Prompt ให้บริการจากเว็บไซต์นี้เอง (เฉพาะไทยและละติน) ผู้เข้าใช้แอป
+// จึงไม่บอกเซิร์ฟเวอร์ของ Google ว่าใครกำลังเข้าแพลตฟอร์มฟื้นฟู
 import '@fontsource/prompt/thai-300.css'
 import '@fontsource/prompt/thai-400.css'
 import '@fontsource/prompt/thai-500.css'

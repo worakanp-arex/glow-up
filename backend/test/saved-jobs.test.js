@@ -9,7 +9,11 @@ const response = () => ({ code: 200, body: null, status(code) { this.code = code
 
 test("saving a job is scoped to the user and only allowed for publicly listed jobs", async () => {
   mock.method(Job, "findOne", (filter) => {
-    assert.deepEqual(filter, { _id: "job1", status: "open", verifiedStatus: "verified" });
+    // งานที่หมดเขตแล้วก็บันทึกไม่ได้ เหมือนที่ไม่แสดงในรายการสาธารณะ
+    const { $or: expiry, ...rest } = filter;
+    assert.deepEqual(rest, { _id: "job1", status: "open", verifiedStatus: "verified" });
+    assert.equal(expiry[0].expiredAt, null);
+    assert.ok(expiry[1].expiredAt.$gt instanceof Date);
     return { select: async () => ({ _id: "job1" }) };
   });
   let upsert;

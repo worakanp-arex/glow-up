@@ -13,10 +13,10 @@ function formatDateTime(iso) {
   return new Date(iso).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
 }
 
-// The chat between a person and their counsellor: the message list and the
-// reply box. There is no realtime channel for chat messages, so it re-reads the
-// session every 15 seconds while the tab is visible, and immediately when a
-// counselling notification arrives, so replies show up without a refresh.
+// แชทระหว่างบุคคลกับผู้ให้คำปรึกษา: รายการข้อความและกล่องตอบ ไม่มี
+// ช่องทางเรียลไทม์สำหรับข้อความแชท จึงอ่าน session ใหม่ทุก 15 วินาที
+// ขณะที่แท็บมองเห็นอยู่ และทันทีเมื่อมีการแจ้งเตือนการปรึกษาเข้ามา
+// คำตอบจึงขึ้นโดยไม่ต้องรีเฟรช
 export default function CounsellingThread({ session, onChange, canReply, emptyHint = "เริ่มเล่าเท่าที่พร้อม ผู้ให้คำปรึกษาจะตอบกลับในพื้นที่นี้" }) {
   const { user } = useAuth();
   const [replyText, setReplyText] = useState("");
@@ -40,7 +40,7 @@ export default function CounsellingThread({ session, onChange, canReply, emptyHi
           onChange(fresh);
         }
       } catch {
-        // keep showing what we have; the next tick will try again
+        // แสดงสิ่งที่มีอยู่ต่อไป รอบถัดไปจะลองใหม่
       }
     }
     const timer = setInterval(refresh, POLL_MS);

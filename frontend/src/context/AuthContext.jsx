@@ -21,8 +21,8 @@ export function AuthProvider({ children }) {
       .finally(() => setCheckingSession(false));
   }, []);
 
-  // A new sign-in must not inherit the live connection of whoever was signed in
-  // before in this tab: reconnect so notifications follow the new account.
+  // การล็อกอินใหม่ต้องไม่สืบทอดการเชื่อมต่อสดของผู้ที่ล็อกอินอยู่ก่อนหน้า
+  // ในแท็บนี้: เชื่อมต่อใหม่เพื่อให้การแจ้งเตือนตามบัญชีใหม่
   const startSession = useCallback((signedInUser) => {
     disconnectSocket();
     setUser(signedInUser);
@@ -46,11 +46,11 @@ export function AuthProvider({ children }) {
     return startSession(data.user);
   }, [startSession]);
 
-  // The session is the server's cookie, which only the server can clear. If the
-  // request fails (network, server down) the person is still signed in on this
-  // device, so say so rather than showing a signed-out screen that comes back
-  // to life on reload; the caller handles the error.
-  // A 401 means the session had already ended, which is what was wanted.
+  // เซสชันคือ cookie ของเซิร์ฟเวอร์ ซึ่งมีเพียงเซิร์ฟเวอร์ที่ล้างได้ หาก
+  // คำขอล้มเหลว (เครือข่าย เซิร์ฟเวอร์ล่ม) ผู้ใช้ยังล็อกอินอยู่บน
+  // อุปกรณ์นี้ จึงบอกตามจริง แทนที่จะแสดงหน้าจอที่ออกจากระบบแล้วซึ่งกลับ
+  // มาเป็นล็อกอินเมื่อโหลดใหม่ ผู้เรียกจัดการ error เอง
+  // 401 หมายถึงเซสชันสิ้นสุดไปแล้ว ซึ่งก็คือสิ่งที่ต้องการ
   const logout = useCallback(async () => {
     try {
       await authService.logout();

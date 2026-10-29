@@ -11,7 +11,7 @@
 
 .games-xp { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1px solid var(--color-primary-200); border-radius: 999px; background: var(--color-primary-50); color: var(--color-primary-700); font-size: .85rem; font-weight: 600; }
 
-/* ---------- Intro strip ---------- */
+/* ---------- แถบแนะนำ ---------- */
 .games-intro { display: flex; align-items: center; gap: 14px; padding: 18px 24px; }
 .games-intro-icon, .games-cta-icon, .games-missions-icon { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; background: color-mix(in srgb, #8b7fd6 14%, var(--color-surface)); color: #6c5fc7; }
 .games-intro > div, .games-cta > div { display: flex; flex-direction: column; flex: 1; min-width: 0; }
@@ -22,7 +22,7 @@
 
 .quest-all-done { display: flex; align-items: center; gap: .5rem; padding: 12px 18px; border-radius: var(--radius-lg); background-color: var(--color-success-bg); color: var(--color-success); font-size: .85rem; font-weight: 500; }
 
-/* ---------- Daily missions (unlock step) ---------- */
+/* ---------- ภารกิจประจำวัน (ขั้นปลดล็อก) ---------- */
 .games-missions { padding: 0; overflow: hidden; }
 .games-missions-head { display: flex; align-items: center; gap: 14px; width: 100%; padding: 18px 24px; border: 0; background: none; font: inherit; text-align: left; color: inherit; cursor: pointer; }
 .games-missions-icon { background: var(--color-primary-50); color: var(--color-primary-600); }
@@ -32,7 +32,7 @@
 .games-missions-copy span { font-size: .75rem; line-height: 1.6; color: var(--color-text-muted); }
 .games-missions-body { padding: 0 24px 24px; border-top: 1px solid var(--color-border); padding-top: 18px; }
 
-/* ---------- Game cards ---------- */
+/* ---------- การ์ดเกม ---------- */
 .games-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 0; padding: 0; list-style: none; }
 .game-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; transition: transform .15s ease, box-shadow .15s ease, border-color .15s; }
 .game-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
@@ -54,7 +54,7 @@
 
 .games-player { scroll-margin-top: 100px; }
 
-/* ---------- Small wins ---------- */
+/* ---------- ชัยชนะเล็กๆ ---------- */
 .games-wins { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 .games-wins-eyebrow { margin: 0 0 4px; font-size: .68rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--color-primary-600); }
 .games-wins h2 { margin: 0 0 4px; font-size: 1.2rem; font-weight: 600; }
@@ -65,7 +65,7 @@
 .games-wins-badges small { font-size: .62rem; line-height: 1.4; color: var(--color-text-muted); }
 .games-wins-badges .is-earned span { border: 0; background: var(--color-primary-50); color: var(--color-primary-600); box-shadow: 0 0 0 1px var(--color-primary-200); }
 
-/* ---------- Bottom CTA ---------- */
+/* ---------- CTA ด้านล่าง ---------- */
 .games-cta { display: flex; align-items: center; gap: 14px; padding: 18px 24px; }
 .games-cta-icon { background: var(--color-success-bg); color: var(--color-success); }
 
@@ -83,7 +83,7 @@
   .games-wins-badges { width: 100%; justify-content: space-around; gap: 8px; }
 }
 
-/* ---------- Streak strip and cards without a photo ---------- */
+/* ---------- แถบสตรีคและการ์ดที่ไม่มีรูปถ่าย ---------- */
 .games-streak { display: flex; align-items: center; gap: 14px; padding: 16px 24px; }
 .games-streak-icon { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; background: var(--color-surface-hover); color: var(--color-text-muted); }
 .games-streak.is-active .games-streak-icon { background: color-mix(in srgb, #f2a071 22%, var(--color-surface)); color: #d9731f; }

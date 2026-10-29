@@ -1,4 +1,4 @@
-/* Shared page refinements: readable summaries and form-first handheld flows. */
+/* ปรับแต่งหน้าที่ใช้ร่วมกัน: สรุปที่อ่านง่ายและขั้นตอนที่เน้นฟอร์มบนอุปกรณ์พกพา */
 .layout .dashboard-greeting { background: radial-gradient(ellipse at 95% 0%, var(--color-primary-200), transparent 60%), linear-gradient(120deg, var(--color-surface), var(--color-primary-50)); border-color: var(--color-primary-200); position: relative; }
 .dashboard-greeting .page-heading-icon { background: var(--color-surface); box-shadow: var(--shadow-sm); }
 .mood-select select { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--color-border); color: var(--color-text); background: var(--color-surface); text-overflow: ellipsis; }

@@ -39,12 +39,12 @@ import { sanitizeText } from "../src/utils/sanitizeText.js";
 import sharp from "sharp";
 
 afterEach(() => mock.restoreAll());
-// Registration looks accounts up including deleted ones (their address stays reserved).
+// การสมัครค้นหาบัญชีรวมถึงที่ถูกลบ (อีเมลของบัญชีเหล่านั้นยังถูกจองไว้)
 const accountLookup = (found) => () => ({ setOptions: async () => found });
 const response = () => ({ code: 200, body: null, headers: {}, status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; }, cookie() {}, setHeader(name, value) { this.headers[name] = value; } });
-// Mongoose query chains (.sort/.populate/.select/.skip/.limit) that all
-// resolve to `result` when awaited, regardless of which chain methods a
-// given controller happens to call.
+// สายโซ่ query ของ Mongoose (.sort/.populate/.select/.skip/.limit) ที่ทั้งหมด
+// resolve เป็น `result` เมื่อ await ไม่ว่า controller ตัวนั้น
+// จะเรียกเมธอดใดในสายโซ่
 function chainable(result) {
   const obj = { sort: () => obj, populate: () => obj, select: () => obj, skip: () => obj, limit: () => obj, then: (resolve, reject) => Promise.resolve(result).then(resolve, reject) };
   return obj;
@@ -159,7 +159,7 @@ const STRONG_SECRET = "9f2c71ab3d84e605b1c7a9d2f0e4863b5a1d7c9e2f4b6081";
 test("configuration rejects missing and weak secrets", () => {
   assert.throws(() => validateEnvironment({}), /MONGODB_URI/);
   assert.throws(() => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET: "short", NODE_ENV: "production" }), /JWT_SECRET/);
-  // Only an explicit development/test environment may use a weak secret.
+  // เฉพาะสภาพแวดล้อม development/test ที่ระบุชัดเจนเท่านั้นที่ใช้ secret อ่อนได้
   assert.doesNotThrow(() => validateEnvironment({ MONGODB_URI: "test", JWT_SECRET: "development-secret", NODE_ENV: "development" }));
 });
 test("a forgotten or mistyped NODE_ENV is held to production standards, so the published placeholder secret never works", () => {
@@ -231,9 +231,9 @@ test("uploaded file content matching its declared kind is accepted", async () =>
 });
 test("real content of another allowed type than the one declared is rejected, because the declared type names the stored file", async () => {
   const filePath = path.join(os.tmpdir(), `${randomUUID()}.png`);
-  fs.writeFileSync(filePath, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0])); // a JPEG...
+  fs.writeFileSync(filePath, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0])); // JPEG...
   const res = response();
-  await verifyUploadedFile("avatar")({ file: { path: filePath, mimetype: "image/png" } }, res, () => assert.fail("declared PNG but bytes are JPEG")); // ...sent as PNG
+  await verifyUploadedFile("avatar")({ file: { path: filePath, mimetype: "image/png" } }, res, () => assert.fail("declared PNG but bytes are JPEG")); // ...ที่ส่งเป็น PNG
   assert.equal(res.code, 400);
   assert.equal(fs.existsSync(filePath), false);
 });
@@ -267,7 +267,7 @@ test("uploads of a refused request are deleted, uploads of an accepted one are k
 test("a photo's hidden metadata (owner, camera, location fields) is removed on upload", async () => {
   const filePath = path.join(os.tmpdir(), `${randomUUID()}.jpg`);
   fs.writeFileSync(filePath, await realJpeg({ IFD0: { Artist: "SomchaiOwner", Make: "SecretPhone" } }));
-  // Metadata is read from bytes, not the path: sharp would keep the file open on Windows.
+  // อ่านเมทาดาตาจากไบต์ ไม่ใช่จากพาธ: sharp จะเปิดไฟล์ค้างไว้บน Windows
   const read = () => sharp(fs.readFileSync(filePath)).metadata();
   assert.ok((await read()).exif, "the test photo starts out with metadata");
   let passed = false;
@@ -283,7 +283,7 @@ test("a photo's hidden metadata (owner, camera, location fields) is removed on u
 test("an image that looks right but can't be decoded is rejected and deleted", async () => {
   const filePath = path.join(os.tmpdir(), `${randomUUID()}.png`);
   const valid = await sharp({ create: { width: 8, height: 8, channels: 3, background: "#00f" } }).png().toBuffer();
-  fs.writeFileSync(filePath, valid.subarray(0, valid.length - 40)); // valid signature, truncated body
+  fs.writeFileSync(filePath, valid.subarray(0, valid.length - 40)); // ลายเซ็นถูกต้อง แต่เนื้อไฟล์ถูกตัด
   const res = response();
   await verifyUploadedFile("avatar")({ file: { path: filePath, mimetype: "image/png" } }, res, () => assert.fail("a corrupt image must not pass"));
   assert.equal(res.code, 400);

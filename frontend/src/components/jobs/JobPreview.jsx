@@ -5,23 +5,15 @@ import * as applicationService from "../../services/applicationService.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import StatusBadge from "../common/StatusBadge.jsx";
 import { initials } from "../../utils/initials.js";
+import { splitDescription } from "../../utils/jobDescription.js";
 import "./JobPreview.css";
 
-
-// Split a free-text description into an intro paragraph block and a list of
-// bullet lines ("-", "•", "*" or "1."), so duties read as a list.
-function splitDescription(text) {
-  const about = [];
-  const duties = [];
-  for (const raw of (text || "").split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line) continue;
-    const bullet = line.match(/^(?:[-•*]|\d+[.)])\s*(.+)$/);
-    if (bullet) duties.push(bullet[1]);
-    else about.push(line);
-  }
-  return { about, duties };
-}
+// หัวข้อที่แสดงใต้ "เกี่ยวกับงานนี้" เรียงตามลำดับที่ผู้สมัครอยากอ่าน
+const DESCRIPTION_SECTIONS = [
+  ["duties", "หน้าที่หลัก"],
+  ["requirements", "คุณสมบัติและสิ่งที่ต้องทำได้"],
+  ["benefits", "สวัสดิการและเงื่อนไข"],
+];
 
 function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match = null, showImage = true }) {
   const { user, isAuthenticated } = useAuth();
@@ -58,7 +50,7 @@ function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match 
   const accepting = job.status === "open" && job.verifiedStatus === "verified" && !expired;
   const applicationStatus = existingApplication?.status || "pending";
   const statusMessages = { pending: "ส่งใบสมัครแล้ว · รอนายจ้างพิจารณา", interview: "ได้รับนัดสัมภาษณ์ · ดูรายละเอียดในใบสมัคร", passed: "ผ่านการคัดเลือกแล้ว", rejected: "ใบสมัครไม่ได้รับการคัดเลือก", cancelled: "คุณยกเลิกใบสมัครนี้แล้ว" };
-  const { about, duties } = splitDescription(job.description);
+  const sections = splitDescription(job.description);
   const seekerVerified = user?.verifiedStatus === "verified";
   const canApply = isSeeker && seekerVerified && !alreadyApplied && accepting;
 
@@ -83,8 +75,8 @@ function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match 
       setMyApplications((prev) => [{ ...application, job }, ...prev]);
     } catch (err) {
       if (err.response?.status === 409) {
-        // Someone else applied from another tab/session in the meantime — refresh
-        // the list so the UI settles into the same calm "already applied" state.
+        // ระหว่างนั้นมีคนสมัครจากแท็บ/เซสชันอื่น — รีเฟรช
+        // รายการเพื่อให้ UI เข้าสู่สถานะ "สมัครแล้ว" แบบสงบเหมือนกัน
         setJustApplied(job._id);
         applicationService.getMyApplications().then(setMyApplications).catch(() => setApplicationsError(true));
       } else {
@@ -157,19 +149,19 @@ function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match 
         </section>
       )}
 
-      {about.length > 0 && (
+      {sections.about.length > 0 && (
         <section className="job-preview-section">
           <h3>เกี่ยวกับงานนี้</h3>
-          {about.map((line, i) => <p key={i}>{line}</p>)}
+          {sections.about.map((line, i) => <p key={i}>{line}</p>)}
         </section>
       )}
 
-      {duties.length > 0 && (
-        <section className="job-preview-section">
-          <h3>หน้าที่หลัก</h3>
-          <ul>{duties.map((line, i) => <li key={i}>{line}</li>)}</ul>
+      {DESCRIPTION_SECTIONS.map(([key, title]) => sections[key].length > 0 && (
+        <section key={key} className="job-preview-section">
+          <h3>{title}</h3>
+          <ul>{sections[key].map((line, i) => <li key={i}>{line}</li>)}</ul>
         </section>
-      )}
+      ))}
 
       {attachmentRequests.length > 0 && (
         <section className="job-preview-section">
@@ -218,7 +210,8 @@ function JobPreview({ job, showTitle = true, saved = false, onToggleSave, match 
         </div>
       )}
 
-      {(canApply || !isAuthenticated) && (
+      {/* ผู้เยี่ยมชมเห็นปุ่มเข้าสู่ระบบเฉพาะงานที่ยังรับสมัคร งานที่ปิด/หมดเขตมีข้อความแจ้งด้านบนอยู่แล้ว */}
+      {(canApply || (!isAuthenticated && accepting)) && (
         <footer className="job-preview-foot">
           {job.salary > 0 ? (
             <div className="job-preview-foot-salary"><small>เงินเดือน</small><strong>{job.salary.toLocaleString()} <span>บาท/เดือน</span></strong></div>

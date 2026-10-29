@@ -11,8 +11,8 @@ import { ensureDefaultSkills } from "./services/skillCatalogService.js";
 validateEnvironment();
 
 const PORT = process.env.PORT || 5001;
-// Behind nginx, set HOST=127.0.0.1 so the API can't be reached directly from the
-// network. Left unset it listens on every interface (needed on Railway and similar hosts).
+// หลัง nginx ให้ตั้ง HOST=127.0.0.1 เพื่อไม่ให้เข้าถึง API ตรงๆ จากเครือข่ายได้
+// ถ้าไม่ตั้งจะฟังทุกอินเทอร์เฟซ (จำเป็นบน Railway และโฮสต์ลักษณะเดียวกัน)
 const HOST = process.env.HOST;
 
 const httpServer = http.createServer(app);
@@ -20,23 +20,23 @@ initSocket(httpServer, (process.env.CORS_ORIGIN || "http://localhost:5173").trim
 
 connectDB()
   .then(() => {
-    // Adds any missing standard career skills; never edits existing ones.
+    // เพิ่มทักษะอาชีพมาตรฐานที่ขาดอยู่ ไม่แก้ไขของเดิม
     ensureDefaultSkills().catch((err) => console.error("Seeding default skills failed", err));
     const onListening = () => console.log(`Server running on http://${HOST || "localhost"}:${PORT}`);
     if (HOST) httpServer.listen(PORT, HOST, onListening);
     else httpServer.listen(PORT, onListening);
-    // Warn people about saved courses that are about to expire. Production runs
-    // a single instance (see deploy/ecosystem.config.cjs), so an in-process
-    // timer is enough; reminders are deduped per person, course and day.
+    // เตือนผู้ที่บันทึกคอร์สไว้ว่าคอร์สใกล้หมดอายุ production รันแบบ
+    // instance เดียว (ดู deploy/ecosystem.config.cjs) จึงใช้ตัวจับเวลาในโปรเซสเดียวได้
+    // การเตือนไม่ซ้ำต่อคน ต่อคอร์ส ต่อวัน
     const remindAboutExpiringCourses = () => sendCourseExpiryReminders().catch((err) => console.error("Course expiry reminders failed", err));
     remindAboutExpiringCourses();
     setInterval(remindAboutExpiringCourses, 60 * 60 * 1000).unref();
-    // Same for lessons and scenarios, but the reminder goes to the staff member who wrote them.
+    // เช่นเดียวกันสำหรับบทเรียนและสถานการณ์ แต่ส่งการเตือนไปหาเจ้าหน้าที่ผู้เขียน
     const remindAboutExpiringContent = () => sendContentExpiryReminders().catch((err) => console.error("Content expiry reminders failed", err));
     remindAboutExpiringContent();
     setInterval(remindAboutExpiringContent, 60 * 60 * 1000).unref();
-    // Deleted accounts are kept for RETENTION_DAYS and then anonymised for good. The job
-    // can safely run any number of times: it only touches accounts whose time is up.
+    // บัญชีที่ถูกลบเก็บไว้ RETENTION_DAYS วันแล้วทำให้ไม่ระบุตัวตนถาวร งานนี้
+    // รันกี่ครั้งก็ได้อย่างปลอดภัย: แตะเฉพาะบัญชีที่ครบกำหนดแล้ว
     const anonymizeDeletedAccounts = () =>
       anonymizeExpiredUsers()
         .then((count) => count > 0 && console.log(`Anonymised ${count} deleted account(s)`))

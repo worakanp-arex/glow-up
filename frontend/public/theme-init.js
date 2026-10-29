@@ -3,7 +3,7 @@
   try {
     stored = localStorage.getItem("theme");
   } catch {
-    stored = null; // storage can be blocked (private windows, strict settings)
+    stored = null; // storage อาจถูกบล็อก (หน้าต่างส่วนตัว การตั้งค่าเข้มงวด)
   }
   var theme =
     stored === "light" || stored === "dark"

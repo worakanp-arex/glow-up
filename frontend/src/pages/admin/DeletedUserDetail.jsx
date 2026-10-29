@@ -40,7 +40,7 @@ function DeletedUserDetail() {
   const { confirm, confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
-    // Opening this page is recorded in the audit log by the server, once per visit.
+    // เซิร์ฟเวอร์บันทึกการเปิดหน้านี้ลง audit log หนึ่งครั้งต่อหนึ่งการเข้าชม
     userService
       .getDeletedUser(userId)
       .then(setData)

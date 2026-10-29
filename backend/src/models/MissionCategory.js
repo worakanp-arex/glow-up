@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-// Admin-managed catalog of ActivityMission categories (replaces the old
-// hardcoded 8-category enum). `key` is the stable identifier stored on
-// ActivityMission/ActivityMissionLog documents and must never change once
-// missions reference it — only `label`/`icon`/`order` are editable.
+// แคตตาล็อกหมวดหมู่ ActivityMission ที่แอดมินจัดการ (แทน enum 8 หมวดที่ฮาร์ดโค้ดเดิม)
+// `key` คือตัวระบุคงที่ที่เก็บในเอกสาร
+// ActivityMission/ActivityMissionLog และห้ามเปลี่ยนเมื่อมีภารกิจ
+// อ้างอิงแล้ว — แก้ได้เฉพาะ `label`/`icon`/`order`
 const missionCategorySchema = new mongoose.Schema(
   {
     key: { type: String, required: true, unique: true, trim: true },

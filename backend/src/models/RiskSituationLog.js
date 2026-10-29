@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 const riskSituationLogSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    // What happened, in the user's own words.
+    // เหตุการณ์ที่เกิดขึ้น เล่าด้วยคำของผู้ใช้เอง
     situation: { type: String, required: true },
     skillUsed: { type: Boolean, required: true },
-    // Which coping/refusal skill they used, if any.
+    // ทักษะรับมือ/ปฏิเสธที่ใช้ (ถ้ามี)
     skillDescription: { type: String },
     outcome: { type: String, enum: ["handled_well", "partially_handled", "relapsed"], required: true },
     occurredAt: { type: Date, default: Date.now },

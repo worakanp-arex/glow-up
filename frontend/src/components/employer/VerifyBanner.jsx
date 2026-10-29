@@ -2,7 +2,7 @@ import { ShieldAlert } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./employer.css";
 
-// Reminds an employer whose account hasn't been verified yet what that blocks.
+// เตือนนายจ้างที่บัญชียังไม่ได้รับการยืนยันว่าสิ่งนี้บล็อกอะไรอยู่
 export default function VerifyBanner() {
   const { user } = useAuth();
   if (user.verifiedStatus === "verified") return null;

@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-// Who did what to whose data. Written when an account is deleted, restored or
-// anonymised and whenever an admin opens a deleted account's records, so access
-// to retained health data can always be explained afterwards. Entries are only
-// ever added, never edited.
+// ใครทำอะไรกับข้อมูลของใคร บันทึกเมื่อบัญชีถูกลบ กู้คืน หรือ
+// ทำให้ไม่ระบุตัวตน และทุกครั้งที่แอดมินเปิดดูข้อมูลของบัญชีที่ถูกลบ
+// เพื่อให้อธิบายการเข้าถึงข้อมูลสุขภาพที่เก็บไว้ได้เสมอ รายการมีแต่เพิ่ม
+// ไม่มีการแก้ไข
 const auditLogSchema = new mongoose.Schema(
   {
-    // null when the system acted on its own (the retention job).
+    // null เมื่อระบบทำงานเอง (งานเก็บรักษาข้อมูล)
     actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     action: {
       type: String,

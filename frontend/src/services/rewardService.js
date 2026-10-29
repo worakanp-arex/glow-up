@@ -4,7 +4,7 @@ export function getMyRewards() {
   return api.get("/rewards/me").then((res) => res.data);
 }
 
-// Admin management (badge/reward catalog).
+// การจัดการโดยแอดมิน (แคตตาล็อกตรา/รางวัล)
 export function getRewards() {
   return api.get("/rewards").then((res) => res.data);
 }

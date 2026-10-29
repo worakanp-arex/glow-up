@@ -1,8 +1,8 @@
 import Setting from "../models/Setting.js";
 
-// In-process cache so hot paths (e.g. level computation on every points
-// summary) don't hit Mongo on every call — admin changes still land within
-// this TTL.
+// แคชในโปรเซส เพื่อไม่ให้เส้นทางที่ถูกเรียกบ่อย (เช่น การคำนวณระดับในทุกสรุปคะแนน)
+// ต้องไปถาม Mongo ทุกครั้ง — การเปลี่ยนของแอดมินยังมีผลภายใน
+// TTL นี้
 const CACHE_TTL_MS = 30_000;
 const cache = new Map();
 

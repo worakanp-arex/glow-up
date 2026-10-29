@@ -40,7 +40,7 @@ export async function getDashboard(req, res) {
     byLevel[item._id] = item.count;
   }
 
-  // `total` is every active account, whatever its role; the rest is the breakdown.
+  // `total` คือทุกบัญชีที่ยังใช้งานอยู่ ไม่ว่าบทบาทใด ส่วนที่เหลือคือรายละเอียดแยกตามบทบาท
   const roleCount = (role) => usersByRole.find((item) => item._id === role)?.count ?? 0;
   const roles = ["user", "family", "counsellor", "employer", "admin"];
   res.json({

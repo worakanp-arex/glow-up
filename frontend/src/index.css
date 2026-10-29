@@ -23,7 +23,7 @@ textarea {
   color: var(--color-text);
 }
 
-/* ---------- Custom <select> ---------- */
+/* ---------- <select> แบบกำหนดเอง ---------- */
 
 select {
   appearance: none;
@@ -39,9 +39,11 @@ select::-ms-expand {
   display: none;
 }
 
-/* ---------- Custom <input type="search"> ---------- */
-/* Without this, the browser draws its own native search-field capsule and
-   cancel button on top of our border, which looks like two nested boxes. */
+/* ---------- <input type="search"> แบบกำหนดเอง ---------- */
+/*
+ * หากไม่มีส่วนนี้ เบราว์เซอร์จะวาดแคปซูลช่องค้นหาแบบ native ของตัวเอง
+ * และปุ่มยกเลิกซ้อนบนขอบของเรา ซึ่งดูเหมือนกล่องสองชั้นซ้อนกัน
+ */
 
 input[type="search"] {
   appearance: none;
@@ -57,7 +59,7 @@ input[type="search"]::-webkit-search-results-decoration {
   display: none;
 }
 
-/* ---------- Custom <input type="range"> ---------- */
+/* ---------- <input type="range"> แบบกำหนดเอง ---------- */
 
 input[type="range"] {
   appearance: none;
@@ -108,7 +110,7 @@ input[type="range"]:hover::-moz-range-thumb {
   transform: scale(1.15);
 }
 
-/* ---------- Custom <input type="checkbox"> ---------- */
+/* ---------- <input type="checkbox"> แบบกำหนดเอง ---------- */
 
 input[type="checkbox"] {
   appearance: none;

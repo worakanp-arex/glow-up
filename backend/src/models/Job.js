@@ -5,7 +5,7 @@ const jobSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String },
-    // employer must be a User with role "employer"
+    // employer ต้องเป็น User ที่มีบทบาท "employer"
     employer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     // link to the real external application page (company site / JobsDB) to avoid
     // falling under the recruitment-agency licensing law (พ.ร.บ.จัดหางาน)
@@ -13,17 +13,17 @@ const jobSchema = new mongoose.Schema(
     location: { type: String },
     salary: { type: Number },
     status: { type: String, enum: ["open", "closed", "expired"], default: "open" },
-    // admin moderation gate, separate from the operational `status` lifecycle above
+    // ด่านตรวจสอบโดยแอดมิน แยกจากวงจรสถานะ `status` ด้านบน
     verifiedStatus: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
     expiredAt: { type: Date },
-    // Company / job picture shown on the listing (public upload, /uploads/job-images/...).
+    // รูปบริษัท/งานที่แสดงในรายการ (อัปโหลดแบบสาธารณะ, /uploads/job-images/...)
     imageUrl: { type: String },
-    // Set by the admin when a posting is rejected, so the employer knows why.
+    // แอดมินตั้งค่าเมื่อประกาศถูกปฏิเสธ เพื่อให้นายจ้างรู้เหตุผล
     rejectionReason: { type: String },
     reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     reviewedAt: { type: Date },
     category: { type: mongoose.Schema.Types.ObjectId, ref: "JobCategory" },
-    // documents the employer wants applicants to attach on top of the profile resume/certificates
+    // เอกสารที่นายจ้างต้องการให้ผู้สมัครแนบ นอกเหนือจากเรซูเม่/เกียรติบัตรในโปรไฟล์
     attachmentRequests: { type: [String], enum: ATTACHMENT_TYPES, default: [] },
   },
   { timestamps: true }

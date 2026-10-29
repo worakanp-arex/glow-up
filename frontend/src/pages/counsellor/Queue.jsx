@@ -18,7 +18,7 @@ import "./Queue.css";
 import Avatar from "../../components/common/Avatar.jsx";
 
 const SESSION_TYPE_ICONS = { chat: MessageCircle, hotline: Phone, video: Video };
-// Each list opens with a handful of cases; "show more" reveals the next batch.
+// แต่ละรายการเริ่มด้วยไม่กี่เคส "ดูเพิ่ม" แสดงชุดถัดไป
 const PAGE_SIZE = 5;
 
 const FILTERS = [
@@ -55,8 +55,8 @@ function Queue() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Cancelled or closed requests have nothing left to claim, even if no
-  // counsellor ever picked them up.
+  // คำขอที่ยกเลิกหรือปิดแล้วไม่มีอะไรให้รับอีก แม้ไม่เคยมีผู้ให้คำปรึกษา
+  // คนใดรับไว้
   const byFilter = useMemo(() => ({
     unclaimed: sessions.filter((s) => !s.counsellor && s.status !== "cancelled" && s.status !== "closed"),
     mine: sessions.filter((s) => s.counsellor?._id === user._id),
@@ -64,8 +64,8 @@ function Queue() {
   }), [sessions, user._id]);
   const filteredSessions = byFilter[filter];
 
-  // The calendar is fed by the same list as the queue, so it also knows each
-  // appointment's status (finished ones go grey) and who is responsible.
+  // ปฏิทินได้ข้อมูลจากรายการเดียวกับคิว จึงรู้สถานะของแต่ละ
+  // นัดด้วย (นัดที่เสร็จแล้วเป็นสีเทา) และรู้ว่าใครรับผิดชอบ
   const calendarSessions = useMemo(
     () => sessions.filter((s) => s.scheduledAt && (calendarScope === "all" || s.counsellor?._id === user._id)),
     [sessions, calendarScope, user._id]
@@ -133,7 +133,7 @@ function Queue() {
                 {visibleSessions.map((session) => {
                   const TypeIcon = SESSION_TYPE_ICONS[session.sessionType] || MessageCircle;
                   const mood = moodByValue(session.mood);
-                  // Another counsellor's case: only its time, type, status and owner are shared.
+                  // เคสของผู้ให้คำปรึกษาท่านอื่น: แชร์เฉพาะเวลา ประเภท สถานะ และเจ้าของ
                   if (session.restricted) {
                     return (
                       <li key={session._id}>

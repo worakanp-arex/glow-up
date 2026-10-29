@@ -5,12 +5,12 @@ const microLessonSchema = new mongoose.Schema(
     title: { type: String, required: true },
     body: { type: String, required: true },
     category: { type: String },
-    // Who this lesson is written for — lets the family/caregiver guide reuse
-    // the same lesson system without mixing into the recovering user's list.
+    // เนื้อหานี้เขียนสำหรับใคร — ให้คู่มือครอบครัว/ผู้ดูแลใช้ระบบบทเรียน
+    // เดียวกันได้ โดยไม่ปะปนกับรายการของผู้ฟื้นฟู
     audience: { type: String, enum: ["user", "family"], default: "user" },
     order: { type: Number, default: 0 },
     active: { type: Boolean, default: true },
-    // Last day the lesson is shown to members; unset means it never expires.
+    // วันสุดท้ายที่แสดงบทเรียนให้สมาชิก ถ้าไม่ตั้งค่าแปลว่าไม่หมดอายุ
     expiresAt: { type: Date },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },

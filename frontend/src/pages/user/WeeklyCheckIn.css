@@ -7,11 +7,11 @@
 .weekly-checkin-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: stretch; }
 .weekly-checkin-side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 @media (min-width: 961px) {
-  /* The form sets the row height; the history fills the rest and scrolls. */
+  /* ฟอร์มกำหนดความสูงของแถว ประวัติเติมส่วนที่เหลือและเลื่อนได้ */
   .weekly-checkin-side { contain: size; }
 }
 
-/* ---------- Form ---------- */
+/* ---------- ฟอร์ม ---------- */
 .weekly-checkin-form { display: flex; flex-direction: column; gap: 22px; }
 .weekly-checkin-form .checkin-title { margin-top: 4px; }
 .weekly-checkin-field { margin: 0; padding: 0; border: 0; min-width: 0; }
@@ -40,7 +40,7 @@
 .weekly-checkin-risk-flag input { width: 18px; height: 18px; accent-color: var(--color-danger); }
 .weekly-checkin-risk-note { margin: -8px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--color-danger-bg); color: var(--color-danger); font-size: .82rem; line-height: 1.7; }
 
-/* ---------- Done state ---------- */
+/* ---------- สถานะเสร็จแล้ว ---------- */
 .weekly-checkin-done { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 28px 12px 12px; text-align: center; }
 .weekly-checkin-done-icon { display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: 8px; border-radius: 50%; background: var(--color-success-bg); color: var(--color-success); }
 .weekly-checkin-done h2 { margin: 0; font-size: 1.25rem; font-weight: 600; }
@@ -53,7 +53,7 @@
 .weekly-checkin-done-summary dd.is-text { font-size: .9rem; line-height: 2.1; }
 .weekly-checkin-done-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; }
 
-/* ---------- History + help ---------- */
+/* ---------- ประวัติ + วิธีใช้ ---------- */
 .weekly-checkin-history { display: flex; flex-direction: column; flex: 1; min-height: 220px; }
 .weekly-checkin-history .ui-card-head { margin-bottom: 8px; }
 .weekly-checkin-history ul { flex: 1; min-height: 0; margin: 0 -8px 0 0; padding: 0 8px 0 0; list-style: none; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }

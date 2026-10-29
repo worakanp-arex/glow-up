@@ -16,13 +16,13 @@ export function shiftDateKey(dateKey, dayOffset) {
   return d.toISOString().slice(0, 10);
 }
 
-// ISO-8601 week key (e.g. "2026-W37") for the given date's Asia/Bangkok
-// calendar day — used to dedupe one weekly check-in per user per week.
+// รหัสสัปดาห์ ISO-8601 (เช่น "2026-W37") ของวันตามปฏิทิน Asia/Bangkok
+// ของวันที่ที่ให้มา — ใช้กันการส่งแบบประเมินรายสัปดาห์ซ้ำ หนึ่งครั้งต่อผู้ใช้ต่อสัปดาห์
 export function toIsoWeekKey(date) {
   const [year, month, day] = toBangkokDateKey(date).split("-").map(Number);
   const d = new Date(Date.UTC(year, month - 1, day));
-  // Shift to the Thursday of this ISO week, then the ISO year is that
-  // Thursday's year (standard ISO-8601 week-numbering rule).
+  // เลื่อนไปวันพฤหัสบดีของสัปดาห์ ISO นี้ แล้วปี ISO คือปีของ
+  // วันพฤหัสบดีนั้น (กฎการนับสัปดาห์มาตรฐานของ ISO-8601)
   const dayNum = (d.getUTCDay() + 6) % 7;
   d.setUTCDate(d.getUTCDate() - dayNum + 3);
   const isoYear = d.getUTCFullYear();
@@ -31,8 +31,8 @@ export function toIsoWeekKey(date) {
   return `${isoYear}-W${String(weekNum).padStart(2, "0")}`;
 }
 
-// Start / end instants of an Asia/Bangkok calendar day ("YYYY-MM-DD"), used for
-// open and expiry dates that people enter as plain dates.
+// เวลาเริ่ม/สิ้นสุดของวันตามปฏิทิน Asia/Bangkok ("YYYY-MM-DD") ใช้กับ
+// วันเปิดและวันหมดอายุที่ผู้คนกรอกเป็นวันที่ธรรมดา
 export function bangkokStartOfDay(dateKey) {
   return new Date(`${dateKey}T00:00:00+07:00`);
 }
@@ -41,8 +41,8 @@ export function bangkokEndOfDay(dateKey) {
   return new Date(`${dateKey}T23:59:59.999+07:00`);
 }
 
-// Mongo filter for "open right now" given optional startDate / endDate fields.
-// `{ field: null }` also matches documents where the field is missing.
+// ตัวกรอง Mongo สำหรับ "เปิดอยู่ ณ ตอนนี้" จากฟิลด์ startDate / endDate ที่ไม่บังคับ
+// `{ field: null }` ยังตรงกับเอกสารที่ไม่มีฟิลด์นั้นด้วย
 export function openWindowFilter(now = new Date()) {
   return {
     $and: [
@@ -56,9 +56,9 @@ export function isWithinWindow(doc, now = new Date()) {
   return !(doc.startDate && doc.startDate > now) && !(doc.endDate && doc.endDate < now);
 }
 
-// An optional "last day" typed as a plain date: undefined when the field was not
-// sent, null when it was cleared, the end of that Bangkok day otherwise (so an
-// item stays available through its last day). An unreadable value is an Invalid Date.
+// "วันสุดท้าย" ที่ไม่บังคับซึ่งพิมพ์เป็นวันที่ธรรมดา: undefined เมื่อไม่ได้ส่งฟิลด์
+// null เมื่อล้างค่า มิฉะนั้นเป็นสิ้นวันตามเวลาไทยของวันนั้น (เพื่อให้
+// รายการยังใช้ได้ตลอดวันสุดท้าย) ค่าที่อ่านไม่ได้จะเป็น Invalid Date
 export function parseOptionalEndOfDay(value) {
   if (value === undefined) return undefined;
   if (value === null || value === "") return null;
@@ -66,7 +66,7 @@ export function parseOptionalEndOfDay(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(dateKey) ? bangkokEndOfDay(dateKey) : new Date(NaN);
 }
 
-// Mongo filter for items whose `expiresAt` has not passed; items without one never expire.
+// ตัวกรอง Mongo สำหรับรายการที่ `expiresAt` ยังไม่ผ่าน รายการที่ไม่มีค่านี้ไม่หมดอายุ
 export function notExpiredFilter(now = new Date()) {
   return { $or: [{ expiresAt: null }, { expiresAt: { $gte: now } }] };
 }

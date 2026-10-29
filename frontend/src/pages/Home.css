@@ -2,7 +2,7 @@
   overflow-x: hidden;
 }
 
-/* ---------- Hero ---------- */
+/* ---------- ส่วนหัว (Hero) ---------- */
 
 .home-hero {
   position: relative;
@@ -131,7 +131,7 @@
   justify-content: flex-start;
 }
 
-/* ---------- Hero visual ---------- */
+/* ---------- ภาพประกอบส่วนหัว ---------- */
 
 .home-hero-visual {
   display: flex;
@@ -272,7 +272,7 @@
   }
 }
 
-/* ---------- Partners strip ---------- */
+/* ---------- แถบพันธมิตร ---------- */
 
 .home-partners {
   max-width: 1180px;
@@ -315,7 +315,7 @@
   transform: translateY(-2px);
 }
 
-/* ---------- Section heading ---------- */
+/* ---------- หัวข้อส่วน ---------- */
 
 .home-section-heading {
   max-width: 640px;
@@ -341,7 +341,7 @@
   color: var(--color-text);
 }
 
-/* ---------- Features ---------- */
+/* ---------- ฟีเจอร์ ---------- */
 
 .home-features {
   max-width: 1180px;
@@ -397,7 +397,7 @@
   color: var(--color-text-secondary);
 }
 
-/* ---------- Steps ---------- */
+/* ---------- ขั้นตอน ---------- */
 
 .home-steps {
   background-color: var(--color-surface);
@@ -485,13 +485,13 @@
   }
 }
 
-/* ---------- News ---------- */
+/* ---------- ข่าว ---------- */
 
 .home-news-wrap {
   padding: 5rem 1.5rem 4rem;
 }
 
-/* ---------- CTA banner ---------- */
+/* ---------- แบนเนอร์ CTA ---------- */
 
 .home-cta-banner {
   max-width: 1000px;
@@ -532,7 +532,7 @@
   animation: none;
 }
 
-/* A calmer public welcome, sharing the workspace's blue palette. */
+/* หน้าต้อนรับสาธารณะที่ดูสงบขึ้น ใช้โทนสีฟ้าเดียวกับพื้นที่ทำงาน */
 .home-page .home-hero { padding: 80px 32px; background: var(--color-page-bg); border-bottom: 1px solid var(--color-border); }
 .home-page .home-hero-blob { display: none; }
 .home-page .home-hero-inner { gap: 80px; }
@@ -556,6 +556,6 @@
 @media (max-width: 860px) { .home-page .home-hero { padding: 44px 24px; } .home-page .home-hero-inner { gap: 28px; } .home-page .home-hero-visual { min-height: 360px; margin-top: 0; } .home-page .home-hero-copy h1 { margin-inline: auto; } .home-page .home-cta-banner { margin-inline: 20px; } }
 @media (max-width: 520px) { .home-page .home-hero { padding: 36px 20px; } .home-page .home-hero-visual { padding: 24px 12px; min-height: 330px; border-radius: 24px; } .home-page .home-hero-card-main { width: 100%; max-width: 290px; } .home-page .home-features { padding: 36px 20px; grid-template-columns: 1fr; } .home-page .home-hero-actions .btn { flex: 1; } }
 
-/* ---------- Illustrations ---------- */
+/* ---------- ภาพประกอบ ---------- */
 .home-mascot { display: block; width: 190px; height: auto; margin: -4px auto 12px; }
 .home-cta-art { position: relative; display: block; width: 130px; height: auto; margin: -8px auto 12px; padding: 8px 8px 0; border-radius: 50%; background: rgba(255, 255, 255, .92); }

@@ -45,7 +45,7 @@ const response = () => ({
   setHeader(name, value) { this.headers[name] = value; },
 });
 
-// Mongoose query chain that resolves to `result` whichever chain methods are used.
+// สายโซ่ query ของ Mongoose ที่ resolve เป็น `result` ไม่ว่าจะเรียกเมธอดใดในสายโซ่
 function chainable(result) {
   const obj = { sort: () => obj, populate: () => obj, select: () => obj, skip: () => obj, limit: () => obj, lean: () => obj, then: (resolve, reject) => Promise.resolve(result).then(resolve, reject) };
   return obj;
@@ -61,8 +61,8 @@ function captureNotifications() {
   return created;
 }
 
-// A counselling session as it comes back from find().populate(): `populated()`
-// answers with the id the counsellor field was populated from.
+// session ปรึกษาตามที่ได้จาก find().populate(): `populated()`
+// ตอบด้วย id ที่ฟิลด์ counsellor ถูก populate มา
 function session({ id, counsellor = null, user = { _id: "p1", name: "ผู้ป่วย", email: "p@example.com", phone: "0800000000" } }) {
   return {
     _id: id,
@@ -81,7 +81,7 @@ function session({ id, counsellor = null, user = { _id: "p1", name: "ผู้�
   };
 }
 
-// ---------- counselling queue: other counsellors' cases ----------
+// ---------- คิวปรึกษา: เคสของผู้ให้คำปรึกษาคนอื่น ----------
 
 const doctor = (id) => ({ _id: id, name: `หมอ ${id}` });
 
@@ -124,7 +124,7 @@ test("an admin still sees every case in full", async () => {
   assert.equal(res.body[0].restricted, undefined);
 });
 
-// ---------- family milestones follow the progress-sharing switch ----------
+// ---------- หมุดหมายครอบครัวเป็นไปตามสวิตช์แชร์ความก้าวหน้า ----------
 
 test("a patient who turned progress sharing off sends the family no milestone notice", async () => {
   mock.method(User, "findById", () => chainable({ familySharing: { progress: false, missions: true } }));
@@ -147,7 +147,7 @@ test("milestones still reach the family when sharing is on or was never configur
   }
 });
 
-// ---------- overview: named lists are limited for counsellors ----------
+// ---------- ภาพรวม: รายการที่แสดงชื่อถูกจำกัดสำหรับผู้ให้คำปรึกษา ----------
 
 function mockCounsellorPatients({ assigned = [], withSession = [], others = [] }) {
   mock.method(User, "find", (filter) => {
@@ -189,7 +189,7 @@ test("today's appointments drill-down hides patients the counsellor may not see,
   assert.equal(asAdmin.body.hidden, 0);
 });
 
-// ---------- activity approvals ----------
+// ---------- การอนุมัติกิจกรรม ----------
 
 function mockPatientOwnership({ mine = [], unassigned = [], sessionWithMe = [] }) {
   mock.method(User, "find", (filter) => {
@@ -229,7 +229,7 @@ test("a counsellor cannot approve activity logged by another counsellor's patien
   assert.equal(log.save.mock.callCount(), 0);
 });
 
-// ---------- safety alerts ----------
+// ---------- การแจ้งเตือนความปลอดภัย ----------
 
 function mockCareTeam({ assignedCounsellor = null, staff }) {
   let staffFilter;
@@ -268,7 +268,7 @@ test("resubmitting the weekly check-in inside the cooldown does not page the tea
   mock.method(WeeklyCheckIn, "findOneAndUpdate", async (filter) => {
     if (++call === 1) return { _id: "w1", selfHarmRiskFlag: true };
     claimFilter = filter;
-    return null; // someone already claimed the alert within the cooldown
+    return null; // มีคนจองการแจ้งเตือนไปแล้วภายในช่วงพัก
   });
   const created = captureNotifications();
   const res = response();
@@ -315,7 +315,7 @@ test("a coped-with situation never alerts", async () => {
   assert.equal(created.length, 0);
 });
 
-// ---------- verification withdrawn ----------
+// ---------- ถอนการยืนยัน ----------
 
 const tokenFor = (id = "u1") => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
@@ -344,7 +344,7 @@ test("staff accounts that are verified, or legacy accounts still marked pending,
   }
 });
 
-// ---------- employer sees nothing of a withdrawn application ----------
+// ---------- นายจ้างไม่เห็นอะไรเลยจากใบสมัครที่ถูกถอน ----------
 
 test("an employer loses an applicant's contact details and documents once they withdraw", async () => {
   mock.method(User, "findById", () => chainable({ verifiedStatus: "verified" }));
@@ -411,7 +411,7 @@ test("an employer can only download documents of applications that were not with
   for (const filter of employerChecks) assert.deepEqual(filter.status, { $ne: "cancelled" });
 });
 
-// ---------- editing an approved posting ----------
+// ---------- การแก้ไขประกาศที่อนุมัติแล้ว ----------
 
 function liveJob(extra) {
   return doc({ _id: "j1", employer: { toString: () => "e1" }, verifiedStatus: "verified", status: "open", title: "พนักงานครัว", description: "d", externalUrl: "https://ok.example", ...extra });
@@ -448,7 +448,7 @@ test("an admin editing a live posting does not reset its approval", async () => 
   assert.equal(job.verifiedStatus, "verified");
 });
 
-// ---------- community posts: a post you cannot see answers 404 everywhere ----------
+// ---------- โพสต์ชุมชน: โพสต์ที่คุณมองไม่เห็นตอบ 404 ทุกที่ ----------
 
 test("commenting, reacting and bookmarking use the same visibility as reading", async () => {
   const filters = [];
@@ -482,7 +482,7 @@ test("an existing bookmark can always be removed", async () => {
   assert.equal(deleted.mock.callCount(), 1);
 });
 
-// ---------- lessons and mass assignment ----------
+// ---------- บทเรียนและ mass assignment ----------
 
 test("members only open active lessons for their own audience; staff open drafts too", async () => {
   const filters = [];
@@ -495,7 +495,7 @@ test("members only open active lessons for their own audience; staff open drafts
   assert.deepEqual(filters[0].$or, [{ audience: "user" }, { audience: { $exists: false } }]);
   assert.deepEqual({ _id: filters[1]._id, active: filters[1].active, audience: filters[1].audience }, { _id: "l1", active: true, audience: "family" });
   assert.deepEqual(filters[2], { _id: "l1" });
-  // Members never get a lesson past its expiry date (an unset date means it never expires); staff still can.
+  // สมาชิกไม่ได้บทเรียนที่พ้นวันหมดอายุ (ถ้าไม่ตั้งวันที่แปลว่าไม่หมดอายุ) แต่เจ้าหน้าที่ยังได้
   for (const memberFilter of [filters[0], filters[1]]) {
     assert.deepEqual(memberFilter.$and[0].$or[0], { expiresAt: null });
     assert.ok(memberFilter.$and[0].$or[1].expiresAt.$gte instanceof Date);

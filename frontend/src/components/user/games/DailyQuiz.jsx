@@ -7,7 +7,7 @@ import "./DailyQuiz.css";
 
 const LETTERS = ["ก", "ข", "ค", "ง"];
 
-// Today's 3 recovery-knowledge questions, one at a time.
+// คำถามความรู้การฟื้นฟู 3 ข้อของวันนี้ ทีละข้อ
 function DailyQuiz({ onPlayed, onClose }) {
   const [questions, setQuestions] = useState(null);
   const [step, setStep] = useState(0);

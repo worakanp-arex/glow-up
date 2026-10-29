@@ -2,7 +2,7 @@
   overflow-x: hidden;
 }
 
-/* ---------- Hero ---------- */
+/* ---------- ส่วนหัว (Hero) ---------- */
 
 .about-hero {
   background: linear-gradient(180deg, var(--color-primary-50) 0%, var(--color-page-bg) 100%);
@@ -42,7 +42,7 @@
   color: var(--color-text-secondary);
 }
 
-/* ---------- Values ---------- */
+/* ---------- ค่านิยม ---------- */
 
 .about-values {
   max-width: 1080px;
@@ -92,7 +92,7 @@
   color: var(--color-text-secondary);
 }
 
-/* ---------- Partners ---------- */
+/* ---------- พันธมิตร ---------- */
 
 .about-partners {
   background-color: var(--color-surface);

@@ -6,7 +6,7 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Real MongoDB for the account lifecycle integration tests.
+    # MongoDB จริงสำหรับ integration test วงจรชีวิตของบัญชี
     services:
       mongo:
         image: mongo:7
@@ -26,7 +26,7 @@ jobs:
             frontend/package-lock.json
       - run: npm ci --prefix backend
       - run: npm ci --prefix frontend
-      # Fails the build on a known high-severity vulnerability in anything that ships to production.
+      # ทำให้ build ล้มเหลวเมื่อพบช่องโหว่ระดับสูงที่ทราบแล้วในสิ่งที่ส่งขึ้น production
       - run: npm audit --omit=dev --audit-level=high --prefix backend
       - run: npm audit --omit=dev --audit-level=high --prefix frontend
       - run: npm test --prefix backend

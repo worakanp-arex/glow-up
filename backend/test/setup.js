@@ -1,4 +1,4 @@
-// Isolate tests from local credentials and external services.
+// แยกเทสต์ออกจากข้อมูลยืนยันตัวตนในเครื่องและบริการภายนอก
 process.env.DOTENV_CONFIG_PATH = "test/nonexistent.env";
 process.env.NODE_ENV = "test";
 process.env.JWT_SECRET = "test-only-secret-never-use-in-production";

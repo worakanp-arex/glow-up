@@ -23,8 +23,8 @@ function missionFields(body) {
   return fields;
 }
 
-// The metric a mission tracks (`type`) is fixed at creation: changing it later
-// would make existing progress meaningless.
+// ตัวชี้วัดที่ภารกิจติดตาม (`type`) ถูกกำหนดตอนสร้างและเปลี่ยนไม่ได้:
+// การเปลี่ยนภายหลังจะทำให้ความคืบหน้าเดิมไม่มีความหมาย
 export async function createMission(req, res) {
   const mission = await Mission.create({ type: req.body.type, ...missionFields(req.body) });
   res.status(201).json(mission);
@@ -38,9 +38,9 @@ export async function updateMission(req, res) {
   res.json(mission);
 }
 
-// Deleting a mission that people have already completed would silently remove
-// the points they earned, so those are archived (hidden, `active: false`)
-// instead; a mission nobody finished is removed outright.
+// การลบภารกิจที่มีคนทำสำเร็จไปแล้วจะทำให้คะแนนที่พวกเขาได้หายไปโดยไม่รู้ตัว
+// จึงเก็บเข้าคลัง (ซ่อน, `active: false`) แทน
+// ส่วนภารกิจที่ยังไม่มีใครทำสำเร็จจะลบทิ้งเลย
 export async function deleteMission(req, res) {
   const mission = await Mission.findById(req.params.id);
   if (!mission) {
@@ -57,8 +57,8 @@ export async function deleteMission(req, res) {
   res.status(204).send();
 }
 
-// Recognized sobriety-streak milestones (in days) that get a specific family
-// notification instead of the generic "new progress" message.
+// หมุดหมายสตรีคการเลิก (เป็นจำนวนวัน) ที่ได้รับการแจ้งเตือนครอบครัวแบบเฉพาะเจาะจง
+// แทนข้อความทั่วไป "มีความคืบหน้าใหม่"
 const MILESTONE_STREAK_DAYS = new Set([7, 30, 90, 180, 365]);
 
 export { getAll as listMissions, getOne as getMission };
@@ -67,18 +67,17 @@ async function currentValueForMission(userId, mission, streakStats) {
   if (mission.type === "streak") return streakStats.currentStreak;
   if (mission.type === "totalCheckins") return streakStats.totalCheckIns;
   if (mission.type === "scenarioCompleted") {
-    // Distinct scenarios: passing the same one again and again must not count again.
+    // นับเฉพาะสถานการณ์ที่ไม่ซ้ำกัน: การผ่านข้อเดิมซ้ำๆ ต้องไม่นับเพิ่ม
     return (await ScenarioAttempt.distinct("scenario", { user: userId, passed: true })).length;
   }
-  // "custom" missions are completed manually (e.g. by an admin), not
-  // recomputed here.
+  // ภารกิจ "custom" ทำเครื่องหมายสำเร็จด้วยมือ (เช่น โดยแอดมิน)
+  // ไม่คำนวณใหม่ที่นี่
   return null;
 }
 
-// Recomputes mission progress for a user against their current activity, and
-// awards any missions/rewards newly reached. Cumulative points are always
-// summed from completed UserMission docs rather than stored as a mutable
-// counter, so they can never drift out of sync.
+// คำนวณความคืบหน้าภารกิจของผู้ใช้ใหม่จากกิจกรรมปัจจุบัน และให้
+// ภารกิจ/รางวัลที่เพิ่งถึงเกณฑ์ คะแนนสะสมถูกรวมจากเอกสาร UserMission ที่สำเร็จเสมอ
+// ไม่ได้เก็บเป็นตัวนับที่แก้ไขได้ จึงไม่มีทางคลาดเคลื่อน
 export async function checkAndAwardMissions(userId) {
   const logs = await EmotionLog.find({ user: userId }).select("date happinessLevel");
   const streakStats = computeStreakStats(logs);
@@ -143,7 +142,7 @@ export async function myMissionProgress(req, res) {
   const allMissions = await Mission.find({ active: true }).sort({ order: 1, targetValue: 1 });
   const userMissions = await UserMission.find({ user: req.user.id });
   const progressByMission = new Map(userMissions.map((um) => [um.mission.toString(), um]));
-  // A mission outside its open window is hidden unless the user already finished it.
+  // ภารกิจที่อยู่นอกช่วงเวลาเปิดจะถูกซ่อน เว้นแต่ผู้ใช้ทำสำเร็จไปแล้ว
   const missions = allMissions.filter(
     (mission) => isWithinWindow(mission) || progressByMission.get(mission._id.toString())?.completed
   );
@@ -161,9 +160,9 @@ export async function myMissionProgress(req, res) {
   res.json(result);
 }
 
-// Counsellor/admin marks a "custom" mission complete for a specific user —
-// the only Mission type that isn't recomputed automatically from activity
-// (see currentValueForMission above), so it needs an explicit approval step.
+// ผู้ให้คำปรึกษา/แอดมินทำเครื่องหมายภารกิจ "custom" ว่าสำเร็จให้ผู้ใช้เฉพาะราย —
+// เป็นภารกิจประเภทเดียวที่ไม่คำนวณอัตโนมัติจากกิจกรรม
+// (ดู currentValueForMission ด้านบน) จึงต้องมีขั้นตอนอนุมัติที่ชัดเจน
 export async function approveCustomMission(req, res) {
   const mission = await Mission.findOne({ _id: req.params.id, type: "custom", active: true });
   if (!mission) {

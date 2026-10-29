@@ -14,10 +14,10 @@ export async function createRiskSituationLog(req, res) {
     occurredAt,
   });
 
-  // A logged relapse is safety-relevant the same way a self-harm risk flag
-  // is — alert the patient's care team so a real person can follow up. Every
-  // entry stays on the patient's record, but only the first relapse inside the
-  // cooldown pages the team.
+  // การบันทึกว่ากลับไปใช้ซ้ำเกี่ยวกับความปลอดภัยเช่นเดียวกับสัญญาณเสี่ยง
+  // ทำร้ายตนเอง — แจ้งทีมดูแลของผู้ป่วยเพื่อให้คนจริงๆ ติดตามต่อ ทุก
+  // รายการอยู่ในประวัติของผู้ป่วย แต่เฉพาะการกลับไปใช้ซ้ำครั้งแรกใน
+  // ช่วงพักเท่านั้นที่แจ้งทีม
   if (outcome === "relapsed") {
     const alertedRecently = await RiskSituationLog.exists({
       user: req.user.id,

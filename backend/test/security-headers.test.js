@@ -10,7 +10,7 @@ import { pageCspHeader } from "../src/config/csp.js";
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const read = (relative) => fs.readFileSync(path.join(repo, relative), "utf8");
 
-// A stand-in for the built front end, so the app runs in its single-service mode.
+// ตัวแทนของ front end ที่ build แล้ว เพื่อให้แอปรันในโหมดบริการเดียว
 const dist = fs.mkdtempSync(path.join(os.tmpdir(), "glowup-dist-"));
 fs.writeFileSync(path.join(dist, "index.html"), "<!doctype html><title>x</title>");
 fs.writeFileSync(path.join(dist, "theme-init.js"), "document.documentElement.dataset.theme='light'");
@@ -75,7 +75,7 @@ test("pages are served with the policy and the other protective headers; the API
   const base = await serve(t);
   const page = await fetch(`${base}/login`);
   await page.text();
-  // helmet writes "a;b" where the files say "a; b": same policy, different spacing.
+  // helmet เขียน "a;b" ที่ไฟล์เขียน "a; b": นโยบายเดียวกัน แต่เว้นวรรคต่างกัน
   assert.equal(page.headers.get("content-security-policy").replace(/;\s*/g, "; "), pageCspHeader());
   assert.equal(page.headers.get("x-content-type-options"), "nosniff");
   assert.equal(page.headers.get("referrer-policy"), "no-referrer");

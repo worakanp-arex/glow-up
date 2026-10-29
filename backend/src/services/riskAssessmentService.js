@@ -5,11 +5,10 @@ import { assessRisk } from "./riskPredictionService.js";
 import { notifyCareTeam } from "./notificationService.js";
 import { toBangkokDateKey } from "../utils/dateKey.js";
 
-// Recomputes and stores a user's rule-based risk level from their recent
-// emotion logs, and pages every admin/counsellor the first time a day's
-// assessment comes back "high". EmotionLog only allows one entry per day, so
-// calling this from the daily check-in flow naturally throttles alerts to at
-// most once per user per day.
+// คำนวณใหม่และบันทึกระดับความเสี่ยงแบบอิงกฎของผู้ใช้จากบันทึกอารมณ์ล่าสุด
+// และแจ้งแอดมิน/ผู้ให้คำปรึกษาทุกคนในครั้งแรกของวันที่ผลประเมินออกมาเป็น "high"
+// EmotionLog อนุญาตหนึ่งรายการต่อวัน การเรียกจากขั้นตอนเช็คอินรายวัน
+// จึงจำกัดการแจ้งเตือนได้เองเป็นอย่างมากหนึ่งครั้งต่อผู้ใช้ต่อวัน
 export async function runRiskAssessment(userId) {
   const emotionLogs = await EmotionLog.find({ user: userId }).sort({ date: -1 }).limit(30);
   const result = await assessRisk(null, emotionLogs);

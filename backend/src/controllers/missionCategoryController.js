@@ -1,10 +1,9 @@
 import MissionCategory from "../models/MissionCategory.js";
 import ActivityMission from "../models/ActivityMission.js";
 
-// The 8 categories this app shipped with, back when they were a hardcoded
-// enum (see gameContent.js RECOVERY_DOMAINS). Auto-seeded the first time
-// anyone reads the catalog on a database that predates MissionCategory, so
-// existing ActivityMission documents referencing these keys keep working.
+// 8 หมวดที่แอปนี้มีมาตั้งแต่ต้น สมัยที่เป็น enum ฮาร์ดโค้ด (ดู RECOVERY_DOMAINS ใน gameContent.js)
+// จะถูกสร้างอัตโนมัติเมื่อมีคนอ่านแคตตาล็อกครั้งแรกบนฐานข้อมูลที่เก่ากว่า MissionCategory
+// เพื่อให้เอกสาร ActivityMission เดิมที่อ้างอิงคีย์เหล่านี้ใช้งานต่อได้
 const DEFAULT_CATEGORIES = [
   { key: "routine", label: "งานบ้าน / กิจวัตร", icon: "Home", order: 1 },
   { key: "physical", label: "ออกกำลังกาย", icon: "Dumbbell", order: 2 },
@@ -35,8 +34,8 @@ export async function createMissionCategory(req, res) {
   res.status(201).json(category);
 }
 
-// `key` is intentionally never editable here — changing it would silently
-// orphan every ActivityMission already stored with the old key.
+// `key` ตั้งใจไม่ให้แก้ไขที่นี่เด็ดขาด — การเปลี่ยนจะทำให้ ActivityMission
+// ทุกรายการที่เก็บ key เดิมไว้กลายเป็นกำพร้าโดยไม่รู้ตัว
 export async function updateMissionCategory(req, res) {
   const { label, icon, order } = req.body;
   const updates = {};

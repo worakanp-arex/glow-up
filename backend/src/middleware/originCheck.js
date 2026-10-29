@@ -1,9 +1,9 @@
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
 
-// Defence in depth on top of the SameSite=Lax login cookie: a browser always
-// says which site a create/update/delete came from, so refuse the ones that did
-// not come from our own front end. Clients that send no Origin (curl, server to
-// server, the test suite) are not browsers acting on someone's behalf and pass.
+// ป้องกันหลายชั้น (defence in depth) เสริมจาก cookie ล็อกอิน SameSite=Lax: เบราว์เซอร์
+// บอกเสมอว่าคำขอสร้าง/แก้ไข/ลบมาจากเว็บไหน จึงปฏิเสธคำขอที่ไม่ได้
+// มาจาก front end ของเรา ไคลเอนต์ที่ไม่ส่ง Origin (curl,
+// เซิร์ฟเวอร์ต่อเซิร์ฟเวอร์, ชุดทดสอบ) ไม่ใช่เบราว์เซอร์ที่กระทำแทนใคร จึงผ่านได้
 export function requireOwnOrigin(allowedOrigin) {
   return function checkOrigin(req, res, next) {
     if (SAFE_METHODS.includes(req.method)) return next();

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
-// How many items sit behind each tab or filter, for tabs whose lists are loaded
-// a page at a time. `load` answers `{ [tabKey]: count }`; call `refresh` after
-// something changes the lists (an approval, a deletion, a status switch). While
-// the counts are unknown (or failed to load) it answers `null` and tabs show
-// just their label.
+// มีกี่รายการอยู่หลังแต่ละแท็บหรือตัวกรอง สำหรับแท็บที่โหลดรายการทีละหน้า
+// `load` ตอบ `{ [tabKey]: count }` เรียก `refresh` หลังมีสิ่งที่เปลี่ยนรายการ
+// (การอนุมัติ การลบ การเปลี่ยนสถานะ) ขณะที่ยังไม่รู้จำนวน
+// (หรือโหลดไม่สำเร็จ) จะตอบ `null` และแท็บแสดงเฉพาะป้ายชื่อ
 export function useTabCounts(load) {
   const [counts, setCounts] = useState(null);
   const [version, setVersion] = useState(0);
@@ -23,7 +22,7 @@ export function useTabCounts(load) {
   return [counts, refresh];
 }
 
-// Asks a paginated list endpoint for one item per tab just to read its total.
+// ขอ endpoint รายการที่แบ่งหน้าให้ส่งหนึ่งรายการต่อแท็บ เพื่ออ่านจำนวนรวมเท่านั้น
 export function countByTab(tabs, fetchPage) {
   return Promise.all(tabs.map((item) => fetchPage({ page: 1, limit: 1, ...item.params }).then(({ total }) => [item.key, total]))).then(Object.fromEntries);
 }

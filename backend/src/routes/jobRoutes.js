@@ -2,6 +2,7 @@ import { Router } from "express";
 import { body, query } from "express-validator";
 import {
   listJobs,
+  listJobsByMatch,
   getJob,
   myJobs,
   getMyJob,
@@ -30,7 +31,7 @@ const router = Router();
 const JOB_BODY = [
   body("title").trim().notEmpty().isLength({ max: 200 }),
   body("description").optional().trim().isLength({ max: 5000 }),
-  // Blank inputs arrive as "" and mean "not set", so they skip validation.
+  // ช่องที่เว้นว่างจะส่งมาเป็น "" และหมายถึง "ไม่ได้ตั้งค่า" จึงข้ามการตรวจสอบ
   urlBody("externalUrl"),
   body("location").optional().trim().isLength({ max: 200 }),
   body("salary").optional({ values: "falsy" }).isFloat({ min: 0 }),
@@ -57,6 +58,8 @@ const JOB_BODY_UPDATE = [
 ];
 
 router.get("/", [...paginationQuery()], validate, asyncHandler(listJobs));
+// ต้องอยู่ก่อน /:id ไม่เช่นนั้น "matched" จะถูกตีเป็นรหัสงาน
+router.get("/matched", verifyToken, requireRole("user"), [...paginationQuery()], validate, asyncHandler(listJobsByMatch));
 router.get(
   "/mine",
   verifyToken,

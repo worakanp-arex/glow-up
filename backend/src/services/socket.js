@@ -14,12 +14,12 @@ export function socketToken(handshake) {
 export function initSocket(httpServer, corsOrigin) {
   io = new Server(httpServer, {
     cors: { origin: corsOrigin, credentials: true },
-    // CORS does not apply to a WebSocket upgrade, so refuse a browser that
-    // opens one from another site. Clients that send no Origin (not browsers)
-    // are left to the token check.
+    // CORS ไม่มีผลกับการอัปเกรดเป็น WebSocket จึงปฏิเสธเบราว์เซอร์ที่
+    // เปิดจากเว็บอื่น ไคลเอนต์ที่ไม่ส่ง Origin (ไม่ใช่เบราว์เซอร์)
+    // ปล่อยให้การตรวจ token ตัดสิน
     allowRequest: (req, callback) => callback(null, !req.headers.origin || req.headers.origin === corsOrigin),
-    // Behind proxies that only pass plain HTTP (e.g. Vercel rewrites) Socket.IO
-    // stays on long-polling; a shorter interval keeps each poll under proxy timeouts.
+    // หลัง proxy ที่ส่งผ่านเฉพาะ HTTP ธรรมดา (เช่น Vercel rewrites) Socket.IO
+    // จะอยู่ที่ long-polling ช่วงเวลาที่สั้นลงทำให้แต่ละ poll ไม่เกินเวลา timeout ของ proxy
     ...(process.env.SOCKET_PING_INTERVAL_MS && { pingInterval: Number(process.env.SOCKET_PING_INTERVAL_MS) }),
   });
 
@@ -27,8 +27,8 @@ export function initSocket(httpServer, corsOrigin) {
     try {
       const claims = jwt.verify(socketToken(socket.handshake), process.env.JWT_SECRET, { algorithms: ["HS256"] });
       const user = await User.findById(claims.id).select(`_id ${SESSION_USER_FIELDS}`);
-      // Same rules as the REST API: a suspended, removed or signed-out-by-password-change
-      // account gets no live notifications either.
+      // กฎเดียวกับ REST API: บัญชีที่ถูกระงับ ลบ หรือถูกออกจากระบบเพราะเปลี่ยนรหัสผ่าน
+      // ก็ไม่ได้รับการแจ้งเตือนสดเช่นกัน
       if (!claims.exp || sessionRejection(claims, user)) throw new Error("Unauthorized");
       socket.data.userId = user._id.toString();
       socket.data.expiresAt = claims.exp * 1000;
@@ -45,10 +45,10 @@ export function initSocket(httpServer, corsOrigin) {
   return io;
 }
 
-// Drops every live connection of one account. A socket checked its token only
-// when it connected, so without this a suspended or signed-out account would keep
-// receiving notifications until its token ran out. Clients reconnect on their own;
-// the new handshake is checked again.
+// ตัดการเชื่อมต่อสดทั้งหมดของบัญชีหนึ่ง socket ตรวจ token เฉพาะตอนเชื่อมต่อ
+// หากไม่มีตัวนี้ บัญชีที่ถูกระงับหรือออกจากระบบจะยังได้รับการแจ้งเตือน
+// จน token หมดอายุ ไคลเอนต์เชื่อมต่อใหม่เอง
+// และ handshake ใหม่จะถูกตรวจอีกครั้ง
 export function disconnectUser(userId) {
   if (!io) return;
   io.in((userId._id || userId).toString()).disconnectSockets(true);

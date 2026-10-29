@@ -1,8 +1,8 @@
-// Remembers the page the visitor was on before the current one so a page that
-// can be opened from anywhere (the profile) can send them back where they came
-// from instead of to a fixed page. Kept in sessionStorage so it survives a
-// refresh; storage may be unavailable (private windows), so every access is
-// guarded and a missing value just means "use the role's home page".
+// จำหน้าที่ผู้เข้าชมอยู่ก่อนหน้าหน้าปัจจุบัน เพื่อให้หน้าที่
+// เปิดได้จากทุกที่ (โปรไฟล์) ส่งผู้ใช้กลับไปที่ที่มา
+// แทนหน้าตายตัว เก็บใน sessionStorage เพื่อให้อยู่รอดหลังรีเฟรช
+// storage อาจใช้ไม่ได้ (หน้าต่างส่วนตัว) จึงป้องกันทุกการเข้าถึง
+// และค่าที่หายไปแปลว่า "ใช้หน้าหลักของบทบาท"
 const CURRENT_KEY = "route.current";
 const PREVIOUS_KEY = "route.previous";
 
@@ -18,7 +18,7 @@ function write(key, value) {
   try {
     sessionStorage.setItem(key, value);
   } catch {
-    // ignore: back navigation falls back to the role home page
+    // เมิน: การย้อนกลับจะถอยไปหน้าหลักของบทบาท
   }
 }
 
@@ -26,7 +26,7 @@ export function trackRoute(pathname, search = "") {
   const next = pathname + search;
   const current = read(CURRENT_KEY);
   if (current === next) return;
-  // Moving between sections of the same page (profile tabs) is not a new place.
+  // การเปลี่ยนระหว่างส่วนของหน้าเดียวกัน (แท็บโปรไฟล์) ไม่ถือเป็นที่ใหม่
   if (current && current.split("?")[0] === pathname) {
     write(CURRENT_KEY, next);
     return;
@@ -35,8 +35,8 @@ export function trackRoute(pathname, search = "") {
   write(CURRENT_KEY, next);
 }
 
-// Only internal, same-site paths are ever returned. `requirePathPrefix` keeps a
-// back link inside one area (e.g. "/employer/").
+// คืนเฉพาะพาธภายในเว็บเดียวกันเท่านั้น `requirePathPrefix` ทำให้
+// ลิงก์ย้อนกลับอยู่ในพื้นที่เดียว (เช่น "/employer/")
 export function getPreviousRoute(excludePathPrefix, requirePathPrefix) {
   const previous = read(PREVIOUS_KEY);
   if (!previous || !previous.startsWith("/") || previous.startsWith("//")) return null;

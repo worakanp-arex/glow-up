@@ -81,7 +81,7 @@ function PostsModeration() {
       tags: editForm.tagsInput.split(",").map((t) => t.trim()).filter(Boolean),
       note: editForm.note || undefined,
     });
-    // Editing resolves the report: the post is shown again and the reporters are told.
+    // การแก้ไขถือว่าจัดการรายงานแล้ว: โพสต์แสดงอีกครั้งและผู้รายงานได้รับแจ้ง
     removeFromList(editing);
   }
 

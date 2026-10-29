@@ -9,9 +9,9 @@ const FETCH_TIMEOUT_MS = 8000;
 const parser = new XMLParser({ ignoreAttributes: false });
 
 let cache = { items: [], fetchedAt: 0 };
-// Tracks the newest article already announced, so only genuinely new articles
-// notify. Starts null so the very first fetch after a server start just sets
-// the baseline instead of notifying everyone about the whole existing feed.
+// จำบทความล่าสุดที่ประกาศไปแล้ว เพื่อให้แจ้งเฉพาะบทความใหม่จริงๆ เริ่มเป็น null
+// เพื่อให้การดึงครั้งแรกหลังเซิร์ฟเวอร์เริ่มแค่ตั้งค่าเส้นฐาน
+// แทนการแจ้งทุกคนเรื่องฟีดเก่าทั้งหมด
 let notifiedLink = null;
 
 const FALLBACK_ARTICLES = [
@@ -60,9 +60,9 @@ function toHttps(url) {
   return typeof url === "string" ? url.replace(/^http:\/\//, "https://") : url;
 }
 
-// Readers are sent to an article's link, so it must really point at the
-// publisher: a feed item can't redirect people to some other site, or to a
-// non-web scheme. Images only have to be https, never a data: or javascript: URL.
+// ผู้อ่านจะถูกพาไปยังลิงก์ของบทความ จึงต้องชี้ไปที่ผู้เผยแพร่จริง:
+// รายการในฟีดต้องไม่เปลี่ยนเส้นทางคนไปเว็บอื่นหรือไปสกีมที่ไม่ใช่เว็บ
+// รูปภาพต้องเป็น https เท่านั้น ห้ามเป็น data: หรือ javascript:
 function trustedArticleLink(url) {
   try {
     const { protocol, hostname, href } = new URL(url);
@@ -135,7 +135,7 @@ async function notifyUsersOfNewArticle(items) {
   if (!newest?.link) return;
 
   if (notifiedLink === null) {
-    notifiedLink = newest.link; // baseline on first fetch — don't spam existing users
+    notifiedLink = newest.link; // เส้นฐานในการดึงครั้งแรก — ไม่ส่งสแปมถึงผู้ใช้ที่มีอยู่
     return;
   }
   if (newest.link === notifiedLink) return;
@@ -161,7 +161,7 @@ export async function getRecoveryNews(limit = 6) {
         notifyUsersOfNewArticle(items).catch(() => {});
       }
     } catch {
-      // keep serving the previous cache (or fallback below) if the feed is unreachable
+      // ใช้แคชเดิมต่อไป (หรือค่าสำรองด้านล่าง) หากเข้าถึงฟีดไม่ได้
     }
   }
 

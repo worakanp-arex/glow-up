@@ -77,7 +77,7 @@ test("family profile and navigation use the family role and exclude patient-only
   const nav = info.project.name === "mobile" ? page.locator("#mobile-navigation") : page.locator(".secondary-nav");
   await expect(nav.getByRole("link", { name: "ติดตามครอบครัว", exact: true })).toBeVisible();
   await expect(nav.locator('a[href="/craving-tracker"]')).toHaveCount(0);
-  // Patient-only pages send a family member to their own home, not the landing page.
+  // หน้าเฉพาะผู้ป่วยส่งสมาชิกครอบครัวไปหน้าหลักของตน ไม่ใช่หน้า landing
   await page.goto("/craving-tracker");
   await expect(page).toHaveURL(/\/family\/dashboard$/);
 });

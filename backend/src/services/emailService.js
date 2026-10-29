@@ -9,24 +9,24 @@ const transporter = smtpConfigured
       host: process.env.SMTP_HOST,
       port: smtpPort,
       secure: smtpPort === 465,
-      // Verification codes and reset links must never travel unencrypted: refuse
-      // to send if the server won't upgrade the connection to TLS (STARTTLS).
-      // Left optional for local development against a plain-text mail catcher.
+      // รหัสยืนยันและลิงก์รีเซ็ตต้องไม่เดินทางโดยไม่เข้ารหัส: ปฏิเสธ
+      // การส่งหากเซิร์ฟเวอร์ไม่ยอมอัปเกรดการเชื่อมต่อเป็น TLS (STARTTLS)
+      // เปิดเป็นทางเลือกสำหรับการพัฒนาในเครื่องกับ mail catcher แบบข้อความธรรมดา
       requireTLS: isProductionLike() && smtpPort !== 465,
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     })
   : null;
 
-// Hosts that block outbound SMTP (e.g. Railway Free/Trial/Hobby) can send
-// through Brevo's HTTPS API instead: set BREVO_API_KEY and EMAIL_FROM (a sender
-// address verified in Brevo). When both are set, this takes priority over SMTP.
-// Values pasted into a hosting dashboard often pick up spaces or quotes.
+// โฮสต์ที่บล็อก SMTP ขาออก (เช่น Railway แบบ Free/Trial/Hobby) ส่งผ่าน
+// HTTPS API ของ Brevo แทนได้: ตั้ง BREVO_API_KEY และ EMAIL_FROM (ที่อยู่ผู้ส่ง
+// ที่ยืนยันใน Brevo) เมื่อตั้งทั้งคู่ วิธีนี้จะมีลำดับก่อน SMTP
+// ค่าที่วางลงในแดชบอร์ดของโฮสต์มักติดช่องว่างหรือเครื่องหมายคำพูดมาด้วย
 const cleanSetting = (value) => (value || "").trim().replace(/^(['"])(.*)\1$/, "$2").trim();
 const BREVO_API_KEY = cleanSetting(process.env.BREVO_API_KEY);
 const EMAIL_FROM = cleanSetting(process.env.EMAIL_FROM);
 const brevoConfigured = Boolean(BREVO_API_KEY && EMAIL_FROM);
 
-// Describe the key without revealing it, so a wrong key type shows up in logs.
+// อธิบายคีย์โดยไม่เปิดเผยค่า เพื่อให้ชนิดคีย์ที่ผิดปรากฏใน log
 export function describeBrevoKey(key = BREVO_API_KEY) {
   if (!key) return "not set";
   const kind = key.startsWith("xkeysib-") ? "API key" : key.startsWith("xsmtpsib-") ? "SMTP key (wrong type - create an API key instead)" : "unrecognised format (expected xkeysib-...)";
@@ -68,8 +68,8 @@ function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
 }
 
-// Every outgoing email shares this layout so recipients can always see where
-// the message came from and who to contact.
+// อีเมลขาออกทุกฉบับใช้เลย์เอาต์นี้ร่วมกัน เพื่อให้ผู้รับเห็นเสมอว่า
+// ข้อความมาจากไหนและติดต่อใคร
 function renderEmail({ heading, body, reason }) {
   const siteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
   return `<!doctype html>
@@ -92,7 +92,7 @@ function renderEmail({ heading, body, reason }) {
 }
 
 export async function sendMail({ to, subject, html }) {
-  // Unit tests exercise controllers without a mail server.
+  // ยูนิตเทสต์ทดสอบ controller โดยไม่ต้องมีเมลเซิร์ฟเวอร์
   if (process.env.NODE_ENV === "test") return;
 
   if (brevoConfigured) {
@@ -139,10 +139,9 @@ export function sendOtpEmail(to, otp) {
   });
 }
 
-// Sent instead of a verification code when someone starts a sign-up with an
-// address that already has an account. The sign-up page answers exactly as it
-// does for a new address, so it can't be used to find out who has registered;
-// the real owner learns about it here.
+// ส่งแทนรหัสยืนยันเมื่อมีคนเริ่มสมัครด้วยอีเมลที่มีบัญชีอยู่แล้ว หน้าสมัคร
+// ตอบเหมือนอีเมลใหม่ทุกประการ จึงใช้เช็กไม่ได้ว่าใครสมัครไว้
+// เจ้าของจริงจะรู้เรื่องนี้จากอีเมลฉบับนี้
 export function sendAccountExistsEmail(to) {
   const siteUrl = process.env.FRONTEND_URL || "http://localhost:5173";
   const login = escapeHtml(`${siteUrl}/login`);
@@ -173,8 +172,8 @@ export function sendPasswordResetEmail(to, resetUrl) {
 
 export function sendFamilyInviteEmail(to, inviterName, acceptUrl) {
   const url = escapeHtml(acceptUrl);
-  // The inviter's name is free text typed by a member, so it stays in the escaped
-  // body only: a subject line is where a spoofed message would be read first.
+  // ชื่อผู้เชิญเป็นข้อความอิสระที่สมาชิกพิมพ์เอง จึงอยู่เฉพาะในเนื้อหาที่ escape แล้ว
+  // ไม่ใส่ในหัวเรื่อง: เพราะหัวเรื่องคือจุดที่ข้อความปลอมถูกอ่านเป็นที่แรก
   const inviter = escapeHtml(String(inviterName).replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 100));
   return sendMail({
     to,

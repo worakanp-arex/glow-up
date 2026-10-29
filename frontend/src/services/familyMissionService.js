@@ -8,7 +8,7 @@ export function confirmFamilyMission(familyMissionId) {
   return api.post("/family-missions/confirm", { familyMissionId }).then((res) => res.data);
 }
 
-// Admin management (family mission catalog).
+// การจัดการโดยแอดมิน (แคตตาล็อกภารกิจครอบครัว)
 export function getFamilyMissions() {
   return api.get("/family-missions").then((res) => res.data);
 }

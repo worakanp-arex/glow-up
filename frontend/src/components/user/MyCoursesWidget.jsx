@@ -20,7 +20,7 @@ function MyCoursesWidget() {
 
   const completedCount = enrollments.filter((e) => e.certificateUrl).length;
   const stillLearning = enrollments.filter((e) => !e.certificateUrl);
-  // A saved course that is about to expire is shown first so it isn't missed.
+  // คอร์สที่บันทึกไว้และใกล้หมดอายุจะแสดงก่อน เพื่อไม่ให้พลาด
   const expiringSoon = stillLearning.find((e) => e.course && courseStatus(e.course).state === "expiring");
   const current = expiringSoon || stillLearning[0] || enrollments[0];
   const currentStatus = current?.course ? courseStatus(current.course) : null;

@@ -39,8 +39,8 @@ const counsellingSessionSchema = new mongoose.Schema(
 
     messages: [messageSchema],
 
-    // Structured clinical outcome, separate from the free-form chat thread —
-    // filled in by the assigned counsellor (or admin) after the session.
+    // ผลลัพธ์ทางคลินิกแบบมีโครงสร้าง แยกจากเธรดแชทอิสระ —
+    // กรอกโดยผู้ให้คำปรึกษาที่รับผิดชอบ (หรือแอดมิน) หลังจบ session
     outcome: {
       summary: { type: String },
       recordedAt: { type: Date },

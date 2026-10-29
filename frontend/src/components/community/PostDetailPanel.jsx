@@ -63,10 +63,10 @@ function CommentItem({ comment, canEdit, canDelete, onSave, onDelete }) {
   );
 }
 
-// Shared by the standalone /community/:id page and Community.jsx's inline
-// master-detail panel — `onChange` reports post-level patches (likes, saves,
-// comment count, edits) so an embedding list can stay in sync; `onDeleted`
-// lets each embedding decide what "gone" means (navigate away vs. clear selection).
+// ใช้ร่วมกันระหว่างหน้า /community/:id แบบเดี่ยวและแผง master-detail แบบ inline
+// ของ Community.jsx — `onChange` รายงานแพตช์ระดับโพสต์ (ถูกใจ บันทึก
+// จำนวนคอมเมนต์ การแก้ไข) เพื่อให้รายการที่ฝังอยู่ซิงค์ตาม `onDeleted`
+// ให้แต่ละที่ที่ฝังตัดสินใจว่า "หายไป" หมายถึงอะไร (ไปหน้าอื่นหรือล้างตัวเลือก)
 function PostDetailPanel({ postId, onChange, onDeleted, reaction }) {
   const { user } = useAuth();
   const [post, setPost] = useState(null);

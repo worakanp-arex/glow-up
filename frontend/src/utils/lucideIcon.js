@@ -54,12 +54,12 @@ import {
   Zap,
 } from "lucide-react";
 
-// A curated, explicitly-imported subset of lucide-react icons for admin-
-// entered icon names (MissionCategory.icon, Mission.badgeIcon, Reward.icon,
-// ActivityMission.icon). Importing the whole `lucide-react` namespace
-// (`import * as ...`) would defeat tree-shaking and pull the entire icon set
-// into every bundle that uses this helper, so only icons listed here are ever
-// bundled. `label` is the Thai name shown in the icon picker.
+// ชุดย่อยของไอคอน lucide-react ที่คัดไว้และ import อย่างชัดเจน สำหรับชื่อไอคอน
+// ที่แอดมินกรอก (MissionCategory.icon, Mission.badgeIcon, Reward.icon,
+// ActivityMission.icon) การ import ทั้ง namespace ของ `lucide-react`
+// (`import * as ...`) จะทำลาย tree-shaking และดึงไอคอนทั้งชุด
+// เข้าทุก bundle ที่ใช้ตัวช่วยนี้ จึงรวมเฉพาะไอคอนที่ระบุไว้ที่นี่เท่านั้น
+// `label` คือชื่อภาษาไทยที่แสดงในตัวเลือกไอคอน
 export const ICON_OPTIONS = [
   { name: "Home", label: "บ้าน / งานบ้าน", Icon: Home },
   { name: "Dumbbell", label: "ออกกำลังกาย", Icon: Dumbbell },

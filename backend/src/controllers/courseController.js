@@ -5,7 +5,7 @@ import { publicUrl, UPLOAD_ROOT } from "../middleware/upload.js";
 import { paginationOptions, escapeRegex } from "../utils/pagination.js";
 import { bangkokStartOfDay, bangkokEndOfDay } from "../utils/dateKey.js";
 import { sendCourseExpiryReminders } from "../services/courseReminderService.js";
-import { recommendCoursesForUser } from "../services/courseRecommendationService.js";
+import { recommendCoursesForUser, featuredCoursesForUser } from "../services/courseRecommendationService.js";
 import fs from "fs";
 import path from "path";
 
@@ -17,8 +17,8 @@ function removeUploadedCover(fileUrl) {
   fs.unlink(path.join(UPLOAD_ROOT, fileUrl.replace("/uploads/", "")), () => {});
 }
 
-// Accepts "YYYY-MM-DD" (or "" / null to clear) and stores the Bangkok day
-// boundary so a course ends at the end of its last day, not at midnight.
+// รับค่า "YYYY-MM-DD" (หรือ "" / null เพื่อล้างค่า) และเก็บเป็นขอบเขตวันตามเวลาไทย
+// เพื่อให้คอร์สสิ้นสุดเมื่อจบวันสุดท้าย ไม่ใช่เที่ยงคืน
 function parseCourseDate(value, boundary) {
   if (value === undefined) return undefined;
   if (value === null || value === "") return null;
@@ -26,8 +26,8 @@ function parseCourseDate(value, boundary) {
   return boundary === "end" ? bangkokEndOfDay(dateKey) : bangkokStartOfDay(dateKey);
 }
 
-// ?status=active|upcoming|expired narrows the list by the course's open/expiry
-// dates; anything else (or no value) returns every course.
+// ?status=active|upcoming|expired กรองรายการตามวันเปิด/วันหมดอายุของคอร์ส
+// ค่าอื่นหรือไม่ส่งค่า จะคืนทุกคอร์ส
 function statusFilter(status, now = new Date()) {
   if (status === "active") {
     return [
@@ -52,7 +52,7 @@ export async function listCourses(req, res) {
   }
 
   const pagination = paginationOptions(req.query);
-  const query = Course.find(filter).sort({ createdAt: -1 });
+  const query = Course.find(filter).sort({ createdAt: -1, _id: -1 });
   if (pagination) {
     res.setHeader("X-Total-Count", await Course.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
@@ -65,6 +65,12 @@ export async function createCourse(req, res) {
   if (!title || !externalUrl) {
     return res.status(400).json({ message: "กรุณากรอกชื่อคอร์สและลิงก์คอร์สภายนอก" });
   }
+  const start = parseCourseDate(startDate, "start") || undefined;
+  const end = parseCourseDate(endDate, "end") || undefined;
+  // ตรวจแบบเดียวกับตอนแก้ไข คอร์สที่วันสิ้นสุดอยู่ก่อนวันเริ่มจะไม่มีวันเปิดให้เรียนได้เลย
+  if (start && end && end < start) {
+    return res.status(400).json({ message: "วันสิ้นสุดต้องไม่ก่อนวันเริ่มต้น" });
+  }
 
   const course = await Course.create({
     title,
@@ -72,15 +78,15 @@ export async function createCourse(req, res) {
     category,
     externalUrl,
     tags: Array.isArray(tags) ? tags : [],
-    startDate: parseCourseDate(startDate, "start") || undefined,
-    endDate: parseCourseDate(endDate, "end") || undefined,
+    startDate: start,
+    endDate: end,
     coverImage: coverImage || undefined,
     createdBy: req.user.id,
   });
   res.status(201).json(course);
 }
 
-// Only whitelisted fields are editable; blank dates / cover clear the value.
+// แก้ไขได้เฉพาะฟิลด์ที่อยู่ในรายการอนุญาต วันที่/ปกที่ว่างจะล้างค่าเดิม
 export async function updateCourse(req, res) {
   const course = await Course.findById(req.params.id);
   if (!course) {
@@ -114,14 +120,19 @@ export async function uploadCover(req, res) {
   res.status(201).json({ url: publicUrl("courseCover", req.file.filename) });
 }
 
-// Open courses that relate to the jobs the person bookmarked, each with the job
-// that prompted it so the page can say why it is suggested.
+// คอร์สที่เปิดอยู่และเกี่ยวข้องกับงานที่ผู้ใช้บุ๊กมาร์กไว้ พร้อมระบุงานที่เป็นต้นเหตุ
+// เพื่อให้หน้าเว็บบอกเหตุผลที่แนะนำได้
 export async function recommendedCourses(req, res) {
   res.json(await recommendCoursesForUser(req.user.id));
 }
 
+// คอร์สสำหรับแบนเนอร์เลื่อนวนหน้าคอร์ส เลือกตามทักษะที่ผู้ใช้สนใจ (ดูรายละเอียดที่ featuredCoursesForUser)
+export async function featuredCourses(req, res) {
+  res.json(await featuredCoursesForUser(req.user.id));
+}
+
 export async function myCourses(req, res) {
-  // Best-effort nudge for courses that are about to expire; never blocks the list.
+  // แจ้งเตือนคอร์สที่ใกล้หมดอายุแบบพยายามเต็มที่ (best-effort) และจะไม่ขัดขวางการแสดงรายการ
   await sendCourseExpiryReminders({ userId: req.user.id }).catch(() => {});
   const enrollments = await UserCourse.find({ user: req.user.id }).populate("course");
   res.json(enrollments.filter((enrollment) => enrollment.course));

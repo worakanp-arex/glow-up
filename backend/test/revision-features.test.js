@@ -44,7 +44,7 @@ const response = () => ({
   setHeader(name, value) { this.headers[name] = value; },
 });
 
-// Mongoose query chain that resolves to `result` whichever chain methods are used.
+// สายโซ่ query ของ Mongoose ที่ resolve เป็น `result` ไม่ว่าจะเรียกเมธอดใดในสายโซ่
 function chainable(result) {
   const obj = { sort: () => obj, populate: () => obj, select: () => obj, skip: () => obj, limit: () => obj, then: (resolve, reject) => Promise.resolve(result).then(resolve, reject) };
   return obj;
@@ -60,7 +60,7 @@ function captureNotifications() {
   return created;
 }
 
-// ---------- counselling: one request at a time ----------
+// ---------- การปรึกษา: ครั้งละหนึ่งคำขอ ----------
 
 test("a person with a request in progress cannot open another one", async () => {
   mock.method(CounsellingSession, "findOne", () => chainable({ _id: "open1" }));
@@ -131,7 +131,7 @@ test("messages cannot be added to a closed request, but sessions without a statu
   assert.equal(res.code, 201);
 });
 
-// ---------- post reports ----------
+// ---------- การรายงานโพสต์ ----------
 
 test("reporting a post stores the reason, hides it and alerts the staff", async () => {
   mock.method(Post, "countDocuments", async () => 0);
@@ -218,7 +218,7 @@ test("staff cannot delete someone else's post that was never reported", async ()
   assert.equal(res.code, 403);
 });
 
-// ---------- family: requests and messages ----------
+// ---------- ครอบครัว: คำขอและข้อความ ----------
 
 test("a family request always gets the same answer, so patient emails cannot be probed", async () => {
   mock.method(User, "findById", () => chainable({ _id: "fam1", name: "แม่", email: "mom@example.com", role: "family" }));
@@ -304,7 +304,7 @@ test("a stranger cannot post to a family link, and a sender cannot mark their ow
   assert.equal(own.code, 403);
 });
 
-// ---------- courses: open and expiry dates ----------
+// ---------- คอร์ส: วันเปิดและวันหมดอายุ ----------
 
 test("course list can be narrowed to open, upcoming or expired courses without touching the search filter", async () => {
   const filters = [];
@@ -370,7 +370,7 @@ test("the staff member who wrote a lesson or scenario is reminded before it expi
   assert.equal(await sendContentExpiryReminders(), 1, "an item already reminded about today is skipped");
 });
 
-// ---------- accounts: admin guards and profile art ----------
+// ---------- บัญชี: ตัวป้องกันของแอดมินและภาพโปรไฟล์ ----------
 
 test("an admin cannot delete themselves or the last active admin", async () => {
   const self = response();
@@ -396,7 +396,7 @@ test("rejecting an account saves the reason and includes it in the notification"
 });
 
 test("admin-created accounts follow the same password policy as everyone else", async () => {
-  // Staff accounts can read patient records, so a short or obvious password is refused.
+  // บัญชีเจ้าหน้าที่อ่านข้อมูลผู้ป่วยได้ จึงปฏิเสธรหัสผ่านที่สั้นหรือเดาง่าย
   for (const password of ["short", "Abcdefg12", "password123", "aaaaaaaaaaaa"]) {
     const res = response();
     await createUserByAdmin({ body: { name: "แอดมิน", email: "a@example.com", password, role: "admin" } }, res);
@@ -421,7 +421,7 @@ test("profile pictures and covers are picked from fixed keys and never from arbi
   assert.equal("avatarColor" in update, false);
 });
 
-// ---------- jobs: moderation reasons and edits ----------
+// ---------- งาน: เหตุผลการตรวจสอบและการแก้ไข ----------
 
 test("rejecting a job keeps the reason for the employer", async () => {
   let update;
@@ -455,7 +455,7 @@ test("an employer only opens their own postings", async () => {
   assert.equal(res.code, 404);
 });
 
-// ---------- overview: who is behind a number ----------
+// ---------- ภาพรวม: ใครอยู่เบื้องหลังตัวเลข ----------
 
 test("admins get risk numbers only, never a per-person risk list", async () => {
   const res = response();
@@ -469,7 +469,7 @@ test("an unknown overview list kind is rejected", async () => {
   assert.equal(res.code, 400);
 });
 
-// ---------- skills catalogue ----------
+// ---------- แคตตาล็อกทักษะ ----------
 
 test("the default skills are added once and never overwrite existing ones", async () => {
   const first = DEFAULT_SKILLS.service[0];

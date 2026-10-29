@@ -35,7 +35,7 @@ function MicroLessons() {
       })
       .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
-    // Bookmarks are a convenience — the page still works if they fail to load.
+    // บุ๊กมาร์กเป็นความสะดวก — หน้ายังทำงานได้หากโหลดไม่สำเร็จ
     microLessonService.getSavedLessonIds().then((ids) => setSavedIds(new Set(ids))).catch(() => {});
   }, []);
 

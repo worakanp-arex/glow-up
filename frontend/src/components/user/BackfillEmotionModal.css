@@ -173,7 +173,7 @@
   justify-content: center;
 }
 
-/* ---------- Missing-days prompt (shares the same overlay/modal chrome) ---------- */
+/* ---------- พรอมต์วันที่ยังไม่ได้เช็คอิน (ใช้ overlay/modal เดียวกัน) ---------- */
 
 .missing-days-prompt p {
   margin: 0 0 1.1rem;

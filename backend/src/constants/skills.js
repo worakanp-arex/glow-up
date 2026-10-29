@@ -1,5 +1,5 @@
-// Career skill catalogue. `category` keys group skills in the pickers; the
-// frontend mirrors the labels in frontend/src/constants/skillCategories.js.
+// แคตตาล็อกทักษะอาชีพ คีย์ `category` ใช้จัดกลุ่มทักษะในตัวเลือก
+// ส่วน frontend มีป้ายชื่อซ้ำไว้ที่ frontend/src/constants/skillCategories.js
 export const SKILL_CATEGORIES = [
   { key: "service", label: "บริการและค้าปลีก" },
   { key: "food", label: "ครัวและอาหาร" },

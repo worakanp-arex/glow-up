@@ -14,10 +14,10 @@ import BreathingGame from "../../components/user/games/BreathingGame.jsx";
 import EmotionMatchGame from "../../components/user/games/EmotionMatchGame.jsx";
 import "./RecoveryGame.css";
 
-// Points mirror the backend scoring in gameController (memory ≤10,
-// quiz 3/answer, wheel 3–10, breathing 3–5, emotion 1/answer). Only the first
-// play per day earns XP. `art` is shown instead of a photo for games that
-// don't have their own card picture.
+// คะแนนตรงกับการให้คะแนนของ backend ใน gameController (memory ≤10,
+// quiz 3/คำตอบ, wheel 3–10, breathing 3–5, emotion 1/คำตอบ) เล่นครั้งแรก
+// ของวันเท่านั้นที่ได้ XP `art` แสดงแทนรูปถ่ายสำหรับเกม
+// ที่ไม่มีภาพประจำการ์ดของตัวเอง
 const GAMES = [
   { key: "memory", title: "จับคู่ ดูแลใจ", description: "ฝึกความจำและการเชื่อมโยง จับคู่สิ่งกระตุ้นกับวิธีรับมือ", level: "สบาย ๆ", tone: "lilac", minutes: 3, xp: "+10 XP", icon: Heart, image: "/images/games/memory.png" },
   { key: "quiz", title: "เลือกทางของคุณ", description: "ฝึกตัดสินใจผ่านสถานการณ์ 3 ข้อ", level: "ลองคิดสักนิด", tone: "peach", minutes: 4, xp: "+9 XP", icon: BookOpen, image: "/images/games/quiz.png" },

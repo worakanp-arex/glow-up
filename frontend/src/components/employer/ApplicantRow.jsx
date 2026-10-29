@@ -2,10 +2,11 @@ import { Link } from "react-router-dom";
 import { Briefcase, GraduationCap, MapPin, Paperclip, Wallet } from "lucide-react";
 import Avatar from "../common/Avatar.jsx";
 import StatusBadge from "../common/StatusBadge.jsx";
+import { jobSummary } from "../../utils/jobDescription.js";
 import "./employer.css";
 
-// One applicant in a list, with enough personal detail to decide whether to
-// open the full application: name, age/gender/province, education, a short bio.
+// ผู้สมัครหนึ่งคนในรายการ พร้อมข้อมูลส่วนตัวพอให้ตัดสินใจว่าจะ
+// เปิดใบสมัครฉบับเต็มหรือไม่: ชื่อ อายุ/เพศ/จังหวัด การศึกษา และประวัติย่อสั้นๆ
 export default function ApplicantRow({ application, showJob = false }) {
   const { user, match, job } = application;
   const facts = [user.age ? `อายุ ${user.age} ปี` : null, user.gender || null].filter(Boolean);
@@ -27,7 +28,7 @@ export default function ApplicantRow({ application, showJob = false }) {
                   {job.salary > 0 && <span><Wallet size={12} aria-hidden="true" />{job.salary.toLocaleString()} บาท/เดือน</span>}
                 </span>
               )}
-              {job.description && <span className="employer-applicant-jobdesc">{job.description}</span>}
+              {jobSummary(job.description) && <span className="employer-applicant-jobdesc">{jobSummary(job.description)}</span>}
             </span>
           )}
           <span className="employer-applicant-facts">

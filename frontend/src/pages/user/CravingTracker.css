@@ -9,14 +9,14 @@
 
 .layout .craving-tracker-page > .page-header { margin-bottom: 0; }
 
-/* ---------- Check-in form ---------- */
+/* ---------- ฟอร์มเช็คอิน ---------- */
 .craving-tracker-form { display: flex; flex-direction: column; gap: 22px; }
 .craving-tracker-form .checkin-sub { margin-bottom: 0; }
 .craving-tracker-form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 40%); gap: 28px; align-items: start; }
 .craving-tracker-form-row .ui-field select { min-height: 48px; }
 .craving-tracker-form .checkin-foot .ui-btn { min-width: 180px; }
 
-/* ---------- Calendar + history ---------- */
+/* ---------- ปฏิทิน + ประวัติ ---------- */
 .craving-tracker-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
@@ -45,7 +45,7 @@
 .craving-tracker-load-more { margin-top: 8px; min-height: 40px; font-size: .78rem; }
 .craving-tracker-private-note { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--color-surface-hover); font-size: .75rem; color: var(--color-text-muted); }
 
-/* ---------- Weekly check-in, risk, real situations ---------- */
+/* ---------- แบบประเมินรายสัปดาห์ ความเสี่ยง สถานการณ์จริง ---------- */
 .craving-tracker-lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 24px; align-items: start; }
 .craving-tracker-lower-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 
@@ -73,21 +73,21 @@
   .craving-tracker-form .checkin-foot .ui-btn, .craving-tracker-risk-situation-form > .ui-btn { width: 100%; }
 }
 
-/* ---------- Fixed-height history box (scrolls inside) ---------- */
+/* ---------- กล่องประวัติความสูงคงที่ (เลื่อนภายใน) ---------- */
 .craving-tracker-layout { align-items: stretch; }
 .craving-tracker-history { display: flex; flex-direction: column; min-height: 0; }
 .craving-tracker-history-scroll { flex: 1; min-height: 0; margin-right: -10px; padding-right: 10px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .craving-tracker-history-scroll:focus-visible { outline-offset: 2px; }
 .craving-tracker-history-scroll .craving-tracker-month-heading { position: sticky; top: 0; z-index: 1; margin: 0; padding: 6px 0; background: var(--color-surface); }
 @media (min-width: 961px) {
-  /* Let the calendar set the row height; the history fills it and scrolls. */
+  /* ให้ปฏิทินกำหนดความสูงของแถว ประวัติเติมเต็มและเลื่อนได้ */
   .craving-tracker-history { contain: size; }
 }
 @media (max-width: 960px) {
   .craving-tracker-history-scroll { max-height: 440px; }
 }
 
-/* ---------- Lower row balance ---------- */
+/* ---------- ความสมดุลของแถวล่าง ---------- */
 .craving-tracker-lower { align-items: stretch; }
 .craving-tracker-lower-col > .craving-tracker-summary { flex: 1; }
 .craving-tracker-risk-situation-list { max-height: 300px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; scrollbar-width: thin; }

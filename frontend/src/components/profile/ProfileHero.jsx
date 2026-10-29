@@ -5,8 +5,8 @@ import { coverStyle } from "../common/CoverPicker.jsx";
 import { COVER_PRESETS, DEFAULT_COVER_PRESET } from "../../constants/profileArt.js";
 import "./ProfileHero.css";
 
-// Wide cover with the person's picture overlapping its bottom-left edge, their
-// name and badges beside it, and the "change picture" action on the right.
+// ปกกว้างโดยรูปของบุคคลซ้อนที่ขอบล่างซ้าย ชื่อ
+// และป้ายอยู่ข้างๆ และปุ่ม "เปลี่ยนรูป" อยู่ด้านขวา
 export default function ProfileHero({ user, roleLabel, onChangePicture, onEditInfo }) {
   const cover = COVER_PRESETS.find((item) => item.key === (user.coverPreset || DEFAULT_COVER_PRESET)) || COVER_PRESETS[0];
 

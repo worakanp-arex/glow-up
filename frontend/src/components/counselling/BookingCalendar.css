@@ -105,8 +105,10 @@
   border-color: var(--color-primary-300);
 }
 
-/* Blue: something on this day is still in progress. Green: all of it is
-   finished. Red: everything scheduled that day was cancelled. */
+/*
+ * น้ำเงิน: มีบางอย่างในวันนี้ยังดำเนินอยู่ เขียว: เสร็จหมดแล้ว
+ * แดง: ทุกอย่างที่นัดไว้ในวันนั้นถูกยกเลิก
+ */
 .booking-calendar-cell.has-open {
   background-color: var(--color-primary-100);
   color: var(--color-primary-800);

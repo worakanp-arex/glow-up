@@ -3,10 +3,10 @@ import { Check, Search } from "lucide-react";
 import { SKILL_CATEGORIES, skillCategoryLabel } from "../../constants/skillCategories.js";
 import "./SkillPicker.css";
 
-// Career skills grouped by category. With no search text, the user first
-// picks a category, then sees only that category's skills to choose from —
-// picking straight from one long list of every skill was slow and overwhelming.
-// Typing a search switches to a flat, matching list across every category.
+// ทักษะอาชีพจัดกลุ่มตามหมวดหมู่ เมื่อไม่มีข้อความค้นหา ผู้ใช้จะเลือก
+// หมวดก่อน แล้วเห็นเฉพาะทักษะของหมวดนั้นให้เลือก —
+// การเลือกจากรายการยาวของทักษะทั้งหมดช้าและล้นมือ
+// เมื่อพิมพ์ค้นหาจะเปลี่ยนเป็นรายการแบบแบนที่ตรงกันข้ามทุกหมวด
 export default function SkillPicker({ skills, selectedIds, onToggle, loading = false, emptyText = "ยังไม่มีทักษะในระบบ" }) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(null);
@@ -32,8 +32,8 @@ export default function SkillPicker({ skills, selectedIds, onToggle, loading = f
       }));
   }, [skills, query]);
 
-  // Land on a valid category once the list loads, and drop back to the
-  // category list if a search clears out the one currently open.
+  // ไปที่หมวดที่ใช้ได้เมื่อรายการโหลดเสร็จ และกลับไปที่รายการหมวด
+  // หากการค้นหาทำให้หมวดที่เปิดอยู่หายไป
   useEffect(() => {
     if (activeCategory && groups.some((group) => group.key === activeCategory)) return;
     setActiveCategory(isSearching ? null : groups[0]?.key ?? null);

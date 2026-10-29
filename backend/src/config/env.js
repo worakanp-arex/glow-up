@@ -1,16 +1,16 @@
 import "dotenv/config";
 
-// Only these two environments may run with relaxed security (weak secret,
-// cookies over plain HTTP, raw error messages). Anything else — including an
-// unset or mistyped NODE_ENV — is treated like production, so forgetting to set
-// it on a server can never leave the published placeholder secret in effect.
+// เฉพาะสองสภาพแวดล้อมนี้เท่านั้นที่รันด้วยความปลอดภัยแบบผ่อนปรนได้ (secret อ่อน
+// cookie ผ่าน HTTP ธรรมดา ข้อความ error ดิบ) สิ่งอื่นทั้งหมด — รวมถึง NODE_ENV ที่ไม่ได้ตั้งหรือพิมพ์ผิด —
+// ถูกปฏิบัติเหมือน production ดังนั้นการลืมตั้งค่าบนเซิร์ฟเวอร์
+// จะไม่ทำให้ secret ตัวอย่างที่เผยแพร่ไว้มีผลใช้งานได้
 const RELAXED_ENVIRONMENTS = ["development", "test"];
 
 export function isProductionLike(env = process.env) {
   return !RELAXED_ENVIRONMENTS.includes(env.NODE_ENV);
 }
 
-// The example files ship these values, so anyone can read them on GitHub.
+// ไฟล์ตัวอย่างมีค่าเหล่านี้ ใครก็อ่านได้บน GitHub
 const PLACEHOLDER_SECRET = /change_?this|changeme|your[_-]?secret|^(secret|development-secret)$/i;
 const MIN_SECRET_LENGTH = 32;
 const MIN_DISTINCT_SECRET_CHARS = 8;

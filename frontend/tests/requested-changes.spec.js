@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 
 const person = { _id: "507f1f77bcf86cd799439011", name: "ก้าวใหม่ ใจดี", email: "test@example.com", verifiedStatus: "verified", certificates: [] };
 
-// Every API call answers `[]` unless `responses` has an entry for it, keyed by
-// "METHOD /path" or just "/path"; a function entry gets the route to answer itself.
+// ทุกการเรียก API ตอบ `[]` เว้นแต่ `responses` มีรายการสำหรับมัน โดยใช้คีย์
+// "METHOD /path" หรือแค่ "/path" รายการที่เป็นฟังก์ชันรับ route เพื่อตอบเอง
 async function mockApi(page, role, responses = {}) {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.route("https://fonts.googleapis.com/**", (route) => route.abort());
@@ -88,7 +88,7 @@ test("family messages read like a chat, newest last, and can be answered from th
   let sent;
   await mockApi(page, "user", {
     "/family/invited": [{ _id: "link1", status: "active", familyUser: { name: "แม่", email: "mom@example.com" } }],
-    "/family/links/link1/messages": messages, // the API answers newest first
+    "/family/links/link1/messages": messages, // API ตอบรายการใหม่สุดก่อน
     "POST /family/links/link1/messages": async (route) => {
       sent = route.request().postDataJSON();
       await route.fulfill({ status: 201, json: { sent: true } });
@@ -127,7 +127,7 @@ test("the self-assessment shows encouragement and next steps, never a risk label
   });
   await page.goto("/craving-tracker");
   await page.getByRole("button", { name: "ดูคำแนะนำสำหรับช่วงนี้" }).click();
-  // No entries in the last week, so it first offers to fill the gaps; carry on without.
+  // ไม่มีรายการในสัปดาห์ที่ผ่านมา จึงเสนอให้เติมช่องว่างก่อน ข้ามไปทำต่อ
   await page.getByRole("button", { name: /ประเมินเลย/ }).click();
 
   const guidance = page.locator(".risk-guidance");

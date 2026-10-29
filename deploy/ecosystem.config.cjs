@@ -1,6 +1,6 @@
-// PM2 process file for the glow-up backend.
-// Start:   pm2 start deploy/ecosystem.config.cjs
-// Keep a single instance: rate limits and Socket.IO rooms live in memory.
+// ไฟล์โปรเซส PM2 สำหรับ backend ของ glow-up
+// เริ่มด้วย:   pm2 start deploy/ecosystem.config.cjs
+// ให้รันแบบ instance เดียว: rate limit และห้อง Socket.IO อยู่ในหน่วยความจำ
 module.exports = {
   apps: [
     {

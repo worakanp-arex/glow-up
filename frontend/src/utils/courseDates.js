@@ -1,5 +1,5 @@
-// Open / expiry date helpers for courses (external course links expire). Dates
-// are shown in Thai (Buddhist era) using the Asia/Bangkok calendar day.
+// ตัวช่วยวันเปิด/วันหมดอายุของคอร์ส (ลิงก์คอร์สภายนอกมีวันหมดอายุ) วันที่
+// แสดงเป็นไทย (พ.ศ.) โดยใช้วันตามปฏิทิน Asia/Bangkok
 const THAI_DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Bangkok" });
 const ISO_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" });
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -9,12 +9,12 @@ export function formatCourseDate(value) {
   return value ? THAI_DATE.format(new Date(value)) : null;
 }
 
-// "YYYY-MM-DD" (Bangkok) for an <input type="date">; "" when not set.
+// "YYYY-MM-DD" (เวลาไทย) สำหรับ <input type="date"> เป็น "" เมื่อไม่ได้ตั้ง
 export function toDateInputValue(value) {
   return value ? ISO_DAY.format(new Date(value)) : "";
 }
 
-// state: "expired" | "upcoming" | "expiring" | "active" | "open" (no dates at all)
+// state: "expired" | "upcoming" | "expiring" | "active" | "open" (ไม่มีวันที่เลย)
 export function courseStatus(course, now = new Date()) {
   const start = course?.startDate ? new Date(course.startDate) : null;
   const end = course?.endDate ? new Date(course.endDate) : null;

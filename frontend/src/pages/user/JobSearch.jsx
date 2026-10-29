@@ -33,6 +33,9 @@ const SALARY_OPTIONS = [
 
 const LOGO_TONES = ["primary", "peach", "lilac", "mint"];
 
+// จำนวนทักษะ/อาชีพแนะนำสูงสุดที่แสดงในแถบ "เริ่มจากทักษะที่คุณมี"
+const TOP_SHOWN = 3;
+
 
 function JobSearch() {
   const navigate = useNavigate();
@@ -69,8 +72,8 @@ function JobSearch() {
     careerService.getRecommendedCareers().then(setRecommendations).catch(() => setRecommendations([]));
   }, [isAuthenticated, user?.role]);
 
-  // Build the query from current inputs; `override` lets a filter apply its
-  // new value immediately instead of waiting for the state update.
+  // สร้าง query จากค่าที่กรอกอยู่ `override` ให้ตัวกรองใช้ค่าใหม่ทันที
+  // แทนการรอ state อัปเดต
   function buildParams(override = {}) {
     const values = { keyword, location, category, province, deadlineWithinDays, salaryRange, ...override };
     const salary = SALARY_OPTIONS.find((opt) => opt.value === values.salaryRange) || SALARY_OPTIONS[0];
@@ -91,7 +94,7 @@ function JobSearch() {
     setLoadError(null);
     const request = savedOnly
       ? jobService.getSavedJobs().then((items) => ({ items, total: items.length }))
-      : jobService.searchJobsPage({ ...appliedFilters, page, limit: resultLimit }, controller.signal);
+      : jobService.searchJobsPage({ ...appliedFilters, page, limit: resultLimit }, controller.signal, { byMatch: isSeeker });
     request
       .then(({ items, total: count }) => {
         if (controller.signal.aborted) return;
@@ -102,7 +105,7 @@ function JobSearch() {
       .catch((error) => { if (!controller.signal.aborted) setLoadError(error); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [appliedFilters, page, resultLimit, savedOnly]);
+  }, [appliedFilters, page, resultLimit, savedOnly, isSeeker]);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -124,18 +127,34 @@ function JobSearch() {
 
   const selectedJob = jobs.find((job) => job._id === selectedJobId) || null;
 
-  if (loadError) return <AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} />;
+  // แถบ "เริ่มจากทักษะที่คุณมี" แสดงเฉพาะ 3 ทักษะที่เชี่ยวชาญที่สุด (ระดับสูงสุดก่อน)
+  // และ 3 อาชีพที่ตรงมากที่สุด ไม่แสดงอาชีพที่ตรง 0% เพื่อไม่ให้แถบนี้รก
+  const topSkillNames = [...mySkills]
+    .sort((a, b) => (b.level || 0) - (a.level || 0))
+    .slice(0, TOP_SHOWN)
+    .map((item) => item.skill?.skillName)
+    .filter(Boolean);
+  const topRecommendations = [...recommendations]
+    .filter((rec) => rec.match.score > 0)
+    .sort((a, b) => b.match.score - a.match.score)
+    .slice(0, TOP_SHOWN);
+
+  const header = (
+    <PageHeader
+      icon={Search}
+      eyebrow="Your next chapter"
+      description="เริ่มจากทักษะที่มี แล้วค่อย ๆ มองหาก้าวต่อไป"
+      actions={isSeeker && <Link to="/my-applications" className="ui-btn ui-btn-outline">ใบสมัครของฉัน</Link>}
+    >
+      โอกาสที่เหมาะกับคุณ
+    </PageHeader>
+  );
+
+  if (loadError) return <div className="job-search-page">{header}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 
   return (
     <div className="job-search-page">
-      <PageHeader
-        icon={Search}
-        eyebrow="Your next chapter"
-        description="เริ่มจากทักษะที่มี แล้วค่อย ๆ มองหาก้าวต่อไป"
-        actions={isSeeker && <Link to="/my-applications" className="ui-btn ui-btn-outline">ใบสมัครของฉัน</Link>}
-      >
-        โอกาสที่เหมาะกับคุณ
-      </PageHeader>
+      {header}
 
       <form className="job-search-form" onSubmit={handleSubmit}>
         <label className="job-search-field job-search-field-keyword">
@@ -210,14 +229,14 @@ function JobSearch() {
           <div className="job-search-skills-body">
             <strong>เริ่มจากทักษะที่คุณมี</strong>
             <span>
-              {mySkills.length > 0
-                ? mySkills.map((item) => item.skill?.skillName).filter(Boolean).join(" · ")
+              {topSkillNames.length > 0
+                ? topSkillNames.join(" · ")
                 : "เพิ่มทักษะในโปรไฟล์ เพื่อดูว่างานไหนตรงกับคุณ"}
             </span>
-            {recommendations.length > 0 && (
+            {topRecommendations.length > 0 && (
               <div className="job-search-recommendations" aria-label="อาชีพแนะนำสำหรับคุณ">
                 <small>อาชีพแนะนำ:</small>
-                {recommendations.map((rec) => (
+                {topRecommendations.map((rec) => (
                   <button
                     key={rec.category._id}
                     type="button"
@@ -245,6 +264,7 @@ function JobSearch() {
               <div className="job-search-list-header">
                 <span className="job-search-result-count">
                   {savedOnly ? `งานที่บันทึกไว้ ${total} ตำแหน่ง` : `พบ ${total} ตำแหน่ง`}
+                  {isSeeker && !savedOnly && " · เรียงจากทักษะที่ตรงมากที่สุด"}
                 </span>
                 {!savedOnly && (
                   <label className="job-search-limit-select">
@@ -310,7 +330,9 @@ function JobSearch() {
           </div>
 
           {!mobile && <div className="job-search-preview">
+            {/* key ทำให้ช่องแนบไฟล์ล้างทุกครั้งที่เปลี่ยนงาน ไม่ค้างชื่อไฟล์จากงานก่อนหน้า */}
             <JobPreview
+              key={selectedJob?._id || "none"}
               job={selectedJob}
               saved={selectedJob ? savedIds.has(selectedJob._id) : false}
               onToggleSave={toggleSaved}

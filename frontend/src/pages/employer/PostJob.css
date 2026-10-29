@@ -11,7 +11,7 @@
 
 .post-job-form { display: flex; flex-direction: column; gap: 1.25rem; }
 
-/* Two columns: the posting's details on the left, picture / skills on the right. */
+/* สองคอลัมน์: รายละเอียดของประกาศอยู่ซ้าย รูปภาพ/ทักษะอยู่ขวา */
 .post-job-columns { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 .post-job-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 

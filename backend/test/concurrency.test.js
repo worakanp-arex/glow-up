@@ -26,15 +26,15 @@ function tokenFor(role, id = "racer") {
 
 const response = () => ({ code: 200, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; }, cookie() {} });
 
-// Mongoose query chains (.select/.populate) that resolve to an empty array —
-// used to stub out the reward-check side path that a successful mission/
-// course/application write triggers, so it doesn't touch real models.
+// สายโซ่ query ของ Mongoose (.select/.populate) ที่ resolve เป็นอาร์เรย์ว่าง —
+// ใช้จำลองเส้นทางตรวจรางวัลที่ถูกกระตุ้นเมื่อเขียนภารกิจ/
+// คอร์ส/ใบสมัครสำเร็จ เพื่อไม่ให้แตะ model จริง
 function emptyChain() {
   const obj = { select: () => obj, populate: () => obj, then: (resolve) => Promise.resolve([]).then(resolve) };
   return obj;
 }
 
-// Fires `count` concurrent requests against the same route and tallies status codes.
+// ยิงคำขอพร้อมกัน `count` รายการไปยัง route เดียวกันแล้วนับรหัสสถานะ
 async function fireConcurrent(base, { method, path, token, body }, count) {
   const headers = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -105,8 +105,8 @@ test("concurrent activity-mission logging: unique index + 409 handling stop doub
     created = true;
     return { _id: "log1" };
   });
-  // The one winning call reaches checkAndAwardRewards() afterwards — stub out
-  // everything that side path touches so it resolves to "no new rewards".
+  // การเรียกที่ชนะเพียงรายการเดียวจะไปถึง checkAndAwardRewards() ภายหลัง — จำลอง
+  // ทุกอย่างที่เส้นทางนั้นแตะ เพื่อให้ได้ผลเป็น "ไม่มีรางวัลใหม่"
   t.mock.method(UserMission, "find", () => emptyChain());
   t.mock.method(ActivityMissionLog, "find", () => emptyChain());
   t.mock.method(GamePlay, "find", () => emptyChain());
@@ -159,15 +159,15 @@ test("concurrent OTP guesses cannot exceed the attempt limit (the attempt is cla
   };
   t.mock.method(PendingRegistration, "findOne", () => ({ select: async () => pending }));
   t.mock.method(PendingRegistration, "deleteOne", async () => ({}));
-  // Stands in for MongoDB's atomic conditional increment: the check and the
-  // increment happen in one step, so concurrent callers can't both pass the limit.
+  // เลียนแบบการเพิ่มค่าแบบมีเงื่อนไขที่เป็น atomic ของ MongoDB: การตรวจและ
+  // การเพิ่มเกิดในขั้นตอนเดียว ผู้เรียกที่ทำพร้อมกันจึงผ่านขีดจำกัดทั้งคู่ไม่ได้
   let storedAttempts = 0;
   t.mock.method(PendingRegistration, "findOneAndUpdate", async (filter) => {
     if (storedAttempts >= filter.attempts.$lt) return null;
     storedAttempts += 1;
     return pending;
   });
-  // Real bcrypt work is what naturally lets many guesses be in flight at once.
+  // งาน bcrypt จริงคือสิ่งที่ทำให้การเดาจำนวนมากอยู่ระหว่างดำเนินการพร้อมกันได้ตามธรรมชาติ
   let codeChecks = 0;
   t.mock.method(bcrypt, "compare", async () => {
     codeChecks += 1;

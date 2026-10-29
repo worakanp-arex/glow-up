@@ -8,8 +8,8 @@ import "./GrowthCard.css";
 
 const WEEKDAY = new Intl.DateTimeFormat("th-TH", { weekday: "short", timeZone: "UTC" });
 
-// Level/XP come from the existing points summary (missions + activities +
-// games); the week strip comes from the emotion check-in streak history.
+// ระดับ/XP มาจากสรุปคะแนนที่มีอยู่ (ภารกิจ + กิจกรรม +
+// เกม) ส่วนแถบสัปดาห์มาจากประวัติสตรีคการเช็คอินอารมณ์
 export default function GrowthCard({ streak }) {
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState(false);

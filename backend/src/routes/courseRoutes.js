@@ -8,6 +8,7 @@ import {
   uploadCover,
   myCourses,
   recommendedCourses,
+  featuredCourses,
   enrollCourse,
   unenrollCourse,
   uploadCourseCertificate,
@@ -27,7 +28,7 @@ const COURSE_BODY = [
   body("tags.*").optional().isString().trim().isLength({ max: 50 }),
   body("startDate").optional({ values: "falsy" }).isISO8601(),
   body("endDate").optional({ values: "falsy" }).isISO8601(),
-  // Built-in images or a previously uploaded cover; never an arbitrary URL.
+  // รูปที่มีมาในระบบหรือปกที่เคยอัปโหลด ไม่รับ URL อะไรก็ได้
   body("coverImage").optional({ values: "falsy" }).matches(/^\/(images\/[\w\-/]+\.(png|webp|jpe?g)|uploads\/course-covers\/[\w.-]+)$/),
 ];
 
@@ -35,7 +36,7 @@ router.get(
   "/",
   [
     query("status").optional().isIn(["active", "upcoming", "expired", "all"]),
-    // Search terms must be plain text: ?q[]=a would otherwise reach the regex builder as an array.
+    // คำค้นต้องเป็นข้อความธรรมดา: ?q[]=a จะไปถึงตัวสร้าง regex เป็นอาร์เรย์
     query("q").optional().isString().isLength({ max: 100 }),
     query("category").optional().isString().isLength({ max: 100 }),
     query("tag").optional().isString().isLength({ max: 100 }),
@@ -46,6 +47,7 @@ router.get(
 );
 router.get("/mine", verifyToken, requireRole("user"), asyncHandler(myCourses));
 router.get("/recommended", verifyToken, requireRole("user"), asyncHandler(recommendedCourses));
+router.get("/featured", verifyToken, requireRole("user"), asyncHandler(featuredCourses));
 router.post(
   "/cover",
   verifyToken,

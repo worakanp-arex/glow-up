@@ -5,8 +5,8 @@ import * as gameService from "../../../services/gameService.js";
 import { GameResult } from "./GameShell.jsx";
 import "./EmotionMatchGame.css";
 
-// Today's five situations: pick the feeling that fits, to practise noticing
-// what you feel before deciding what to do.
+// 5 สถานการณ์ของวันนี้: เลือกความรู้สึกที่เหมาะสม เพื่อฝึกสังเกต
+// ว่าเรารู้สึกอย่างไรก่อนตัดสินใจว่าจะทำอะไร
 function EmotionMatchGame({ onPlayed, onClose }) {
   const [questions, setQuestions] = useState(null);
   const [step, setStep] = useState(0);

@@ -1,7 +1,6 @@
-// Profile pictures and cover backgrounds a person can pick without
-// uploading anything. Clients send a preset *key*; the server maps it to the
-// URL below, so arbitrary image URLs can never be stored on a profile.
-// The frontend mirrors this file in frontend/src/constants/profileArt.js.
+// รูปโปรไฟล์และพื้นหลังปกที่ผู้ใช้เลือกได้โดยไม่ต้องอัปโหลด ไคลเอนต์ส่งเฉพาะ *key* ของ preset
+// เซิร์ฟเวอร์แปลงเป็น URL ด้านล่าง ดังนั้นจะไม่มีทางเก็บ URL รูปภาพอะไรก็ได้ลงในโปรไฟล์
+// frontend มีไฟล์เดียวกันนี้ที่ frontend/src/constants/profileArt.js
 export const AVATAR_PRESETS = [
   { key: "user", label: "ตัวละครเริ่มต้น", url: "/images/avatars/user.webp" },
   { key: "staff", label: "ทีมดูแล", url: "/images/avatars/staff.webp" },
@@ -15,11 +14,11 @@ export const AVATAR_PRESETS = [
   { key: "mood-surprised", label: "ตื่นเต้น", url: "/images/illustrations/mood-surprised.webp" },
 ];
 
-// Background colours for letter ("initial") avatars.
+// สีพื้นหลังของอวาตาร์แบบตัวอักษร ("initial")
 export const AVATAR_COLORS = ["#287fc2", "#0c8f6f", "#d9731f", "#8b5fd0", "#d0457b", "#4a6fa5", "#b8860b", "#5b6b7a"];
 
-// Cover (background) behind the profile card. `image` presets use a file in
-// /public; `gradient` presets are plain CSS backgrounds.
+// พื้นหลัง (ปก) หลังการ์ดโปรไฟล์ preset แบบ `image` ใช้ไฟล์ใน
+// /public ส่วนแบบ `gradient` เป็นพื้นหลัง CSS ล้วน
 export const COVER_PRESETS = [
   { key: "banner", label: "เมืองยามเช้า", kind: "image", value: "/images/illustrations/banner.webp" },
   { key: "lesson-1", label: "ฟ้าใส", kind: "image", value: "/images/lessons/cover-1.png" },

@@ -16,7 +16,7 @@
   color: var(--color-text-muted);
 }
 
-/* ---------- status badge (also used by the counselling list) ---------- */
+/* ---------- ป้ายสถานะ (ใช้ในรายการปรึกษาด้วย) ---------- */
 
 .counselling-status-badge {
   display: inline-flex;
@@ -63,7 +63,7 @@
   color: var(--color-danger);
 }
 
-/* ---------- layout & cards ---------- */
+/* ---------- เลย์เอาต์และการ์ด ---------- */
 
 .counselling-detail-layout {
   display: grid;
@@ -122,7 +122,7 @@
   color: var(--color-text-muted);
 }
 
-/* ---------- request details ---------- */
+/* ---------- รายละเอียดคำขอ ---------- */
 
 .counselling-detail-message {
   margin: 0 0 1.25rem;
@@ -171,7 +171,7 @@
   color: var(--color-text);
 }
 
-/* ---------- schedule & outcome forms ---------- */
+/* ---------- ฟอร์มนัดหมายและผลลัพธ์ ---------- */
 
 .counselling-detail-scheduled {
   display: flex;
@@ -235,7 +235,7 @@
   align-self: flex-end;
 }
 
-/* ---------- sidebar ---------- */
+/* ---------- แถบด้านข้าง ---------- */
 
 .counselling-progress {
   list-style: none;

@@ -3,7 +3,7 @@ import { toBangkokDateKey, shiftDateKey } from "../utils/dateKey.js";
 const HISTORY_DAYS = 84;
 
 /**
- * @param {{ date: Date, happinessLevel?: number }[]} logs - a user's daily check-ins
+ * @param {{ date: Date, happinessLevel?: number }[]} logs - บันทึกเช็คอินรายวันของผู้ใช้
  */
 export function computeStreakStats(logs, now = new Date()) {
   const dayByKey = new Map();

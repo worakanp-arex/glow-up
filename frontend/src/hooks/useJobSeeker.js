@@ -3,15 +3,15 @@ import { useAuth } from "../context/AuthContext.jsx";
 import * as skillService from "../services/skillService.js";
 import * as jobService from "../services/jobService.js";
 
-// Skill-match and bookmark state for signed-in job seekers. Guests and other
-// roles get empty values and a no-op toggle, so callers can render the same
-// markup for everyone.
+// สถานะความตรงของทักษะและบุ๊กมาร์กสำหรับผู้หางานที่ล็อกอิน ผู้เยี่ยมชมและ
+// บทบาทอื่นได้ค่าว่างและตัวสลับที่ไม่ทำอะไร ผู้เรียกจึงเรนเดอร์
+// markup เดียวกันให้ทุกคนได้
 export function useJobSeeker() {
   const { user, isAuthenticated } = useAuth();
   const isSeeker = isAuthenticated && user?.role === "user";
   const [mySkills, setMySkills] = useState([]);
   const [savedIds, setSavedIds] = useState(() => new Set());
-  // The job just bookmarked, kept for a few seconds so the page can point to related courses.
+  // งานที่เพิ่งบุ๊กมาร์ก เก็บไว้ไม่กี่วินาทีเพื่อให้หน้าชี้ไปยังคอร์สที่เกี่ยวข้องได้
   const [justSaved, setJustSaved] = useState(null);
   const hideTimer = useRef(null);
   useEffect(() => () => clearTimeout(hideTimer.current), []);

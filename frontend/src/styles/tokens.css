@@ -1,17 +1,17 @@
 /*
- * Breakpoint convention (documentation only — CSS custom properties can't be
- * used inside @media queries, so this isn't enforced by tooling, just by
- * convention). Use these two values in every page's @media rules:
- *   @media (max-width: 860px) { ... }  tablet / nav collapse
- *   @media (max-width: 520px) { ... }  small phone — tighter padding/type,
- *                                       full-width buttons, stacked cards
+ * ข้อตกลงเรื่อง breakpoint (เป็นเอกสารเท่านั้น — CSS custom property ใช้ภายใน
+ * @media query ไม่ได้ จึงไม่มีเครื่องมือบังคับ ใช้ตามข้อตกลงเท่านั้น)
+ * ใช้สองค่านี้ใน @media ของทุกหน้า:
+ * @media (max-width: 860px) { ... }  แท็บเล็ต / เมนูยุบ
+ * @media (max-width: 520px) { ... }  โทรศัพท์จอเล็ก — padding/ตัวอักษรกระชับ
+ * ปุ่มเต็มความกว้าง การ์ดเรียงซ้อน
  */
 
 :root {
-  /* Typography */
+  /* ตัวอักษร */
   --font-sans: "Prompt", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  /* Primary (brand) scale, derived from #3289D1 */
+  /* สเกลหลัก (แบรนด์) สร้างจาก #3289D1 */
   --color-primary-50: #eaf3fa;
   --color-primary-100: #d5e7f6;
   --color-primary-200: #accfec;
@@ -23,7 +23,7 @@
   --color-primary-800: #194970;
   --color-primary-900: #11314b;
 
-  /* Neutral (ink) scale */
+  /* สเกลกลาง (หมึก) */
   --color-ink-50: #f8fafc;
   --color-ink-100: #f1f5f9;
   --color-ink-200: #e2e8f0;
@@ -35,7 +35,7 @@
   --color-ink-800: #1e293b;
   --color-ink-900: #0f172a;
 
-  /* Semantic surfaces & text */
+  /* พื้นผิวและข้อความเชิงความหมาย */
   --color-page-bg: #f4f7fb;
   --color-surface: #ffffff;
   --color-surface-hover: var(--color-ink-100);
@@ -46,7 +46,7 @@
   --color-text-muted: var(--color-ink-500);
   --color-text-faint: var(--color-ink-400);
 
-  /* Status */
+  /* สถานะ */
   --color-success: #166534;
   --color-success-bg: #dcfce7;
   --color-warning: #92400e;
@@ -57,7 +57,7 @@
   --color-info: var(--color-primary-700);
   --color-info-bg: var(--color-primary-50);
 
-  /* Happiness scale (1=worst..7=best), diverging red -> neutral gray -> green */
+  /* มาตราความสุข (1=แย่สุด..7=ดีสุด) แบบไล่สีแยกขั้ว แดง -> เทากลาง -> เขียว */
   --happiness-1: #b91c1c;
   --happiness-2: #d9622f;
   --happiness-3: #e8a97e;
@@ -66,12 +66,14 @@
   --happiness-6: #4fae6d;
   --happiness-7: #166534;
 
-  /* Page content width — shared by every list/dashboard-style page so
-     switching between nav tabs doesn't visibly jump. Narrow single-column
-     detail/reading pages (post/course/job detail) intentionally opt out. */
+  /*
+   * ความกว้างเนื้อหาของหน้า — ใช้ร่วมกันทุกหน้าแบบรายการ/แดชบอร์ด เพื่อให้
+   * การสลับแท็บเมนูไม่กระโดดให้เห็น หน้ารายละเอียด/อ่านคอลัมน์เดียวแบบแคบ
+   * (โพสต์/คอร์ส/รายละเอียดงาน) ตั้งใจไม่ใช้ค่านี้
+   */
   --content-width: 1080px;
 
-  /* Spacing scale */
+  /* สเกลระยะห่าง */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -82,26 +84,26 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
 
-  /* Radius */
+  /* ความโค้งมุม */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-full: 999px;
 
-  /* Shadow */
+  /* เงา */
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
 
-  /* Custom <select> chevron (native arrows can't be recolored, so we supply our own) */
+  /* ลูกศรของ <select> แบบกำหนดเอง (ลูกศร native เปลี่ยนสีไม่ได้ เราจึงทำเอง) */
   --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 8 10 13 15 8'/%3E%3C/svg%3E");
 }
 
 /*
- * Dark theme overrides. Redefining the raw --color-ink-* and --color-primary-*
- * steps here is enough to flip every semantic token (--color-text,
- * --color-border, --color-info-bg, etc.) that's built on top of them —
- * custom properties resolve per-element, so nothing else needs to change.
+ * ค่าแทนที่ของธีมมืด การนิยามขั้น --color-ink-* และ --color-primary-* ดิบใหม่
+ * ที่นี่เพียงพอที่จะพลิกทุก token เชิงความหมาย (--color-text,
+ * --color-border, --color-info-bg ฯลฯ) ที่สร้างอยู่บนนั้น —
+ * custom property ตีความตามแต่ละองค์ประกอบ จึงไม่ต้องแก้อะไรอีก
  */
 :root[data-theme="dark"] {
   color-scheme: dark;

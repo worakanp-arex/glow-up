@@ -5,11 +5,10 @@ import "./FamilyMessageHistory.css";
 
 const MESSAGE_DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
-// The conversation between a person and their linked family member, like a
-// chat: oldest at the top, newest at the bottom. `viewerRole` is "family" or
-// "user" so "mine" bubbles can be told apart. `refreshKey` reloads the list
-// (e.g. after sending a new message elsewhere). With `canReply` a box under the
-// list lets the viewer answer right here.
+// บทสนทนาระหว่างบุคคลกับสมาชิกครอบครัวที่เชื่อมต่อกัน เหมือนแชท: เก่าสุดอยู่บน
+// ใหม่สุดอยู่ล่าง `viewerRole` เป็น "family" หรือ "user" เพื่อแยกฟองข้อความ
+// ของ "ฉัน" `refreshKey` โหลดรายการใหม่ (เช่น หลังส่งข้อความใหม่จากที่อื่น)
+// เมื่อมี `canReply` จะมีกล่องใต้รายการให้ผู้ดูตอบได้ตรงนี้เลย
 export default function FamilyMessageHistory({ linkId, viewerRole, refreshKey = 0, title = "ข้อความที่ผ่านมา", canReply = false }) {
   const [messages, setMessages] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -26,7 +25,7 @@ export default function FamilyMessageHistory({ linkId, viewerRole, refreshKey = 
       .getFamilyMessages(linkId)
       .then((data) => {
         if (cancelled) return;
-        // The API answers newest first; a conversation reads the other way round.
+        // API ตอบข้อความใหม่สุดก่อน แต่บทสนทนาอ่านย้อนกลับ
         setMessages(Array.isArray(data) ? [...data].reverse() : []);
         setFailed(false);
       })
@@ -34,7 +33,7 @@ export default function FamilyMessageHistory({ linkId, viewerRole, refreshKey = 
     return () => { cancelled = true; };
   }, [linkId, refreshKey, reloads]);
 
-  // Keep the newest message in view.
+  // ให้ข้อความใหม่สุดอยู่ในมุมมองเสมอ
   useEffect(() => {
     const list = listRef.current;
     if (list) list.scrollTop = list.scrollHeight;

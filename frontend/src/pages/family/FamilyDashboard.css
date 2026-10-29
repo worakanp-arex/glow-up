@@ -1,4 +1,4 @@
-/* Same page shell as the user dashboard: roomy content width, hero, main + side columns. */
+/* โครงหน้าเดียวกับแดชบอร์ดผู้ใช้: ความกว้างเนื้อหาโปร่ง ส่วนหัว คอลัมน์หลัก + ข้าง */
 .family-dashboard-page {
   max-width: var(--content-width);
   margin: 0 auto;
@@ -90,7 +90,7 @@
 .family-dashboard-rewards ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .family-dashboard-rewards li { padding: 0.35rem 0.75rem; border-radius: var(--radius-full); background-color: var(--color-primary-50); color: var(--color-primary-700); font-size: 0.8rem; font-weight: 500; }
 
-/* The message composer is the most important action on this page. */
+/* ตัวเขียนข้อความคือการกระทำที่สำคัญที่สุดในหน้านี้ */
 .family-dashboard-message-form { display: flex; flex-direction: column; gap: 14px; border-color: var(--color-primary-200); box-shadow: var(--card-shadow); }
 .family-dashboard-message-head { display: flex; align-items: center; gap: 12px; }
 .family-dashboard-message-head h3 { margin: 0; font-size: 1.05rem; color: var(--color-text); }
@@ -124,7 +124,7 @@
   .family-dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* ---------- Family home before any link exists ---------- */
+/* ---------- หน้าหลักของครอบครัวก่อนมีลิงก์ ---------- */
 .family-home-grid { align-items: stretch; }
 .family-home-card, .family-home-privacy { display: flex; flex-direction: column; gap: 12px; }
 .family-home-card h2, .family-home-privacy h2 { margin: 0; font-size: 1.2rem; }

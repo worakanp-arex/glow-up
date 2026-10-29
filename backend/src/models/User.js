@@ -30,46 +30,46 @@ const userSchema = new mongoose.Schema(
     specialization: { type: String },
     hospital: { type: String },
     verifiedStatus: { type: String, enum: ["pending", "verified", "rejected", "suspended"], default: "pending" },
-    // Which counsellor is responsible for this user's care (role "user" only).
-    // Set automatically the first time a counsellor claims one of their
-    // counselling sessions; gates which counsellor can view their full
-    // clinical profile (see utils/patientAccess.js).
+    // ผู้ให้คำปรึกษาที่รับผิดชอบการดูแลผู้ใช้รายนี้ (เฉพาะบทบาท "user")
+    // ตั้งอัตโนมัติเมื่อผู้ให้คำปรึกษารับ session ของผู้ใช้เป็นครั้งแรก
+    // และเป็นตัวกำหนดว่าผู้ให้คำปรึกษาคนไหนดูโปรไฟล์
+    // ทางคลินิกฉบับเต็มได้ (ดู utils/patientAccess.js)
     assignedCounsellor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     avatarUrl: { type: String },
-    // "initial" shows a coloured letter instead of avatarUrl / the role artwork.
+    // "initial" แสดงตัวอักษรสีแทน avatarUrl / ภาพประจำบทบาท
     avatarStyle: { type: String, enum: ["image", "initial"], default: "image" },
     avatarColor: { type: String },
-    // Key into constants/profileArt.js COVER_PRESETS (background behind the profile card).
+    // คีย์ของ COVER_PRESETS ใน constants/profileArt.js (พื้นหลังหลังการ์ดโปรไฟล์)
     coverPreset: { type: String },
-    // Employer details
+    // ข้อมูลนายจ้าง
     website: { type: String },
     companySize: { type: String },
     companyDescription: { type: String },
     contactPosition: { type: String },
-    // Admin details
+    // ข้อมูลแอดมิน
     position: { type: String },
     department: { type: String },
-    // Name the patient gives their family circle (role "user" only).
+    // ชื่อที่ผู้ป่วยตั้งให้กลุ่มครอบครัวของตน (เฉพาะบทบาท "user")
     familyName: { type: String },
-    // Why an admin rejected or suspended the account (shown to the owner).
+    // เหตุผลที่แอดมินปฏิเสธหรือระงับบัญชี (แสดงให้เจ้าของบัญชีเห็น)
     verificationNote: { type: String },
-    // What an active family follower may see (role "user" only). Both default
-    // on so links created before this setting existed keep behaving the same.
+    // สิ่งที่ผู้ติดตามในครอบครัวที่เชื่อมต่ออยู่เห็นได้ (เฉพาะบทบาท "user")
+    // เปิดทั้งคู่เป็นค่าเริ่มต้น เพื่อให้ลิงก์ที่สร้างก่อนมีการตั้งค่านี้ทำงานเหมือนเดิม
     familySharing: {
       progress: { type: Boolean, default: true },
       missions: { type: Boolean, default: true },
     },
     resetPasswordTokenHash: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
-    // Every login token issued before this moment is refused (see
-    // middleware/authMiddleware.js), so changing or resetting the password
-    // signs out whoever else might be holding a session.
+    // token ล็อกอินทุกตัวที่ออกก่อนเวลานี้จะถูกปฏิเสธ (ดู
+    // middleware/authMiddleware.js) ดังนั้นการเปลี่ยนหรือรีเซ็ตรหัสผ่าน
+    // จะออกจากระบบทุกเซสชันที่อาจมีคนอื่นถืออยู่
     passwordChangedAt: { type: Date, select: false },
-    // Soft delete. A deleted account is invisible to the whole app (it cannot sign
-    // in, nobody can look it up, no email or reminder reaches it) but its data is
-    // kept for RETENTION_DAYS so an admin can review or restore it; after that it
-    // is anonymised (services/accountLifecycleService.js). Only code that passes
-    // the `withDeleted` option, or filters on `deletedAt` itself, can see these.
+    // Soft delete บัญชีที่ถูกลบจะมองไม่เห็นในทั้งแอป (ล็อกอินไม่ได้ ไม่มีใครค้นเจอ
+    // ไม่มีอีเมลหรือการเตือนไปถึง) แต่ข้อมูลถูกเก็บไว้ RETENTION_DAYS วัน
+    // เพื่อให้แอดมินตรวจสอบหรือกู้คืนได้ หลังจากนั้นจะถูกทำให้
+    // ไม่ระบุตัวตน (services/accountLifecycleService.js) เฉพาะโค้ดที่ส่งตัวเลือก
+    // `withDeleted` หรือกรองด้วย `deletedAt` เองเท่านั้นที่เห็นบัญชีเหล่านี้
     deletedAt: { type: Date },
     deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     deletionReason: { type: String },
@@ -90,23 +90,23 @@ const userSchema = new mongoose.Schema(
 
 userSchema.index({ deletedAt: 1 });
 
-// Every ordinary lookup of users leaves out deleted accounts. Doing it here, once,
-// instead of in each query means no code path (a reminder job, a notification, a
-// list, a populate) can forget to and reach a deleted person.
+// การค้นหาผู้ใช้ทั่วไปทุกครั้งจะไม่รวมบัญชีที่ถูกลบ ทำที่นี่ครั้งเดียว
+// แทนการทำในทุก query ทำให้ไม่มีเส้นทางโค้ดใด (งานเตือน การแจ้งเตือน
+// รายการ หรือ populate) ลืมแล้วไปถึงคนที่ถูกลบได้
 const QUERIES_THAT_HIDE_DELETED_USERS = [
   "find", "findOne", "findOneAndUpdate", "findOneAndReplace", "findOneAndDelete",
   "updateOne", "updateMany", "countDocuments", "distinct",
 ];
 userSchema.pre(QUERIES_THAT_HIDE_DELETED_USERS, function hideDeletedUsers() {
   if (this.getOptions().withDeleted) return;
-  // A query that names `deletedAt` itself (the admin's deleted-accounts screens) is asking on purpose.
+  // query ที่ระบุ `deletedAt` เอง (หน้าจอบัญชีที่ถูกลบของแอดมิน) ตั้งใจขอบัญชีที่ถูกลบ
   if (this.getFilter().deletedAt !== undefined) return;
   this.where({ deletedAt: null });
 });
 
 userSchema.pre("save", async function hashPassword(next) {
   if (!this.isModified("password")) return next();
-  // A password replaced on an existing account ends every older session.
+  // การเปลี่ยนรหัสผ่านของบัญชีที่มีอยู่จะสิ้นสุดทุกเซสชันที่เก่ากว่า
   if (!this.isNew) this.passwordChangedAt = new Date();
   if (this.$locals.passwordAlreadyHashed) {
     delete this.$locals.passwordAlreadyHashed;

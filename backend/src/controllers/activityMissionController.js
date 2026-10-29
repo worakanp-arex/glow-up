@@ -47,8 +47,8 @@ export async function updateActivityMission(req, res) {
   res.json(doc);
 }
 
-// Logs carry the points people earned, so a mission that has been logged is
-// archived (hidden, `active: false`) rather than erased with its history.
+// บันทึกการทำภารกิจเก็บคะแนนที่ผู้ใช้ได้รับ ภารกิจที่เคยมีผู้บันทึกแล้วจึงถูก
+// เก็บเข้าคลัง (ซ่อน, `active: false`) แทนการลบทิ้งพร้อมประวัติ
 export async function deleteActivityMission(req, res) {
   const doc = await ActivityMission.findById(req.params.id);
   if (!doc) {
@@ -117,8 +117,8 @@ export async function logActivity(req, res) {
   }
 
   if (activity.requiresApproval) {
-    // A patient with a counsellor of their own is only announced to that
-    // counsellor and the admins; otherwise every counsellor can pick it up.
+    // ผู้ป่วยที่มีผู้ให้คำปรึกษาประจำตัวจะแจ้งเฉพาะผู้ให้คำปรึกษาคนนั้นและแอดมิน
+    // ไม่เช่นนั้นผู้ให้คำปรึกษาทุกคนรับเรื่องได้
     const reportingUser = await User.findById(req.user.id).select("name");
     await notifyCareTeam(
       req.user.id,
@@ -128,8 +128,8 @@ export async function logActivity(req, res) {
     );
   }
 
-  // Points from an approval-required mission aren't counted until approved
-  // (see rewardService.getTotalPoints), so skip the reward check for those.
+  // คะแนนจากภารกิจที่ต้องได้รับอนุมัติจะไม่ถูกนับจนกว่าจะอนุมัติ
+  // (ดู rewardService.getTotalPoints) จึงข้ามการตรวจรางวัลสำหรับภารกิจเหล่านั้น
   const newlyEarnedRewards = activity.requiresApproval ? [] : await checkAndAwardRewards(req.user.id);
 
   res.status(201).json({ log, newlyEarnedRewards });
@@ -142,8 +142,8 @@ export async function listPendingActivityApprovals(req, res) {
     .sort({ createdAt: -1 });
   if (req.user.role === "admin") return res.json(logs);
 
-  // Logs carry the patient's own notes, so a counsellor only sees the ones
-  // they may review (see reviewablePatientIds).
+  // บันทึกมีโน้ตส่วนตัวของผู้ป่วย ผู้ให้คำปรึกษาจึงเห็นเฉพาะรายการ
+  // ที่ตนมีสิทธิ์ตรวจ (ดู reviewablePatientIds)
   const reviewable = await reviewablePatientIds(req.user.id, logs.filter((log) => log.user).map((log) => log.user._id));
   res.json(logs.filter((log) => log.user && reviewable.has(String(log.user._id))));
 }

@@ -1,4 +1,4 @@
-// Thai names of the five account roles, used wherever a role is shown.
+// ชื่อภาษาไทยของบทบาทบัญชีทั้งห้า ใช้ทุกที่ที่แสดงบทบาท
 export const ROLE_LABELS = {
   user: "ผู้ใช้งานปกติ",
   family: "ครอบครัว/ผู้ดูแล",

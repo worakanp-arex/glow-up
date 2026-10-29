@@ -27,9 +27,9 @@ import {
   Archive,
 } from "lucide-react";
 
-// `icon` is shown beside each link in the mobile (hamburger) menu and the side
-// navigation. `group` is used by the left side navigation only (admin and
-// counsellor); every other role keeps the horizontal bar and ignores it.
+// `icon` แสดงข้างลิงก์แต่ละรายการในเมนูมือถือ (แฮมเบอร์เกอร์) และเมนูด้านข้าง
+// `group` ใช้เฉพาะเมนูด้านข้างซ้าย (แอดมินและผู้ให้คำปรึกษา)
+// บทบาทอื่นใช้แถบแนวนอนและไม่สนใจค่านี้
 export const LINKS_BY_ROLE = {
   guest: [
     { to: "/", label: "หน้าหลัก", end: true, icon: House },
@@ -92,8 +92,8 @@ export const LINKS_BY_ROLE = {
   ],
 };
 
-// Admin and counsellor have many menu items, so they get a left side
-// navigation (white, dark text) instead of the horizontal bar.
+// แอดมินและผู้ให้คำปรึกษามีรายการเมนูมาก จึงใช้เมนูด้านข้างซ้าย
+// (พื้นขาว ตัวอักษรเข้ม) แทนแถบแนวนอน
 const SIDEBAR_ROLES = ["admin", "counsellor"];
 
 export function usesSidebar(user, isAuthenticated) {

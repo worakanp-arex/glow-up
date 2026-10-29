@@ -1,28 +1,27 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-// Fields the session check needs; `passwordChangedAt` is hidden from normal reads.
+// ฟิลด์ที่การตรวจเซสชันต้องใช้ `passwordChangedAt` ถูกซ่อนจากการอ่านปกติ
 export const SESSION_USER_FIELDS = "role verifiedStatus +passwordChangedAt";
 
-// Decides whether a signed token still gets in, given the account as it is
-// *now*: a token alone is not enough, because the account may have been
-// removed, suspended, had its verification withdrawn, or changed its password
-// since the token was issued. Shared by the REST middleware and the socket
-// handshake so both close the door at the same moment.
-// Returns null to let the request through, otherwise the response to send.
+// ตัดสินว่า token ที่ลงนามแล้วยังเข้าได้หรือไม่ โดยดูบัญชี ณ *ปัจจุบัน*:
+// token อย่างเดียวไม่พอ เพราะบัญชีอาจถูกลบ ระงับ ถอนการยืนยัน
+// หรือเปลี่ยนรหัสผ่านหลังจากออก token ใช้ร่วมกันระหว่าง REST middleware
+// และ socket handshake เพื่อให้ปิดประตูพร้อมกัน
+// คืน null เพื่อให้คำขอผ่านไป มิฉะนั้นคืน response ที่ต้องส่ง
 export function sessionRejection(claims, user) {
   if (!user) return { status: 401, message: "กรุณาเข้าสู่ระบบอีกครั้ง" };
   if (user.verifiedStatus === "suspended") {
     return { status: 403, message: "บัญชีของคุณถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ" };
   }
-  // Staff whose verification an admin withdrew must stop reaching patient data
-  // (employers are gated separately where they touch applicant data).
+  // เจ้าหน้าที่ที่แอดมินถอนการยืนยันต้องเข้าถึงข้อมูลผู้ป่วยไม่ได้อีก
+  // (นายจ้างถูกควบคุมแยกต่างหากในจุดที่แตะข้อมูลผู้สมัคร)
   if (user.verifiedStatus === "rejected" && (user.role === "admin" || user.role === "counsellor")) {
     return { status: 403, message: "บัญชีของคุณไม่ผ่านการยืนยันตัวตน กรุณาติดต่อผู้ดูแลระบบ" };
   }
-  // `iat` is in whole seconds, so compare at that resolution: a token issued in
-  // the same second as the change (the fresh one handed out by change-password)
-  // is accepted, every earlier one is not.
+  // `iat` เป็นหน่วยวินาที จึงเทียบที่ความละเอียดนั้น: token ที่ออกใน
+  // วินาทีเดียวกับการเปลี่ยนรหัส (ตัวใหม่ที่ change-password ส่งให้)
+  // ยอมรับได้ ส่วนตัวก่อนหน้านั้นทั้งหมดไม่ยอมรับ
   if (user.passwordChangedAt && claims.iat < Math.floor(user.passwordChangedAt.getTime() / 1000)) {
     return { status: 401, message: "รหัสผ่านถูกเปลี่ยนแล้ว กรุณาเข้าสู่ระบบอีกครั้ง" };
   }

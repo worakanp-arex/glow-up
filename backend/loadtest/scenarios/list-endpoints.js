@@ -1,5 +1,5 @@
-// Measures the now-paginated list endpoints (Phase 3) under concurrency
-// against real seed data, instead of the old unbounded full-table scan.
+// วัดประสิทธิภาพ endpoint รายการที่แบ่งหน้าแล้ว (Phase 3) ภายใต้การเรียกพร้อมกัน
+// กับข้อมูลทดสอบจริง แทนการสแกนทั้งตารางแบบไม่จำกัดเหมือนเดิม
 import autocannon from "autocannon";
 import { pathToFileURL } from "node:url";
 import { loginAdmin, summarize, printSummary } from "../helpers.js";

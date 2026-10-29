@@ -5,7 +5,7 @@ import { trackRoute } from "../../utils/routeHistory.js";
 function ScrollToTop() {
   const { pathname, search, hash, key } = useLocation();
 
-  // Remember where the visitor came from (used by the profile's back button).
+  // จำว่าผู้เข้าชมมาจากไหน (ใช้กับปุ่มย้อนกลับของโปรไฟล์)
   useEffect(() => { trackRoute(pathname, search); }, [pathname, search]);
 
   useEffect(() => {

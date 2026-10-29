@@ -1,10 +1,10 @@
 import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 
-// Replaces window.confirm/alert with the shared ConfirmDialog. Render
-// `confirmDialog` anywhere in the component; call `confirm({ title, message,
-// confirmLabel, onConfirm })`. The dialog stays open with a busy state while
-// onConfirm runs, closes on success, and shows the error message if it throws.
+// แทนที่ window.confirm/alert ด้วย ConfirmDialog ที่ใช้ร่วมกัน เรนเดอร์
+// `confirmDialog` ที่ไหนก็ได้ในคอมโพเนนต์ เรียก `confirm({ title, message,
+// confirmLabel, onConfirm })` ไดอะล็อกจะค้างเปิดในสถานะกำลังทำงานขณะ
+// onConfirm รัน ปิดเมื่อสำเร็จ และแสดงข้อความ error ถ้า throw
 export default function useConfirmDialog() {
   const [request, setRequest] = useState(null);
   const [busy, setBusy] = useState(false);

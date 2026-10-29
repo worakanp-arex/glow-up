@@ -1,9 +1,9 @@
 import RiskAssessment from "../models/RiskAssessment.js";
 import { runRiskAssessment } from "../services/riskAssessmentService.js";
 
-// Computing an assessment stores a record and can page the care team, so it is
-// a POST. A GET must never change anything: a link or image on another site can
-// make a signed-in browser issue one.
+// การคำนวณผลประเมินจะบันทึกข้อมูลและอาจแจ้งทีมดูแล จึงเป็น POST
+// GET ต้องไม่เปลี่ยนแปลงอะไรเด็ดขาด: ลิงก์หรือรูปภาพบนเว็บอื่นสามารถ
+// ทำให้เบราว์เซอร์ที่ล็อกอินอยู่ส่งคำขอได้
 export async function assessMyRisk(req, res) {
   const assessment = await runRiskAssessment(req.user.id);
   res.status(201).json(assessment);

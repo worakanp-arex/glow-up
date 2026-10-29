@@ -9,7 +9,7 @@
 
 .layout .micro-lessons-page > .page-header { margin-bottom: 0; }
 
-/* ---------- Featured lesson ---------- */
+/* ---------- บทเรียนเด่น ---------- */
 .lessons-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 36%); align-items: center; gap: 24px; min-height: 200px; padding: 32px 40px; border: 1px solid var(--color-primary-100); border-radius: var(--radius-xl); background: linear-gradient(120deg, var(--color-primary-50), color-mix(in srgb, var(--color-primary-100) 60%, var(--color-surface))); overflow: hidden; }
 .lessons-hero-eyebrow { margin: 0 0 6px; font-size: .75rem; font-weight: 600; color: var(--color-primary-700); }
 .lessons-hero h2 { margin: 0 0 6px; font-size: 1.45rem; font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; }
@@ -17,14 +17,14 @@
 .lessons-hero-art { align-self: stretch; margin: -32px -40px -32px 0; background: transparent; }
 .lessons-hero-art img { object-fit: contain; object-position: right bottom; }
 
-/* ---------- Tabs + search ---------- */
+/* ---------- แท็บ + ค้นหา ---------- */
 .lessons-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .lessons-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 .lessons-search { width: min(300px, 100%); }
 
 .micro-lessons-empty { margin: 0; font-size: .875rem; color: var(--color-text-muted); }
 
-/* ---------- Lesson cards ---------- */
+/* ---------- การ์ดบทเรียน ---------- */
 .lessons-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 0; padding: 0; list-style: none; }
 .lesson-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; transition: transform .15s ease, box-shadow .15s ease; }
 .lesson-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }

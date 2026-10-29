@@ -3,7 +3,7 @@ import * as gameService from "../../../services/gameService.js";
 import { GameResult } from "./GameShell.jsx";
 import "./BreathingGame.css";
 
-// 4-7-8 breathing: breathe in for 4 seconds, hold for 7, breathe out for 8.
+// การหายใจ 4-7-8: หายใจเข้า 4 วินาที กลั้น 7 วินาที หายใจออก 8 วินาที
 const PHASES = [
   { key: "inhale", label: "หายใจเข้าทางจมูก", seconds: 4 },
   { key: "hold", label: "กลั้นลมหายใจไว้", seconds: 7 },
@@ -39,7 +39,7 @@ function BreathingGame({ onPlayed, onClose }) {
     }
   }, [onPlayed]);
 
-  // One tick per second while a session is running.
+  // เดินหนึ่งจังหวะต่อวินาทีขณะที่ session ทำงาน
   useEffect(() => {
     if (stage !== "running") return undefined;
     const timer = setTimeout(() => {

@@ -1,4 +1,4 @@
-// Proficiency levels stored as 1-5 on UserSkill.level, shown with Thai labels.
+// ระดับความชำนาญที่เก็บเป็น 1-5 ใน UserSkill.level แสดงด้วยป้ายภาษาไทย
 export const SKILL_LEVELS = [
   { value: 1, label: "เริ่มต้น", description: "เพิ่งเริ่มเรียนรู้ ยังต้องมีคนแนะนำ" },
   { value: 2, label: "พื้นฐาน", description: "ทำงานง่าย ๆ ได้ แต่ยังต้องมีคนตรวจสอบ" },

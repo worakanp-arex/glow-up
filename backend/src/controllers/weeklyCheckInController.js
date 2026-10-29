@@ -21,11 +21,11 @@ export async function submitWeeklyCheckIn(req, res) {
     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
   );
 
-  // Safety-critical path: immediately alert the patient's care team when
-  // self-harm risk is flagged — there's no existing risk-assessment alert
-  // mechanism to reuse (RiskAssessment is on-demand and passive). The alert is
-  // claimed atomically so resubmitting the form can't page the team again
-  // within the cooldown.
+  // เส้นทางที่เกี่ยวกับความปลอดภัยโดยตรง: แจ้งทีมดูแลของผู้ป่วยทันทีเมื่อมีการ
+  // ระบุความเสี่ยงทำร้ายตนเอง — ไม่มีกลไกแจ้งเตือนผลประเมินความเสี่ยงให้ใช้ซ้ำ
+  // (RiskAssessment ทำงานเมื่อเรียกและเป็นแบบ passive) การแจ้งเตือนถูกจองแบบ atomic
+  // เพื่อให้การส่งฟอร์มซ้ำไม่แจ้งทีมอีกครั้ง
+  // ในช่วงพัก
   if (checkIn.selfHarmRiskFlag) {
     const claimed = await WeeklyCheckIn.findOneAndUpdate(
       {

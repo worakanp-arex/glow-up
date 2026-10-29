@@ -36,3 +36,5 @@
   .employer-job-detail-page { padding: 1.5rem 1rem 2.5rem; }
   .employer-job-files li { flex-wrap: wrap; }
 }
+
+.employer-job-notice { margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--color-warning-bg); color: var(--color-warning); font-size: .85rem; }

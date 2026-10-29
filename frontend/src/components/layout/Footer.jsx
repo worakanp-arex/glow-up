@@ -7,7 +7,7 @@ import PartnerBadge from "../common/PartnerBadge.jsx";
 import { PARTNERS } from "../../constants/partners.js";
 import "./Footer.css";
 
-// Footer links only point at pages the visitor's role can open.
+// ลิงก์ในส่วนท้ายชี้เฉพาะหน้าที่บทบาทของผู้เข้าชมเปิดได้
 const MORE_LINKS_BY_ROLE = {
   guest: [
     { to: "/community", label: "ชุมชนฟื้นฟู" },

@@ -22,8 +22,8 @@ function Community() {
   const { user } = useAuth();
   const isStaff = STAFF_ROLES.includes(user.role);
   const [searchParams, setSearchParams] = useSearchParams();
-  // Saved posts live on this page as a tab (?tab=saved) so switching keeps the
-  // same layout and detail panel instead of jumping to another page.
+  // โพสต์ที่บันทึกอยู่ในหน้านี้เป็นแท็บ (?tab=saved) การสลับจึงคงเลย์เอาต์
+  // และแผงรายละเอียดเดิมไว้ แทนการกระโดดไปหน้าอื่น
   const tab = !isStaff && searchParams.get("tab") === "saved" ? "saved" : "all";
   const [posts, setPosts] = useState([]);
   const [savedPosts, setSavedPosts] = useState(null);

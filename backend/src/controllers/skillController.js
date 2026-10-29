@@ -4,8 +4,8 @@ import { paginationOptions, escapeRegex } from "../utils/pagination.js";
 
 const { create } = createCrudController(Skill, { fields: ["skillName", "category"] });
 
-// Optional ?q= (name search) and ?category= filters; grouped by category so the
-// pickers can render headings without re-sorting.
+// ตัวกรอง ?q= (ค้นหาชื่อ) และ ?category= ไม่บังคับ จัดกลุ่มตามหมวดหมู่
+// เพื่อให้ตัวเลือกแสดงหัวข้อได้โดยไม่ต้องเรียงใหม่
 export async function getSkills(req, res) {
   const filter = {};
   if (req.query.category) filter.category = req.query.category;

@@ -27,8 +27,8 @@ function formatDayRow(dateKey) {
   return DAY_ROW.format(new Date(`${dateKey}T00:00:00+07:00`));
 }
 
-// Runs `loader` again whenever `key` changes. (The Playwright fixtures answer
-// unknown endpoints with [], which is treated as "no data".)
+// เรียก `loader` ใหม่ทุกครั้งที่ `key` เปลี่ยน (fixture ของ Playwright
+// ตอบ endpoint ที่ไม่รู้จักด้วย [] ซึ่งถือเป็น "ไม่มีข้อมูล")
 function useLoad(loader, key) {
   const [state, setState] = useState({ data: null, error: null, loading: true });
   const loaderRef = useRef(loader);
@@ -56,10 +56,10 @@ function Section({ icon: Icon, title, children }) {
 function OverviewTab({ data }) {
   const { user } = useAuth();
   const leaderboard = data.leaderboard || [];
-  // Per-person risk lists are only for counsellors; admins see the numbers.
+  // รายการความเสี่ยงรายบุคคลมีไว้สำหรับผู้ให้คำปรึกษาเท่านั้น แอดมินเห็นเป็นตัวเลข
   const riskLink = user.role === "counsellor" ? "/counsellor/overview/risk" : undefined;
   const byRole = data.activeUsers.byRole;
-  // Everyone who signed in counts; the hint says how that splits between patients, family and staff.
+  // ทุกคนที่ล็อกอินนับรวมหมด คำใบ้บอกว่าแบ่งเป็นผู้ป่วย ครอบครัว และเจ้าหน้าที่อย่างไร
   const activeHint = byRole ? `ผู้ใช้ ${byRole.user} · ครอบครัว ${byRole.family} · บุคลากร ${byRole.counsellor + byRole.admin}${byRole.employer ? ` · นายจ้าง ${byRole.employer}` : ""}` : "กดเพื่อดูว่าเป็นใคร";
   return (
     <>

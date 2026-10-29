@@ -2,13 +2,13 @@ import crypto from "crypto";
 import validator from "validator";
 import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 
-// In-memory store: fine for this single-process deployment. If the app is ever
-// horizontally scaled, this needs a shared store (e.g. Redis) instead.
+// ที่เก็บในหน่วยความจำ: เหมาะกับการ deploy แบบโปรเซสเดียวนี้ หากแอปถูกขยาย
+// แนวนอนในอนาคต ต้องเปลี่ยนไปใช้ที่เก็บร่วม (เช่น Redis)
 //
-// Every sensitive endpoint gets its own limiter (so a busy login form can't use
-// up the budget of password reset), and the ones that guess a secret for a given
-// account are limited per account as well as per address: a botnet spreading
-// attempts over many addresses is still capped at the account.
+// ทุก endpoint ที่อ่อนไหวมีตัวจำกัดของตัวเอง (ฟอร์มล็อกอินที่คนใช้มาก
+// จึงไม่กินโควตาของการรีเซ็ตรหัสผ่าน) และตัวที่ใช้เดารหัสลับของบัญชีใดบัญชีหนึ่ง
+// จำกัดทั้งต่อบัญชีและต่อที่อยู่: บอตเน็ตที่กระจายความพยายามผ่านหลายที่อยู่
+// ก็ยังถูกจำกัดที่ตัวบัญชี
 
 const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
@@ -18,8 +18,8 @@ function limiter(options) {
   return rateLimit({ standardHeaders: true, legacyHeaders: false, ...options });
 }
 
-// The same address in different spellings must share one counter, or adding a
-// dot or "+tag" to a Gmail address would give an attacker a fresh allowance.
+// ที่อยู่เดียวกันที่สะกดต่างกันต้องใช้ตัวนับร่วมกัน ไม่เช่นนั้นการเติมจุดหรือ
+// "+tag" ในอีเมล Gmail จะให้โควตาใหม่แก่ผู้โจมตี
 function emailKey(req, field = "email") {
   const raw = typeof req.body?.[field] === "string" ? req.body[field].slice(0, 254) : "";
   return validator.normalizeEmail(raw) || raw.toLowerCase();
@@ -27,19 +27,19 @@ function emailKey(req, field = "email") {
 
 const byIp = (req) => ipKeyGenerator(req.ip);
 const byUser = (req) => req.user?.id || ipKeyGenerator(req.ip);
-// Rate limiting runs before the token is checked, so identify a signed-in
-// client by a fingerprint of the credential it presents. Forged values only
-// create their own throw-away bucket (and are refused later anyway).
+// rate limit ทำงานก่อนตรวจ token จึงระบุไคลเอนต์ที่ล็อกอินอยู่ด้วย
+// ลายนิ้วมือของข้อมูลยืนยันตัวตนที่ส่งมา ค่าปลอมจะสร้างเพียงถังใช้แล้วทิ้งของตัวเอง
+// (และจะถูกปฏิเสธภายหลังอยู่แล้ว)
 function byCredential(req) {
   const header = req.headers.authorization;
   const token = (header?.startsWith("Bearer ") ? header.slice(7) : null) || req.cookies?.token;
   return token ? `session:${crypto.createHash("sha256").update(token).digest("hex").slice(0, 32)}` : byIp(req);
 }
 
-// ----- sign-in -----
+// ----- ล็อกอิน -----
 
-// Only failed attempts count: a hospital or school behind one address can all
-// sign in successfully without locking each other out.
+// นับเฉพาะความพยายามที่ล้มเหลว: โรงพยาบาลหรือโรงเรียนที่อยู่หลังที่อยู่เดียวกัน
+// ล็อกอินสำเร็จพร้อมกันได้โดยไม่ล็อกกันเอง
 export const loginIpLimiter = limiter({
   windowMs: 15 * MINUTE,
   limit: 20,
@@ -61,7 +61,7 @@ export const googleLimiter = limiter({
   message: { message: "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง" },
 });
 
-// ----- registration codes -----
+// ----- รหัสสมัครสมาชิก -----
 
 export const otpRequestLimiter = limiter({
   windowMs: 15 * MINUTE,
@@ -69,7 +69,7 @@ export const otpRequestLimiter = limiter({
   message: { message: "ขอรหัส OTP บ่อยเกินไป กรุณาลองใหม่ภายหลัง" },
 });
 
-// Stops one person's inbox being flooded with codes from many addresses.
+// ป้องกันไม่ให้กล่องจดหมายของคนคนเดียวถูกท่วมด้วยรหัสจากหลายที่อยู่
 export const otpRequestAccountLimiter = limiter({
   windowMs: HOUR,
   limit: 5,
@@ -90,7 +90,7 @@ export const otpVerifyAccountLimiter = limiter({
   message: { message: "ยืนยันรหัส OTP บ่อยเกินไป กรุณาลองใหม่ภายหลัง" },
 });
 
-// ----- password reset -----
+// ----- รีเซ็ตรหัสผ่าน -----
 
 export const forgotPasswordIpLimiter = limiter({
   windowMs: 15 * MINUTE,
@@ -98,8 +98,8 @@ export const forgotPasswordIpLimiter = limiter({
   message: { message: "ขอรีเซ็ตรหัสผ่านบ่อยเกินไป กรุณาลองใหม่ภายหลัง" },
 });
 
-// Answers exactly like a successful request, so exceeding it reveals nothing —
-// it just stops anyone using this form to spam an address with reset emails.
+// ตอบเหมือนคำขอที่สำเร็จทุกประการ ดังนั้นการเกินโควตาจึงไม่เปิดเผยอะไร —
+// เพียงป้องกันไม่ให้ใครใช้ฟอร์มนี้ส่งอีเมลรีเซ็ตรบกวนที่อยู่ใดที่อยู่หนึ่ง
 export const forgotPasswordAccountLimiter = limiter({
   windowMs: HOUR,
   limit: 3,
@@ -128,10 +128,10 @@ export const changePasswordLimiter = limiter({
   message: { message: "เปลี่ยนรหัสผ่านผิดพลาดบ่อยเกินไป กรุณาลองใหม่ภายหลัง" },
 });
 
-// ----- family -----
+// ----- ครอบครัว -----
 
-// Family members asking to follow a patient by email: limited per account so the
-// endpoint can't be used to probe which addresses belong to patients.
+// สมาชิกครอบครัวขอติดตามผู้ป่วยด้วยอีเมล: จำกัดต่อบัญชี เพื่อไม่ให้
+// endpoint ถูกใช้สอดแนมว่าอีเมลไหนเป็นของผู้ป่วย
 export const familyRequestLimiter = limiter({
   windowMs: HOUR,
   limit: 10,
@@ -139,8 +139,8 @@ export const familyRequestLimiter = limiter({
   message: { message: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่ภายหลัง" },
 });
 
-// An invite sends an email from this app's address to a stranger, so it is
-// capped per member and per recipient to keep it from being a spam relay.
+// คำเชิญส่งอีเมลจากที่อยู่ของแอปนี้ไปหาคนแปลกหน้า จึงจำกัดทั้งต่อสมาชิก
+// และต่อผู้รับ เพื่อไม่ให้กลายเป็นช่องทางส่งสแปม
 export const familyInviteLimiter = limiter({
   windowMs: HOUR,
   limit: 5,
@@ -155,12 +155,12 @@ export const familyInviteRecipientLimiter = limiter({
   message: { message: "อีเมลนี้ได้รับคำเชิญหลายครั้งแล้ว กรุณาลองใหม่ภายหลัง" },
 });
 
-// ----- the whole API -----
+// ----- API ทั้งหมด -----
 
 const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
 
-// A generous ceiling per client, mostly to blunt scraping and the public job
-// list being hammered; normal use never gets near it.
+// เพดานที่ค่อนข้างหลวมต่อไคลเอนต์ เพื่อลดการสกัดข้อมูลและการถล่มรายการงานสาธารณะ
+// การใช้งานปกติไม่มีทางถึง
 export const apiLimiter = limiter({
   windowMs: 5 * MINUTE,
   limit: 1500,
@@ -169,9 +169,9 @@ export const apiLimiter = limiter({
   message: { message: "ส่งคำขอบ่อยเกินไป กรุณาลองใหม่ภายหลัง" },
 });
 
-// Every create/update/delete counts here, per signed-in client: posts, comments,
-// chat messages, check-ins, notifications triggered... all cost the database
-// and, for staff alerts, other people's attention.
+// ทุกการสร้าง/แก้ไข/ลบนับที่นี่ ต่อไคลเอนต์ที่ล็อกอิน: โพสต์ คอมเมนต์
+// ข้อความแชท เช็คอิน การแจ้งเตือนที่ถูกกระตุ้น... ล้วนเป็นภาระของฐานข้อมูล
+// และการแจ้งเตือนเจ้าหน้าที่ก็กินความสนใจของคนอื่น
 export const apiWriteLimiter = limiter({
   windowMs: 5 * MINUTE,
   limit: 240,
@@ -180,7 +180,7 @@ export const apiWriteLimiter = limiter({
   message: { message: "ทำรายการบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่" },
 });
 
-// Each upload can be several megabytes, so file uploads get their own, tighter allowance.
+// การอัปโหลดแต่ละครั้งอาจมีขนาดหลายเมกะไบต์ ไฟล์อัปโหลดจึงมีโควตาของตัวเองที่เข้มกว่า
 export const uploadLimiter = limiter({
   windowMs: HOUR,
   limit: 40,

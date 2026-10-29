@@ -15,7 +15,7 @@ function buildDeck(pairs) {
   return shuffle(cards);
 }
 
-// Match each trigger card with its healthy coping response.
+// จับคู่การ์ดตัวกระตุ้นแต่ละใบกับวิธีรับมือที่ดีต่อสุขภาพ
 function CopingMemoryGame({ onPlayed, onClose }) {
   const [pairs, setPairs] = useState(null);
   const [deck, setDeck] = useState([]);

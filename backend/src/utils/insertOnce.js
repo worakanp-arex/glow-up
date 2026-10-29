@@ -1,4 +1,4 @@
-// Unique compound indexes are required on the identity fields supplied here.
+// ต้องมี unique compound index บนฟิลด์ที่ใช้ระบุตัวตนที่ส่งมาที่นี่
 export async function insertOnce(Model, identity, values = {}) {
   try {
     const result = await Model.updateOne(identity, { $setOnInsert: values }, { upsert: true, setDefaultsOnInsert: true });

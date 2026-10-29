@@ -23,7 +23,7 @@
 
 .mission-board h2 svg { color: var(--color-primary-600); }
 
-/* Summary of how many missions are done. */
+/* สรุปจำนวนภารกิจที่ทำเสร็จแล้ว */
 .mission-total {
   display: flex;
   flex-direction: column;

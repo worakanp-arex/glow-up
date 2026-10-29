@@ -12,9 +12,9 @@ export function paginationQuery() {
   ];
 }
 
-// JSON lets a client send a number, array or object where text is expected, and
-// the string validators below would quietly stringify it (an array of emails
-// even passes isEmail). Every auth field is checked to be real text first.
+// JSON ให้ไคลเอนต์ส่งตัวเลข อาร์เรย์ หรืออ็อบเจ็กต์ในที่ที่คาดหวังข้อความได้ และ
+// ตัวตรวจสอบสตริงด้านล่างจะแปลงเป็นสตริงโดยเงียบๆ (อาร์เรย์ของอีเมล
+// ยังผ่าน isEmail) ทุกฟิลด์ auth จึงถูกตรวจว่าเป็นข้อความจริงก่อน
 export function emailBody(field = "email") {
   return body(field)
     .isString().withMessage("valid email is required").bail()
@@ -23,15 +23,15 @@ export function emailBody(field = "email") {
     .normalizeEmail();
 }
 
-// A password being *entered* (login, current password): any text, but bounded so
-// a huge value can't be used to burn CPU in bcrypt.
+// รหัสผ่านที่ถูก *กรอก* (ล็อกอิน รหัสผ่านปัจจุบัน): ข้อความอะไรก็ได้ แต่มีขอบเขต
+// เพื่อไม่ให้ค่าขนาดใหญ่ถูกใช้เผา CPU ใน bcrypt
 export function passwordEntryBody(field) {
   return body(field)
     .isString().withMessage(`${field} is required`).bail()
     .isLength({ min: 1, max: PASSWORD_MAX_LENGTH }).withMessage(`${field} is required`);
 }
 
-// A password being *chosen*: held to the password policy.
+// รหัสผ่านที่ถูก *ตั้ง*: ต้องผ่านนโยบายรหัสผ่าน
 export function newPasswordBody(field) {
   return body(field).custom((value) => {
     const problem = passwordProblem(value);
@@ -40,9 +40,9 @@ export function newPasswordBody(field) {
   });
 }
 
-// A link that people will be sent to or shown: http(s) only, with the scheme
-// spelled out. Without this "javascript:", "data:", "file:" or an app-specific
-// scheme could be stored and offered to someone as a harmless-looking link.
+// ลิงก์ที่จะส่งหรือแสดงให้คน: http(s) เท่านั้น และต้องระบุสกีมให้ชัด ไม่เช่นนั้น
+// "javascript:", "data:", "file:" หรือสกีมเฉพาะแอปอาจถูกเก็บไว้
+// แล้วเสนอให้ใครสักคนเป็นลิงก์ที่ดูไม่เป็นอันตราย
 export function urlBody(field, { max = 500, required = false } = {}) {
   const chain = body(field);
   if (!required) chain.optional({ values: "falsy" });

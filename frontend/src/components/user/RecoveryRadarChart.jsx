@@ -7,7 +7,7 @@ const CENTER = SIZE / 2;
 const MAX_RADIUS = 105;
 const GRID_STEPS = [0.25, 0.5, 0.75, 1];
 const LABEL_OFFSET = 26;
-// Extra room either side so long Thai axis labels are not clipped at the edge.
+// เว้นที่ด้านข้างเพิ่ม เพื่อไม่ให้ป้ายแกนภาษาไทยที่ยาวถูกตัดที่ขอบ
 const LABEL_PAD = 60;
 
 function pointAt(index, count, fraction) {

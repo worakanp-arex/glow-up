@@ -5,7 +5,7 @@ import Avatar from "../common/Avatar.jsx";
 import * as familyService from "../../services/familyService.js";
 import "./AccountCard.css";
 
-// For family accounts: who they follow, plus shortcuts to the family pages.
+// สำหรับบัญชีครอบครัว: แสดงว่าติดตามใครอยู่ พร้อมทางลัดไปหน้าครอบครัว
 export default function FamilyConnectionsCard() {
   const [links, setLinks] = useState(null);
 

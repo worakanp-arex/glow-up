@@ -34,7 +34,7 @@ function PostCard({
   const [commentsEnabled, setCommentsEnabled] = useState(post.commentsEnabled !== false);
   const [visibleToRoles, setVisibleToRoles] = useState(post.visibleToRoles || []);
   const [saving, setSaving] = useState(false);
-  // "Reported" is per person: only the people who reported it see it as reported.
+  // "รายงานแล้ว" เป็นรายบุคคล: เฉพาะคนที่รายงานเท่านั้นที่เห็นว่ารายงานแล้ว
   const [flagged, setFlagged] = useState(Boolean(post.reportedByMe));
 
   const isOwner = post.user?._id === currentUserId;

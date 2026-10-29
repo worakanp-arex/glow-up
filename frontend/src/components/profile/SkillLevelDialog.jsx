@@ -4,8 +4,8 @@ import EditorDialog from "../common/EditorDialog.jsx";
 import { SKILL_LEVELS } from "../../constants/skillLevels.js";
 import "./SkillLevelDialog.css";
 
-// Popup for choosing a skill's proficiency level, shown when a skill is
-// first picked and when an owned skill's level badge is clicked to change it.
+// ป๊อปอัปเลือกระดับความชำนาญของทักษะ แสดงเมื่อเลือกทักษะ
+// ครั้งแรก และเมื่อกดป้ายระดับของทักษะที่มีอยู่เพื่อเปลี่ยน
 export default function SkillLevelDialog({ skillName, initialLevel = 3, onConfirm, onClose }) {
   const [level, setLevel] = useState(initialLevel);
 

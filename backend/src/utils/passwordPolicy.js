@@ -1,17 +1,17 @@
-// One place for how passwords are accepted and hashed, so registration, reset,
-// change and the admin tools can't drift apart.
+// ที่เดียวที่กำหนดวิธีรับและแฮชรหัสผ่าน เพื่อให้การสมัคร รีเซ็ต
+// เปลี่ยน และเครื่องมือของแอดมินไม่เบี่ยงเบนจากกัน
 
-// bcrypt's cost is stored inside every hash, so raising it never locks out
-// existing accounts — their older hashes keep verifying.
+// ค่า cost ของ bcrypt ถูกเก็บอยู่ในแฮชทุกตัว การเพิ่มค่าจึงไม่ทำให้
+// บัญชีเดิมเข้าไม่ได้ — แฮชเก่ายังตรวจสอบผ่านต่อไป
 export const BCRYPT_COST = 12;
 
 export const PASSWORD_MIN_LENGTH = 10;
-// bcrypt ignores everything past 72 bytes; this keeps the request (and the CPU
-// work per attempt) bounded without cutting off a long passphrase.
+// bcrypt เมินทุกอย่างหลัง 72 ไบต์ ค่านี้จำกัดคำขอ (และงาน CPU ต่อความพยายาม)
+// โดยไม่ตัดวลีรหัสผ่านที่ยาว
 export const PASSWORD_MAX_LENGTH = 128;
 
-// Passwords that appear in every leaked-password list. Anything shorter than the
-// minimum is already refused, so only entries long enough to matter are listed.
+// รหัสผ่านที่ปรากฏในรายการรหัสผ่านที่รั่วไหลทุกรายการ สิ่งที่สั้นกว่า
+// ขั้นต่ำถูกปฏิเสธอยู่แล้ว จึงระบุเฉพาะรายการที่ยาวพอจะมีความหมาย
 const COMMON_PASSWORDS = new Set([
   "1234567890", "0123456789", "12345678910", "123456789a", "1234512345", "9876543210", "0987654321",
   "qwertyuiop", "qwerty1234", "qwerty12345", "asdfghjkl1", "1q2w3e4r5t", "1qaz2wsx3edc", "zxcvbnm123",
@@ -21,7 +21,7 @@ const COMMON_PASSWORDS = new Set([
   "growup1234", "glowup1234", "growup12345", "glowup12345", "0000000000", "1111111111", "1234567891",
 ]);
 
-// Returns a message for a password that must be refused, or null when it is fine.
+// คืนข้อความสำหรับรหัสผ่านที่ต้องปฏิเสธ หรือ null เมื่อใช้ได้
 export function passwordProblem(password) {
   if (typeof password !== "string") return "รหัสผ่านต้องเป็นข้อความ";
   if (password.length < PASSWORD_MIN_LENGTH) return `รหัสผ่านต้องมีอย่างน้อย ${PASSWORD_MIN_LENGTH} ตัวอักษร`;

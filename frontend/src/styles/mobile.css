@@ -1,4 +1,4 @@
-/* Compact handheld layouts; desktop keeps its horizontal navigation. */
+/* เลย์เอาต์กะทัดรัดสำหรับอุปกรณ์พกพา เดสก์ท็อปคงเมนูแนวนอนไว้ */
 @media (max-width: 860px) {
   .layout .navbar-wrapper .navbar { min-height: 60px; padding: 6px 12px; gap: 8px; }
   .layout .navbar-wrapper .navbar-logo { height: 32px; }
@@ -29,7 +29,7 @@
   .layout .pagination { margin-top: 12px; padding-top: 12px; gap: 8px; }
   .layout .pagination button { width: 44px; height: 44px; }
 
-  /* Welcome panel: left-aligned copy, mascot rising from the bottom edge. */
+  /* แผงต้อนรับ: ข้อความชิดซ้าย มาสคอตโผล่ขึ้นจากขอบล่าง */
   .layout .home-page .home-hero { margin: 12px 12px 0; padding: 28px 20px 0; border: 0; border-radius: 28px; background: linear-gradient(180deg, var(--color-primary-50), var(--color-primary-100)); }
   .layout .home-page .home-hero-inner { display: flex; flex-direction: column; gap: 0; text-align: left; }
   .layout .home-page .home-eyebrow { padding: 5px 10px; font-size: .75rem; margin-bottom: 14px; background: var(--color-surface); }

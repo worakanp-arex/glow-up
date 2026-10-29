@@ -1,9 +1,9 @@
 import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 
-// A wide dialog for creating or editing one record. `onSave` does the request;
-// the dialog stays open with the server's message if it throws, and closes
-// itself when it succeeds.
+// ไดอะล็อกกว้างสำหรับสร้างหรือแก้ไขข้อมูลหนึ่งรายการ `onSave` ส่งคำขอ
+// ไดอะล็อกจะค้างเปิดพร้อมข้อความจากเซิร์ฟเวอร์ถ้า throw และจะปิด
+// เองเมื่อสำเร็จ
 export default function EditorDialog({ title, onSave, onClose, children, saveLabel = "บันทึก", saveDisabled = false }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");

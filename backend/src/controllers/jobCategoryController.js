@@ -19,7 +19,7 @@ export async function updateJobCategory(req, res) {
   }
 }
 
-// A category that postings still use is kept, so no job silently loses its category.
+// หมวดหมู่ที่ประกาศงานยังใช้อยู่จะถูกเก็บไว้ เพื่อไม่ให้งานใดสูญเสียหมวดหมู่โดยไม่รู้ตัว
 export async function deleteJobCategory(req, res) {
   const category = await JobCategory.findById(req.params.id);
   if (!category) {

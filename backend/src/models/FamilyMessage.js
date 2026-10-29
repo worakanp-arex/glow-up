@@ -1,17 +1,16 @@
 import mongoose from "mongoose";
 
-// A short message between a recovering user and the family member they are
-// actively linked to. Both sides can send; history stays on the link even
-// after the notification that announced it has been cleared or expired.
+// ข้อความสั้นๆ ระหว่างผู้ฟื้นฟูกับสมาชิกครอบครัวที่เชื่อมต่อกันอยู่ ส่งได้ทั้งสองฝ่าย
+// ประวัติอยู่กับลิงก์แม้การแจ้งเตือนที่ประกาศข้อความนั้นจะถูกล้างหรือหมดอายุแล้ว
 const familyMessageSchema = new mongoose.Schema(
   {
     familyLink: { type: mongoose.Schema.Types.ObjectId, ref: "FamilyLink", required: true },
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    // "family" = the follower, "user" = the person in recovery.
+    // "family" = ผู้ติดตาม, "user" = ผู้ฟื้นฟู
     senderRole: { type: String, enum: ["family", "user"], required: true },
     content: { type: String, required: true, maxlength: 500 },
     replyTo: { type: mongoose.Schema.Types.ObjectId, ref: "FamilyMessage" },
-    // Set when the other party opened/acknowledged it.
+    // ตั้งค่าเมื่ออีกฝ่ายเปิดอ่าน/รับทราบแล้ว
     readAt: { type: Date },
   },
   { timestamps: true }

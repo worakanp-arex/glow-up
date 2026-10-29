@@ -14,8 +14,8 @@ import "./DeletedUsers.css";
 const PAGE_SIZE = 10;
 const DATE = new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" });
 
-// Accounts that were deleted (by an admin or by the person) and are still kept for
-// review or restoring, or have since been anonymised.
+// บัญชีที่ถูกลบ (โดยแอดมินหรือเจ้าของบัญชี) และยังเก็บไว้เพื่อ
+// ตรวจสอบหรือกู้คืน หรือถูกทำให้ไม่ระบุตัวตนไปแล้ว
 function DeletedUsers() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");

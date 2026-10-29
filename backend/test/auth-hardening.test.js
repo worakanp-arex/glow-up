@@ -14,7 +14,7 @@ import { assertLocalDatabase } from "../src/config/localOnly.js";
 import { startServer } from "./helpers/httpServer.js";
 
 afterEach(() => mock.restoreAll());
-// Registration looks accounts up including deleted ones (their address stays reserved).
+// การสมัครค้นหาบัญชีรวมถึงที่ถูกลบ (อีเมลของบัญชีเหล่านั้นยังถูกจองไว้)
 const accountLookup = (found) => () => ({ setOptions: async () => found });
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
@@ -32,7 +32,7 @@ function chainable(result) {
   return obj;
 }
 
-// ---------- registration cannot be taken over ----------
+// ---------- การสมัครถูกแย่งไม่ได้ ----------
 
 const NEW_REGISTRATION = { role: "user", name: "เหยื่อ", email: "victim@example.com", password: "victim-chosen-pass", pdpaConsent: true };
 const livePending = (overrides = {}) => ({
@@ -108,7 +108,7 @@ test("signing up with an address that already has an account answers like a new 
   assert.equal(taken.body.message, fresh.body.message);
 });
 
-// ---------- signing in ----------
+// ---------- การล็อกอิน ----------
 
 test("signing in sets an HttpOnly cookie that lives as long as the token, and never repeats the token in the body", async () => {
   const hash = await bcrypt.hash("a-long-enough-password", 4);
@@ -198,7 +198,7 @@ test("validation answers say which field failed but never echo the submitted val
   assert.ok(JSON.parse(text).errors.every((error) => !("value" in error)));
 });
 
-// ---------- password policy ----------
+// ---------- นโยบายรหัสผ่าน ----------
 
 test("passwords must be 10-128 characters and not an obvious one", () => {
   assert.match(passwordProblem("short"), /10/);
@@ -218,7 +218,7 @@ test("registration, reset and change all refuse a weak new password", { timeout:
   assert.equal(await post("/api/auth/reset-password", { email: "a@example.com", token: "t", newPassword: "12345678" }), 400);
 });
 
-// ---------- sessions end when the password changes ----------
+// ---------- เซสชันสิ้นสุดเมื่อเปลี่ยนรหัสผ่าน ----------
 
 const tokenIssuedAt = (iat) => jwt.sign({ id: "u1", role: "user", iat }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
@@ -269,7 +269,7 @@ test("a forgotten-password request can't keep replacing a reset link that was ju
   assert.equal(old.save.mock.callCount(), 1);
 });
 
-// ---------- refusing cross-site writes ----------
+// ---------- ปฏิเสธการเขียนข้ามเว็บ ----------
 
 test("a write from another site is refused before authentication; the same request from our own origin gets as far as authentication", { timeout: 20000 }, async (t) => {
   const base = await startServer(t);
@@ -284,7 +284,7 @@ test("a write from another site is refused before authentication; the same reque
   assert.equal(await post(undefined), 401, "non-browser clients send no Origin");
 });
 
-// ---------- backfilling check-ins ----------
+// ---------- บันทึกเช็คอินย้อนหลัง ----------
 
 test("a mood check-in can only be backfilled a week, and only with a real date", async () => {
   mock.method(EmotionLog, "findOneAndUpdate", async () => assert.fail("must not be saved"));
@@ -300,7 +300,7 @@ test("a mood check-in can only be backfilled a week, and only with a real date",
   assert.equal(await attempt({ $gt: "" }), 400);
 });
 
-// ---------- seed scripts ----------
+// ---------- สคริปต์ seed ----------
 
 test("seed scripts that create publicly known passwords refuse any database that isn't on this machine", () => {
   for (const uri of ["mongodb://localhost:27017/glow-up", "mongodb://127.0.0.1/x", "mongodb://user:pw@localhost/x"]) {
@@ -309,6 +309,6 @@ test("seed scripts that create publicly known passwords refuse any database that
   for (const uri of ["mongodb+srv://user:pw@cluster0.abcde.mongodb.net/glow-up", "mongodb://db.example.com:27017/x", "mongodb://a:1,b:2/x", "", "not a uri"]) {
     assert.throws(() => assertLocalDatabase(uri), /Refusing/, String(uri));
   }
-  // With no argument it checks the configured MONGODB_URI (the test setup points it at localhost).
+  // หากไม่ระบุอาร์กิวเมนต์จะตรวจ MONGODB_URI ที่ตั้งค่าไว้ (การตั้งค่าเทสต์ชี้ไปที่ localhost)
   assert.doesNotThrow(() => assertLocalDatabase());
 });

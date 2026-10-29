@@ -1,5 +1,5 @@
-// Why a post was reported. The frontend mirrors this list in
-// frontend/src/constants/reportReasons.js — keep the two in sync.
+// เหตุผลที่โพสต์ถูกรายงาน frontend มีรายการนี้ซ้ำไว้ใน
+// frontend/src/constants/reportReasons.js — ต้องแก้ให้ตรงกันทั้งสองที่
 export const REPORT_REASONS = [
   { value: "inappropriate", label: "เนื้อหาไม่เหมาะสม" },
   { value: "misinformation", label: "ข้อมูลเท็จหรือทำให้เข้าใจผิด" },

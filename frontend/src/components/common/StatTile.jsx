@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import "./StatTile.css";
 
-// Pass `to` (route) or `onClick` to make the whole tile a drill-down link.
+// ส่ง `to` (route) หรือ `onClick` เพื่อให้ทั้งไทล์เป็นลิงก์เจาะลึก
 function StatTile({ label, value, tone = "neutral", to, onClick, hint }) {
   const body = (
     <>

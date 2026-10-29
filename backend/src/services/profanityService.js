@@ -75,7 +75,7 @@ const LATIN_BAD = LATIN_WORDS.map(latinPattern);
 // boundaries they would match by accident.
 const MIN_LENGTH_WITHOUT_SEPARATORS = 4;
 
-// Layer 1. Synchronous, no network.
+// ชั้นที่ 1 ทำงานแบบ synchronous ไม่ใช้เครือข่าย
 export function containsListedWord(text) {
   const base = collapseRepeats(baseForm(text));
   const spaced = joinSpacedLetters(base).replace(ALLOWED, " ");
@@ -88,14 +88,14 @@ export function containsListedWord(text) {
 }
 
 const API_TIMEOUT_MS = 3000;
-// iApp bills per 400 characters and takes the text in the URL, so long text is
-// cut into pieces and only the first few are sent. The word list still reads all of it.
+// iApp คิดเงินทุก 400 ตัวอักษรและรับข้อความผ่าน URL จึงตัดข้อความยาว
+// เป็นท่อนๆ แล้วส่งเฉพาะไม่กี่ท่อนแรก ส่วนคลังคำยังอ่านข้อความทั้งหมด
 const IAPP_CHUNK = 400;
 const IAPP_MAX_CHUNKS = 3;
 const IAPP_DEFAULT_THRESHOLD = 0.8;
-// Harassment, hate and sexual content only. Self-harm and violence are left
-// out on purpose: people recovering from addiction or depression talk about
-// those honestly, and a blocked message is the wrong response to someone in pain.
+// เฉพาะการคุกคาม ความเกลียดชัง และเนื้อหาทางเพศ การทำร้ายตนเองและความรุนแรง
+// ถูกเว้นไว้โดยตั้งใจ: ผู้ที่ฟื้นฟูจากการเสพติดหรือโรคซึมเศร้า
+// พูดถึงเรื่องเหล่านี้ตรงๆ และการบล็อกข้อความเป็นปฏิกิริยาที่ผิดต่อคนที่กำลังเจ็บปวด
 const OPENAI_BLOCKED_CATEGORIES = ["harassment", "harassment/threatening", "hate", "hate/threatening", "sexual"];
 
 async function flaggedByOpenAI(text) {
@@ -136,14 +136,14 @@ async function flaggedByIapp(text) {
 
 const PROVIDERS = { openai: flaggedByOpenAI, iapp: flaggedByIapp };
 
-// Layer 2. Never throws: any failure counts as "not flagged".
+// ชั้นที่ 2 ไม่โยน error เด็ดขาด: ความล้มเหลวทุกแบบถือว่า "ไม่ถูกตั้งธง"
 async function flaggedByApi(text) {
   const provider = PROVIDERS[(process.env.MODERATION_PROVIDER || "").trim().toLowerCase()];
   if (!provider) return false;
   try {
     return await provider(text);
   } catch (err) {
-    // Log the reason only; the text is a private message and stays out of the logs.
+    // บันทึกเฉพาะเหตุผล ข้อความเป็นข้อความส่วนตัวและต้องไม่อยู่ใน log
     console.warn("[moderation] API check skipped:", err.name, "-", err.message);
     return false;
   }
@@ -154,12 +154,12 @@ export async function isProfane(text) {
   return containsListedWord(text) || (await flaggedByApi(text));
 }
 
-// Route middleware: rejects the request when req.body[field] is not acceptable.
-// Place it after `validate` so only well-formed bodies reach the moderation API.
+// Route middleware: ปฏิเสธคำขอเมื่อ req.body[field] ยอมรับไม่ได้
+// วางหลัง `validate` เพื่อให้เฉพาะ body ที่รูปแบบถูกต้องไปถึง API กลั่นกรอง
 export function profanityGuard(field) {
   return async function profanityGuardMiddleware(req, res, next) {
     try {
-      // Screen what will be stored: the controllers strip markup first.
+      // ตรวจสิ่งที่จะถูกเก็บ: controller ตัด markup ออกก่อนแล้ว
       if (await isProfane(sanitizeText(req.body?.[field]))) {
         return res.status(400).json({ message: REJECT_MESSAGE });
       }

@@ -1,5 +1,5 @@
-// Mirrors the backend's ISO week key (e.g. "2026-W37"), used client-side
-// only to decide whether "this week's" check-in already exists.
+// สะท้อนรหัสสัปดาห์ ISO ของ backend (เช่น "2026-W37") ใช้ฝั่งไคลเอนต์
+// เพื่อตัดสินเท่านั้นว่ามีเช็คอิน "ของสัปดาห์นี้" แล้วหรือยัง
 export function getIsoWeekKey(date = new Date()) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = (d.getUTCDay() + 6) % 7;

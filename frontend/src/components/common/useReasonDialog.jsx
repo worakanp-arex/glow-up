@@ -1,10 +1,10 @@
 import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 
-// Like useConfirmDialog, but the dialog also asks for a written reason, e.g.
-// when rejecting something so the person on the other end is told why.
+// เหมือน useConfirmDialog แต่ไดอะล็อกขอเหตุผลเป็นลายลักษณ์อักษรด้วย เช่น
+// ตอนปฏิเสธสิ่งใดเพื่อให้อีกฝ่ายรู้เหตุผล
 // `askReason({ title, description, label, placeholder, confirmLabel, required,
-// onConfirm(reason) })`; render `reasonDialog` anywhere in the component.
+// onConfirm(reason) })` เรนเดอร์ `reasonDialog` ที่ไหนก็ได้ในคอมโพเนนต์
 export default function useReasonDialog() {
   const [request, setRequest] = useState(null);
   const [reason, setReason] = useState("");

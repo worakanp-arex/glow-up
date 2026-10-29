@@ -19,7 +19,7 @@ async function setup(page, options = {}) {
     const method = route.request().method();
     let data = [];
     if (p === "/auth/me") data = user;
-    else if (p === "/jobs") data = [job];
+    else if (p === "/jobs" || p === "/jobs/matched") data = [job];
     else if (p === "/jobs/1") data = { ...job, ...options.job };
     else if (p === "/applications/me") data = options.noApplication ? [] : [{ _id: "a1", job, status: options.status || "pending", appliedAt: today, match: { score: 50, matchedSkills: ["การบริการลูกค้า"], missingSkills: ["คอมพิวเตอร์"], totalSkills: 2 } }];
     else if (p === "/users/me/recovery-summary") data = options.recovery || { ongoing: false, endDate: "2025-01-01T00:00:00Z" };
@@ -95,7 +95,7 @@ test("community comments open a mobile detail and reporting uses a dialog", asyn
   await page.getByRole("button", { name: "รายงานเนื้อหา", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(state.flags).toBe(0);
-  // A reason is required before the report can be sent.
+  // ต้องระบุเหตุผลก่อนจึงจะส่งรายงานได้
   await expect(page.getByRole("button", { name: "ส่งรายงาน", exact: true })).toBeDisabled();
   await page.getByRole("combobox", { name: "รายงานเรื่องอะไร" }).selectOption("harassment");
   await page.getByRole("textbox", { name: "รายละเอียดเพิ่มเติม (ไม่บังคับ)" }).fill("ถ้อยคำรุนแรง");
@@ -196,7 +196,7 @@ test("counselling starts with a request and a descriptive mood dropdown", async 
   await select.selectOption("anxious");
   await expect(page.locator(".mood-select p")).toContainText("กังวลใจ ไม่สบายใจ");
   await expect(page.locator(".mood-select svg")).toBeVisible();
-  // The request form comes first: beside the history on wide screens, above it on narrow ones.
+  // ฟอร์มคำขออยู่ก่อน: ข้างประวัติบนจอกว้าง และเหนือประวัติบนจอแคบ
   const form = await page.locator(".counselling-form").boundingBox(), history = await page.getByRole("heading", { name: "คำขอที่ผ่านมา" }).boundingBox();
   if (info.project.name === "mobile") expect(history.y).toBeGreaterThan(form.y + form.height);
   else expect(history.x).toBeGreaterThan(form.x + form.width);

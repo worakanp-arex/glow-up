@@ -1,5 +1,5 @@
-// Adds the standard career-skill catalogue (grouped by category) to the
-// database. Idempotent — run with: npm run seed:skills
+// เพิ่มแคตตาล็อกทักษะอาชีพมาตรฐาน (จัดเป็นหมวดหมู่) ลงในฐานข้อมูล
+// รันซ้ำได้อย่างปลอดภัย (idempotent) — รันด้วย: npm run seed:skills
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { connectDB } from "./db.js";

@@ -9,15 +9,9 @@
 
 .layout .courses-page > .page-header { margin-bottom: 0; }
 
-/* ---------- Continue-learning hero ---------- */
-.courses-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 40%); align-items: center; gap: 24px; min-height: 220px; padding: 32px 40px; border: 1px solid var(--color-primary-100); border-radius: var(--radius-xl); background: linear-gradient(120deg, var(--color-primary-50), color-mix(in srgb, var(--color-primary-100) 60%, var(--color-surface))); overflow: hidden; }
-.courses-hero-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
-.courses-hero-eyebrow { margin: 0; font-size: .75rem; font-weight: 600; color: var(--color-primary-700); }
-.courses-hero h2 { margin: 0; font-size: 1.5rem; font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; }
-.courses-hero-copy > p:not(.courses-hero-eyebrow) { margin: 0 0 6px; font-size: .85rem; line-height: 1.7; color: var(--color-text-secondary); }
-.courses-hero .ui-btn { margin-top: 10px; }
-
-/* ---------- Suggested from saved jobs ---------- */
+/* ---------- แนะนำจากงานที่บันทึกไว้ ---------- */
+/* ลิงก์ /courses#recommended: เว้นที่ให้แถบเมนูที่ติดด้านบนไม่บังหัวข้อ */
+.courses-recommended { scroll-margin-top: 100px; }
 .courses-recommended .ui-card-head { margin-bottom: 14px; }
 .courses-recommended .ui-card-head h2 { display: flex; align-items: center; gap: 8px; font-size: 1.05rem; }
 .courses-recommended-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
@@ -29,13 +23,15 @@
 .courses-recommended-item .ui-btn { margin-top: auto; min-height: 40px; padding: 8px 16px; }
 @media (max-width: 900px) { .courses-recommended-list { grid-template-columns: minmax(0, 1fr); } }
 
-/* ---------- Tabs + search ---------- */
+/* ---------- แท็บ + ค้นหา ---------- */
 .courses-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .courses-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
 .courses-search { width: min(300px, 100%); }
 .courses-empty { margin: 0; font-size: .875rem; color: var(--color-text-muted); }
+.courses-save-error { margin: 0; padding: 10px 14px; border-radius: 10px; background: var(--color-danger-bg); color: var(--color-danger); font-size: .82rem; }
+.course-card-save:disabled { opacity: .6; cursor: progress; }
 
-/* ---------- Course cards ---------- */
+/* ---------- การ์ดคอร์ส ---------- */
 .courses-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin: 0; padding: 0; list-style: none; }
 .course-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; transition: transform .15s ease, box-shadow .15s ease; }
 .course-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
@@ -55,7 +51,7 @@
 .course-card-external-link { display: grid; place-items: center; flex-shrink: 0; width: 42px; height: 42px; border: 1px solid var(--color-border-strong); border-radius: 12px; color: var(--color-text-secondary); }
 .course-card-external-link:hover { background: var(--color-primary-50); color: var(--color-primary-700); }
 
-/* ---------- Refusal-skills callout ---------- */
+/* ---------- กล่องเน้นทักษะการปฏิเสธ ---------- */
 .courses-learning-callout { display: flex; align-items: center; gap: 14px; padding: 18px 24px; color: var(--color-text); text-decoration: none; transition: border-color .15s, transform .15s; }
 .courses-learning-callout:hover { border-color: var(--color-primary-200); transform: translateY(-2px); }
 .courses-learning-callout-icon { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; border-radius: 14px; background: color-mix(in srgb, #8b7fd6 14%, var(--color-surface)); color: #6c5fc7; }
@@ -69,23 +65,12 @@
 }
 @media (max-width: 600px) {
   .courses-page { gap: 18px; }
-  .courses-hero { grid-template-columns: minmax(0, 1fr); padding: 22px; min-height: 0; }
-  .courses-hero-art.is-missing { display: none; }
-  .courses-hero .ui-btn { width: 100%; }
   .courses-tabs { flex-wrap: nowrap; overflow-x: auto; width: 100%; scrollbar-width: none; }
   .courses-tabs .ui-tab { flex-shrink: 0; }
   .courses-search { width: 100%; }
   .courses-grid { grid-template-columns: minmax(0, 1fr); }
   .courses-learning-callout { padding: 16px; }
 }
-
-/* Mascot illustration: fixed-size circle with a soft halo, scaled per breakpoint. */
-.image-slot.courses-hero-art { position: relative; justify-self: center; align-self: center; width: 200px; height: 200px; min-height: 0; margin: 0; border-radius: 50%; background: transparent; overflow: visible; }
-.image-slot.courses-hero-art::before { content: ""; position: absolute; inset: -22px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--color-primary-200) 55%, transparent), transparent 70%); }
-.image-slot.courses-hero-art img { position: relative; width: 100%; height: 100%; object-fit: contain; border-radius: 50%; box-shadow: var(--shadow-md); }
-.image-slot.courses-hero-art.is-missing { display: none; }
-@media (max-width: 860px) { .image-slot.courses-hero-art { width: 160px; height: 160px; } }
-@media (max-width: 600px) { .image-slot.courses-hero-art { order: -1; width: 120px; height: 120px; margin: 0 auto 6px; } .image-slot.courses-hero-art::before { inset: -14px; } }
 
 .course-card .course-card-dates { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0 0 8px; font-size: .72rem; color: var(--color-text-secondary); }
 .course-card-dates b { padding: 1px 8px; border-radius: 8px; background: var(--color-surface-hover); font-weight: 600; }

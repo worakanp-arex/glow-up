@@ -99,7 +99,7 @@ function DailyCheckin({ loggedToday, onLogged }) {
   );
 }
 
-// Shared with the mood-tracker page so both forms look the same.
+// ใช้ร่วมกับหน้าติดตามอารมณ์ เพื่อให้ทั้งสองฟอร์มหน้าตาเหมือนกัน
 export function CravingRange({ value, onChange }) {
   return (
     <label className="checkin-range">

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { PartyPopper, RotateCcw, Sparkles, X } from "lucide-react";
 import "./GameShell.css";
 
-// Full-screen-ish dialog every mini-game plays inside.
+// ไดอะล็อกเกือบเต็มหน้าจอที่ทุกมินิเกมเล่นอยู่ภายใน
 export function GameModal({ title, subtitle, onClose, children }) {
   const dialogRef = useRef(null);
 
@@ -50,7 +50,7 @@ export function GameModal({ title, subtitle, onClose, children }) {
   );
 }
 
-// End-of-round screen shared by all games.
+// หน้าจอสิ้นสุดรอบที่ทุกเกมใช้ร่วมกัน
 export function GameResult({ headline, detail, pointsAwarded, practice, onReplay, onClose, children }) {
   return (
     <div className="game-result" role="status">

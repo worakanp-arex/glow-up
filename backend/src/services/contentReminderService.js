@@ -13,9 +13,9 @@ function daysLabel(expiresAt, now) {
   return days <= 1 ? "ภายในวันนี้หรือพรุ่งนี้" : `ในอีก ${days} วัน`;
 }
 
-// Tells the staff member who wrote a lesson or a scenario that it is about to
-// expire, so they can extend or replace it before members lose it. Runs hourly
-// (see server.js); each person gets at most one reminder per item per day.
+// แจ้งเจ้าหน้าที่ผู้เขียนบทเรียนหรือสถานการณ์ว่าใกล้หมดอายุ เพื่อให้
+// ต่ออายุหรือเปลี่ยนก่อนที่สมาชิกจะเสียเนื้อหานั้นไป ทำงานทุกชั่วโมง
+// (ดู server.js) แต่ละคนได้รับการเตือนไม่เกินหนึ่งครั้งต่อรายการต่อวัน
 export async function sendContentExpiryReminders({ now = new Date() } = {}) {
   const window = { $gte: now, $lte: new Date(now.getTime() + WARN_DAYS * DAY_MS) };
   const [lessons, scenarios] = await Promise.all([

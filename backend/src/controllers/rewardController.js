@@ -27,8 +27,8 @@ export async function updateReward(req, res) {
   res.json(reward);
 }
 
-// Rewards are derived from total points, so removing one also removes the
-// copies people already hold (otherwise their lists would contain empty rewards).
+// รางวัลคำนวณจากคะแนนรวม ดังนั้นการลบรางวัลหนึ่งจึงลบสำเนาที่ผู้คนถืออยู่ด้วย
+// (ไม่เช่นนั้นรายการของพวกเขาจะมีรางวัลว่างเปล่า)
 export async function deleteReward(req, res) {
   const reward = await Reward.findByIdAndDelete(req.params.id);
   if (!reward) {

@@ -1,5 +1,5 @@
-// Ready-made course covers staff can pick instead of uploading one. The key is
-// the image path itself, so a chosen cover is stored on the course as-is.
+// ปกคอร์สสำเร็จรูปที่เจ้าหน้าที่เลือกได้แทนการอัปโหลด คีย์คือ
+// พาธรูปเอง ปกที่เลือกจึงถูกเก็บในคอร์สตามที่เป็น
 export const COURSE_COVER_OPTIONS = [
   { key: "/images/lessons/cover-1.png", label: "ฟ้าใส", kind: "image", value: "/images/lessons/cover-1.png", group: "ภาพปกบทเรียน" },
   { key: "/images/lessons/cover-2.png", label: "ทุ่งสีเขียว", kind: "image", value: "/images/lessons/cover-2.png", group: "ภาพปกบทเรียน" },

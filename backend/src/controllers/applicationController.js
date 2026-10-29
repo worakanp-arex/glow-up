@@ -14,13 +14,13 @@ const STATUS_LABELS = {
   cancelled: "ยกเลิกแล้ว",
 };
 
-// Basic personal details an employer sees alongside the application. Address
-// and other contact-sensitive fields are deliberately left out.
+// ข้อมูลส่วนตัวพื้นฐานที่นายจ้างเห็นร่วมกับใบสมัคร ที่อยู่
+// และข้อมูลติดต่อที่อ่อนไหวอื่นๆ ถูกตัดออกโดยตั้งใจ
 const APPLICANT_PROFILE_FIELDS =
   "name nickname email phone age gender province bio verifiedStatus education experience resumeUrl certificates avatarUrl avatarStyle avatarColor";
 
-// Once an applicant withdraws, the employer keeps the fact that the application
-// existed but loses the applicant's contact details, profile and documents.
+// เมื่อผู้สมัครถอนใบสมัคร นายจ้างจะยังเห็นว่าเคยมีใบสมัคร
+// แต่จะไม่เห็นข้อมูลติดต่อ โปรไฟล์ และเอกสารของผู้สมัครอีก
 const WITHDRAWN_APPLICANT_FIELDS = ["_id", "name", "nickname", "avatarUrl", "avatarStyle", "avatarColor"];
 
 function hideWithdrawnApplicantDetails(application, viewer) {
@@ -32,8 +32,8 @@ function hideWithdrawnApplicantDetails(application, viewer) {
   return { ...plain, user, attachments: [] };
 }
 
-// Employers must be identity-verified before they can view or act on applicant
-// data; admins bypass this check.
+// นายจ้างต้องผ่านการยืนยันตัวตนก่อนจึงจะดูหรือดำเนินการกับข้อมูลผู้สมัครได้
+// แอดมินข้ามการตรวจนี้
 async function assertEmployerVerified(req, res) {
   if (req.user.role === "admin") return true;
   const employer = await User.findById(req.user.id).select("verifiedStatus");
@@ -47,8 +47,8 @@ async function assertEmployerVerified(req, res) {
 }
 
 export async function applyToJob(req, res) {
-  // Job seekers must be verified by an admin before their application (and
-  // attached documents) reaches an employer.
+  // ผู้หางานต้องได้รับการยืนยันจากแอดมินก่อน ใบสมัคร (และเอกสารแนบ)
+  // จึงจะถึงมือนายจ้าง
   const applicant = await User.findById(req.user.id).select("verifiedStatus");
   if (applicant?.verifiedStatus !== "verified") {
     return res.status(403).json({
@@ -81,7 +81,7 @@ export async function applyToJob(req, res) {
     name,
     url: publicUrl("applicationAttachment", files[i].filename),
   }));
-  // Anything uploaded beyond what the posting asked for is never referenced.
+  // สิ่งที่อัปโหลดเกินกว่าที่ประกาศงานขอ จะไม่ถูกนำไปอ้างอิง
   removeUploadedFiles(files.slice(requiredNames.length));
 
   const application = await Application.create({ user: req.user.id, job: job._id, attachments });
@@ -119,14 +119,14 @@ export async function jobApplicants(req, res) {
     res.setHeader("X-Total-Count", await Application.countDocuments(filter));
     query.skip(pagination.skip).limit(pagination.limit);
   }
-  // Applicants whose account was deleted are no longer shown.
+  // ผู้สมัครที่บัญชีถูกลบแล้วจะไม่แสดงอีก
   const applications = (await query).filter((application) => application.user);
   const withMatches = await jobApplicantMatches(job._id, applications);
   res.json(withMatches.map((application) => hideWithdrawnApplicantDetails(application, req.user)));
 }
 
-// Every application to any of the employer's postings (the dashboard's
-// "all applicants" drill-down), optionally narrowed by status.
+// ใบสมัครทุกรายการของทุกประกาศงานของนายจ้าง (หน้าเจาะลึก
+// "ผู้สมัครทั้งหมด" ของแดชบอร์ด) กรองตามสถานะได้
 export async function listEmployerApplications(req, res) {
   if (!(await assertEmployerVerified(req, res))) return;
   const jobs = await Job.find({ employer: req.user.id }).select("_id");
@@ -142,13 +142,13 @@ export async function listEmployerApplications(req, res) {
     query.skip(pagination.skip).limit(pagination.limit);
   }
   const applications = (await query).filter((application) => application.user);
-  // Each applicant is scored against the posting they applied to, so the list shows the skill match too.
+  // ผู้สมัครแต่ละคนถูกให้คะแนนเทียบกับประกาศที่ตนสมัคร รายการจึงแสดงความตรงของทักษะด้วย
   const withMatches = await mixedApplicationMatches(applications);
   res.json(withMatches.map((application) => hideWithdrawnApplicantDetails(application, req.user)));
 }
 
-// Admin overview of every application, optionally narrowed by status, for the
-// dashboard drill-down.
+// ภาพรวมใบสมัครทั้งหมดสำหรับแอดมิน กรองตามสถานะได้ ใช้ในหน้าเจาะลึก
+// ของแดชบอร์ด
 export async function listAllApplications(req, res) {
   const filter = {};
   if (req.query.status) filter.status = req.query.status;

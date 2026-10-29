@@ -32,10 +32,10 @@ const INITIAL_FORM = {
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
-// The server hands this secret only to the browser that started the sign-up.
-// It is what lets the same person ask for a new code or finish verifying, and
-// what stops anyone else who knows the email address from interfering. It is
-// kept for this tab only, so a page reload mid-sign-up doesn't lock the person out.
+// เซิร์ฟเวอร์ส่งความลับนี้ให้เฉพาะเบราว์เซอร์ที่เริ่มการสมัคร
+// มันคือสิ่งที่ทำให้คนเดิมขอรหัสใหม่หรือยืนยันให้เสร็จได้ และ
+// ป้องกันไม่ให้คนอื่นที่รู้อีเมลเข้ามาแทรกแซง เก็บไว้เฉพาะแท็บนี้
+// เพื่อให้การโหลดหน้าใหม่กลางทางไม่ล็อกผู้ใช้ออกจากการสมัคร
 const REGISTRATION_TOKEN_KEY = "registrationToken";
 
 function readRegistrationToken() {
@@ -51,7 +51,7 @@ function storeRegistrationToken(token) {
     if (token) window.sessionStorage.setItem(REGISTRATION_TOKEN_KEY, token);
     else window.sessionStorage.removeItem(REGISTRATION_TOKEN_KEY);
   } catch {
-    // Private mode: the token still lives in component state for this visit.
+    // โหมดส่วนตัว: token ยังอยู่ใน state ของคอมโพเนนต์สำหรับการเข้าชมครั้งนี้
   }
 }
 

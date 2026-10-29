@@ -37,7 +37,7 @@ function GoogleSignInButton({ onCredential }) {
           type: "standard",
           theme: "outline",
           size: "large",
-          // Google only accepts a pixel width, so fit the space the form leaves us.
+          // Google รับเฉพาะความกว้างเป็นพิกเซล จึงปรับให้พอดีกับพื้นที่ที่ฟอร์มเหลือไว้ให้
           width: Math.max(200, Math.min(320, Math.floor(buttonRef.current.clientWidth || 320))),
           text: "continue_with",
           locale: "th",

@@ -11,7 +11,7 @@ const riskAssessmentSchema = new mongoose.Schema(
 );
 
 riskAssessmentSchema.index({ user: 1, createdAt: -1 });
-// Assessments are recomputed on every check-in; keep 90 days of history.
+// ผลประเมินคำนวณใหม่ทุกครั้งที่เช็คอิน เก็บประวัติไว้ 90 วัน
 riskAssessmentSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
 
 export default mongoose.model("RiskAssessment", riskAssessmentSchema);

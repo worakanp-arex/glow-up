@@ -1,7 +1,7 @@
 import "./BarList.css";
 
-// Horizontal bars for a ranked list: label on the left, bar and value on the
-// right. `items` is [{ key, label, value, hint? }]; bars scale to the largest.
+// แท่งแนวนอนสำหรับรายการจัดอันดับ: ป้ายอยู่ซ้าย แท่งและค่าอยู่
+// ขวา `items` คือ [{ key, label, value, hint? }] แท่งปรับสัดส่วนตามค่าสูงสุด
 export default function BarList({ items, unit = "ครั้ง", emptyText = "ยังไม่มีข้อมูลในช่วงนี้" }) {
   if (!items || items.length === 0) return <p className="bar-list-empty">{emptyText}</p>;
   const max = Math.max(1, ...items.map((item) => item.value));

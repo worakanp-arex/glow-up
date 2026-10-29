@@ -30,7 +30,7 @@
   .checkin-foot .ui-btn { width: 100%; }
 }
 
-/* Done state: summary + next steps so the card keeps a useful height. */
+/* สถานะเสร็จแล้ว: สรุปและขั้นตอนถัดไป เพื่อให้การ์ดยังมีความสูงที่เป็นประโยชน์ */
 .checkin-done .checkin-complete { padding: 18px; border-radius: 16px; background: var(--color-success-bg); }
 .checkin-next-title { margin: 22px 0 12px; font-size: .85rem; font-weight: 600; color: var(--color-text); }
 .checkin-next { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }

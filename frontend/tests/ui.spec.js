@@ -62,7 +62,8 @@ async function fixture(page, role = "user", options = {}) {
       data = url.searchParams.has("page") ? allUsers.slice(start, start + (Number(url.searchParams.get("limit")) || 10)) : allUsers;
       return route.fulfill({ json: data, headers: { "X-Total-Count": String(allUsers.length) } });
     }
-    else if (["/jobs", "/jobs/mine", "/jobs/admin/all"].includes(p)) {
+    // ผู้หางานที่ล็อกอินเรียก /jobs/matched (เรียงตามทักษะที่ตรง) ส่วนผู้เยี่ยมชมและบทบาทอื่นเรียก /jobs
+    else if (["/jobs", "/jobs/matched", "/jobs/mine", "/jobs/admin/all"].includes(p)) {
       if (options.failJobs) return route.fulfill({ status: 500, json: { message: "โหลดรายการไม่สำเร็จ" } });
       const start = ((Number(url.searchParams.get("page")) || 1) - 1) * (Number(url.searchParams.get("limit")) || 10);
       data = url.searchParams.has("page") ? jobs.slice(start, start + (Number(url.searchParams.get("limit")) || 10)) : jobs;

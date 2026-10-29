@@ -24,7 +24,7 @@ const INITIAL_FORM = {
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 
-// Create a new posting, or edit an existing one when the route has a :jobId.
+// สร้างประกาศใหม่ หรือแก้ไขประกาศที่มีอยู่เมื่อ route มี :jobId
 function PostJob() {
   const navigate = useNavigate();
   const { jobId } = useParams();
@@ -120,9 +120,15 @@ function PostJob() {
         attachmentRequests: selectedAttachments,
       };
       const saved = editing ? await jobService.updateJob(jobId, payload) : await jobService.createJob(payload);
-      if (imageFile) await jobService.uploadJobImage(saved._id, imageFile);
-      else if (removeImage) await jobService.removeJobImage(saved._id);
-      navigate(`/employer/jobs/${saved._id}`);
+      // ประกาศถูกบันทึกแล้ว ถ้ารูปล้มเหลวต้องไม่ค้างอยู่หน้าฟอร์ม (กดส่งซ้ำจะได้ประกาศซ้ำ) จึงไปหน้าประกาศพร้อมคำเตือน
+      let imageNotice = null;
+      try {
+        if (imageFile) await jobService.uploadJobImage(saved._id, imageFile);
+        else if (removeImage) await jobService.removeJobImage(saved._id);
+      } catch {
+        imageNotice = "บันทึกประกาศงานแล้ว แต่บันทึกรูปไม่สำเร็จ กด “แก้ไขประกาศ” เพื่อลองใส่รูปอีกครั้ง";
+      }
+      navigate(`/employer/jobs/${saved._id}`, { state: imageNotice ? { notice: imageNotice } : undefined });
     } catch (err) {
       setError(err.response?.data?.message || (editing ? "บันทึกประกาศงานไม่สำเร็จ" : "สร้างประกาศงานไม่สำเร็จ"));
     } finally {
@@ -173,7 +179,8 @@ function PostJob() {
                 </label>
                 <label className="ui-field">
                   รายละเอียดงาน
-                  <textarea name="description" value={form.description} onChange={handleChange} rows={6} placeholder={"อธิบายงานคร่าว ๆ\n- ขึ้นต้นบรรทัดด้วย - เพื่อแสดงเป็นรายการหน้าที่"} />
+                  <textarea name="description" value={form.description} onChange={handleChange} rows={12} placeholder={"อธิบายงานคร่าว ๆ 1-2 บรรทัด แล้วแยกเป็นหัวข้อ เช่น\n\nหน้าที่หลัก:\n- ต้อนรับและเสิร์ฟอาหารลูกค้า\n\nคุณสมบัติและสิ่งที่ต้องทำได้:\n- ยืนทำงานต่อเนื่อง 8 ชั่วโมงได้\n\nสวัสดิการและเงื่อนไข:\n- ประกันสังคม หยุดสัปดาห์ละ 1 วัน"} />
+                  <small>พิมพ์หัวข้อให้ลงท้ายด้วย : แล้วขึ้นต้นแต่ละข้อด้วย - ระบบจะแสดงเป็นรายการให้ผู้สมัครอ่านง่าย</small>
                 </label>
                 <div className="post-job-row">
                   <label className="ui-field">

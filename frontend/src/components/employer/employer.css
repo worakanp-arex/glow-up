@@ -1,4 +1,4 @@
-/* Shared employer-area pieces: the verification banner and applicant rows. */
+/* ส่วนประกอบของพื้นที่นายจ้างที่ใช้ร่วมกัน: แบนเนอร์ยืนยันตัวตนและแถวผู้สมัคร */
 .employer-banner { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; border: 1px solid var(--color-warning-border, var(--color-border)); border-radius: 16px; background: var(--color-warning-bg); color: var(--color-warning); }
 .employer-banner.is-danger { background: var(--color-danger-bg); color: var(--color-danger); border-color: var(--color-danger-border, var(--color-border)); }
 .employer-banner svg { flex-shrink: 0; margin-top: 2px; }

@@ -11,13 +11,13 @@
 .profile-error { background: var(--color-danger-bg); color: var(--color-danger); }
 .profile-empty-note { margin: 0; font-size: .82rem; color: var(--color-text-muted); }
 
-/* ---------- Layout helpers ---------- */
+/* ---------- ตัวช่วยจัดเลย์เอาต์ ---------- */
 .profile-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
 .profile-split-even { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
 .profile-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .profile-grid-2 { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; align-items: stretch; }
 
-/* ---------- Goals ---------- */
+/* ---------- เป้าหมาย ---------- */
 .profile-goal-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 20px; }
 .profile-goal-list li > button { display: flex; align-items: center; gap: 16px; width: 100%; margin-bottom: 18px; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .profile-goal-icon { display: grid; place-items: center; flex-shrink: 0; width: 48px; height: 48px; border-radius: 14px; background: var(--color-success-bg); color: var(--color-success); }
@@ -37,7 +37,7 @@
 .profile-goal-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-wrap: wrap; }
 .profile-goal-delete { display: inline-flex; align-items: center; gap: 4px; margin-right: auto; padding: 0; border: 0; background: none; font: inherit; font-size: .8rem; color: var(--color-danger); cursor: pointer; }
 
-/* ---------- Courses ---------- */
+/* ---------- คอร์ส ---------- */
 .profile-courses-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .profile-courses-list li { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); }
 .profile-courses-list li:last-child { border-bottom: 0; }
@@ -48,7 +48,7 @@
 .profile-courses-status-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
 .profile-courses-cert-link { font-size: .75rem; color: var(--color-primary-600); }
 
-/* ---------- Recovery ---------- */
+/* ---------- การฟื้นฟู ---------- */
 .profile-recovery { display: flex; align-items: flex-start; gap: 12px; padding: 20px 22px; }
 .profile-recovery > svg { flex-shrink: 0; margin-top: 3px; color: var(--color-primary-600); }
 .profile-recovery strong { font-size: .82rem; font-weight: 500; color: var(--color-text-secondary); }
@@ -56,7 +56,7 @@
 .profile-recovery small { font-size: .72rem; color: var(--color-text-muted); }
 .profile-side-note { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; font-size: .72rem; }
 
-/* ---------- Skills ---------- */
+/* ---------- ทักษะ ---------- */
 .profile-skill-add-form { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; margin-bottom: 18px; }
 .profile-skill-add-form input, .profile-skill-add-form select { min-width: 0; padding: 10px 14px; font-size: .85rem; }
 .profile-skill-level-select { width: 110px; }
@@ -89,7 +89,7 @@
 .profile-cert-add { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
 .profile-cert-add input[type="text"] { min-width: 0; padding: 10px 14px; font-size: .85rem; }
 
-/* ---------- Family & sharing ---------- */
+/* ---------- ครอบครัวและการแชร์ ---------- */
 .profile-family-invite-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
 .profile-family-invite-form input { min-width: 0; padding: 10px 14px; font-size: .85rem; }
 .profile-family-hint { margin: 8px 0 0; font-size: .72rem; }
@@ -118,7 +118,7 @@
 .profile-privacy h3 { margin: 0 0 6px; font-size: .9rem; font-weight: 600; }
 .profile-privacy p { margin: 0; font-size: .78rem; line-height: 1.7; color: var(--color-text-secondary); }
 
-/* ---------- Personal form: two columns ---------- */
+/* ---------- ฟอร์มข้อมูลส่วนตัว: สองคอลัมน์ ---------- */
 .profile-form-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; align-items: start; }
 .profile-fieldset { display: flex; flex-direction: column; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .profile-fieldset legend { width: 100%; margin-bottom: 14px; padding: 0 0 10px; border-bottom: 1px solid var(--color-border); font-size: .9rem; font-weight: 600; color: var(--color-text); }
@@ -147,7 +147,7 @@
   .profile-privacy { padding: 20px; }
 }
 
-/* ---------- Column balance ---------- */
+/* ---------- ความสมดุลของคอลัมน์ ---------- */
 .profile-split { align-items: stretch; }
 .profile-col > .profile-courses-card { flex: 1; display: flex; flex-direction: column; }
 .profile-learn-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: auto; padding-top: 16px; }

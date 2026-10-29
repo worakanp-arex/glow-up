@@ -12,8 +12,8 @@ export function updateActivityMission(id, data) {
   return api.put(`/activity-missions/${id}`, data).then((res) => res.data);
 }
 
-// Resolves to { archived: true, logCount } when the mission had history and was
-// hidden instead of removed, or to undefined (204) when it was deleted.
+// คืน { archived: true, logCount } เมื่อภารกิจมีประวัติและถูกซ่อน
+// แทนที่จะลบ หรือ undefined (204) เมื่อถูกลบ
 export function deleteActivityMission(id) {
   return api.delete(`/activity-missions/${id}`).then((res) => res.data);
 }
@@ -30,7 +30,7 @@ export function logActivity(id, data) {
   return api.post(`/activity-missions/${id}/log`, data).then((res) => res.data);
 }
 
-// Counsellor/admin review of activity logs from missions marked requiresApproval.
+// ผู้ให้คำปรึกษา/แอดมินตรวจบันทึกกิจกรรมจากภารกิจที่ตั้ง requiresApproval
 export function getPendingActivityApprovals() {
   return api.get("/activity-missions/logs/pending").then((res) => res.data);
 }

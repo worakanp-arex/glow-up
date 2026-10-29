@@ -1,8 +1,8 @@
-// What a person sees after "assess now". The measurement underneath is unchanged
-// (the care team still sees the level), but the person is shown encouragement and
-// next steps instead of a risk label or raw averages: a label like "high risk"
-// weighs on someone who is already struggling, and a visible score invites
-// logging for the score rather than for how they actually feel.
+// สิ่งที่ผู้ใช้เห็นหลัง "ประเมินตอนนี้" การวัดเบื้องหลังไม่เปลี่ยน
+// (ทีมดูแลยังเห็นระดับ) แต่ผู้ใช้จะเห็นกำลังใจและ
+// ขั้นตอนถัดไปแทนป้ายความเสี่ยงหรือค่าเฉลี่ยดิบ: ป้ายอย่าง "ความเสี่ยงสูง"
+// ทับถมคนที่กำลังลำบากอยู่แล้ว และคะแนนที่เห็นได้
+// ชวนให้บันทึกเพื่อคะแนน ไม่ใช่เพื่อความรู้สึกจริง
 export const RISK_GUIDANCE = {
   low: {
     title: "ช่วงนี้คุณดูแลใจได้ดี",

@@ -1,6 +1,6 @@
-// Dev/demo helper: seeds a starter set of missions and rewards so the
-// Reward/Mission feature has data to show without requiring an admin UI.
-// Run with: node src/config/seedMissions.js
+// ตัวช่วยสำหรับพัฒนา/สาธิต: สร้างชุดภารกิจและรางวัลเริ่มต้น เพื่อให้ฟีเจอร์
+// รางวัล/ภารกิจมีข้อมูลแสดงโดยไม่ต้องมีหน้าแอดมิน
+// รันด้วย: node src/config/seedMissions.js
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { connectDB } from "./db.js";

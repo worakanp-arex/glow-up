@@ -1,6 +1,6 @@
-// Role-based artwork shown when a person has not uploaded a profile picture.
-// Employer and admin accounts keep their initials so companies read as
-// organisations rather than characters.
+// ภาพประจำบทบาทที่แสดงเมื่อผู้ใช้ยังไม่ได้อัปโหลดรูปโปรไฟล์
+// บัญชีนายจ้างและแอดมินใช้ตัวอักษรย่อ เพื่อให้บริษัทดูเป็น
+// องค์กร ไม่ใช่ตัวละคร
 const DEFAULT_AVATARS = {
   user: "/images/avatars/user.webp",
   counsellor: "/images/avatars/staff.webp",

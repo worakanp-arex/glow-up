@@ -4,17 +4,17 @@ const activityMissionSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String },
-    // References MissionCategory.key — validated against the admin-managed
-    // catalog at the route layer (see activityMissionRoutes.js) rather than a
-    // hardcoded Mongoose enum, since admins can add/rename categories.
+    // อ้างอิง MissionCategory.key — ตรวจกับแคตตาล็อกที่แอดมินจัดการ
+    // ที่ชั้น route (ดู activityMissionRoutes.js) แทน enum ของ Mongoose
+    // ที่ฮาร์ดโค้ด เพราะแอดมินเพิ่ม/เปลี่ยนชื่อหมวดได้
     category: { type: String, required: true },
     icon: { type: String },
     points: { type: Number, default: 5 },
-    // When true, a counsellor/admin must approve each day's log before its
-    // points count toward the user's total (see ActivityMissionLog.approved).
+    // เมื่อเป็น true ผู้ให้คำปรึกษา/แอดมินต้องอนุมัติบันทึกของแต่ละวัน ก่อนที่
+    // คะแนนจะนับรวมในคะแนนของผู้ใช้ (ดู ActivityMissionLog.approved)
     requiresApproval: { type: Boolean, default: false },
     active: { type: Boolean, default: true },
-    // Optional period in which people can log it (Bangkok day boundaries).
+    // ช่วงเวลาที่ผู้คนบันทึกได้ (ไม่บังคับ) ตามขอบเขตวันของไทย
     startDate: { type: Date },
     endDate: { type: Date },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

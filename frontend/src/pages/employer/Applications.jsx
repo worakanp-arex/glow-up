@@ -18,7 +18,7 @@ const STATUS_FILTERS = [
   { key: "rejected", label: "ปฏิเสธ" },
 ];
 
-// Every application to any of the employer's postings, newest first.
+// ใบสมัครทั้งหมดของทุกประกาศของนายจ้าง ใหม่สุดก่อน
 function Applications() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requested = searchParams.get("status") || "";
@@ -29,7 +29,7 @@ function Applications() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [blocked, setBlocked] = useState(false);
-  // How many applications sit under each filter, so every tab can say what it holds.
+  // แต่ละตัวกรองมีกี่ใบสมัคร เพื่อให้ทุกแท็บบอกได้ว่ามีอะไรอยู่
   const [counts, setCounts] = useState(null);
 
   useEffect(() => {

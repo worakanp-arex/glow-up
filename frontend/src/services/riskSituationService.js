@@ -8,7 +8,7 @@ export function createRiskSituationLog(payload) {
   return api.post("/risk-situations", payload).then((res) => res.data);
 }
 
-// Admin/counsellor: a specific patient's logged real-world risk situations.
+// แอดมิน/ผู้ให้คำปรึกษา: เหตุการณ์เสี่ยงในชีวิตจริงที่ผู้ป่วยเฉพาะรายบันทึกไว้
 export function getRiskSituationLogsForUser(userId) {
   return api.get(`/risk-situations/${userId}`).then((res) => res.data);
 }

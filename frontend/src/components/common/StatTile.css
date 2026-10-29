@@ -18,7 +18,7 @@
   background-color: var(--color-border-strong);
 }
 
-/* accent bar colors come from the accessibility-validated status palette; keep as literal hex */
+/* สีแถบเน้นมาจากชุดสีสถานะที่ผ่านการตรวจเรื่องการเข้าถึงแล้ว ให้คงเป็นค่า hex ตรงๆ */
 .stat-tile-warning::before {
   background-color: #fab219;
 }
@@ -50,7 +50,7 @@
   color: var(--color-text-muted);
 }
 
-/* Drill-down tiles: the whole tile is a link/button. */
+/* ไทล์เจาะลึก: ทั้งไทล์เป็นลิงก์/ปุ่ม */
 .stat-tile-interactive {
   display: block;
   width: 100%;

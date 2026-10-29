@@ -11,6 +11,8 @@ import * as courseService from "../../services/courseService.js";
 import StatusBadge from "../../components/common/StatusBadge.jsx";
 import { courseRange, courseStatus } from "../../utils/courseDates.js";
 import { courseCover } from "../../utils/courseCover.js";
+import { buildBannerSlides } from "../../utils/courseBanner.js";
+import CourseBanner from "../../components/courses/CourseBanner.jsx";
 import "./Courses.css";
 
 const ALL = "";
@@ -28,23 +30,30 @@ function Courses() {
   const [courses, setCourses] = useState([]);
   const [myCourses, setMyCourses] = useState([]);
   const [recommended, setRecommended] = useState([]);
+  const [featuredCourses, setFeaturedCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(ALL);
+  // id คอร์สที่กำลังบันทึก/เลิกบันทึก กันการกดซ้ำระหว่างรอเซิร์ฟเวอร์
+  const [savingId, setSavingId] = useState(null);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
     Promise.all([
-      // Learners only see courses that are open now; staff also see upcoming and expired ones.
+      // ผู้เรียนเห็นเฉพาะคอร์สที่เปิดอยู่ตอนนี้ เจ้าหน้าที่เห็นคอร์สที่กำลังจะเปิดและที่หมดอายุแล้วด้วย
       courseService.getCourses({ status: isStaff ? "all" : "active" }),
       isUser ? courseService.getMyCourses() : Promise.resolve([]),
-      // Suggestions are a bonus: if they fail to load the rest of the page still works.
+      // คำแนะนำเป็นส่วนเสริม: หากโหลดไม่สำเร็จ ส่วนอื่นของหน้ายังทำงานได้
       isUser ? courseService.getRecommendedCourses().catch(() => []) : Promise.resolve([]),
+      // คอร์สสำหรับแบนเนอร์เลื่อนวน (เลือกตามทักษะที่สนใจ) ถ้าโหลดไม่ได้แบนเนอร์จะใช้คอร์สที่เปิดอยู่แทน
+      isUser ? courseService.getFeaturedCourses().catch(() => []) : Promise.resolve([]),
     ])
-      .then(([allCourses, enrolled, suggested]) => {
+      .then(([allCourses, enrolled, suggested, featured]) => {
         setCourses(allCourses);
         setMyCourses(enrolled);
         setRecommended(Array.isArray(suggested) ? suggested : []);
+        setFeaturedCourses(Array.isArray(featured) ? featured : []);
       })
       .catch((error) => setLoadError(error))
       .finally(() => setLoading(false));
@@ -73,17 +82,26 @@ function Courses() {
 
   const pagination = usePagination(visibleCourses);
 
-  // "Continue where you left off": the most recent saved course without a certificate yet.
+  // "เรียนต่อจากที่ค้างไว้": คอร์สที่บันทึกไว้ล่าสุดที่ยังไม่มีใบรับรอง จะอยู่สไลด์แรกของแบนเนอร์
   const continuing = [...myCourses].reverse().find((e) => e.course && !e.certificateUrl)?.course;
-  const featured = continuing || courses[0];
+  const bannerSlides = buildBannerSlides({ continuing, featured: featuredCourses, courses });
 
   async function handleToggleSaved(courseId, isEnrolled) {
-    if (isEnrolled) {
-      await courseService.unenrollCourse(courseId);
-      setMyCourses((prev) => prev.filter((e) => e.course._id !== courseId));
-    } else {
-      const enrollment = await courseService.enrollCourse(courseId);
-      setMyCourses((prev) => [...prev, enrollment]);
+    if (savingId) return;
+    setSavingId(courseId);
+    setSaveError("");
+    try {
+      if (isEnrolled) {
+        await courseService.unenrollCourse(courseId);
+        setMyCourses((prev) => prev.filter((e) => e.course._id !== courseId));
+      } else {
+        const enrollment = await courseService.enrollCourse(courseId);
+        setMyCourses((prev) => [...prev, enrollment]);
+      }
+    } catch (err) {
+      setSaveError(err.response?.data?.message || (isEnrolled ? "เลิกบันทึกคอร์สไม่สำเร็จ ลองใหม่อีกครั้ง" : "บันทึกคอร์สไม่สำเร็จ ลองใหม่อีกครั้ง"));
+    } finally {
+      setSavingId(null);
     }
   }
 
@@ -109,18 +127,7 @@ function Courses() {
     <div className="courses-page">
       {header}
 
-      {featured && (
-        <section className="courses-hero">
-          <div className="courses-hero-copy">
-            <p className="courses-hero-eyebrow">{continuing ? "เรียนต่อจากครั้งที่แล้ว" : "แนะนำสำหรับคุณ"}</p>
-            <h2>{featured.title}</h2>
-            <p>{excerpt(featured.description, 90) || "กลับมาเรียนต่อในจังหวะของคุณ"}</p>
-            {continuing && <StatusBadge status="learning" />}
-            <Link to={`/courses/${featured._id}`} className="ui-btn ui-btn-primary">{continuing ? "เรียนต่อ" : "เริ่มเรียน"}</Link>
-          </div>
-          <ImageSlot className="courses-hero-art" src="/images/illustrations/mascot.webp" alt="" />
-        </section>
-      )}
+      <CourseBanner slides={bannerSlides} />
 
       {recommended.length > 0 && (
         <section className="courses-recommended" id="recommended" aria-labelledby="recommended-heading">
@@ -157,6 +164,8 @@ function Courses() {
         </label>
       </div>
 
+      {saveError && <p className="courses-save-error" role="alert">{saveError}</p>}
+
       {visibleCourses.length === 0 ? (
         <p className="courses-empty">
           {category === SAVED && !query.trim() ? "ยังไม่มีคอร์สที่บันทึกไว้ — แตะไอคอนบุ๊กมาร์กบนการ์ดเพื่อเก็บไว้เรียนต่อ" : "ไม่พบคอร์สเรียนที่ตรงกับเงื่อนไข"}
@@ -179,6 +188,8 @@ function Courses() {
                       type="button"
                       className={`course-card-save${enrollment ? " is-saved" : ""}`}
                       onClick={() => handleToggleSaved(course._id, Boolean(enrollment))}
+                      disabled={savingId === course._id}
+                      aria-busy={savingId === course._id}
                       aria-pressed={Boolean(enrollment)}
                       aria-label={enrollment ? "เลิกบันทึกคอร์ส" : "บันทึกคอร์สนี้"}
                     >
@@ -214,14 +225,17 @@ function Courses() {
       )}
       <Pagination {...pagination} />
 
-      <Link to="/learning" className="ui-card courses-learning-callout">
-        <span className="courses-learning-callout-icon"><MessageCircleWarning size={20} /></span>
-        <span className="courses-learning-callout-text">
-          <strong>ฝึกทักษะการปฏิเสธ</strong>
-          <span>บทเรียนสั้นและสถานการณ์จำลอง ฝึกวิธีปฏิเสธในสถานการณ์เสี่ยง</span>
-        </span>
-        <ArrowRight size={18} aria-hidden="true" />
-      </Link>
+      {/* หน้า /learning เปิดเฉพาะผู้ใช้ บทบาทอื่นกดแล้วจะถูกพากลับหน้าแรกของตัวเอง จึงไม่แสดง */}
+      {isUser && (
+        <Link to="/learning" className="ui-card courses-learning-callout">
+          <span className="courses-learning-callout-icon"><MessageCircleWarning size={20} /></span>
+          <span className="courses-learning-callout-text">
+            <strong>ฝึกทักษะการปฏิเสธ</strong>
+            <span>บทเรียนสั้นและสถานการณ์จำลอง ฝึกวิธีปฏิเสธในสถานการณ์เสี่ยง</span>
+          </span>
+          <ArrowRight size={18} aria-hidden="true" />
+        </Link>
+      )}
     </div>
   );
 }

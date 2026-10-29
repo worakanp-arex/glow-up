@@ -1,4 +1,4 @@
-// A family message stays on the home page for this long after it was marked as
-// read, then the usual welcome returns (the message remains in the profile's
-// history). The server applies the same window when it picks the latest message.
+// ข้อความจากครอบครัวอยู่บนหน้าหลักตามเวลานี้หลังทำเครื่องหมายว่าอ่านแล้ว
+// จากนั้นข้อความต้อนรับปกติจะกลับมา (ข้อความยังอยู่ในประวัติของโปรไฟล์)
+// เซิร์ฟเวอร์ใช้ช่วงเวลาเดียวกันเมื่อเลือกข้อความล่าสุด
 export const READ_MESSAGE_VISIBLE_MS = 10 * 60 * 1000;

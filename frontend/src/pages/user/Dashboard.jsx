@@ -54,8 +54,8 @@ function Dashboard() {
       .catch(() => setFamilyLinks([]));
   }, []);
 
-  // The newest encouragement from family replaces the generic welcome text so it
-  // isn't only a line in the notification list.
+  // กำลังใจล่าสุดจากครอบครัวมาแทนข้อความต้อนรับทั่วไป
+  // เพื่อไม่ให้เป็นเพียงบรรทัดในรายการแจ้งเตือน
   useEffect(() => {
     familyService
       .getLatestFamilyMessage()
@@ -63,11 +63,10 @@ function Dashboard() {
       .catch(() => setFamilyMessage(null));
   }, []);
 
-  // A family member accepts an invite through their own regular account, so
-  // the same "user" role can view either dashboard depending on whether
-  // they're actively linked as someone's family follower. Wait for the check
-  // to resolve before rendering either dashboard, to avoid a flash of the
-  // wrong one.
+  // สมาชิกครอบครัวรับคำเชิญผ่านบัญชีปกติของตนเอง ดังนั้น
+  // บทบาท "user" เดียวกันอาจดูได้ทั้งสองแดชบอร์ด ขึ้นกับว่า
+  // เป็นผู้ติดตามครอบครัวของใครอยู่หรือไม่ ให้รอผลตรวจนี้
+  // ก่อนเรนเดอร์แดชบอร์ดใด เพื่อไม่ให้แดชบอร์ดผิดอันกะพริบขึ้นมา
   if (familyLinks === null) {
     return <AsyncState />;
   }

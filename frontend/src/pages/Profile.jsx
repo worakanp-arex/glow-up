@@ -64,7 +64,7 @@ function Profile() {
   const { user, updateUser } = useAuth();
   const isUser = user.role === "user";
   const [searchParams] = useSearchParams();
-  // ?tab=skills etc. lets other pages link straight to a profile section.
+  // ?tab=skills เป็นต้น ให้หน้าอื่นลิงก์ตรงไปยังส่วนของโปรไฟล์ได้
   const [tab, setTab] = useState(() => {
     const requested = searchParams.get("tab");
     if (!isUser) return "personal";
@@ -281,8 +281,8 @@ function Profile() {
   const ownedSkills = mySkills.filter((item) => item.skill);
   const ownedSkillIds = ownedSkills.map((item) => item.skill._id);
 
-  // Picking a skill that's already owned removes it; picking a new one opens
-  // the level popup instead of adding it straight away.
+  // การเลือกทักษะที่มีอยู่แล้วจะลบออก การเลือกทักษะใหม่จะเปิด
+  // ป๊อปอัปเลือกระดับ แทนการเพิ่มทันที
   async function handleToggleSkill(skill) {
     const existing = ownedSkills.find((item) => item.skill._id === skill._id);
     if (existing) {
@@ -355,7 +355,7 @@ function Profile() {
   }
 
   const activeGoals = (goals || []).filter((g) => g.status === "active");
-  // Top the learning card up to 3 rows with courses the user hasn't saved yet.
+  // เติมการ์ดการเรียนรู้ให้ครบ 3 แถวด้วยคอร์สที่ผู้ใช้ยังไม่ได้บันทึก
   const enrolledIds = new Set(myCourses.map((e) => e.course?._id));
   const suggestedCourses = allCourses.filter((c) => !enrolledIds.has(c._id)).slice(0, Math.max(0, 3 - myCourses.length));
   const doneGoals = (goals || []).filter((g) => g.status === "completed");

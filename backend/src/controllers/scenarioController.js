@@ -5,7 +5,7 @@ import { notExpiredFilter, parseOptionalEndOfDay } from "../utils/dateKey.js";
 
 const INVALID_EXPIRY = { message: "วันหมดอายุไม่ถูกต้อง" };
 
-// What members can play: switched on and not past the last day.
+// สิ่งที่สมาชิกเล่นได้: เปิดใช้งานอยู่และยังไม่พ้นวันสุดท้าย
 function playableFilter() {
   return { active: true, ...notExpiredFilter() };
 }
@@ -18,8 +18,8 @@ function sanitizeScenario(scenario) {
   };
 }
 
-// User-facing: don't leak which option is correct or its feedback text
-// before the user has actually attempted the scenario.
+// ฝั่งผู้ใช้: ไม่เปิดเผยว่าตัวเลือกไหนถูกหรือข้อความอธิบาย
+// ก่อนที่ผู้ใช้จะลองทำสถานการณ์นั้นจริง
 export async function listActiveScenarios(req, res) {
   const scenarios = await ScenarioSimulation.find(playableFilter()).sort({ createdAt: -1 });
   res.json(scenarios.map(sanitizeScenario));

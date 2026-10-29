@@ -1,7 +1,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import "./ShowMore.css";
 
-// The "show more / show less" button under a list limited with useShowMore.
+// ปุ่ม "ดูเพิ่ม / ย่อ" ใต้รายการที่จำกัดด้วย useShowMore
 export default function ShowMoreButton({ hidden, expanded, onToggle }) {
   if (hidden <= 0) return null;
   return (

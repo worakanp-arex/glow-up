@@ -2,16 +2,16 @@ import mongoose from "mongoose";
 
 const familyLinkSchema = new mongoose.Schema(
   {
-    // The person in recovery whose progress the family member follows.
+    // ผู้ฟื้นฟูที่สมาชิกครอบครัวติดตามความก้าวหน้า
     recoveringUser: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    // Set once the invite is accepted; null while pending.
+    // ตั้งค่าเมื่อรับคำเชิญแล้ว เป็น null ขณะที่ยังรออยู่
     familyUser: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    // Who started the connection. "recovering" = the patient invited a family
-    // member by email; "family" = the family member asked to follow the patient
-    // and the patient has to approve (status "requested").
+    // ใครเริ่มการเชื่อมต่อ "recovering" = ผู้ป่วยเชิญสมาชิกครอบครัว
+    // ทางอีเมล "family" = สมาชิกครอบครัวขอติดตามผู้ป่วย
+    // และผู้ป่วยต้องอนุมัติ (สถานะ "requested")
     initiatedBy: { type: String, enum: ["recovering", "family"], default: "recovering" },
-    // For patient invites this is the invitee's email; for family requests it is
-    // the requester's own email.
+    // คำเชิญจากผู้ป่วยคืออีเมลของผู้ถูกเชิญ ส่วนคำขอจากครอบครัวคือ
+    // อีเมลของผู้ขอเอง
     inviteEmail: { type: String, required: true },
     inviteTokenHash: {
       type: String,

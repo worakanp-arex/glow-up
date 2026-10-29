@@ -1,8 +1,8 @@
-// Opens many concurrent authenticated Socket.IO connections, then closes
-// them, to check the Phase-1 maxHttpBufferSize tuning and the (already-
-// correct) disconnect-timer cleanup in backend/src/services/socket.js hold
-// under real connection volume — autocannon is HTTP-only, so this is a
-// standalone script.
+// เปิดการเชื่อมต่อ Socket.IO ที่ผ่านการยืนยันตัวตนจำนวนมากพร้อมกัน แล้วปิดทั้งหมด
+// เพื่อตรวจการปรับ maxHttpBufferSize ของ Phase-1 และการล้างตัวจับเวลาเมื่อตัดการเชื่อมต่อ
+// (ซึ่งถูกต้องอยู่แล้ว) ใน backend/src/services/socket.js
+// ว่ายังทำงานได้ดีเมื่อมีการเชื่อมต่อจำนวนมาก — autocannon รองรับเฉพาะ HTTP
+// จึงต้องมีสคริปต์แยกต่างหาก
 import { io } from "socket.io-client";
 import { pathToFileURL } from "node:url";
 import { loginUser } from "../helpers.js";

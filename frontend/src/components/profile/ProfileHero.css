@@ -1,4 +1,4 @@
-/* Cover on top, the picture overlaps its bottom-left corner. */
+/* ปกอยู่ด้านบน รูปภาพซ้อนที่มุมล่างซ้ายของปก */
 .profile-hero { padding: 0; overflow: hidden; }
 .profile-hero-cover { height: 176px; background-color: var(--color-primary-100); }
 .profile-hero-main { position: relative; display: flex; align-items: flex-start; gap: 24px; padding: 0 28px 24px; }

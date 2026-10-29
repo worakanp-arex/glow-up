@@ -9,15 +9,15 @@ const missionSchema = new mongoose.Schema(
       enum: ["streak", "totalCheckins", "scenarioCompleted", "custom"],
       required: true,
     },
-    // What value of the tracked metric completes this mission (e.g. 7 days
-    // of streak, 30 total check-ins, 1 scenario passed).
+    // ค่าของตัวชี้วัดที่ติดตามซึ่งทำให้ภารกิจสำเร็จ (เช่น สตรีค 7 วัน
+    // เช็คอินรวม 30 ครั้ง ผ่านสถานการณ์ 1 ครั้ง)
     targetValue: { type: Number, required: true },
     rewardPoints: { type: Number, default: 0 },
     badgeIcon: { type: String },
     active: { type: Boolean, default: true },
-    // Display order on the user's board (lower first) and an optional window
-    // in which the mission can still be progressed. Completed missions keep
-    // their points after the window closes.
+    // ลำดับการแสดงบนบอร์ดของผู้ใช้ (น้อยก่อน) และช่วงเวลาที่ไม่บังคับ
+    // ซึ่งภารกิจยังมีความคืบหน้าได้ ภารกิจที่สำเร็จแล้วยังเก็บ
+    // คะแนนไว้แม้ช่วงเวลาจะปิดแล้ว
     order: { type: Number, default: 0 },
     startDate: { type: Date },
     endDate: { type: Date },

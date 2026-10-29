@@ -37,7 +37,7 @@ function NotificationBell() {
   const [confirmClear, setConfirmClear] = useState(false);
   const containerRef = useRef(null);
   const navigate = useNavigate();
-  // The panel opens on the latest few; older ones sit behind "show more" and fold back up each time it is opened.
+  // แผงเปิดมาที่ไม่กี่รายการล่าสุด รายการเก่ากว่าอยู่หลัง "ดูเพิ่ม" และพับกลับทุกครั้งที่เปิด
   const list = useShowMore(notifications, 5, open);
 
   useEffect(() => {
