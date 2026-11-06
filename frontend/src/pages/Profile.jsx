@@ -25,9 +25,7 @@ import useConfirmDialog from "../components/common/useConfirmDialog.jsx";
 import { THAI_PROVINCES } from "../constants/provinces.js";
 import { skillLevelLabel } from "../constants/skillLevels.js";
 import SkillLevelDialog from "../components/profile/SkillLevelDialog.jsx";
-import { roleHome } from "../constants/roleHome.js";
 import { courseRange, courseStatus } from "../utils/courseDates.js";
-import { getPreviousRoute } from "../utils/routeHistory.js";
 import "./Profile.css";
 
 const FAMILY_STATUS_LABELS = { pending: "รอการตอบรับ", requested: "ขอเชื่อมต่อ", active: "ติดตามอยู่" };
@@ -473,11 +471,9 @@ function Profile() {
     </form>
   );
 
-  const backTo = getPreviousRoute("/profile") || roleHome(user.role);
-
   return (
     <div className="profile-page">
-      <PageHeader icon={User} eyebrow="Your own story" description="จัดการข้อมูล เป้าหมาย และสิ่งที่คุณเลือกแบ่งปัน" backTo={backTo} backLabel="หน้าที่คุณเข้ามา">โปรไฟล์ของฉัน</PageHeader>
+      <PageHeader icon={User} eyebrow="Your own story" description="จัดการข้อมูล เป้าหมาย และสิ่งที่คุณเลือกแบ่งปัน">โปรไฟล์ของฉัน</PageHeader>
 
       <ProfileHero
         user={user}

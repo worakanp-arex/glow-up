@@ -54,7 +54,7 @@ function Dashboard() {
           <Users size={16} />
           <span>ผู้ใช้งาน</span>
         </h2>
-        <div className="admin-dashboard-grid">
+        <div className="admin-dashboard-grid is-six">
           <StatTile label="ผู้ใช้งานทั้งหมด" value={stats.users.total} to="/admin/users" hint="รวมทุกบทบาท" />
           <StatTile label="ผู้ผ่านการบำบัด" value={stats.users.patients ?? 0} to="/admin/users?role=user" hint="ดูรายชื่อผู้ใช้งาน" />
           <StatTile label="ครอบครัว/ผู้ดูแล" value={stats.users.family ?? 0} to="/admin/users?role=family" hint="ดูรายชื่อครอบครัว" />

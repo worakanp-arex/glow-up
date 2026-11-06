@@ -1,5 +1,6 @@
-.deleted-users-head,
-.deleted-users-row {
+/* ต้องมีความสำคัญของ selector เท่ากับ .users-list > li ใน Users.css ไม่เช่นนั้นจะถูกทับเหลือ 3 คอลัมน์ */
+.users-table-head.deleted-users-head,
+.users-list > .deleted-users-row {
   grid-template-columns: minmax(0, 1fr) 170px 190px 70px;
 }
 
@@ -10,8 +11,7 @@
 .deleted-users-state.is-anonymized { color: var(--color-text-muted); font-weight: 500; }
 
 @media (max-width: 900px) {
-  .deleted-users-row { grid-template-columns: minmax(0, 1fr) auto; }
-  .deleted-users-when, .deleted-users-state { grid-column: 1 / -1; }
+  .users-list > .deleted-users-row { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* หน้ารายละเอียด */
@@ -43,6 +43,12 @@
 .deleted-user-section summary { cursor: pointer; color: var(--color-primary-700); font-size: 0.8rem; }
 .deleted-user-chat { margin-top: 0.4rem; padding-left: 0.75rem; border-left: 3px solid var(--color-border-strong); display: flex; flex-direction: column; gap: 0.35rem; }
 .deleted-user-chat p { margin: 0; }
+.deleted-user-profile { display: flex; align-items: flex-start; gap: 16px; }
+.deleted-user-profile > :first-child { flex-shrink: 0; }
+.deleted-user-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: baseline; gap: 10px 24px; margin: 0; }
+.deleted-user-facts > div { display: contents; }
+.deleted-user-facts dt { font-size: 0.78rem; color: var(--color-text-muted); }
+.deleted-user-facts dd { margin: 0; font-size: 0.9rem; color: var(--color-text); overflow-wrap: anywhere; }
 .deleted-user-muted { margin: 0; color: var(--color-text-muted); font-size: 0.85rem; }
 .deleted-user-counts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 0; font-size: 0.85rem; color: var(--color-text-secondary); }
 

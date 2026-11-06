@@ -54,8 +54,6 @@ function DeletedUsers() {
     <div className="users-page deleted-users-page">
       <PageHeader
         icon={Archive}
-        backTo="/admin/users"
-        backLabel="จัดการผู้ใช้งาน"
         description={<>บัญชีที่ถูกลบจะถูกซ่อนจากระบบทันที ข้อมูลเก็บไว้ {ACCOUNT_RETENTION_DAYS} วันเพื่อให้ตรวจสอบหรือกู้คืนได้ จากนั้นระบบจะลบชื่อ อีเมล และข้อความส่วนตัวถาวร</>}
       >
         บัญชีที่ถูกลบ

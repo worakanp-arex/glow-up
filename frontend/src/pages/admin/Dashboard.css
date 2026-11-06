@@ -47,4 +47,7 @@
 
 .admin-dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
 
+/* กลุ่มที่มี 6 ไทล์ แบ่งเป็น 3×2 แทนที่จะเหลือไทล์เดี่ยวโดดอยู่แถวล่าง */
+@media (min-width: 760px) { .admin-dashboard-grid.is-six { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
 @media (max-width: 520px) { .admin-dashboard-page { padding: 1.5rem 1rem 2.5rem; } }

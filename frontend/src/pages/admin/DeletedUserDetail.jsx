@@ -93,9 +93,9 @@ function DeletedUserDetail() {
 
       {!anonymized && (
         <Section title="ข้อมูลบัญชี">
-          <div className="users-info">
+          <div className="deleted-user-profile">
             <Avatar user={user} size={52} />
-            <dl className="profile-facts">
+            <dl className="deleted-user-facts">
               {PROFILE_FIELDS.filter(([key]) => user[key]).map(([key, label]) => (
                 <div key={key}><dt>{label}</dt><dd>{user[key]}</dd></div>
               ))}

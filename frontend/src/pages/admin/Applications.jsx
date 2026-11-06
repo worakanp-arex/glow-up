@@ -51,7 +51,7 @@ function Applications() {
   }, [page, status]);
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const header = <PageHeader icon={FileSearch} eyebrow="Admin" description="ใบสมัครงานทุกใบในระบบ กดที่แต่ละรายการเพื่อดูผู้สมัคร ตำแหน่ง และไฟล์ที่แนบ" backTo="/admin" backLabel="หน้าหลัก">ใบสมัครงานทั้งหมด</PageHeader>;
+  const header = <PageHeader icon={FileSearch} eyebrow="Admin" description="ใบสมัครงานทุกใบในระบบ กดที่แต่ละรายการเพื่อดูผู้สมัคร ตำแหน่ง และไฟล์ที่แนบ">ใบสมัครงานทั้งหมด</PageHeader>;
 
   if (loadError) return <div className="admin-applications-page">{header}<AsyncState error description={loadError.response?.data?.message} onRetry={() => window.location.reload()} /></div>;
 

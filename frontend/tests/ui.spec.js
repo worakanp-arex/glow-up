@@ -17,7 +17,7 @@ const deletedUser = {
     familyLinkCount: 1, applicationCount: 2,
   },
 };
-const summary = { activeUsers: { count: 12 }, risk: { byLevel: { low: 10, medium: 2, high: 0 } }, appointments: { today: 0, byDay: [] }, loginTrend: [], leaderboard: [] };
+const summary = { activeUsers: { count: 12 }, risk: { byLevel: { low: 10, medium: 2, high: 0 }, moodTrend: [{ dateKey: "2026-10-26", average: 4.2, count: 8 }, { dateKey: "2026-10-27", average: 4.8, count: 9 }, { dateKey: "2026-10-28", average: 5.1, count: 7 }], moodTrendDays: 30 }, appointments: { today: 0, byDay: [] }, loginTrend: [], leaderboard: [] };
 
 async function fixture(page, role = "user", options = {}) {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -196,7 +196,6 @@ const details = [
   ["admin", "/admin/users/1", "/admin/users"],
   ["admin", "/admin/deleted-users/1", "/admin/deleted-users"],
   ["admin", "/admin/deleted-users/2", "/admin/deleted-users"],
-  ["admin", "/admin/applications", "/admin"],
   ["employer", "/employer/applications/1", "/employer/jobs/1/applicants"],
   ["employer", "/employer/jobs/1/applicants", "/employer/jobs/1"],
   ["employer", "/employer/jobs/1", "/employer/jobs"],
@@ -220,17 +219,6 @@ for (const [role, url, parent] of details) test(`detail header and back ${role} 
   if (["/courses/1", "/employer/applications/1", "/employer/jobs/new", "/counselling/1"].includes(url)) await page.screenshot({ path: testInfo.outputPath("preview.png"), animations: "disabled" });
   await page.locator(".page-back").click();
   await expect(page).toHaveURL(new URL(parent, "http://127.0.0.1:5173").href);
-});
-
-test("the profile back button returns to the page the visitor came from", async ({ page }) => {
-  await fixture(page, "user"); await page.goto("/courses");
-  await page.getByRole("button", { name: "เมนูบัญชีของฉัน" }).click();
-  await page.locator('.user-menu-panel a[href="/profile"]').click();
-  await expect(page.locator(".page-back")).toHaveAttribute("href", "/courses");
-  await page.locator(".page-back").click();
-  await expect(page).toHaveURL(/\/courses$/);
-  await page.goto("/profile");
-  await expect(page.locator(".page-back")).toHaveAttribute("href", /\/courses$/);
 });
 
 test("back returns to the page the visitor just came from, not a fixed parent", async ({ page }) => {

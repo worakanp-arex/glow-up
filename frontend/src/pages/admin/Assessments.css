@@ -38,6 +38,9 @@
   gap: 0.9rem;
 }
 
+.assessments-trend { margin-top: 1.5rem; }
+.assessments-trend-empty { margin: 0; padding: 2rem 1rem; text-align: center; color: var(--color-text-muted); font-size: 0.85rem; }
+
 @media (max-width: 860px) {
   .assessments-page {
     padding: 2rem 1.25rem 3rem;
